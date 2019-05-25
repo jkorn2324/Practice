@@ -11,15 +11,9 @@ declare(strict_types=1);
 namespace practice;
 
 
-use pocketmine\entity\Attribute;
-use pocketmine\level\format\io\LevelProvider;
-use pocketmine\level\Level;
 use pocketmine\scheduler\Task;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
-use practice\duels\groups\DuelGroup;
-use practice\duels\groups\MatchedGroup;
-use practice\duels\groups\QueuedPlayer;
 use practice\player\PracticePlayer;
 use practice\scoreboard\ScoreboardUtil;
 
@@ -52,7 +46,6 @@ class PracticeTask extends Task
 
         $this->updateWorlds();
         $this->updatePlayers();
-        $this->updateDuels();
         $this->updateParties();
         $this->checkForReload();
 
@@ -96,55 +89,6 @@ class PracticeTask extends Task
         }
 
         if(PracticeCore::getDuelHandler()->updateQueues()) ScoreboardUtil::updateSpawnScoreboards("in-queues");
-    }
-
-    private function updateDuels() : void {
-
-        PracticeCore::get1vs1Handler()->update();
-
-        $queuedPlayers = PracticeCore::getDuelHandler()->getQueuedPlayers();
-
-        $awaitingMatches = PracticeCore::getDuelHandler()->getAwaitingGroups();
-
-        $duels = PracticeCore::getDuelHandler()->getDuelsInProgress();
-
-        $keys = array_keys($queuedPlayers);
-
-        foreach($keys as $key) {
-
-            if(isset($queuedPlayers[$key])) {
-
-                $queue = $queuedPlayers[$key];
-
-                if ($queue instanceof QueuedPlayer) {
-                    $name = $queue->getPlayerName();
-
-                    if ($queue->isPlayerOnline()) {
-                        if (PracticeCore::getDuelHandler()->didFindMatch($name)) {
-                            $opponent = PracticeCore::getDuelHandler()->getMatchedPlayer($name);
-                            PracticeCore::getDuelHandler()->setPlayersMatched($name, $opponent);
-                        }
-                    }
-                }
-            }
-        }
-
-        foreach($awaitingMatches as $match) {
-
-            if($match instanceof MatchedGroup) {
-
-                $queue = $match->getQueue();
-
-                if(PracticeCore::getDuelHandler()->isAnArenaOpen($queue))
-                    PracticeCore::getDuelHandler()->startDuel($match);
-            }
-        }
-
-        foreach($duels as $duel) {
-
-            if($duel instanceof DuelGroup) $duel->update();
-
-        }
     }
 
     private function updateParties() : void {
