@@ -122,7 +122,9 @@ class PracticeCore extends PluginBase
     }
 
     public function onDisable() {
-        parent::onDisable();
+
+        if($this->getServer()->isRunning())
+            PracticeUtil::transferEveryone();
     }
 
     private function loadLevels() : void {

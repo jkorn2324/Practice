@@ -34,7 +34,9 @@ use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\permission\PermissionManager;
 use pocketmine\Player;
 use pocketmine\Server;
+use pocketmine\utils\Internet;
 use pocketmine\utils\TextFormat;
+use pocketmine\utils\Utils;
 use practice\arenas\PracticeArena;
 use practice\game\entity\FishingHook;
 use practice\player\PracticePlayer;
@@ -851,7 +853,9 @@ class PracticeUtil
 
         $players = $server->getOnlinePlayers();
 
-        $serverIP = $server->getIp();
+        $serverIP = Internet::getIP();
+
+        echo $serverIP . "\n";
 
         $serverPort = $server->getPort();
 

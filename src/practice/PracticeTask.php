@@ -30,11 +30,14 @@ class PracticeTask extends Task
     /** @var int */
     private $announcementTime = 0;
 
+    private $maxAnnouncementTime;
+
     public function __construct(PracticeCore $c) {
         $this->core = $c;
         $this->currentTick = 0;
-        //$this->ticksBetweenReload = PracticeUtil::minutesToTicks(1);
-        $this->ticksBetweenReload = PracticeUtil::hoursToTicks(3);
+        $this->maxAnnouncementTime = PracticeUtil::secondsToTicks(45);
+        $this->ticksBetweenReload = PracticeUtil::minutesToTicks(1);
+        //$this->ticksBetweenReload = PracticeUtil::hoursToTicks(3);
         $this->randomAnnouncement = [
             TextFormat::AQUA . 'See a hacker online? Use ' . TextFormat::YELLOW . '/report hacker' . TextFormat::AQUA .' to notify the staff of hackers on the server.',
             TextFormat::AQUA . 'Find a bug on the server? Use ' . TextFormat::YELLOW . '/report bug' . TextFormat::AQUA . ' to notify the staff of bugs on the server.',
@@ -58,9 +61,10 @@ class PracticeTask extends Task
     }
 
     private function updateWorlds() : void {
+
         $this->announcementTime++;
 
-        if($this->announcementTime > 45) {
+        if($this->announcementTime > $this->maxAnnouncementTime) {
             Server::getInstance()->broadcastMessage(
                 PracticeUtil::getMessage('broadcast-msg') . "\n" . $this->randomAnnouncement[rand(0, 2)]
             );
@@ -141,10 +145,8 @@ class PracticeTask extends Task
             }
         }
 
-        if($this->currentTick > $this->ticksBetweenReload) {
-            PracticeUtil::transferEveryone();
+        if($this->currentTick > $this->ticksBetweenReload)
             Server::getInstance()->reload();
-        }
     }
 
     private function isExactMin(int $tick) : bool {
