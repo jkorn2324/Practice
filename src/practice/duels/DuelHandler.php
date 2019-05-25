@@ -120,8 +120,6 @@ class DuelHandler
 
     private function updateDuels() : void {
 
-        PracticeCore::get1vs1Handler()->update();
-
         $queuedPlayers = PracticeCore::getDuelHandler()->getQueuedPlayers();
 
         $awaitingMatches = PracticeCore::getDuelHandler()->getAwaitingGroups();

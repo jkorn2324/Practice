@@ -47,6 +47,8 @@ class PracticeTask extends Task
 
     public function onRun(int $tick) {
 
+        PracticeCore::get1vs1Handler()->update();
+
         $this->updateWorlds();
         $this->updatePlayers();
         $this->updateParties();
