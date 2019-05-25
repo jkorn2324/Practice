@@ -1,0 +1,106 @@
+# Server Name
+server-name: "Zehox"
+
+# Name for UnRanked duels item.
+unranked-duels: "Play Unranked"
+
+# Name for Ranked duels item.
+ranked-duels: "Play Ranked"
+
+# Name for play ffa item.
+play-ffa: "Play FFA"
+
+# Name for duel types/items/formwindow -> must have %kit-name%in the message.
+kit-name: "%kit-name%"
+
+# Name for ffa items/formwindow -> must have %name% in the message.
+ffa-name: "%kit-name% FFA"
+
+# Name for the hub duels item.
+hub-duels: "Duels"
+
+# Name for the item the player receives while in a duel spectator mode.
+spec-hub: "Back to Hub"
+
+# Name for the item that exits the duels selector.
+exit-duels: "Cancel"
+
+# Name for the item that exits the queue.
+leave-queue: "Leave Queue"
+
+# Name for the inventory titles.
+inventory:
+  # Title for Selecting an FFA kit.
+  select-ffa: "Select FFA"
+  # Title for Selecting a Duel Queue. -> Must have %ranked% in the msg.
+  select-duel: "Select %ranked% Duel"
+
+# Name for seeing a player's inventory after a duel.
+duel-inventory: "See player inventory!"
+
+# Name of the chest inventory of the player after the duel.
+duel-result-inventory: "Player Inventory"
+
+# Title of the duel inventory.
+title-duel-inventory: "Select a kit type..."
+
+# Title of the Leaderboard Inventory
+title-leaderboard-inv: "Leaderboards"
+
+# Name of the item for checking your stats. -> Must have %player%
+stats-item: "Check Stats"
+
+# Request Message of the player with a duel inventory. -> Must have %kit% in the message.
+duel-inventory-request: "Would you like to duel with %kit% against me?"
+
+# Name for the golden head item.
+golden-head: "Golden Head"
+
+# Names for scoreboard
+scoreboard:
+  # Spawn Scoreboard Names
+  spawn:
+    # Number of Online-Players -> Must have %num% & %max-num% in msg.
+    online-players: "Online: %num%;%max-num%"
+    # Number of players in fights -> Must have %num% in msg.
+    in-fights: "In-Fights: %num%"
+    # Number of players in queues -> Must have %num% in msg.
+    in-queues: "In-Queues: %num%"
+    # The labeled in-game-name (IGN). -> Must have %name% in the msg.
+    ign: "IGN: %name%"
+    # The labeled queue the player is in.
+    thequeue: "Queue: %ranked% %queue%"
+  # Arena Scoreboard Names
+  arena-ffa:
+    # Number of Kills on the server. -> Must have %num% in msg.
+    kills: "Kills: %num%"
+    # Number of Deaths on the server. -> Must have %num% in msg.
+    deaths: "Deaths: %num%"
+    # The current ffa arena that the player is in.
+    arena: "Arena: %arena% FFA"
+  # Duel Scoreboard Names
+  duels:
+    # Shows the opponent names. -> Must have %player% in the message.
+    opponent: "Opponent: %player%"
+    # Shows the duration of the duel. -> Must have %time% in the message.
+    duration: "Duration: %time%"
+    # Shows the number of spectators in the duel -> Must have %num% in the message.
+    spectators: "Spectators: %num%"
+    # Displays the kit for the match -> Must have %kit% in the message.
+    kit: "Kit: %kit%"
+  # Player -> mainly for cps and ping.
+  player:
+    # CPS Message -> Must have %player% and %clicks%.
+    cps: "%player% CPS: %clicks%"
+    # Ping Message -> Must have %player% and %ping%.
+    ping: "%player% Ping: "%ping%"
+    # Elo Message -> Must have %player% and %elo%.
+    elo: "%player% Elo: %elo"
+  # Opponent -> mainly for cps and ping.
+  opponent:
+    # CPS Message -> Must have %player% and %clicks%.
+    cps: "%player% CPS: %clicks%"
+    # Ping Message -> Must have %player% and %ping%.
+    ping: "%player% Ping: "%ping%"
+    # Elo Message -> Must have %player% and %elo%.
+    elo: "%player% Elo: %elo"

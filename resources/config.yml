@@ -1,0 +1,26 @@
+# Determines whether the lobby should be protected (PvP is off, and People won't be able to destroy it.
+lobby-protection: true
+
+# Sets the level of the lobby
+lobby-level: "world"
+
+# Enables tap-to-pearl for PE Players
+enable-tap-to-pearl: true
+
+# Enable tap-to-pot for PE Players
+enable-tap-to-pot: true
+
+# Enable tap-to-rod
+enable-tap-to-rod: true
+
+# Enable enderpearl-cooldown
+enable-enderpearl-cooldown: true
+
+# Enable Hub-FormWindows
+enable-hub-formwindows: false
+
+# Determines whether server ranks are enabled
+enable-ranks: false
+
+# Determines whether chat filter is enabled.
+enable-chat-filter: false

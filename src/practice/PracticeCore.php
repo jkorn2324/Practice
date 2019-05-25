@@ -1,0 +1,278 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: jkorn2324
+ * Date: 2019-04-18
+ * Time: 09:02
+ */
+
+declare(strict_types=1);
+
+namespace practice;
+
+use pocketmine\command\Command;
+use pocketmine\command\CommandSender;
+use pocketmine\entity\Entity;
+use pocketmine\plugin\PluginBase;
+use pocketmine\utils\Config;
+use practice\arenas\ArenaHandler;
+use practice\commands\advanced\ArenaCommand;
+use practice\commands\advanced\KitCommand;
+use practice\commands\advanced\MuteCommand;
+use practice\commands\advanced\PartyCommand;
+use practice\commands\advanced\RankCommand;
+use practice\commands\advanced\ReportCommand;
+use practice\commands\advanced\StatsCommand;
+use practice\commands\basic\AcceptCommand;
+use practice\commands\basic\ClearInventoryCommand;
+use practice\commands\basic\DuelCommand;
+use practice\commands\basic\ExtinguishCommand;
+use practice\commands\basic\FeedCommand;
+use practice\commands\basic\FlyCommand;
+use practice\commands\basic\FreezeCommand;
+use practice\commands\basic\HealCommand;
+use practice\commands\basic\KickAllCommand;
+use practice\commands\basic\PingCommand;
+use practice\commands\basic\SpawnCommand;
+use practice\commands\basic\SpectateCommand;
+use practice\commands\basic\TeleportLevelCommand;
+use practice\duels\DuelHandler;
+use practice\duels\IvsIHandler;
+use practice\game\entity\FishingHook;
+use practice\game\items\ItemHandler;
+use practice\kits\KitHandler;
+use practice\parties\PartyManager;
+use practice\player\gameplay\ChatHandler;
+use practice\player\gameplay\ReportHandler;
+use practice\player\permissions\PermissionsHandler;
+use practice\player\permissions\PermissionsToCfgTask;
+use practice\player\PlayerHandler;
+use practice\ranks\RankHandler;
+
+class PracticeCore extends PluginBase
+{
+    private static $instance;
+
+    private static $playerHandler;
+
+    private static $chatHandler;
+
+    private static $rankHandler;
+
+    private static $itemHandler;
+
+    private static $kitHandler;
+
+    private static $arenaHandler;
+    
+    private static $duelHandler;
+
+    private static $ivsiHandler;
+
+    private static $reportHandler;
+
+    /* @var \practice\player\permissions\PermissionsHandler */
+    private static $permissionsHandler;
+
+    private static $partyManager;
+
+    private $serverMuted;
+
+    public function onEnable() {
+
+        $this->registerEntities();
+
+        date_default_timezone_set("America/Los_Angeles");
+
+        $this->initDataFolder();
+        $this->saveDefaultConfig();
+        $this->initMessageConfig();
+        $this->initNameConfig();
+        $this->initRankConfig();
+        $this->initCommands();
+
+        self::$instance = $this;
+
+        self::$playerHandler = new PlayerHandler();
+        self::$kitHandler = new KitHandler();
+        self::$arenaHandler = new ArenaHandler();
+
+        self::$playerHandler->updateLeaderboards();
+
+        self::$itemHandler = new ItemHandler();
+        self::$rankHandler = new RankHandler();
+        self::$chatHandler = new ChatHandler();
+        self::$duelHandler = new DuelHandler();
+        self::$ivsiHandler = new IvsIHandler();
+        self::$reportHandler = new ReportHandler();
+        self::$permissionsHandler = new PermissionsHandler($this);
+        self::$partyManager = new PartyManager();
+
+        $this->serverMuted = false;
+
+        $this->getServer()->getPluginManager()->registerEvents(new PracticeListener($this), $this);
+        $this->getScheduler()->scheduleDelayedTask(new PermissionsToCfgTask(), 10);
+        $this->getScheduler()->scheduleRepeatingTask(new PracticeTask($this), 1);
+    }
+
+    public function onLoad() {
+        $this->loadLevels();
+        PracticeUtil::reloadPlayers();
+    }
+
+    public function onDisable() {
+        parent::onDisable();
+    }
+
+    private function loadLevels() : void {
+
+        $dataFolder = $this->getDataFolder();
+
+        $worlds = PracticeUtil::str_indexOf("/plugins", $dataFolder) . "/worlds";
+
+        if(is_dir($worlds)) {
+            $files = scandir($worlds);
+            foreach($files as $folderName) {
+                if(is_dir($folderName)) {
+                    if(!$this->getServer()->isLevelLoaded($folderName)) {
+                        $this->getServer()->loadLevel($folderName);
+                    }
+                }
+            }
+        }
+    }
+
+    private function initDataFolder() : void {
+
+        $dataFolder = $this->getDataFolder();
+
+        if(!is_dir($dataFolder)){
+            mkdir($dataFolder);
+        }
+    }
+
+    public function setServerMuted(bool $mute) : void {
+        $this->serverMuted = $mute;
+    }
+
+    public function isServerMuted() : bool {
+        return $this->serverMuted;
+    }
+
+    public static function getInstance() : PracticeCore {
+        return self::$instance;
+    }
+
+    public static function getChatHandler() : ChatHandler {
+        return self::$chatHandler;
+    }
+
+    public static function getPlayerHandler() : PlayerHandler {
+        return self::$playerHandler;
+    }
+
+    public static function getRankHandler() : RankHandler {
+        return self::$rankHandler;
+    }
+
+    public static function getItemHandler() : ItemHandler {
+        return self::$itemHandler;
+    }
+
+    public static function getKitHandler() : KitHandler {
+        return self::$kitHandler;
+    }
+
+    public static function getArenaHandler() : ArenaHandler {
+        return self::$arenaHandler;
+    }
+
+    public static function getDuelHandler() : DuelHandler {
+        return self::$duelHandler;
+    }
+
+    public static function get1vs1Handler() : IvsIHandler {
+        return self::$ivsiHandler;
+    }
+
+    public static function getReportHandler() : ReportHandler {
+        return self::$reportHandler;
+    }
+
+    public static function getPermissionHandler() : PermissionsHandler {
+        return self::$permissionsHandler;
+    }
+
+    public static function getPartyManager() : PartyManager {
+        return self::$partyManager;
+    }
+
+    private function initMessageConfig() : void {
+        $this->saveResource("messages.yml");
+    }
+
+    private function initNameConfig() : void {
+        $this->saveResource("names.yml");
+    }
+
+    private function initRankConfig() : void {
+        $this->saveResource("ranks.yml");
+    }
+
+    public function getMessageConfig() : Config {
+        $path = $this->getDataFolder() . "messages.yml";
+        $cfg = new Config($path, Config::YAML);
+        return $cfg;
+    }
+
+    public function getRankConfig() : Config {
+        $path = $this->getDataFolder() . "ranks.yml";
+        $cfg = new Config($path, Config::YAML);
+        return $cfg;
+    }
+
+    public function getNameConfig() : Config {
+        $path = $this->getDataFolder() . "names.yml";
+        $cfg = new Config($path, Config::YAML);
+        return $cfg;
+    }
+
+    public function onCommand(CommandSender $sender, Command $command, string $label, array $args): bool
+    {
+        return parent::onCommand($sender, $command, $label, $args);
+    }
+    
+    private function registerCommand(Command $cmd) : void {
+        $this->getServer()->getCommandMap()->register($cmd->getName(), $cmd);
+    }
+
+    private function initCommands() : void {
+
+        $this->registerCommand(new KitCommand());
+        $this->registerCommand(new ExtinguishCommand());
+        $this->registerCommand(new ClearInventoryCommand());
+        $this->registerCommand(new FeedCommand());
+        $this->registerCommand(new FlyCommand());
+        $this->registerCommand(new FreezeCommand());
+        $this->registerCommand(new FreezeCommand(false));
+        $this->registerCommand(new MuteCommand());
+        $this->registerCommand(new RankCommand());
+        $this->registerCommand(new SpawnCommand());
+        $this->registerCommand(new ArenaCommand());
+        $this->registerCommand(new HealCommand());
+        $this->registerCommand(new DuelCommand());
+        $this->registerCommand(new AcceptCommand());
+        $this->registerCommand(new ReportCommand());
+        $this->registerCommand(new SpectateCommand());
+        $this->registerCommand(new StatsCommand());
+        $this->registerCommand(new PingCommand());
+        $this->registerCommand(new TeleportLevelCommand());
+        $this->registerCommand(new KickAllCommand());
+        //$this->registerCommand(new PartyCommand());
+
+    }
+
+    private function registerEntities() : void {
+        Entity::registerEntity(FishingHook::class, false, ["FishingHook", "minecraft:fishing_hook"]);
+    }
+}

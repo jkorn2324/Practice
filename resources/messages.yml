@@ -1,0 +1,346 @@
+# General Messages for the player.
+general:
+  # Enderpearl Cooldown Messages
+  enderpearl-cooldown:
+    # When player is in enderpearl-cooldown.
+    cooldown-msg: "You are still in an enderpearl-cooldown!"
+    # When player is put in enderpearl-cooldown.
+    cooldown-place: "You are now in enderpearl-cooldown!"
+    # When player is removed from enderpearl-cooldown.
+    cooldown-remove: "You are no longer in enderpearl-cooldown!"
+  # Combat Messages
+  combat:
+    # When player is put in combat.
+    combat-place: "You are now in combat!"
+    # When player is removed from combat.
+    combat-remove: "You are no longer in combat!"
+    # When a player does a command while in combat
+    command-msg: "You can't use this command while in combat!"
+  # Exitinguish messages.
+  ext:
+    # Message when you have extinguished yourself.
+    personal: "You have been extinguished!"
+    # Message when you have extinguished another player. -> Must have %player% in the message.
+    player: "%player% has been successfully extinguished!"
+  # Kit Messages -> All must have %kit% within the message.
+  kits:
+    # Message for listing all the kits within the kits.yml file.
+    list: "Kits: %kit%"
+    # When a player receives a kit.
+    receive: "You have received the kit '%kit%'!"
+    # When a player is on a kit cooldown.
+    cooldown-msg: "You can't receive the kit '%kit%' while on a kit cooldown!"
+    # Message when a kit already exists.
+    kit-exists: "The kit '%kit%' already exists!"
+    # Message when a kit doesn't exist.
+    kit-no-exist: "The kit '%kit%' doesn't exist!"
+    # Message when a kit is created.
+    kit-create: "The kit '%kit%' has been created!"
+    # Message when a kit is remove.
+    kit-remove: "The kit '%kit%' has been deleted!"
+    # Message if the player has no item in hand when using /kit item.
+    no-item: "You must have an item in your hand."
+    # Message when the kit has been updated.
+    kit-update: "The kit has been successfully updated!"
+  # Arena Messages -> Must have %arena-name% within the message.
+  arena:
+    # When a player successfully teleports to an arena.
+    join: "You are now in the %arena-name% Arena!"
+    # When a player fails to teleport to an arena.
+    fail: "Failed to teleport to %arena-name% Arena!"
+    # When a player leaves an arena.
+    leave: "You have left %arena-name% Arena!"
+    # Message for listing all the arenas within the arenas.yml file
+    list: "Arenas: %arena-name%"
+    # Message when an arena already exists.
+    arena-exists: "The arena '%arena-name%' already exists!"
+    # Message when an arena doesn't exist.
+    arena-no-exist: "The arena '%arena-name%' doesn't exist!"
+    # Message when an arena is created.
+    create: "The arena '%arena-name%' has been created!"
+    # Messge when an arena is deleted.
+    delete: "The arena '%arena-name%' has been deleted!"
+    # Message when you are already in an arena
+    in-arena: "You are already in an arena!"
+    # Message when has been updated.
+    update: "The arena '%arena-name%' has been updated!"
+    # Message when the levels are not the same.
+    level: "You are not in the same level as %arena-name%!"
+    # Message when a player tries to update the position of a Duel Arena.
+    not-duel: "%arena-name% is not a duel arena!"
+  # Duel Messages
+  duels:
+    # When a player uses a command while in a duel.
+    command-msg: "You can't use this command while in a duel!"
+    # Message when a player receives a request -> Must have %player% and %kit% in the message.
+    message: "You have received a %kit% duel-request from %player%! Use /accept to accept the duel.\nYou have 20 seconds to accept."
+    # When
+  # Frozen Messages
+  frozen:
+    # When a player is frozen.
+    active-direct: "You are now frozen!"
+    # When a player is not frozen anymore.
+    inactive-direct: "You are now able to move!"
+    # Message for sender when freezing a player. -> must have %player%
+    active-op: "Successfully froze %player%!"
+    # Message for sender when unfreezing a player. -> must have %player%
+    inactive-op: "Successully unfroze %player%!"
+  # Heal Messages
+  heal:
+    # When a player is successfully healed.
+    success-direct: "You have been healed!"
+    # Message for the operator when a player is successfully healed.
+    success-op: "%player% has been healed!"
+  # Feed Messages
+  feed:
+    # When a player is successfully fed.
+    success-direct: "You have been fed!"
+    # Message for the operator when a player is successfully fed.
+    success-op: "%player% has been fed!"
+  # Clear Inventory Messages:
+  clear-inv:
+    # When a player successfully cleared his/her inventory.
+    success-direct: "Your inventory has been cleared."
+    # Message for the operator when a player has successfully cleared their inventory.
+    success-op: "The %player%'s inventory has been successully cleared!"
+  # Fly Messages
+  fly:
+    # When a player can fly.
+    success-direct-fly: "You can now fly!"
+    # When a player can no longer fly.
+    success-direct-land: "You can no longer fly!"
+    # Message for the operator when a player successfly flies.
+    success-op-fly: "%player% can now fly!"
+    # Message for the operator when a player can no longer fly.
+    success-op-land: "%player% can no longer fly!"
+  # Report messages -> must have %player%
+  report:
+    # When a player successfully reports another player.
+    success: "Successfully reported %player%! He will be dealt with soon!"
+  # Stats messages.
+  stats:
+    # Message when the stats have been cleared.
+    clear: "Stats have been successfully cleared!"
+  # Mute messages.
+  mute:
+    # Message that the player receives when he/she has been muted temporarily.
+    mute-personal: "You have been muted!"
+    # Message that the operator receives when the player has been muted. -> must have %player% in the message.
+    mute-op: "Successfully muted %player%!"
+    # Message that the player receives when he/she is no longer been muted.
+    not-muted-personal: "You are no longer muted!"
+    # Message that the operator receives when the player is no longer muted. -> must have %player% in the message.
+    not-muted-op: "%player% is no longer muted."
+    # Message that the operator receives when the player is already muted -> must have %player% in the message.
+    already-muted: "%player% is already muted!"
+    # Message that the operator receives when the player is arleady unmuted -> must have %player% in the message.
+    already-unmuted: "%player% is already unmuted!"
+    # Message that everyone receives when server mute is enabled.
+    sm-enabled: "Server mute has been enabled."
+    # Message that everyone receives when server mute is disabled.
+    sm-disabled: "Server mute has been disabled."
+  # The general rank messages.
+  rank:
+    # When the rank doesn't exist. -> must have %rank% in the message.
+    no-exist: "The rank '%rank%' doesn't exist!"
+    # When the player's rank is changed. -> must have %ranks% in the message.
+    change-personal: "Your rank(s) have been changed to: %ranks%"
+    # The message to the operator when they change a rank. -> must have %player% in the message.
+    change-op: "%player%'s rank(s) have been successfully changed!"
+    # Message when the server ranks are enabled/disabled. -> must have %enabled% in the message.
+    toggle: "Ranks are now %enabled%!"
+    # Message when a player failed to change a player rank. -> must have %player% in the message.
+    failed: "Failed to change the rank of %player%!"
+    # Message when the player tries to change ranks and the ranks aren't enabled. -> must have %player% in the message.
+    not-enabled: "Failed to change %player% rank, as server ranks aren't enabled!"
+
+
+# Messages for form windows.
+formwindow:
+  # FFA Form-Window messages.
+  ffa:
+    # FFA Title Form-Window Message.
+    title: "Select FFA Arena"
+    # FFA Subtitle Form-Window Message.
+    content: "Which arena would you like to play on?"
+  # Duel Form-Window Message -> must have %ranked% in the message.
+  duel:
+    # Duel Title Form-Window Message.
+    title: "Select %ranked% Duel Kit."
+    # Duel Subtitle Form-Window Message
+    content: "Which kit do you want to duel with."
+  # Report Form-Window Message -> must have %player% in the message.
+  report:
+    # Report Form-Window Title
+    title: "Report Player"
+    # Report Form-Window Reason Label
+    reason-label: "Reason (Why are you reporting him/her?):"
+    # Report Form-Window Player Label
+    player-label: "Reported Player: %player%"
+    # Message for when all reports are cleared.
+    clear: "Cleared all reports!"
+  # 1vs1 Form-Window Messages
+  1vs1:
+    # Form window for the person that requests the 1vs1.
+    request-send:
+      # Title for the formwindow.
+      title: "Send 1vs1 Request"
+      # Description for the formwindow.
+      desc: "Send a 1vs1 request to %player%!"
+      # Description for the dropdown 1vs1.
+      dropdown-desc: "Choose the kit you want to 1vs1 with."
+      # The description for the toggle for ranked/unranked matches.
+      ranked-toggle: "Is this match a ranked match?"
+      # The description for the input.
+      send-message: "Send a message to the player."
+    # Form window for the person that receives the request.
+    request-receive:
+      # Title for the formwindow.
+      title: "Received 1vs1 Request!"
+      # Description for the formwindow -> Must have %reqtr%, %ranked%, and %kit% in the message
+      desc: "%reqtr% has sent you a %ranked% %kit% 1vs1 request!"
+      # Message that the requestor sent. -> Must have %msg%
+      requestor-msg: "Message: %msg%"
+      # Description for the dropdown -> must have %player% in the message.
+      dropdown-desc: "Accept or deny the 1vs1 request sent by %player%."
+      # Description for the input message.
+      message-desc: "Send a message to the requestor."
+  # The stats formwindow.
+  stats:
+    # The Title for the formwindow.
+    title: "%player% Stats"
+    # The kills stat label. -> Must have %k%
+    kills: "Kills: %k%"
+    # The deaths stat label. -> Must have %d%
+    deaths: "Deaths: %d%"
+    # The elo stat label -> Must have %e%
+    elo: "Total Elo: %e%"
+
+# All the duel messages.
+duels:
+  # All the queue messages. -> Must have %queue% and %ranked% in the messages that have them.
+  queue:
+    # When a player has left the queue.
+    leave: "You have left the queue for %ranked% %queue%!"
+    # When a player has joined the queue.
+    enter: "You have joined the queue for %ranked% %queue%!"
+    # When a player has found a match with another player -> must have %player% & %elo% in the message.
+    found-match: "You have found a %ranked% %queue% match against %player% %elo%!"
+    # When a player has found a match with another player and they are waiting for an arena to open.
+    wait-for-arena: "Waiting for arena to open..."
+  # All the messages when a duel starts -> Must have %queue% and %ranked% in the messages that have them.
+  start:
+    # The message that tells them the number of seconds until the duel starts. -> Must have %seconds% and %player% in the message.
+    msg1: "%ranked% %queue% duel against %player% will start in %seconds% seconds!"
+    # The message that tells them the map they are playing on. -> Must have %map%.
+    msg2: "You are playing on %map%!"
+    # The message for every countdown second -> must have %seconds%.
+    countdown: "%seconds%..."
+    # The message for when the countdown ends and the duel officially starts.
+    go-msg: "%ranked% %queue% duel begins NOW!"
+  # All the messages a player gets when he dies.
+  end:
+    # Main result message. -> must have %winner%, %loser%, %wElo%, and %lElo%
+    result-msg: "Winner: [%wElo%]%winner%\nLoser: [%lElo%]%loser%"
+    # Elo changes -> must have %winner% & %loser% & %wElo% & %newWElo% & %lElo% & %newLElo% in the message.
+    elo-changes: "Elo Changes:\n- %winner% (%newWElo%) : %wElo%\n- %loser% (%newLElo%): %lElo%"
+  # Other duel.
+  misc:
+    # Message when you are waiting for a match and you try to enter a duel.
+    fail-match: "You can't use this command while waiting for a duel to start."
+    # Message when you are in an arena and try to enter a duel.
+    fail-arena: "You can't use this command while in an ffa arena."
+    # Message when you are in a queue and try to enter a duel.
+    fail-queue: "You can't use this command while in a queue."
+    # Message when a player is not in a duel. -> Must have %player% in the message.
+    not-in-duel: "%player% is not in a duel!"
+    # Message when a player is in a duel. -> Must have %player% in the message.
+    in-duel: "%player% is already in a duel!"
+    # Message when a player is in a ffa arena. -> Must have %player% in the message.
+    arena-msg: "%player% is in an ffa arena."
+    # Message when you try to 1vs1 yourself.
+    fail-yourself: "You can't send a request to yourself!"
+    # Message when a player sends a request and a kit for a duel arena doesnt exist -> must have %kit% in the message.
+    kit-no-exist: "%kit% is not a valid duel kit!"
+    # Message when a player sends a request when they are in the antispam queue -> must have %player% and %time% in the message.
+    anti-spam: "Nobody can send another duel request to %player% for another %time% seconds!"
+  # All the 1vs1 messages
+  1vs1:
+    # Message when a player successfully sends a duel request -> Must have %player%, %kit%, and %ranked% in the message.
+    rq-sent: "A %ranked% %kit% 1vs1 request has been successfully sent to %player%!"
+    # Message when a player has rejected/accepted request -> must have %accept%, %player%, %ranked%, %kit%, and %msg% in the message.
+    result-msg: "%player% has %accept% your %ranked% %kit% request!%msg%"
+    # Message when a the requested player has ran out of time to send a request. -> must have %player%
+    fail-no-time: "You have run out of time to respond to %player%'s request."
+    # Message when a player does not have any received requests and uses the command /accept.
+    no-pending-rqs: "You currently have no pending requests to duel."
+  # All the spectator messages
+  spectator:
+    # Message when a player spectates the match. -> Must have %spec%, %player%, and %opponent% in the msg.
+    join: "%spec% is now spectating the match!"
+    # Message when a player is not spectating anymore. -> Must have %spec%.
+    leave: "%spec% is no longer spectating the match!"
+    # Message at the end of the match that shows the current spectators. -> Must have %spec% & %num%
+    end-msg: "Spectators(%num%): %spec%"
+
+party:
+  invite:
+    yourself: "You can't invite yourself to your own party."
+    invited-msg: "%player% has sent you an invite to join his party!"
+    sender-msg: "Successfully sent an invite to %player% to join your party!"
+    pending-inv: "You already have a pending invite sent to %player%."
+    no-pending-rq: "You do not have any pending requests from %player%."
+    expired-sender: "%player% has declined your party invite request."
+    expired-no-time: "You have ran out of time to accept the party invite from %player%."
+  kick:
+    not-party: "%player% is not in your party."
+    message: "%player% has been kicked from the party!"
+  create:
+    success: "You have successfully created a party!"
+    fail-leader: "You are already the leader/manager of a party."
+    fail-leave: "You must leave your current party first."
+  accept:
+    in-party: "Can't accept party requests while in a party."
+  general:
+    fail-lobby: "You can only use party commands while in the lobby."
+    fail-no-party: "Can't use this command as you aren't in a party."
+    fail-manager: "Only the party manager can use this command."
+    join-msg: "%player% has joined the party!"
+    leave-msg: "%player% has left the party!"
+    new-manager: "%player% is now the new party manager."
+
+
+
+
+# Permission message when a command is run.
+permission-msg: "You do not have permission to use this command!"
+
+# Console command when it can't run a command.
+console-usage-command: "You can't run this command as you are not a player!"
+
+# When a player spawns.
+spawn-message: "You are now at spawn!"
+
+# Messgae when player is not online.
+not-online: "%player-name% is not online!"
+
+# Message when a player is in spectator mode.
+spectator-mode-msg: "You can't use this command while in spectator mode."
+
+# Message that is broadcasted to everyone on the server.
+broadcast-msg: ""
+
+# Message that is used to tell the player he can't send messages while in antispam.
+antispam-msg: "Don't spam the chat!"
+
+# Message when a player is kicked using /kick-all
+kick-all-message: "Don't feel bad, everyone has been kicked! Join back in a few minutes :)"
+
+# Message when a player has a chest inventory and doesn't have and results to view.
+view-res-inv-msg: "You don't have duel results to view!"
+
+# Message when the player has joined a game.
+join-msg: "%player% has joined the game!"
+
+# Message when the player has left a game.
+leave-msg: "%player% has left the game!"
