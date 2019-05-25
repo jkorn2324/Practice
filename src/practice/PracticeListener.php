@@ -158,6 +158,9 @@ class PracticeListener implements Listener
 
         $p = $event->getPlayer();
 
+        $level = $p->getLevel();
+        PracticeUtil::clearEntitiesIn($level);
+
         if(PracticeCore::getPlayerHandler()->isPlayerOnline($p)) {
 
             $player = PracticeCore::getPlayerHandler()->getPlayer($p);
@@ -175,7 +178,7 @@ class PracticeListener implements Listener
                 } elseif ($lastDamageCause->getCause() === EntityDamageEvent::CAUSE_SUFFOCATION) {
                     if ($p->isInsideOfSolid()) {
                         $pos = $p->getPosition();
-                        $block = $p->getLevel()->getBlock($pos);
+                        $block = $level->getBlock($pos);
                         if (PracticeUtil::isGravityBlock($block)) {
                             $diedFairly = false;
                         }

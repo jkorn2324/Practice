@@ -13,6 +13,7 @@ namespace practice;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\entity\Entity;
+use pocketmine\level\Level;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
 use practice\arenas\ArenaHandler;
@@ -132,11 +133,14 @@ class PracticeCore extends PluginBase
 
         if(is_dir($worlds)) {
             $files = scandir($worlds);
+            $server = $this->getServer();
             foreach($files as $folderName) {
                 if(is_dir($folderName)) {
-                    if(!$this->getServer()->isLevelLoaded($folderName)) {
-                        $this->getServer()->loadLevel($folderName);
-                    }
+                    $server->loadLevel($folderName);
+
+                    $level = $server->getLevelByName($folderName);
+                    $level->setTime(6000);
+                    $level->stopTime();
                 }
             }
         }

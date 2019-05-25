@@ -61,25 +61,13 @@ class PracticeTask extends Task
     }
 
     private function updateWorlds() : void {
-
-        $levels = Server::getInstance()->getLevels();
-
-        foreach($levels as $level) {
-
-            if($this->currentTick % 5 === 0) $level->setTime(6000);
-
-            $ticks = PracticeUtil::secondsToTicks(10);
-
-            if($this->currentTick % $ticks === 0 and $this->currentTick !== 0)
-                PracticeUtil::clearEntitiesIn($level);
-        }
-
         $ticks = PracticeUtil::secondsToTicks(45);
 
         if($this->currentTick % $ticks === 0 and $this->currentTick !== 0) {
             $random = rand(0, 2);
-            $broadcastMsg = PracticeUtil::getMessage('broadcast-msg') . "\n" . $this->randomAnnouncement[$random];
-            Server::getInstance()->broadcastMessage($broadcastMsg);
+            Server::getInstance()->broadcastMessage(
+                PracticeUtil::getMessage('broadcast-msg') . "\n" . $this->randomAnnouncement[$random]
+            );
         }
     }
 
