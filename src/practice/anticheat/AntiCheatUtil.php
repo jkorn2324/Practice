@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace practice\anticheat;
 
+use pocketmine\Player;
+use pocketmine\Server;
 use practice\PracticeCore;
 
 class AntiCheatUtil
@@ -23,6 +25,9 @@ class AntiCheatUtil
 
     public const MAX_LETGO_CPS = 1;
 
+    private const MAX_PING = 200;
+    private const BLOCKS_AIR_LIMIT = 6.6;
+
 
     public static function canDamage($player) : bool {
         $result = false;
@@ -34,4 +39,52 @@ class AntiCheatUtil
         }
         return $result;
     }
+
+    /**
+     * @param Player $entity
+     * @param Player $damager
+     */
+    public static function checkForReach(Player $entity, Player $damager): void {
+        if(!self::checkPing($damager) or $damager->getGamemode() === Player::CREATIVE) {
+            return;
+        }
+
+        $distance = $damager->distance($entity);
+        if($distance > self::BLOCKS_AIR_LIMIT) {
+            self::sendReachLog($damager, $distance);
+        }
+    }
+
+    /**
+     * @param Player $player
+     * @return bool
+     */
+    private static function checkPing(Player $player): bool {
+        return $player->getPing() < self::MAX_PING;
+    }
+
+    /**
+     * @param Player $player
+     * @param float $distance
+     */
+    private static function sendReachLog(Player $player, float $distance): void {
+        self::sendLog(
+            "§7{$player->getName()} might be reaching! Distance: \n" . "§c" .
+            round($distance, 1) .  " §7(" . $player->getPing() . " ms)"
+        );
+    }
+
+    /**
+     * @param string $message
+     */
+    private static function sendLog(string $message): void {
+        foreach(Server::getInstance()->getOnlinePlayers() as $player) {
+            if(!PracticeCore::getPlayerHandler()->isMod($player->getName())) {
+                continue;
+            }
+
+            $player->sendMessage("§8[§eAntiCheat§8] " . $message);
+        }
+    }
+
 }

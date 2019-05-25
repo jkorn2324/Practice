@@ -10,9 +10,7 @@ declare(strict_types=1);
 
 namespace practice;
 
-use pocketmine\block\Block;
 use pocketmine\block\Liquid;
-use pocketmine\command\Command;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
 use pocketmine\event\block\BlockBreakEvent;
@@ -25,7 +23,6 @@ use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\inventory\InventoryCloseEvent;
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\event\Listener;
-use pocketmine\event\player\PlayerAnimationEvent;
 use pocketmine\event\player\PlayerBucketEmptyEvent;
 use pocketmine\event\player\PlayerBucketFillEvent;
 use pocketmine\event\player\PlayerChatEvent;
@@ -42,8 +39,6 @@ use pocketmine\event\plugin\PluginDisableEvent;
 use pocketmine\event\server\CommandEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\event\server\DataPacketSendEvent;
-use pocketmine\event\server\ServerEvent;
-use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
 use pocketmine\item\Bucket;
 use pocketmine\item\EnderPearl;
@@ -53,19 +48,13 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemBlock;
 use pocketmine\item\MushroomStew;
 use pocketmine\item\Potion;
-use pocketmine\item\Sign;
 use pocketmine\item\SplashPotion;
-use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
-use pocketmine\network\mcpe\protocol\EntityEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
-use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
-use pocketmine\permission\PermissionManager;
 use pocketmine\Player;
-use pocketmine\Server;
 use practice\anticheat\AntiCheatUtil;
 use practice\arenas\PracticeArena;
 use practice\game\FormUtil;
@@ -277,12 +266,19 @@ class PracticeListener implements Listener
 
     public function onEntityDamagedByEntity(EntityDamageByEntityEvent $event): void {
 
+        $entity = $event->getEntity();
+        $damager = $event->getDamager();
+        if($event->getCause() !== EntityDamageEvent::CAUSE_PROJECTILE
+            and $entity instanceof Player and $damager instanceof Player) {
+            AntiCheatUtil::checkForReach($entity, $damager);
+        }
+
         $cancel = false;
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($event->getDamager()) and PracticeCore::getPlayerHandler()->isPlayerOnline($event->getEntity())) {
+        if(PracticeCore::getPlayerHandler()->isPlayerOnline($damager) and PracticeCore::getPlayerHandler()->isPlayerOnline($entity)) {
 
-            $attacker = PracticeCore::getPlayerHandler()->getPlayer($event->getDamager());
-            $attacked = PracticeCore::getPlayerHandler()->getPlayer($event->getEntity());
+            $attacker = PracticeCore::getPlayerHandler()->getPlayer($damager);
+            $attacked = PracticeCore::getPlayerHandler()->getPlayer($entity);
 
             if(!$attacker->canHitPlayer() or !$attacked->canHitPlayer())
                 $cancel = true;
