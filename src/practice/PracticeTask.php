@@ -33,11 +33,12 @@ class PracticeTask extends Task
     private $maxAnnouncementTime;
 
     public function __construct(PracticeCore $c) {
+
         $this->core = $c;
         $this->currentTick = 0;
         $this->maxAnnouncementTime = PracticeUtil::secondsToTicks(45);
-        $this->ticksBetweenReload = PracticeUtil::minutesToTicks(1);
-        //$this->ticksBetweenReload = PracticeUtil::hoursToTicks(3);
+        //$this->ticksBetweenReload = PracticeUtil::minutesToTicks(1);
+        $this->ticksBetweenReload = PracticeUtil::hoursToTicks(3);
         $this->randomAnnouncement = [
             TextFormat::AQUA . 'See a hacker online? Use ' . TextFormat::YELLOW . '/report hacker' . TextFormat::AQUA .' to notify the staff of hackers on the server.',
             TextFormat::AQUA . 'Find a bug on the server? Use ' . TextFormat::YELLOW . '/report bug' . TextFormat::AQUA . ' to notify the staff of bugs on the server.',
