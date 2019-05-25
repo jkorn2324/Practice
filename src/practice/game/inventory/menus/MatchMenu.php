@@ -76,11 +76,15 @@ class MatchMenu extends BaseMenu
 
         $origItem = $action->getSourceItem();
 
+        $newItem = $action->getTargetItem();
+
         $player = $p->getPlayer();
 
-        if (PracticeUtil::canUseItems($player, true) and PracticeCore::getItemHandler()->isPracticeItem($origItem)) {
+        $isPracticeItem = (PracticeCore::getItemHandler()->isPracticeItem($origItem)) or (PracticeCore::getItemHandler()->isPracticeItem($newItem));
 
-            $practiceItem = PracticeCore::getItemHandler()->getPracticeItem($origItem);
+        if (PracticeUtil::canUseItems($player, true) and $isPracticeItem) {
+
+            $practiceItem = PracticeCore::getItemHandler()->isPracticeItem($newItem) ? PracticeCore::getItemHandler()->getPracticeItem($newItem) : PracticeCore::getItemHandler()->getPracticeItem($origItem);
 
             $queue = $practiceItem->getName();
 

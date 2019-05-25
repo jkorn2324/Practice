@@ -488,6 +488,6 @@ class ItemHandler
     }
 
     public function spawnPartyItems(Player $player, bool $clearInv = false) : void {
-
+        //TODO CREATE PARTY ITEMS
     }
 }
