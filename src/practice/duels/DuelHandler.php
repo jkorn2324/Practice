@@ -62,7 +62,7 @@ class DuelHandler
 
             ScoreboardUtil::updateSpawnScoreboards();
 
-            $this->updateDuels();
+            //$this->updateDuels();
         }
     }
 
@@ -116,53 +116,6 @@ class DuelHandler
         if($this->isPlayerInQueue($player))
             $result = $this->queuedPlayers[$name];
         return $result;
-    }
-
-    private function updateDuels() : void {
-
-        $queuedPlayers = PracticeCore::getDuelHandler()->getQueuedPlayers();
-
-        $awaitingMatches = PracticeCore::getDuelHandler()->getAwaitingGroups();
-
-        $duels = PracticeCore::getDuelHandler()->getDuelsInProgress();
-
-        $keys = array_keys($queuedPlayers);
-
-        foreach($keys as $key) {
-
-            if(isset($queuedPlayers[$key])) {
-
-                $queue = $queuedPlayers[$key];
-
-                if ($queue instanceof QueuedPlayer) {
-                    $name = $queue->getPlayerName();
-
-                    if ($queue->isPlayerOnline()) {
-                        if (PracticeCore::getDuelHandler()->didFindMatch($name)) {
-                            $opponent = PracticeCore::getDuelHandler()->getMatchedPlayer($name);
-                            PracticeCore::getDuelHandler()->setPlayersMatched($name, $opponent);
-                        }
-                    }
-                }
-            }
-        }
-
-        foreach($awaitingMatches as $match) {
-
-            if($match instanceof MatchedGroup) {
-
-                $queue = $match->getQueue();
-
-                if(PracticeCore::getDuelHandler()->isAnArenaOpen($queue))
-                    PracticeCore::getDuelHandler()->startDuel($match);
-            }
-        }
-
-        foreach($duels as $duel) {
-
-            if($duel instanceof DuelGroup) $duel->update();
-
-        }
     }
 
     public function updateQueues() : bool {
