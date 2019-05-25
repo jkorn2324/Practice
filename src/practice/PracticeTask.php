@@ -33,6 +33,9 @@ class PracticeTask extends Task
 
     private $randomAnnouncement;
 
+    /** @var int */
+    private $announcementTime = 0;
+
     public function __construct(PracticeCore $c) {
         $this->core = $c;
         $this->currentTick = 0;
@@ -62,13 +65,13 @@ class PracticeTask extends Task
     }
 
     private function updateWorlds() : void {
-        $ticks = PracticeUtil::secondsToTicks(45);
+        $this->announcementTime++;
 
-        if($this->currentTick % $ticks === 0 and $this->currentTick !== 0) {
-            $random = rand(0, 2);
+        if($this->announcementTime > 45) {
             Server::getInstance()->broadcastMessage(
-                PracticeUtil::getMessage('broadcast-msg') . "\n" . $this->randomAnnouncement[$random]
+                PracticeUtil::getMessage('broadcast-msg') . "\n" . $this->randomAnnouncement[rand(0, 2)]
             );
+            $this->announcementTime = 0;
         }
     }
 
