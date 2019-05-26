@@ -422,11 +422,11 @@ class FormUtil
 
         if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
             $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            $changePEOnlySettings = $p->getDevice() !== PracticeUtil::WINDOWS_10;
+            $changePEOnlySettings = $p->peOnlyQueue();
         }
 
         if($changePEOnlySettings === true) $form->addToggle('Enable PE Only Queues', PracticeCore::getPlayerHandler()->canQueuePEOnly($player));
-        else $form->addLabel('Enable PE Only Queues:\n' . TextFormat::RED . "Windows 10 Players can't change this setting.");
+        else $form->addLabel('Enable PE Only Queues:\n' . TextFormat::RED . "Windows 10/Controller players can't change this setting.");
 
         if($op === true) $form->addToggle('Enable Placing and Breaking Blocks', PracticeCore::getPlayerHandler()->canPlaceNBreak($player));
 

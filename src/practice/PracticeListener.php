@@ -88,10 +88,13 @@ class PracticeListener implements Listener
             $pl = PracticeCore::getPlayerHandler()->addPlayer($p);
             $deviceOS = -1;
 
-            if (!is_null($pl) and PracticeCore::getPlayerHandler()->hasPendingDeviceOs($p)) {
-                $deviceOS = PracticeCore::getPlayerHandler()->getPendingDeviceOs($p);
+            if (!is_null($pl) and PracticeCore::getPlayerHandler()->hasPendingPInfo($p)) {
+                $pInfo = PracticeCore::getPlayerHandler()->getPendingPInfo($p);
+                $deviceOS = intval($pInfo['device']);
+                $input = intval($pInfo['controls']);
                 $pl->setDeviceOS($deviceOS);
-                PracticeCore::getPlayerHandler()->removePendingDeviceOs($p);
+                $pl->setInput($input);
+                PracticeCore::getPlayerHandler()->removePendingPInfo($p);
             }
 
             if($p->getGamemode() !== 0) $p->setGamemode(0);
@@ -431,9 +434,8 @@ class PracticeListener implements Listener
             $p = PracticeCore::getPlayerHandler()->getPlayer($player);
 
             $exec = PracticeUtil::checkActions($action, PlayerInteractEvent::RIGHT_CLICK_BLOCK);
-            if ($p->getDevice() !== PracticeUtil::WINDOWS_10 and $exec === true) {
+            if (($p->getDevice() !== PracticeUtil::WINDOWS_10 or $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) and $exec === true)
                 $p->addClick(false);
-            }
 
             if (PracticeCore::getItemHandler()->isPracticeItem($item)) {
 
@@ -537,7 +539,7 @@ class PracticeListener implements Listener
 
                             if (PracticeUtil::isTapToRodEnabled()) {
                                 if($checkActions === true) {
-                                    if($p->getDevice() === PracticeUtil::WINDOWS_10) {
+                                    if($p->getDevice() === PracticeUtil::WINDOWS_10 or $p->getInput() === PracticeUtil::CONTROLS_MOUSE) {
                                         $use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK;
                                     } else $use = true;
                                 }
@@ -556,7 +558,7 @@ class PracticeListener implements Listener
 
                             if (PracticeUtil::isTapToPearlEnabled()) {
                                 if($checkActions === true) {
-                                    if($p->getDevice() === PracticeUtil::WINDOWS_10) {
+                                    if($p->getDevice() === PracticeUtil::WINDOWS_10 or $p->getInput() === PracticeUtil::CONTROLS_MOUSE) {
                                         $use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK;
                                     } else $use = true;
                                 }
@@ -575,7 +577,7 @@ class PracticeListener implements Listener
 
                             if (PracticeUtil::isTapToPotEnabled()) {
                                 if($checkActions === true) {
-                                    if($p->getDevice() === PracticeUtil::WINDOWS_10) {
+                                    if($p->getDevice() === PracticeUtil::WINDOWS_10 or $p->getInput() === PracticeUtil::CONTROLS_MOUSE) {
                                         $use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK;
                                     } else $use = true;
                                 }
@@ -842,32 +844,6 @@ class PracticeListener implements Listener
     }
 
     //TODO TEST
-    public function onCommand(CommandEvent $event) : void {
-
-        /*$sender = $event->getSender();
-        $commandName = $event->getCommand();
-
-        $map = Server::getInstance()->getCommandMap();
-
-        $cmd = $map->getCommand($commandName);
-
-        $isCommand = !is_null($cmd) and $cmd instanceof Command;
-
-        if($isCommand === true) {
-
-            $permission = $cmd->getPermission();
-
-            if($sender instanceof Player and PracticeUtil::testPermission($sender, $permission, false)) {
-
-                $p = $sender->getPlayer();
-
-                if(!$p->hasPermission($permission))
-                    PracticeUtil::addPermissionTo($p, $permission);
-            }
-        }*/
-    }
-
-    //TODO TEST
     public function onCommandPreprocess(PlayerCommandPreprocessEvent $event): void {
 
         $p = $event->getPlayer();
@@ -982,13 +958,15 @@ class PracticeListener implements Listener
 
         if ($pkt instanceof LoginPacket) {
             $clientData = $pkt->clientData;
-            if (array_key_exists('DeviceOS', $clientData)) {
+            if (isset($clientData['DeviceOS']) and isset($clientData['CurrentInputMode'])) {
                 $device = $clientData['DeviceOS'];
+                $input = $clientData['CurrentInputMode'];
                 if (PracticeCore::getPlayerHandler()->isPlayer($player)) {
                     $p = PracticeCore::getPlayerHandler()->getPlayer($device);
                     $p->setDeviceOS(intval($device));
+                    $p->setInput(intval($input));
                 } else {
-                    PracticeCore::getPlayerHandler()->putPendingDevice($pkt->username, intval($device));
+                    PracticeCore::getPlayerHandler()->putPendingPInfo($pkt->username, intval($device), intval($input));
                 }
             }
         }
@@ -996,7 +974,7 @@ class PracticeListener implements Listener
         if ($pkt instanceof PlayerActionPacket) {
             if ($pkt->action === PlayerActionPacket::ACTION_START_BREAK and PracticeCore::getPlayerHandler()->isPlayer($player)) {
                 $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-                if ($p->getDevice() === PracticeUtil::WINDOWS_10)
+                if ($p->getDevice() === PracticeUtil::WINDOWS_10 or $p->getDevice() === PracticeUtil::CONTROLS_MOUSE)
                     $p->addClick(true);
             }
         } elseif ($pkt instanceof LevelSoundEventPacket) {
@@ -1021,13 +999,13 @@ class PracticeListener implements Listener
                     if(PracticeUtil::canUseItems($p->getPlayer())) {
 
                         if($item->getId() === Item::FISHING_ROD) {
-                            if(PracticeUtil::isTapToRodEnabled()) PracticeUtil::useRod($item, $p->getPlayer(), $p->getDevice() !== PracticeUtil::WINDOWS_10);
+                            if(PracticeUtil::isTapToRodEnabled()) PracticeUtil::useRod($item, $p->getPlayer(), $p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE);
                         } elseif ($item->getId() === Item::ENDER_PEARL and $item instanceof EnderPearl) {
-                            if(PracticeUtil::isTapToPearlEnabled() and $p->getDevice() !== PracticeUtil::WINDOWS_10) PracticeUtil::throwPearl($item, $p->getPlayer(), true);
+                            if(PracticeUtil::isTapToPearlEnabled() and $p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) PracticeUtil::throwPearl($item, $p->getPlayer(), true);
                         } elseif ($item->getId() === Item::SPLASH_POTION and $item instanceof SplashPotion) {
-                            if(PracticeUtil::isTapToPotEnabled() and $p->getDevice() !== PracticeUtil::WINDOWS_10) PracticeUtil::throwPotion($item, $p->getPlayer(), true);
+                            if(PracticeUtil::isTapToPotEnabled() and $p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) PracticeUtil::throwPotion($item, $p->getPlayer(), true);
                         } elseif ($item->getId() === Item::MUSHROOM_STEW and $item instanceof MushroomStew) {
-                            if($p->getDevice() !== PracticeUtil::WINDOWS_10) {
+                            if($p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) {
                                 $inv = $player->getInventory();
                                 $inv->setItemInHand(Item::get(Item::AIR));
                                 $newHealth = $player->getHealth() + 7.0;
@@ -1164,5 +1142,10 @@ class PracticeListener implements Listener
                 }
             }
         }
+
+        $server = $plugin->getServer();
+
+        if($server->isRunning())
+            PracticeUtil::kickAll('Restarting Server');
     }
 }

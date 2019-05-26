@@ -80,11 +80,13 @@ class MatchMenu extends BaseMenu
 
         $player = $p->getPlayer();
 
-        $isPracItem = (PracticeCore::getItemHandler()->isPracticeItem($origItem)) or (PracticeCore::getItemHandler()->isPracticeItem($newItem));
+        $itemHandler = PracticeCore::getItemHandler();
+
+        $isPracItem = ($itemHandler->isPracticeItem($origItem)) or ($itemHandler->isPracticeItem($newItem));
 
         if (PracticeUtil::canUseItems($player, true) and $isPracItem === true) {
 
-            $practiceItem = PracticeCore::getItemHandler()->isPracticeItem($newItem) ? PracticeCore::getItemHandler()->getPracticeItem($newItem) : PracticeCore::getItemHandler()->getPracticeItem($origItem);
+            $practiceItem = ($itemHandler->isPracticeItem($newItem)) ? $itemHandler->getPracticeItem($newItem) : $itemHandler->getPracticeItem($origItem);
 
             $queue = $practiceItem->getName();
 
@@ -92,7 +94,9 @@ class MatchMenu extends BaseMenu
 
             $player->removeWindow($action->getInventory());
 
-            if (PracticeCore::getKitHandler()->isDuelKit($q)) PracticeCore::getDuelHandler()->addPlayerToQueue($p->getPlayerName(), $q, $this->ranked);
+            $duelHandler = PracticeCore::getDuelHandler();
+
+            if (PracticeCore::getKitHandler()->isDuelKit($q) and !$duelHandler->isPlayerInQueue($player)) $duelHandler->addPlayerToQueue($p->getPlayerName(), $q, $this->ranked);
         }
     }
 

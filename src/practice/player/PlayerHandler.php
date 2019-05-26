@@ -274,7 +274,7 @@ class PlayerHandler
         if($result === true) {
             if($this->isPlayerOnline($playerName)) {
                 $p = $this->getPlayer($playerName);
-                $result = $p->getDevice() !== PracticeUtil::WINDOWS_10;
+                $result = $p->peOnlyQueue();
             }
         }
 
@@ -338,16 +338,19 @@ class PlayerHandler
         return $data;
     }
 
-    public function putPendingDevice(string $name, int $device){
-        $this->pendingDeviceData += [$name => $device];
+    public function putPendingPInfo(string $name, int $device, int $controls) : void {
+        $this->pendingDeviceData[$name] = [
+            'device' => $device,
+            'controls' => $controls
+        ];
     }
 
-    public function hasPendingDeviceOs($player) : bool {
-        return $this->getPendingDeviceOs($player) != -1;
+    public function hasPendingPInfo($player) : bool {
+        return $this->getPendingPInfo($player) !== null;
     }
 
-    public function removePendingDeviceOs($player) : void {
-        if($this->hasPendingDeviceOs($player)){
+    public function removePendingPInfo($player) : void {
+        if($this->hasPendingPInfo($player)){
             $key = $this->getPendingDeviceKeyOf($player);
             if(!is_null($key) and is_string($key)) unset($this->pendingDeviceData[$key]);
             /*
@@ -361,17 +364,23 @@ class PlayerHandler
         $result = null;
         $name = PracticeUtil::getPlayerName($player);
         if(!is_null($name) and is_string($name)) {
-            if(array_key_exists($name, $this->pendingDeviceData)){
+            if(isset($this->pendingDeviceData[$name])) {
                 $val = $this->pendingDeviceData[$name];
-                if(is_int($val)) $result = $name;
+                if(is_array($val)) $result = $name;
             }
         }
         return $result;
     }
 
-    public function getPendingDeviceOs($player) : int {
+    /**
+     * @param $player
+     * @return array|null
+     */
+    public function getPendingPInfo($player) {
+
         $name = null;
-        $res = -1;
+        $res = null;
+
         if(isset($player) and !is_null($player)){
             if(is_string($player)){
                 $name = $player;
@@ -383,10 +392,8 @@ class PlayerHandler
         }
 
         if(!is_null($name) and is_string($name)){
-            if(array_key_exists($name, $this->pendingDeviceData)){
-                $val = $this->pendingDeviceData[$name];
-                if(is_int($val)) $res = $val;
-            }
+            if(isset($this->pendingDeviceData[$name]))
+                $res = $this->pendingDeviceData[$name];
         }
         return $res;
     }

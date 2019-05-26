@@ -321,6 +321,10 @@ class ItemHandler
         return !is_null($item) and $item instanceof PracticeItem;
     }
 
+    /**
+     * @param Item $item
+     * @return PracticeItem|null
+     */
     public function getPracticeItem(Item $item)
     {
         $result = null;

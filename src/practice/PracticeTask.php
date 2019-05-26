@@ -169,7 +169,7 @@ class PracticeTask extends Task
 
         if ($this->isExactHr($ticksLeft)) {
             if($hours === 2 or $hours === 1) {
-                $msg = '[Server] ' . $hours . ' hours until server restart.';
+                $msg = '[Server] ' . $hours . ' hour(s) until server restart.';
                 PracticeUtil::broadcastMsg($msg);
             }
         } elseif($this->isExactMin($ticksLeft)) {
@@ -179,10 +179,10 @@ class PracticeTask extends Task
             if($minutes === 150 or $minutes === 90) {
                 $hrs = intval($minutes / 60);
                 $mins = $minutes % 60;
-                $msg = '[Server] ' . $hrs . ' hours and ' . $mins . ' minutes until server restart.';
+                $msg = '[Server] ' . $hrs . ' hour(s) and ' . $mins . ' minutes until server restart.';
                 $broadcast = true;
             } elseif($minutes === 30 or $minutes === 10 or $minutes === 5 or $minutes === 1) {
-                $msg = '[Server] ' . $minutes . ' minutes until server restart.';
+                $msg = '[Server] ' . $minutes . ' minute(s) until server restart.';
                 $broadcast = true;
             }
 

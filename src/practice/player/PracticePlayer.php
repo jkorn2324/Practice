@@ -63,6 +63,7 @@ class PracticePlayer
     private $enderpearlTicks;
     private $lastAntiSpamTick;
     private $deviceOs;
+    private $input;
     private $duelSpamTick;
     private $noDamageTick;
 
@@ -121,6 +122,7 @@ class PracticePlayer
         $this->enderpearlTicks = 0;
         $this->lastAntiSpamTick = 0;
         $this->deviceOs = -1;
+        $this->input = -1;
         $this->duelSpamTick = 0;
         $this->noDamageTick = 0;
         $this->invId = -1;
@@ -828,13 +830,26 @@ class PracticePlayer
         return $count;
     }
 
+    public function getInput() : int {
+        return $this->input;
+    }
+
     public function getDevice() : int {
         return $this->deviceOs;
+    }
+
+    public function setInput(int $val) : void {
+        if($this->input === -1)
+            $this->input = $val;
     }
 
     public function setDeviceOS(int $val) : void {
         if($this->deviceOs === PracticeUtil::UNKNOWN)
             $this->deviceOs = $val;
+    }
+
+    public function peOnlyQueue() : bool {
+        return $this->deviceOs !== PracticeUtil::WINDOWS_10 and $this->input === PracticeUtil::CONTROLS_TOUCH;
     }
 
     public function isInDuel() : bool {

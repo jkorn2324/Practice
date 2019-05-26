@@ -58,6 +58,9 @@ class DuelHandler
 
             PracticeCore::getItemHandler()->spawnQueueItems($p->getPlayer());
 
+            if($this->isPlayerInQueue($p->getPlayerName()))
+                unset($this->queuedPlayers[$p->getPlayerName()]);
+
             $this->queuedPlayers[$p->getPlayerName()] = $newQueue;
 
             ScoreboardUtil::updateSpawnScoreboards();
@@ -331,8 +334,6 @@ class DuelHandler
 
             $checkForPEQueue = $pQueue->isPEOnly();
 
-            $device = $pQueue->getPlayer()->getDevice();
-
             if($pQueue instanceof QueuedPlayer) {
 
                 foreach ($this->queuedPlayers as $queue) {
@@ -349,13 +350,13 @@ class DuelHandler
 
                                 if($checkForPEQueue === true) {
 
-                                    if($queue->getPlayer()->getDevice() !== PracticeUtil::WINDOWS_10) $found = true;
+                                    if($queue->getPlayer()->peOnlyQueue()) $found = true;
 
                                 } else {
 
                                     if($queue->isPEOnly()) {
 
-                                        $found = $device !== PracticeUtil::WINDOWS_10;
+                                        $found = $pQueue->getPlayer()->peOnlyQueue();
 
                                     } else $found = true;
                                 }

@@ -67,6 +67,11 @@ class PracticeUtil
     public const ORBIS = 10;
     public const NX = 11;
 
+    public const CONTROLS_UNKNOWN = 0;
+    public const CONTROLS_MOUSE = 1;
+    public const CONTROLS_TOUCH = 2;
+    public const CONTROLS_CONTROLLER = 3;
+
     # ITEM FUNCTIONS
 
     public static function isSign(Item $item) : bool {
@@ -1373,6 +1378,14 @@ class PracticeUtil
 
     //SERVER FUNCTIONS
 
+    public static function kickAll(string $msg) : void {
+
+        $players = Server::getInstance()->getOnlinePlayers();
+
+        foreach($players as $player)
+            $player->kick($msg);
+    }
+
     public static function reloadPlayers() : void {
 
         $players = Server::getInstance()->getOnlinePlayers();
@@ -1384,9 +1397,13 @@ class PracticeUtil
 
                 $pl = PracticeCore::getPlayerHandler()->addPlayer($p);
 
-                if(!is_null($pl) and PracticeCore::getPlayerHandler()->hasPendingDeviceOs($p)) {
-                    $pl->setDeviceOS(PracticeCore::getPlayerHandler()->getPendingDeviceOs($p));
-                    PracticeCore::getPlayerHandler()->removePendingDeviceOs($p);
+                if(!is_null($pl) and PracticeCore::getPlayerHandler()->hasPendingPInfo($p)) {
+                    $plInfo = PracticeCore::getPlayerHandler()->getPendingPInfo($p);
+                    $device = intval($plInfo['device']);
+                    $input = intval($plInfo['controls']);
+                    $pl->setDeviceOS($device);
+                    $pl->setInput($input);
+                    PracticeCore::getPlayerHandler()->removePendingPInfo($p);
                 }
                 self::resetPlayer($p, true);
             }
