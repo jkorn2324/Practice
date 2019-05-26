@@ -1062,7 +1062,8 @@ class PracticeListener implements Listener
 
                     $p = $playerHandler->getPlayer($player);
 
-                    $p->addClick(false);
+                    // $p->addClick(false);
+                    $p->addCps();
 
                     $pl = $p->getPlayer();
 

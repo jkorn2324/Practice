@@ -73,21 +73,9 @@ class PracticeTask extends Task {
 
         $duelHandler = PracticeCore::getDuelHandler();
 
-        $array = $playerHandler->getOnlinePlayers();
-
-        $size = count($array);
-
-        for($i = 0; $i < $size; $i++) {
-
-            if(isset($array[$i])) {
-
-                $player = $array[$i];
-
-                if ($player instanceof PracticePlayer)
-
-                    $player->updatePlayer();
-
-            }
+        /** @var PracticePlayer $player */
+        foreach($playerHandler->getOnlinePlayers() as $player) {
+            $player->updatePlayer();
         }
 
         if($duelHandler->updateQueues()) ScoreboardUtil::updateSpawnScoreboards("in-queues");

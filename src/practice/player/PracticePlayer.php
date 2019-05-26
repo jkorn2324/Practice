@@ -73,6 +73,9 @@ class PracticePlayer
     private $clicks;
     private $currentFormData;
 
+    /** @var float[] */
+    private $cps = [];
+
     //OTHER
     private $fishing;
     private $duelResultInvs;
@@ -159,6 +162,18 @@ class PracticePlayer
 
     public function getNoDamageTicks() : int {
         return $this->noDamageTick;
+    }
+
+    public function addCps(): void {
+        $microtime = microtime(true);
+        foreach($this->cps as $cps) {
+            if($microtime - $cps > 1) {
+                unset($this->cps[array_search($cps, $this->clicks)]);
+            }
+        }
+
+        $this->clicks[] = $microtime;
+        // Send/update the scoreboard
     }
 
     public function updatePlayer() : void {
