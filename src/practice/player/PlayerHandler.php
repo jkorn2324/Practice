@@ -549,7 +549,7 @@ class PlayerHandler
 
         if(!is_null($name))
 
-            $result = PracticeCore::getRankHandler()->hasRank($name, RankHandler::$DEV) or PracticeCore::getRankHandler()->hasRank($player, RankHandler::$OWNER);
+            $result = PracticeCore::getRankHandler()->hasRank($name, RankHandler::$DEV) or PracticeCore::getRankHandler()->hasRank($name, RankHandler::$OWNER);
 
         return $result;
     }

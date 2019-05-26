@@ -394,7 +394,7 @@ class FormUtil
 
                     $dataPEOnlyIndex = 1;
 
-                    if(array_key_exists($dataPEOnlyIndex, $data)) {
+                    if(isset($data[$dataPEOnlyIndex])) {
 
                         $resultPEOnly = boolval($data[$dataPEOnlyIndex]);
 
@@ -403,7 +403,7 @@ class FormUtil
 
                     $dataPBIndex = 2;
 
-                    if(array_key_exists($dataPBIndex, $data)) {
+                    if(isset($data[$dataPBIndex])) {
 
                         $resultPB = boolval($data[$dataPBIndex]);
 

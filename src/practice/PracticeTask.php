@@ -39,7 +39,7 @@ class PracticeTask extends Task
 
         $this->core = $c;
         $this->currentTick = 0;
-        $this->maxAnnouncementTime = PracticeUtil::secondsToTicks(45);
+        $this->maxAnnouncementTime = PracticeUtil::minutesToTicks(2);
         //$this->ticksBetweenReload = PracticeUtil::minutesToTicks(1);
         $this->ticksBetweenReload = PracticeUtil::hoursToTicks(3);
         $this->randomAnnouncement = [
@@ -89,11 +89,10 @@ class PracticeTask extends Task
 
                 $player = $array[$i];
 
-                if ($player instanceof PracticePlayer) {
+                if ($player instanceof PracticePlayer)
 
                     $player->updatePlayer();
 
-                }
             }
         }
 
