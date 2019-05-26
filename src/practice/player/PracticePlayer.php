@@ -349,6 +349,10 @@ class PracticePlayer
 
     private function getSpawnScoreboard(int $device) : Scoreboard {
 
+        $duelHandler = PracticeCore::getDuelHandler();
+
+        $server = Server::getInstance();
+
         $scoreboard = new Scoreboard($this->getPlayer(), $device, PracticeUtil::getName('server-name'), Scoreboard::SPAWN_SCOREBOARD);
 
         $scoreboard = $scoreboard->addSeparator(TextFormat::BLUE)
@@ -359,25 +363,25 @@ class PracticePlayer
             ->addLine('your-queue', PracticeUtil::getName('scoreboard.spawn.thequeue'))
             ->addSeparator(TextFormat::GREEN);
 
-        $queue = PracticeCore::getDuelHandler()->isPlayerInQueue($this->getPlayerName());
+        $queue = $duelHandler->isPlayerInQueue($this->getPlayerName());
 
         if($queue === false)
             $scoreboard = $scoreboard->hideLine('your-queue')->hideLine('separator-3');
         else $scoreboard = $scoreboard->showLine('your-queue')->showLine('separator-3');
 
-        $online = count(Server::getInstance()->getOnlinePlayers());
-        $max_online = Server::getInstance()->getMaxPlayers();
+        $online = count($server->getOnlinePlayers());
+        $max_online = $server->getMaxPlayers();
 
         $in_fights = PracticeCore::getPlayerHandler()->getPlayersInFights();;
-        $in_queues = PracticeCore::getDuelHandler()->getNumberOfQueuedPlayers();
+        $in_queues = $duelHandler->getNumberOfQueuedPlayers();
 
         $scoreboard = $scoreboard->updateLine('online-players', ['%num%' => $online, '%max-num%' => $max_online])
                         ->updateLine('in-fights', ['%num%' => $in_fights])
                         ->updateLine('in-queues', ['%num%' => $in_queues]);
 
-        if(PracticeCore::getDuelHandler()->isPlayerInQueue($this->playerName)) {
+        if($duelHandler->isPlayerInQueue($this->playerName)) {
 
-            $queue = PracticeCore::getDuelHandler()->getQueuedPlayer($this->playerName);
+            $queue = $duelHandler->getQueuedPlayer($this->playerName);
 
             $ranked = ($queue->isRanked()) ? 'Ranked' : 'Unranked';
 
@@ -428,6 +432,8 @@ class PracticePlayer
 
     private function getSpectatorScoreboard() : Scoreboard {
 
+        $duelHandler = PracticeCore::getDuelHandler();
+
         $scoreboard = new Scoreboard($this->getPlayer(), $this->getDevice(), PracticeUtil::getName('server-name'), Scoreboard::SPEC_SCOREBOARD);
 
         $scoreboard = $scoreboard->addSeparator(TextFormat::GREEN)
@@ -435,8 +441,8 @@ class PracticePlayer
             ->addLine('duration', PracticeUtil::getName('scoreboard.duels.duration'))
             ->addSeparator(TextFormat::BLUE);
 
-        if(PracticeCore::getDuelHandler()->isASpectator($this->playerName)) {
-            $duel = PracticeCore::getDuelHandler()->getDuelFromSpec($this->playerName);
+        if($duelHandler->isASpectator($this->playerName)) {
+            $duel = $duelHandler->getDuelFromSpec($this->playerName);
             $duration = $duel->getDurationString();
             $queue = $duel->getQueue();
             $scoreboard = $scoreboard->updateLine('queue', ['%kit%' => $queue])
@@ -460,6 +466,8 @@ class PracticePlayer
 
         if($this->isInArena()) {
 
+            $playerHandler = PracticeCore::getPlayerHandler();
+
             $arena = $this->currentArena;
 
             $name = PracticeUtil::getName('scoreboard.arena-ffa.arena');
@@ -468,8 +476,8 @@ class PracticePlayer
                 $arena = PracticeUtil::str_replace($arena, [' FFA' => '']);
 
             $cps = $this->getCps();
-            $kills = PracticeCore::getPlayerHandler()->getKillsOf($this->playerName);
-            $deaths = PracticeCore::getPlayerHandler()->getDeathsOf($this->playerName);
+            $kills = $playerHandler->getKillsOf($this->playerName);
+            $deaths = $playerHandler->getDeathsOf($this->playerName);
             $scoreboard = $scoreboard->updateLine('arena', ['%arena%' => $arena])
                 ->updateLine('cps', ['%player%' => 'Your', '%clicks%' => $cps])
                 ->updateLine('kills', ['%num%' => $kills])
@@ -575,6 +583,7 @@ class PracticePlayer
 
                 $tag = Entity::createBaseNBT($player->add(0.0, $player->getEyeHeight(), 0.0), $player->getDirectionVector(), floatval($player->yaw), floatval($player->pitch));
                 $rod = Entity::createEntity('FishingHook', $player->getLevel(), $tag, $player);
+
                 if ($rod !== null) {
                     $x = -sin(deg2rad($player->yaw)) * cos(deg2rad($player->pitch));
                     $y = -sin(deg2rad($player->pitch));
@@ -600,7 +609,9 @@ class PracticePlayer
     }
 
     public function stopFishing(bool $click = true) : void {
+
         if($this->isFishing()) {
+
             if($this->fishing instanceof FishingHook) {
                 $rod = $this->fishing;
                 if($click) {
@@ -654,22 +665,22 @@ class PracticePlayer
     public function isOnline() : bool { return isset($this->playerName) and !is_null($this->getPlayer()) and $this->getPlayer()->isOnline(); }
 
     public function setInCombat(bool $res) : void {
+
         if($res === true){
             $this->lastTickHit = $this->currentTick;
             $this->combatTicks = PracticeUtil::secondsToTicks(self::MAX_COMBAT_TICKS);
             if($this->isOnline()){
                 $p = $this->getPlayer();
-                if($this->inCombat === false){
+                if($this->inCombat === false)
                     $p->sendMessage(PracticeUtil::getMessage('general.combat.combat-place'));
-                }
             }
         } else {
             $this->combatTicks = 0;
             if($this->isOnline()){
                 $p = $this->getPlayer();
-                if($this->inCombat === true){
+                if($this->inCombat === true)
                     $p->sendMessage(PracticeUtil::getMessage('general.combat.combat-remove'));
-                }
+
             }
         }
         $this->inCombat = $res;
@@ -706,9 +717,9 @@ class PracticePlayer
             $this->enderpearlTicks = PracticeUtil::secondsToTicks(self::MAX_ENDERPEARL_SECONDS);
             if($this->isOnline()){
                 $p = $this->getPlayer();
-                if($this->canThrowPearl === true){
+                if($this->canThrowPearl === true)
                     $p->sendMessage(PracticeUtil::getMessage('general.enderpearl-cooldown.cooldown-place'));
-                }
+
                 $p->setXpProgress(1.0);
                 $p->setXpLevel(self::MAX_ENDERPEARL_SECONDS);
             }
@@ -716,9 +727,9 @@ class PracticePlayer
             $this->enderpearlTicks = 0;
             if($this->isOnline()){
                 $p = $this->getPlayer();
-                if($this->canThrowPearl === false){
+                if($this->canThrowPearl === false)
                     $p->sendMessage(PracticeUtil::getMessage('general.enderpearl-cooldown.cooldown-remove'));
-                }
+
                 $p->setXpLevel(0);
                 $p->setXpProgress(0);
             }
@@ -749,8 +760,10 @@ class PracticePlayer
 
         $type = PracticeArena::NO_ARENA;
 
-        if($this->isInArena() and !is_null($this->getCurrentArena()))
-            $type = $this->getCurrentArena()->getArenaType();
+        $arena = $this->getCurrentArena();
+
+        if($this->isInArena() and !is_null($arena))
+            $type = $arena->getArenaType();
 
         return $type;
     }
@@ -762,8 +775,10 @@ class PracticePlayer
             $spawn = $arena->getSpawnPosition();
             $msg = null;
 
-            if(PracticeCore::getDuelHandler()->isPlayerInQueue($player))
-                PracticeCore::getDuelHandler()->removePlayerFromQueue($player, true);
+            $duelHandler = PracticeCore::getDuelHandler();
+
+            if($duelHandler->isPlayerInQueue($player))
+                $duelHandler->removePlayerFromQueue($player, true);
 
             if(!is_null($spawn)) {
                 $player->teleport($spawn);
@@ -802,9 +817,10 @@ class PracticePlayer
         $exec = true;
         $size = count($this->clicks);
         if($size > 0){
+
             $lastClick = $this->clicks[$size - 1];
 
-            if($lastClick instanceof PlayerClick)
+            if(isset($lastClick))
                 $exec = !$click->equals($lastClick);
 
         }
@@ -819,12 +835,11 @@ class PracticePlayer
 
         for($i = $size; $i > -1; $i--) {
             $click = $this->clicks[$i];
-            if($click instanceof PlayerClick){
-                $difference = $this->currentTick - $click->getTickClicked();
-                if($difference <= 20 and $difference >= 0){
-                    $count++;
-                } else break;
-            }
+            $difference = $this->currentTick - $click->getTickClicked();
+            if($difference <= 20 and $difference >= 0)
+                $count++;
+            else break;
+
         }
 
         return $count;
@@ -865,17 +880,12 @@ class PracticePlayer
         if($this->isOnline()){
             $msg = null;
             if($this->isInDuel()){
-                if($this->isInCombat()){
-                    $msg = PracticeUtil::getMessage('general.combat.command-msg');
-                } else {
-                    $msg = PracticeUtil::getMessage('general.duels.command-msg');
-                }
+                $msgStr = ($this->isInCombat()) ? 'general.combat.command-msg' : 'general.duels.command-msg';
+                $msg = PracticeUtil::getMessage($msgStr);
             } else {
-                if($this->isInCombat()){
+                if($this->isInCombat())
                     $msg = PracticeUtil::getMessage('general.combat.command-msg');
-                } else {
-                    $result = true;
-                }
+                else $result = true;
             }
             if(!is_null($msg) and $sendMsg) $this->getPlayer()->sendMessage($msg);
         }
@@ -896,16 +906,20 @@ class PracticePlayer
 
             $arena = $grp->getArena();
 
-            $pos = $grp->isPlayer($this->playerName) ? $arena->getPlayerPos() : $arena->getOpponentPos();
+            $isPlayer = $grp->isPlayer($this->playerName);
 
-            $oppName = $grp->isPlayer($this->playerName) ? $grp->getOpponent()->getPlayerName() : $grp->getPlayer()->getPlayerName();
+            $pos = ($isPlayer === true) ? $arena->getPlayerPos() : $arena->getOpponentPos();
+
+            $oppName = ($isPlayer === true) ? $grp->getOpponent()->getPlayerName() : $grp->getPlayer()->getPlayerName();
 
             $p->setGamemode(0);
 
             $p->teleport($pos);
 
-            if($arena->hasKit($grp->getQueue())){
-                $kit = $arena->getKit($grp->getQueue());
+            $queue = $grp->getQueue();
+
+            if($arena->hasKit($queue)){
+                $kit = $arena->getKit($queue);
                 $kit->giveTo($p);
             }
 
@@ -917,7 +931,7 @@ class PracticePlayer
             $countdown = DuelGroup::MAX_COUNTDOWN_SEC;
 
             $p->sendMessage(PracticeUtil::str_replace(PracticeUtil::getMessage('duels.start.msg2'), ['%map%' => $grp->getArenaName()]));
-            $p->sendMessage(PracticeUtil::str_replace(PracticeUtil::getMessage('duels.start.msg1'), ['%seconds%' => $countdown, '%ranked%' => $ranked, '%queue%' => $grp->getQueue(), '%player%' => $oppName]));
+            $p->sendMessage(PracticeUtil::str_replace(PracticeUtil::getMessage('duels.start.msg1'), ['%seconds%' => $countdown, '%ranked%' => $ranked, '%queue%' => $queue, '%player%' => $oppName]));
         }
     }
 
@@ -1056,8 +1070,9 @@ class PracticePlayer
 
     public function kick(string $msg) : void {
         if($this->isOnline()) {
-            $this->getPlayer()->getInventory()->clearAll();
-            $this->getPlayer()->kick($msg);
+            $p = $this->getPlayer();
+            $p->getInventory()->clearAll();
+            $p->kick($msg);
         }
     }
 }
