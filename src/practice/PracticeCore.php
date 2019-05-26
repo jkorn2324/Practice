@@ -90,6 +90,7 @@ class PracticeCore extends PluginBase
         $this->initNameConfig();
         $this->initRankConfig();
         $this->initCommands();
+        $this->loadLevels();
 
         self::$instance = $this;
 
@@ -115,32 +116,30 @@ class PracticeCore extends PluginBase
         $scheduler = $this->getScheduler();
 
         $this->getServer()->getPluginManager()->registerEvents(new PracticeListener($this), $this);
-        $scheduler->scheduleDelayedTask(new SetTimeDayTask($this), 10);
+        // $scheduler->scheduleDelayedTask(new SetTimeDayTask($this), 10);
         $scheduler->scheduleDelayedTask(new PermissionsToCfgTask(), 10);
         $scheduler->scheduleRepeatingTask(new PracticeTask($this), 1);
     }
 
-    public function onLoad() {
-        $this->loadLevels();
-    }
-
-    public function onDisable() {
-        parent::onDisable();
-    }
-
     private function loadLevels() : void {
+        $worlds = PracticeUtil::str_indexOf("/plugins", $this->getDataFolder()) . "/worlds";
+        if(!is_dir($worlds)) {
+            return;
+        }
 
-        $dataFolder = $this->getDataFolder();
-
-        $worlds = PracticeUtil::str_indexOf("/plugins", $dataFolder) . "/worlds";
-
-        if(is_dir($worlds)) {
-            $files = scandir($worlds);
-            $server = $this->getServer();
-            foreach($files as $folderName) {
-                if(is_dir($folderName))
-                    $server->loadLevel($folderName);
+        $files = scandir($worlds);
+        $server = $this->getServer();
+        foreach($files as $folderName) {
+            if(!is_dir($folderName)) {
+                continue;
             }
+
+            $server->loadLevel($folderName);
+        }
+
+        foreach($server->getLevels() as $level) {
+            $level->setTime(6000);
+            $level->stopTime();
         }
     }
 
