@@ -95,7 +95,7 @@ class PracticeCore extends PluginBase
 
         self::$instance = $this;
 
-        self::$playerHandler = new PlayerHandler();
+        self::$playerHandler = new PlayerHandler($this);
         self::$kitHandler = new KitHandler();
         self::$arenaHandler = new ArenaHandler();
 

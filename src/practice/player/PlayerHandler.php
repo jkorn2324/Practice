@@ -29,18 +29,18 @@ class PlayerHandler
 
     private $leaderboards;
 
-    public function __construct()
+    public function __construct(PracticeCore $core)
     {
         $this->players = [];
         $this->pendingDeviceData = [];
         $this->closedInventoryIDs = [];
         $this->leaderboards = [];
-        $this->initFiles();
+        $this->initFiles($core);
     }
 
-    private function initFiles() : void {
+    private function initFiles(PracticeCore $core) : void {
 
-        $this->playerFolderPath = PracticeCore::getInstance()->getDataFolder() . '/players';
+        $this->playerFolderPath = $core->getDataFolder() . '/players';
 
         if(!is_dir($this->playerFolderPath)) {
             mkdir($this->playerFolderPath);
@@ -99,8 +99,6 @@ class PlayerHandler
         if(is_null($index)) {
             $this->closedInventoryIDs[$player->getName()] = $id;
             $result = true;
-            //$this->closedInventoryIDs[$player->getName()] = $id;
-            //$result = true;
         }
 
         return $result;
@@ -187,8 +185,10 @@ class PlayerHandler
 
             $elo = $stats['elo'];
 
+            $kitHandler = PracticeCore::getKitHandler();
+
             //$duelKits = PracticeCore::getKitHandler()->getDuelKits();
-            $duelKits = PracticeCore::getKitHandler()->getDuelKitNames();
+            $duelKits = $kitHandler->getDuelKitNames();
 
             $keys = array_keys($elo);
 
@@ -202,7 +202,7 @@ class PlayerHandler
 
                 foreach($difference as $kit) {
 
-                    if(PracticeCore::getKitHandler()->isDuelKit($kit))
+                    if($kitHandler->isDuelKit($kit))
                         $elo[$kit] = 1000;
                     else {
                         if(array_key_exists($kit, $elo))
@@ -547,9 +547,11 @@ class PlayerHandler
 
         $name = PracticeUtil::getPlayerName($player);
 
+        $rankHandler = PracticeCore::getRankHandler();
+
         if(!is_null($name))
 
-            $result = PracticeCore::getRankHandler()->hasRank($name, RankHandler::$DEV) or PracticeCore::getRankHandler()->hasRank($name, RankHandler::$OWNER);
+            $result = $rankHandler->hasRank($name, RankHandler::$DEV) or $rankHandler->hasRank($name, RankHandler::$OWNER);
 
         return $result;
     }
@@ -603,10 +605,9 @@ class PlayerHandler
             }
         }
 
-        if(!is_null($name)) {
-            if(array_key_exists($name, $this->players))
-                $res = $name;
-        }
+        if(!is_null($name) and isset($this->players[$name]))
+            $res = $name;
+
         return $res;
     }
 
