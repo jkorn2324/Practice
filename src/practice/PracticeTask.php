@@ -45,6 +45,8 @@ class PracticeTask extends Task {
      * @param int $currentTick
      */
     public function onRun(int $currentTick) {
+        $this->seconds--;
+
         $this->broadcastAnnouncement();
         $this->updateDuels();
         $this->updatePlayers();
