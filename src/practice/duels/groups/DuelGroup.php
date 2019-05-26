@@ -287,7 +287,7 @@ class DuelGroup
                 }
             }
 
-            if($duration % 5 === 0) {
+            if($duration % 2 === 0) {
                 $result = $duration % 20 !== 0;
                 $this->updateScoreboards($result);
             }

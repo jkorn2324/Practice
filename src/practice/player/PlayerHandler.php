@@ -451,7 +451,7 @@ class PlayerHandler
     }
 
     /**
-     * @param $player
+     * @param $player -> Must be of types: string, PracticePlayer, or Player
      * @return PracticePlayer|null
      */
     public function getPlayer($player) {

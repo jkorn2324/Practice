@@ -274,6 +274,7 @@ class PracticeListener implements Listener
 
         $entity = $event->getEntity();
         $damager = $event->getDamager();
+
         if($event->getCause() !== EntityDamageEvent::CAUSE_PROJECTILE
             and $entity instanceof Player and $damager instanceof Player) {
             AntiCheatUtil::checkForReach($entity, $damager);
@@ -281,10 +282,10 @@ class PracticeListener implements Listener
 
         $cancel = false;
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($damager) and PracticeCore::getPlayerHandler()->isPlayerOnline($entity)) {
+        if(PracticeCore::getPlayerHandler()->isPlayerOnline($damager->getName()) and PracticeCore::getPlayerHandler()->isPlayerOnline($entity->getName())) {
 
-            $attacker = PracticeCore::getPlayerHandler()->getPlayer($damager);
-            $attacked = PracticeCore::getPlayerHandler()->getPlayer($entity);
+            $attacker = PracticeCore::getPlayerHandler()->getPlayer($damager->getName());
+            $attacked = PracticeCore::getPlayerHandler()->getPlayer($entity->getName());
 
             if(!$attacker->canHitPlayer() or !$attacked->canHitPlayer())
                 $cancel = true;
@@ -345,8 +346,7 @@ class PracticeListener implements Listener
 
                         if($duel->isSpleef())
                             $cancel = true;
-                        else
-                            $duel->addHitFrom($attacked->getPlayer());
+                        else $duel->addHitFrom($attacked->getPlayer());
                     }
                 }
             }
