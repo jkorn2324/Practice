@@ -821,7 +821,7 @@ class PracticePlayer
             $click = $this->clicks[$i];
             if($click instanceof PlayerClick){
                 $difference = $this->currentTick - $click->getTickClicked();
-                if($difference <= 20 and $difference > 0){
+                if($difference <= 20 and $difference >= 0){
                     $count++;
                 } else break;
             }
