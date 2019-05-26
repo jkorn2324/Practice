@@ -69,8 +69,10 @@ class PracticeTask extends Task
 
         $this->announcementTime++;
 
+        $server = $this->core->getServer();
+
         if($this->announcementTime > $this->maxAnnouncementTime) {
-            Server::getInstance()->broadcastMessage(
+            $server->broadcastMessage(
                 PracticeUtil::getMessage('broadcast-msg') . "\n" . $this->randomAnnouncement[rand(0, 2)]
             );
             $this->announcementTime = 0;
@@ -79,7 +81,11 @@ class PracticeTask extends Task
 
     private function updatePlayers() : void {
 
-        $array = PracticeCore::getPlayerHandler()->getOnlinePlayers();
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        $duelHandler = PracticeCore::getDuelHandler();
+
+        $array = $playerHandler->getOnlinePlayers();
 
         $size = count($array);
         
@@ -96,18 +102,20 @@ class PracticeTask extends Task
             }
         }
 
-        if(PracticeCore::getDuelHandler()->updateQueues()) ScoreboardUtil::updateSpawnScoreboards("in-queues");
+        if($duelHandler->updateQueues()) ScoreboardUtil::updateSpawnScoreboards("in-queues");
     }
 
     private function updateDuels() : void {
 
+        $duelHandler = PracticeCore::getDuelHandler();
+
         PracticeCore::get1vs1Handler()->update();
 
-        $queuedPlayers = PracticeCore::getDuelHandler()->getQueuedPlayers();
+        $queuedPlayers = $duelHandler->getQueuedPlayers();
 
-        $awaitingMatches = PracticeCore::getDuelHandler()->getAwaitingGroups();
+        $awaitingMatches = $duelHandler->getAwaitingGroups();
 
-        $duels = PracticeCore::getDuelHandler()->getDuelsInProgress();
+        $duels = $duelHandler->getDuelsInProgress();
 
         $keys = array_keys($queuedPlayers);
 
@@ -121,9 +129,9 @@ class PracticeTask extends Task
                     $name = $queue->getPlayerName();
 
                     if ($queue->isPlayerOnline()) {
-                        if (PracticeCore::getDuelHandler()->didFindMatch($name)) {
-                            $opponent = PracticeCore::getDuelHandler()->getMatchedPlayer($name);
-                            PracticeCore::getDuelHandler()->setPlayersMatched($name, $opponent);
+                        if ($duelHandler->didFindMatch($name)) {
+                            $opponent = $duelHandler->getMatchedPlayer($name);
+                            $duelHandler->setPlayersMatched($name, $opponent);
                         }
                     }
                 }
@@ -132,13 +140,10 @@ class PracticeTask extends Task
 
         foreach($awaitingMatches as $match) {
 
-            if($match instanceof MatchedGroup) {
+            $queue = $match->getQueue();
 
-                $queue = $match->getQueue();
-
-                if(PracticeCore::getDuelHandler()->isAnArenaOpen($queue))
-                    PracticeCore::getDuelHandler()->startDuel($match);
-            }
+            if($duelHandler->isAnArenaOpen($queue))
+                $duelHandler->startDuel($match);
         }
 
         foreach($duels as $duel) {
@@ -199,7 +204,7 @@ class PracticeTask extends Task
         }
 
         if($this->currentTick > $this->ticksBetweenReload)
-            Server::getInstance()->reload();
+            $this->core->getServer()->reload();
     }
 
     private function isExactMin(int $tick) : bool {

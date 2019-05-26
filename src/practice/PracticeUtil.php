@@ -128,7 +128,7 @@ class PracticeUtil
 
             $baseItem = Item::get($id, $meta, $count);
 
-            if ($isGoldenHead === true) $baseItem = $baseItem->setCustomName(PracticeUtil::getName('golden-head'));
+            if ($isGoldenHead === true) $baseItem = $baseItem->setCustomName(self::getName('golden-head'));
         }
 
         $enchantCount = count($enchantsArr);
@@ -226,17 +226,21 @@ class PracticeUtil
     //SERVER CONFIGURATION FUNCTIONS
 
     public static function getDefaultLevel() : Level {
+
+        $server = Server::getInstance();
+
         $cfg = PracticeCore::getInstance()->getConfig();
         $level = strval($cfg->get('lobby-level'));
         $result = null;
+
         if(isset($level) and !is_null($level)){
-            $lvl = Server::getInstance()->getLevelByName($level);
+            $lvl = $server->getLevelByName($level);
             if(!is_null($lvl))
                 $result = $lvl;
 
         }
 
-        if(is_null($result)) $result = Server::getInstance()->getDefaultLevel();
+        if(is_null($result)) $result = $server->getDefaultLevel();
         return $result;
     }
 
@@ -350,7 +354,7 @@ class PracticeUtil
 
         if($sender instanceof Player) {
             $result = PracticeCore::getPermissionHandler()->testPermission($permission, $sender->getPlayer());
-            if($result === false and $sendMsg === true) $msg = PracticeUtil::getMessage("permission-msg");
+            if($result === false and $sendMsg === true) $msg = self::getMessage("permission-msg");
         }
 
         if(!is_null($msg)) $sender->sendMessage($msg);
@@ -379,9 +383,13 @@ class PracticeUtil
     }
 
     public static function isInSpectatorMode($player) : bool {
+
         $result = false;
-        if(PracticeCore::getPlayerHandler()->isPlayer($player)) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        if($playerHandler->isPlayer($player)) {
+            $p = $playerHandler->getPlayer($player);
             if($p->getPlayer()->getGamemode() === 3) {
                 $result = true;
             } else $result = $p->isInvisible() and self::canFly($p->getPlayer()) and !$p->canHitPlayer();
@@ -393,9 +401,11 @@ class PracticeUtil
 
     public static function setInSpectatorMode($player, bool $spec = true, bool $forDuels = false) : void {
 
-        if(PracticeCore::getPlayerHandler()->isPlayer($player)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
 
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+        if($playerHandler->isPlayer($player)) {
+
+            $p = $playerHandler->getPlayer($player);
 
             if($spec === true){
                 if(!$forDuels) {
@@ -415,6 +425,7 @@ class PracticeUtil
     }
 
     public static function setFrozen(Player $player, bool $freeze, bool $forDuels = false) : void {
+
         if(!is_null($player) and $player->isOnline()){
             $player->setImmobile($freeze);
             if($forDuels === false){
@@ -461,7 +472,9 @@ class PracticeUtil
     }
 
     public static function setCanHit($player, bool $res) : void {
+
         $pl = null;
+
         if (isset($player) and !is_null($player)) {
             if ($player instanceof Player) {
                 $pl = $player;
@@ -485,12 +498,20 @@ class PracticeUtil
     }
 
     public static function canUseItems($player, bool $lobby = false) : bool {
+
         $result = false;
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
 
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            $level = $p->getPlayer()->getLevel();
+        $duelHandler = PracticeCore::getDuelHandler();
+
+        if($playerHandler->isPlayerOnline($player)) {
+
+            $p = $playerHandler->getPlayer($player);
+
+            $pl = $p->getPlayer();
+
+            $level = $pl->getLevel();
 
             $execute = false;
 
@@ -503,7 +524,7 @@ class PracticeUtil
                     else {
                         if($p->isInArena()) $execute = true;
                         elseif ($p->isInDuel()) {
-                            $duel = PracticeCore::getDuelHandler()->getDuel($p->getPlayer());
+                            $duel = $duelHandler->getDuel($pl);
                             if(!$duel->isLoadingDuel()) $execute = true;
                         }
                     }
@@ -516,56 +537,64 @@ class PracticeUtil
 
                 $test = !$p->isInvisible() and !self::isFrozen($p->getPlayer());
 
-                $result = ($test === true) ? true : PracticeCore::getDuelHandler()->isASpectator($p->getPlayer());
+                $result = ($test === true) ? true : $duelHandler->isASpectator($p->getPlayer());
             }
         }
         return $result;
     }
 
     public static function throwPotion(SplashPotion $potion, $player, bool $animate = false) {
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            $potion->onClickAir($p->getPlayer(), $p->getPlayer()->getDirectionVector());
-            if(!$p->getPlayer()->isCreative()) {
-                $inv = $p->getPlayer()->getInventory();
+
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        if($playerHandler->isPlayerOnline($player)) {
+            $p = $playerHandler->getPlayer($player);
+            $pl = $p->getPlayer();
+            $potion->onClickAir($pl, $pl->getDirectionVector());
+            if(!$pl->isCreative()) {
+                $inv = $pl->getInventory();
                 $inv->setItem($inv->getHeldItemIndex(), Item::get(0));
             }
             if($animate) {
                 $pkt = new AnimatePacket();
                 $pkt->action = AnimatePacket::ACTION_SWING_ARM;
-                $pkt->entityRuntimeId = $p->getPlayer()->getId();
-                Server::getInstance()->broadcastPacket($p->getPlayer()->getLevel()->getPlayers(), $pkt);
+                $pkt->entityRuntimeId = $pl->getId();
+                Server::getInstance()->broadcastPacket($pl->getLevel()->getPlayers(), $pkt);
             }
         }
     }
 
     public static function throwPearl(EnderPearl $item, $player, bool $animate = false) {
+
         $exec = false;
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            if(self::isEnderpearlCooldownEnabled()) {
-                $exec = $p->canThrowPearl();
-            } else {
-                $exec = true;
-            }
+
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        if($playerHandler->isPlayerOnline($player)) {
+
+            $p = $playerHandler->getPlayer($player);
+
+            $exec = self::isEnderpearlCooldownEnabled() ? $p->canThrowPearl() : true;
         }
 
         if($exec) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            $item->onClickAir($p->getPlayer(), $p->getPlayer()->getDirectionVector());
-            if(self::isEnderpearlCooldownEnabled()) {
+
+            $p = $playerHandler->getPlayer($player);
+            $pl = $p->getPlayer();
+            $item->onClickAir($pl, $pl->getDirectionVector());
+
+            if(self::isEnderpearlCooldownEnabled())
                 $p->setThrowPearl(false);
-            }
 
             if($animate) {
                 $pkt = new AnimatePacket();
                 $pkt->action = AnimatePacket::ACTION_SWING_ARM;
-                $pkt->entityRuntimeId = $p->getPlayer()->getId();
-                Server::getInstance()->broadcastPacket($p->getPlayer()->getLevel()->getPlayers(), $pkt);
+                $pkt->entityRuntimeId = $pl->getId();
+                Server::getInstance()->broadcastPacket($pl->getLevel()->getPlayers(), $pkt);
             }
 
-            if(!$p->getPlayer()->isCreative()) {
-                $inv = $p->getPlayer()->getInventory();
+            if(!$pl->isCreative()) {
+                $inv = $pl->getInventory();
                 $index = $inv->getHeldItemIndex();
                 $count = $item->getCount();
                 if($count > 1) $inv->setItem($index, Item::get($item->getId(), $item->getDamage(), $count));
@@ -578,65 +607,65 @@ class PracticeUtil
 
         $exec = false;
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        if($playerHandler->isPlayerOnline($player)) {
+
+            $p = $playerHandler->getPlayer($player);
+
+            $pl = $p->getPlayer();
+
+            $players = $pl->getLevel()->getPlayers();
 
             if($p->isFishing()) {
+
                 $p->stopFishing();
                 $exec = true;
 
-                if($animate) {
+                if($animate === true) {
                     $pkt = new AnimatePacket();
                     $pkt->action = AnimatePacket::ACTION_SWING_ARM;
-                    $pkt->entityRuntimeId = $p->getPlayer()->getId();
-                    Server::getInstance()->broadcastPacket($p->getPlayer()->getLevel()->getPlayers(), $pkt);
+                    $pkt->entityRuntimeId = $pl->getId();
+                    Server::getInstance()->broadcastPacket($players, $pkt);
                 }
 
             } else {
+
                 $p->startFishing();
 
-                if($animate) {
+                if($animate === true) {
                     $pkt = new AnimatePacket();
                     $pkt->action = AnimatePacket::ACTION_SWING_ARM;
-                    $pkt->entityRuntimeId = $p->getPlayer()->getId();
-                    Server::getInstance()->broadcastPacket($p->getPlayer()->getLevel()->getPlayers(), $pkt);
+                    $pkt->entityRuntimeId = $pl->getId();
+                    Server::getInstance()->broadcastPacket($players, $pkt);
                 }
             }
         }
 
-        if($exec) {
-            $practicePlayer = PracticeCore::getPlayerHandler()->getPlayer($player);
+        if($exec === true) {
+            $practicePlayer = $playerHandler->getPlayer($player);
             $p = $practicePlayer->getPlayer();
             $inv = $p->getInventory();
             if(!$p->isCreative()) {
-                if($item->getDamage() > 65) {
-                    $inv->setItemInHand(Item::get(0));
-                } else {
-                    $inv->setItemInHand(Item::get($item->getId(), $item->getDamage() + 1));
-                }
+                $newItem = Item::get($item->getId(), $item->getDamage() + 1);
+                if($item->getDamage() > 65)
+                    $newItem = Item::get(0);
+                $inv->setItemInHand($newItem);
             }
         }
     }
 
     public static function checkActions(int $action, int...$actions) : bool {
-        /*$result = false;
-        foreach($actions as $a){
-            if(is_int($a)){
-                if($action === $a) {
-                    $result = true;
-                    break;
-                }
-            }
-        }*/
         return self::arr_indexOf($action, $actions, true) !== -1;
     }
 
     public static function canPlayerChat(Player $p) : bool {
         $res = true;
+        $playerHandler = PracticeCore::getPlayerHandler();
         if(PracticeCore::getInstance()->isServerMuted())
-            $result = !PracticeCore::getPlayerHandler()->isOwner($p) and !PracticeCore::getPlayerHandler()->isMod($p) and !PracticeCore::getPlayerHandler()->isAdmin($p);
+            $result = !$playerHandler->isOwner($p) and !$playerHandler->isMod($p) and !$playerHandler->isAdmin($p);
         else
-            $res = !PracticeCore::getPlayerHandler()->isPlayerMuted($p->getName());
+            $res = !$playerHandler->isPlayerMuted($p->getName());
 
         return $res;
     }
@@ -645,20 +674,24 @@ class PracticeUtil
 
         $result = false;
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        if($playerHandler->isPlayerOnline($player)) {
             $msg = null;
-            $requested = PracticeCore::getPlayerHandler()->getPlayer($player);
-            if($requested->isInArena()) {
-                $msg = self::str_replace(self::getMessage('duels.misc.arena-msg'), ['%player%' => $requested->getPlayerName()]);
-            } else {
-                if(PracticeCore::getDuelHandler()->isWaitingForDuelToStart($requested->getPlayerName()) or $requested->isInDuel()) {
-                    $msg = self::str_replace(self::getMessage('duels.misc.in-duel'), ['%player%' => $requested->getPlayerName()]);
+            $requested = $playerHandler->getPlayer($player);
+            $rqName = $requested->getPlayerName();
+
+            if($requested->isInArena())
+                $msg = self::str_replace(self::getMessage('duels.misc.arena-msg'), ['%player%' => $rqName]);
+            else {
+                if(PracticeCore::getDuelHandler()->isWaitingForDuelToStart($rqName) or $requested->isInDuel()) {
+                    $msg = self::str_replace(self::getMessage('duels.misc.in-duel'), ['%player%' => $rqName]);
                 } else {
-                    if($requested->canSendDuelRequest()) {
+                    if($requested->canSendDuelRequest())
                         $result = true;
-                    } else {
+                    else {
                         $sec = self::ticksToSeconds($requested->getCantSpamDuelTicks());
-                        $msg = self::str_replace(self::getMessage('duels.misc.anti-spam'), ['%player%' => $requested->getPlayerName(), '%time%' => "$sec"]);
+                        $msg = self::str_replace(self::getMessage('duels.misc.anti-spam'), ['%player%' => $rqName, '%time%' => "$sec"]);
                     }
                 }
             }
@@ -671,9 +704,12 @@ class PracticeUtil
     public static function canAcceptPlayer(Player $sender, $player) : bool {
 
         $result = false;
+
+        $ivsiHandler = PracticeCore::get1vs1Handler();
+
         if(self::canRequestPlayer($sender, $player)) {
-            if(PracticeCore::get1vs1Handler()->hasPendingRequest($sender, $player)) {
-                $request = PracticeCore::get1vs1Handler()->getRequest($sender, $player);
+            if($ivsiHandler->hasPendingRequest($sender, $player)) {
+                $request = $ivsiHandler->getRequest($sender, $player);
                 $result = $request->canAccept();
             } else self::getMessage('duels.1vs1.no-pending-rqs');
         }
@@ -690,9 +726,11 @@ class PracticeUtil
         $msg = null;
         $result = false;
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            //if ($player->hasPermission($permission)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        if($playerHandler->isPlayerOnline($player)) {
+
+            $p = $playerHandler->getPlayer($player);
 
             if(self::testPermission($player, $permission)) {
 
@@ -717,6 +755,7 @@ class PracticeUtil
         }
 
         if(!is_null($msg)) $player->sendMessage($msg);
+
         return $result;
     }
 
@@ -725,22 +764,30 @@ class PracticeUtil
         $msg = null;
         $result = false;
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            //if ($player->hasPermission($permission)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        if($playerHandler->isPlayerOnline($player)) {
+
+            $p = $playerHandler->getPlayer($player);
+
             if(self::testPermission($player, $permission)) {
 
                 if ($p->canUseCommands(true)) {
 
                     if (!$p->isInArena()) {
-                        if (!$p->isInDuel() and !PracticeCore::getDuelHandler()->isWaitingForDuelToStart($p)) {
+
+                        $duelHandler = PracticeCore::getDuelHandler();
+
+                        if (!$p->isInDuel() and !$duelHandler->isWaitingForDuelToStart($p)) {
+
                             $exec = false;
+
                             if ($isRequesting) $exec = true;
 
                             else {
-                                if (!PracticeCore::getDuelHandler()->isPlayerInQueue($p)) {
+                                if (!$duelHandler->isPlayerInQueue($p))
                                     $exec = true;
-                                } else $msg = self::getMessage('duels.misc.fail-queue');
+                                else $msg = self::getMessage('duels.misc.fail-queue');
                             }
 
                             $result = $exec;
@@ -756,9 +803,6 @@ class PracticeUtil
 
                 }
             }
-            /*} else {
-                $msg = self::getMessage('permission-msg');
-            }*/
         }
 
         if(!is_null($msg)) $player->sendMessage($msg);
@@ -766,33 +810,40 @@ class PracticeUtil
     }
 
     public static function canExecBasicCommand(CommandSender $sender, bool $consoleRunCommand = true, bool $canRunInSpec = false) : bool {
+
         $exec = false;
         $msg = null;
+
+        $playerHandler = PracticeCore::getPlayerHandler();
+
         if($sender instanceof Player){
-            if(PracticeCore::getPlayerHandler()->isPlayer($sender->getPlayer())){
-                $p = PracticeCore::getPlayerHandler()->getPlayer($sender->getPlayer());
+
+            $pl = $sender->getPlayer();
+
+            if($playerHandler->isPlayer($pl)){
+
+                $p = $playerHandler->getPlayer($pl);
                 $exec = true;
 
                 if($p->canUseCommands(true)) {
-                    if(self::isInSpectatorMode($sender->getPlayer())) {
+                    if(self::isInSpectatorMode($pl)) {
                         $exec = $canRunInSpec;
                         if ($canRunInSpec === false) $msg = self::getMessage('spectator-mode-msg');
                     }
 
                 }
-            } else {
-                $exec = false;
-            }
+            } else $exec = false;
+
         } else {
 
             $exec = $consoleRunCommand;
 
             if($exec === false)
                 $msg = self::getMessage('console-usage-command');
-
         }
 
         if(!is_null($msg)) $sender->sendMessage($msg);
+
         return $exec;
     }
 
@@ -802,16 +853,17 @@ class PracticeUtil
 
         $msg = null;
 
-        if($sender instanceof Player and PracticeCore::getPlayerHandler()->isPlayerOnline($sender->getName())) {
+        $playerHandler = PracticeCore::getPlayerHandler();
 
-            $p = PracticeCore::getPlayerHandler()->getPlayer($sender->getName());
+        $name = $sender->getName();
 
-            //TODO ADD MESSAGES IN MESSAGES.YML
+        if($sender instanceof Player and $playerHandler->isPlayerOnline($name)) {
+
+            $p = $playerHandler->getPlayer($name);
 
             if($p->canUseCommands(true)) {
 
                 if($p->isInArena()) $msg = self::getMessage("party.general.fail-lobby");
-                    //$msg = TextFormat::RED . 'You can only use this command in the lobby.';
 
                 else {
 
@@ -821,7 +873,7 @@ class PracticeUtil
 
                         if(array_key_exists($command, $invalidCmds))
                             $msg = self::getMessage('party.general.fail.no-party');
-                            //$msg = TextFormat::RED . "Can't use command as you aren't in a party!";
+
                         else $result = true;
 
                     } else {
@@ -832,20 +884,19 @@ class PracticeUtil
                             $result = $command !== 'create';
                             if($result === false)
                                 $msg = self::getMessage('party.create.fail-leader');
-                                //$msg = TextFormat::RED . 'You are already the leader/manager of a party!';
+
                         } else {
 
                             $invalidCmds = ['create' => true, 'invite' => true, 'kick' => true, 'accept'];
 
                             if(array_key_exists($command, $invalidCmds))
-                                //$msg = TextFormat::RED . (($command === 'create') ? 'You must leave your current party first.' : ($command === 'accept') ? "Can't accept party requests while in a party." : 'Only the party manager can use this command.');
                                 $msg = ($command === 'create') ? self::getMessage('party.create.fail-leave') : ($command === 'accept') ? self::getMessage('party.accept.in-party') : self::getMessage('party.general.fail-manager');
                             else $result = true;
                         }
                     }
                 }
             }
-        } else $msg = PracticeUtil::getMessage('console-usage-command');
+        } else $msg = self::getMessage('console-usage-command');
 
         if(!is_null($msg)) $sender->sendMessage($msg);
 
@@ -878,6 +929,8 @@ class PracticeUtil
 
     public static function respawnPlayer(Player $player, bool $clearInv = true, bool $reset = false) : void {
 
+        $playerHandler = PracticeCore::getPlayerHandler();
+
         if($reset === true)
             self::resetPlayer($player, $clearInv, false);
 
@@ -893,16 +946,16 @@ class PracticeUtil
 
                 if (self::canFly($player)) { self::setCanFly($player, false); }
 
-                if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-                    $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+                if ($playerHandler->isPlayerOnline($player)) {
+                    $p = $playerHandler->getPlayer($player);
                     $p->setCanHitPlayer(false);
                     if ($p->isInvisible()) { $p->setInvisible(false); }
                 }
             }
 
-            if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
+            if($playerHandler->isPlayerOnline($player)) {
 
-                $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+                $p = $playerHandler->getPlayer($player);
 
                 if($p->isInArena()) $p->setCurrentArena(PracticeArena::NO_ARENA);
 
@@ -919,6 +972,8 @@ class PracticeUtil
     }
 
     public static function resetPlayer(Player $player, bool $clearInv = true, bool $teleport = true) : void {
+
+        $playerHandler = PracticeCore::getPlayerHandler();
 
         if(!is_null($player) and $player->isOnline()) {
 
@@ -942,16 +997,16 @@ class PracticeUtil
 
                 if (self::canFly($player)) { self::setCanFly($player, false); }
 
-                if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-                    $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+                if ($playerHandler->isPlayerOnline($player)) {
+                    $p = $playerHandler->getPlayer($player);
                     $p->setCanHitPlayer(false);
                     if ($p->isInvisible()) { $p->setInvisible(false); }
                 }
             }
 
-            if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
+            if($playerHandler->isPlayerOnline($player)) {
 
-                $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+                $p = $playerHandler->getPlayer($player);
 
                 if($p->isInArena()) $p->setCurrentArena(PracticeArena::NO_ARENA);
 
@@ -990,56 +1045,53 @@ class PracticeUtil
         return !is_null(self::getPlayerByID($id));
     }
 
-    /*public static function addPermissionTo(Player $player, string $permission, bool $recalc = true) : void {
-        $manager = PermissionManager::getInstance();
-        $perm = $manager->getPermission($permission);
-        $isPerm = !is_null($perm);
-        if($isPerm) {
-
-            if ($recalc === true) $player->recalculatePermissions();
-        }
-    }*/
-
     public static function kill($player) : void {
 
-        if(PracticeCore::getPlayerHandler()->isPlayer($player)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
 
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+        if($playerHandler->isPlayer($player)) {
+
+            $p = $playerHandler->getPlayer($player);
+
+            $pl = $p->getPlayer();
 
             if($p->isOnline()) {
 
-                $ev = $p->getPlayer()->getLastDamageCause();
-                if($ev === null) $ev = new EntityDamageEvent($p->getPlayer(), EntityDamageEvent::CAUSE_CUSTOM, 1000);
+                $ev = $pl->getLastDamageCause();
+                if($ev === null) $ev = new EntityDamageEvent($pl, EntityDamageEvent::CAUSE_CUSTOM, 1000);
 
                 $found = false;
 
                 if($ev instanceof EntityDamageByEntityEvent) {
-                    if(PracticeCore::getPlayerHandler()->isPlayer($ev->getDamager())) {
-                        $attacker = PracticeCore::getPlayerHandler()->getPlayer($ev->getDamager());
+                    $dmgr = $ev->getDamager();
+                    if($dmgr instanceof Player and $playerHandler->isPlayer($dmgr->getName())) {
+                        $name = $dmgr->getName();
+                        $attacker = PracticeCore::getPlayerHandler()->getPlayer($name);
                         $differenceTicks = $attacker->getCurrentTick() - $attacker->getLastTickInCombat();
                         $seconds = self::ticksToSeconds($differenceTicks);
                         if($seconds <= 20) $found = true;
                     }
                 }
 
-                if($found === true) $ev = new EntityDamageEvent($p->getPlayer(), EntityDamageEvent::CAUSE_CUSTOM, 1000);
+                if($found === true) $ev = new EntityDamageEvent($pl, EntityDamageEvent::CAUSE_CUSTOM, 1000);
 
                 $ev->call();
-                $p->getPlayer()->setLastDamageCause($ev);
-                $p->getPlayer()->setHealth(20);
+                $pl->setLastDamageCause($ev);
+                $pl->setHealth(20);
 
             } else {
 
                 if(!is_null($p)) {
-                    $ev = new PlayerDeathEvent($p->getPlayer(), $p->getPlayer()->getDrops());
+
+                    $drops = $pl->getDrops();
+
+                    $ev = new PlayerDeathEvent($pl, $drops);
                     $ev->setKeepInventory(false);
                     $ev->call();
-                    $level = $p->getPlayer()->getLevel();
-
-                    $drops = $p->getPlayer()->getDrops();
+                    $level = $pl->getLevel();
 
                     foreach($drops as $item) {
-                        if($item instanceof Item) $level->dropItem($p->getPlayer(), $item);
+                        if($item instanceof Item) $level->dropItem($pl, $item);
                     }
                 }
             }
@@ -1050,12 +1102,14 @@ class PracticeUtil
 
     public static function broadcastMsg(string $msg) : void {
 
-        $players = Server::getInstance()->getOnlinePlayers();
+        $server = Server::getInstance();
+
+        $players = $server->getOnlinePlayers();
 
         foreach($players as $player)
             $player->sendMessage($msg);
 
-        Server::getInstance()->getLogger()->info($msg);
+        $server->getLogger()->info($msg);
     }
 
     public static function getMessage(string $str) : string {
@@ -1141,7 +1195,9 @@ class PracticeUtil
 
         $cfg = PracticeCore::getInstance()->getRankConfig();
 
-        $ranks = (PracticeCore::getRankHandler()->hasRanks($player)) ? PracticeCore::getRankHandler()->getRanksOf($player) : [RankHandler::$GUEST];
+        $rankHandler = PracticeCore::getRankHandler();
+
+        $ranks = ($rankHandler->hasRanks($player)) ? $rankHandler->getRanksOf($player) : [RankHandler::$GUEST];
 
         $firstRank = $ranks[0];
 
@@ -1301,12 +1357,14 @@ class PracticeUtil
 
             if(self::isALevel($level)) {
 
-                if(PracticeUtil::arr_contains_keys($posArr, 'yaw', 'pitch')) {
+                $server = Server::getInstance();
+
+                if(self::arr_contains_keys($posArr, 'yaw', 'pitch')) {
                     $yaw = floatval(intval($posArr['yaw']));
                     $pitch = floatval(intval($posArr['pitch']));
-                    $result = new Location($x, $y, $z, $yaw, $pitch, Server::getInstance()->getLevelByName($level));
+                    $result = new Location($x, $y, $z, $yaw, $pitch, $server->getLevelByName($level));
                 } else
-                    $result = new Position($x, $y, $z, Server::getInstance()->getLevelByName($level));
+                    $result = new Position($x, $y, $z, $server->getLevelByName($level));
 
             }
         }
@@ -1315,8 +1373,8 @@ class PracticeUtil
     }
 
 
-    public static function arePositionsEqual($startPos1, $startPos2) : bool
-    {
+    public static function arePositionsEqual($startPos1, $startPos2) : bool {
+
         $result = false;
 
         $lvl1 = null; $lvl2 = null;
@@ -1393,17 +1451,19 @@ class PracticeUtil
 
         if($playerSize > 0) {
 
+            $playerHandler = PracticeCore::getPlayerHandler();
+
             foreach($players as $p) {
 
-                $pl = PracticeCore::getPlayerHandler()->addPlayer($p);
+                $pl = $playerHandler->addPlayer($p);
 
-                if(!is_null($pl) and PracticeCore::getPlayerHandler()->hasPendingPInfo($p)) {
-                    $plInfo = PracticeCore::getPlayerHandler()->getPendingPInfo($p);
+                if(!is_null($pl) and $playerHandler->hasPendingPInfo($p)) {
+                    $plInfo = $playerHandler->getPendingPInfo($p);
                     $device = intval($plInfo['device']);
                     $input = intval($plInfo['controls']);
                     $pl->setDeviceOS($device);
                     $pl->setInput($input);
-                    PracticeCore::getPlayerHandler()->removePendingPInfo($p);
+                    $playerHandler->removePendingPInfo($p);
                 }
                 self::resetPlayer($p, true);
             }

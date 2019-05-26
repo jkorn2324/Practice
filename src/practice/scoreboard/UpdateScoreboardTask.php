@@ -21,8 +21,9 @@ class UpdateScoreboardTask extends Task
 
     public function __construct($player = null) {
         if(!is_null($player)){
-            if(PracticeCore::getPlayerHandler()->isPlayerOnline($player))
-                $this->player = PracticeCore::getPlayerHandler()->getPlayer($player);
+            $playerHandler = PracticeCore::getPlayerHandler();
+            if($playerHandler->isPlayerOnline($player))
+                $this->player = $playerHandler->getPlayer($player);
         }
     }
 

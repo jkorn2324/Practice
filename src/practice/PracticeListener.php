@@ -69,8 +69,7 @@ class PracticeListener implements Listener
 {
     private $core;
 
-    public function __construct(PracticeCore $c)
-    {
+    public function __construct(PracticeCore $c) {
         $this->core = $c;
     }
 
@@ -83,25 +82,29 @@ class PracticeListener implements Listener
     {
         $p = $event->getPlayer();
 
+        $playerHandler = PracticeCore::getPlayerHandler();
+
         if (!is_null($p)) {
 
-            $pl = PracticeCore::getPlayerHandler()->addPlayer($p);
+            $pl = $playerHandler->addPlayer($p);
             $deviceOS = -1;
 
-            if (!is_null($pl) and PracticeCore::getPlayerHandler()->hasPendingPInfo($p)) {
-                $pInfo = PracticeCore::getPlayerHandler()->getPendingPInfo($p);
+            if (!is_null($pl) and $playerHandler->hasPendingPInfo($p)) {
+                $pInfo = $playerHandler->getPendingPInfo($p);
                 $deviceOS = intval($pInfo['device']);
                 $input = intval($pInfo['controls']);
                 $pl->setDeviceOS($deviceOS);
                 $pl->setInput($input);
-                PracticeCore::getPlayerHandler()->removePendingPInfo($p);
+                $playerHandler->removePendingPInfo($p);
             }
 
             if($p->getGamemode() !== 0) $p->setGamemode(0);
 
             if($p->hasEffects()) $p->removeAllEffects();
 
-            if($p->getHealth() !== $p->getMaxHealth()) $p->setHealth($p->getMaxHealth());
+            $maxHealth = $p->getMaxHealth();
+
+            if($p->getHealth() !== $maxHealth) $p->setHealth($maxHealth);
 
             if($p->isOnFire()) $p->extinguish();
 
@@ -113,7 +116,7 @@ class PracticeListener implements Listener
 
             PracticeCore::getItemHandler()->spawnHubItems($p, true);
 
-            if($deviceOS !== -1 and PracticeCore::getPlayerHandler()->isScoreboardEnabled($p->getName()))
+            if($deviceOS !== -1 and $playerHandler->isScoreboardEnabled($p->getName()))
                 $pl->initScoreboard($deviceOS);
 
             ScoreboardUtil::updateSpawnScoreboards('online-players');
@@ -133,40 +136,48 @@ class PracticeListener implements Listener
 
         $p = $event->getPlayer();
 
-        if (!is_null($p) and PracticeCore::getPlayerHandler()->isPlayer($p)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
 
-            $pracPlayer = PracticeCore::getPlayerHandler()->getPlayer($p);
+        $duelHandler = PracticeCore::getDuelHandler();
+
+        if (!is_null($p) and $playerHandler->isPlayer($p)) {
+
+            $pracPlayer = $playerHandler->getPlayer($p);
 
             if($pracPlayer->isInParty()) {
                 $party = PracticeCore::getPartyManager()->getPartyFromPlayer($pracPlayer->getPlayerName());
                 $party->removeFromParty($pracPlayer->getPlayerName());
             }
 
-            if(PracticeCore::getDuelHandler()->isPlayerInQueue($p))
-                PracticeCore::getDuelHandler()->removePlayerFromQueue($p);
+            if($duelHandler->isPlayerInQueue($p))
+                $duelHandler->removePlayerFromQueue($p);
 
             if ($pracPlayer->isInCombat()) PracticeUtil::kill($p);
 
-            PracticeCore::getPlayerHandler()->removePlayer($p);
+            $playerHandler->removePlayer($p);
         }
 
         $msg = PracticeUtil::str_replace(PracticeUtil::getMessage('leave-msg'), ['%player%' => $p->getName()]);
 
         $event->setQuitMessage($msg);
 
-        PracticeCore::getInstance()->getScheduler()->scheduleDelayedTask(new UpdateScoreboardTask(), 1);
+        $this->core->getScheduler()->scheduleDelayedTask(new UpdateScoreboardTask(), 1);
     }
 
     public function onDeath(PlayerDeathEvent $event): void {
 
         $p = $event->getPlayer();
 
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        $duelHandler = PracticeCore::getDuelHandler();
+
         $level = $p->getLevel();
         PracticeUtil::clearEntitiesIn($level);
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($p)) {
+        if($playerHandler->isPlayerOnline($p)) {
 
-            $player = PracticeCore::getPlayerHandler()->getPlayer($p);
+            $player = $playerHandler->getPlayer($p);
             $lastDamageCause = $p->getLastDamageCause();
             $addToStats = $player->isInArena() and ($player->getCurrentArenaType() === PracticeArena::FFA_ARENA);
 
@@ -192,8 +203,8 @@ class PracticeListener implements Listener
             if($addToStats === true) {
                 if($diedFairly === true) {
                     if($lastDamageCause instanceof EntityDamageByEntityEvent) {
-                        if(PracticeCore::getPlayerHandler()->isPlayerOnline($lastDamageCause->getDamager())) {
-                            $attacker = PracticeCore::getPlayerHandler()->getPlayer($lastDamageCause->getDamager());
+                        if($playerHandler->isPlayerOnline($lastDamageCause->getDamager())) {
+                            $attacker = $playerHandler->getPlayer($lastDamageCause->getDamager());
                             if(!$attacker->equals($player)) {
 
                                 $arena = $attacker->getCurrentArena();
@@ -204,25 +215,25 @@ class PracticeListener implements Listener
                                     $kit->giveTo($attacker->getPlayer());
                                 }
 
-                                PracticeCore::getPlayerHandler()->addKillFor($attacker->getPlayerName());
+                                $playerHandler->addKillFor($attacker->getPlayerName());
                                 $attacker->updateScoreboard();
                             }
                         }
                     }
-                    PracticeCore::getPlayerHandler()->addDeathFor($player->getPlayerName());
+                    $playerHandler->addDeathFor($player->getPlayerName());
                     $player->updateScoreboard();
                 }
             } else {
 
                 if($player->isInDuel()) {
 
-                    $duel = PracticeCore::getDuelHandler()->getDuel($p->getPlayer());
+                    $duel = $duelHandler->getDuel($p->getPlayer());
                     $winner = ($duel->isPlayer($player->getPlayer()) ? $duel->getOpponent()->getPlayerName() : $duel->getPlayer()->getPlayerName());
                     $loser = $player->getPlayerName();
 
-                    if($diedFairly === true) {
+                    if($diedFairly === true)
                         $duel->setResults($winner, $loser);
-                    } else $duel->setResults();
+                    else $duel->setResults();
 
                     $event->setDrops([]);
                 }
@@ -249,14 +260,16 @@ class PracticeListener implements Listener
         $cancel = false;
         $e = $event->getEntity();
 
+        $playerHandler = PracticeCore::getPlayerHandler();
+
         if($event->getEntity() instanceof Player) {
 
             if($event->getCause() === EntityDamageEvent::CAUSE_FALL) {
                 $cancel = true;
             } else {
 
-                if(PracticeCore::getPlayerHandler()->isPlayerOnline($e)) {
-                    $player = PracticeCore::getPlayerHandler()->getPlayer($e);
+                if($playerHandler->isPlayerOnline($e)) {
+                    $player = $playerHandler->getPlayer($e);
                     $lvl = $player->getPlayer()->getLevel();
 
                     if (PracticeUtil::areLevelsEqual($lvl, PracticeUtil::getDefaultLevel()))
@@ -275,6 +288,12 @@ class PracticeListener implements Listener
         $entity = $event->getEntity();
         $damager = $event->getDamager();
 
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        $duelHandler = PracticeCore::getDuelHandler();
+
+        $kitHandler = PracticeCore::getKitHandler();
+
         if($event->getCause() !== EntityDamageEvent::CAUSE_PROJECTILE
             and $entity instanceof Player and $damager instanceof Player) {
             AntiCheatUtil::checkForReach($entity, $damager);
@@ -282,10 +301,10 @@ class PracticeListener implements Listener
 
         $cancel = false;
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($damager->getName()) and PracticeCore::getPlayerHandler()->isPlayerOnline($entity->getName())) {
+        if($playerHandler->isPlayerOnline($damager->getName()) and $playerHandler->isPlayerOnline($entity->getName())) {
 
-            $attacker = PracticeCore::getPlayerHandler()->getPlayer($damager->getName());
-            $attacked = PracticeCore::getPlayerHandler()->getPlayer($entity->getName());
+            $attacker = $playerHandler->getPlayer($damager->getName());
+            $attacked = $playerHandler->getPlayer($entity->getName());
 
             if(!$attacker->canHitPlayer() or !$attacked->canHitPlayer())
                 $cancel = true;
@@ -297,13 +316,13 @@ class PracticeListener implements Listener
 
                 if($attacker->isInDuel() and $attacked->isInDuel()) {
 
-                    $duel = PracticeCore::getDuelHandler()->getDuel($attacker->getPlayerName());
+                    $duel = $duelHandler->getDuel($attacker->getPlayerName());
 
                     $kit = $duel->getQueue();
 
-                    if(PracticeCore::getKitHandler()->hasKitSetting($kit)) {
+                    if($kitHandler->hasKitSetting($kit)) {
 
-                        $pvpData = PracticeCore::getKitHandler()->getKitSetting($kit);
+                        $pvpData = $kitHandler->getKitSetting($kit);
 
                         $kb = $pvpData->getKB();
                         $attackDelay = $pvpData->getAttackDelay();
@@ -318,9 +337,9 @@ class PracticeListener implements Listener
 
                         $name = $kit->getName();
 
-                        if(PracticeCore::getKitHandler()->hasKitSetting($name)) {
+                        if($kitHandler->hasKitSetting($name)) {
 
-                            $pvpData = PracticeCore::getKitHandler()->getKitSetting($name);
+                            $pvpData = $kitHandler->getKitSetting($name);
 
                             $kb = $pvpData->getKB();
                             $attackDelay = $pvpData->getAttackDelay();
@@ -342,7 +361,7 @@ class PracticeListener implements Listener
 
                     if($attacker->isInDuel() and $attacked->isInDuel()) {
 
-                        $duel = PracticeCore::getDuelHandler()->getDuel($attacker->getPlayer());
+                        $duel = $duelHandler->getDuel($attacker->getPlayer());
 
                         if($duel->isSpleef())
                             $cancel = true;
@@ -362,6 +381,8 @@ class PracticeListener implements Listener
 
         $cancel = false;
 
+        $inv = $p->getInventory();
+
         if(PracticeUtil::canUseItems($p)) {
 
             if($item instanceof Food) {
@@ -375,14 +396,18 @@ class PracticeListener implements Listener
 
                     $size = count($effects);
 
+                    $eightSeconds = PracticeUtil::secondsToTicks(8);
+
+                    $twoMin = PracticeUtil::minutesToTicks(2);
+
                     for ($i = 0; $i < $size; $i++) {
                         $effect = $effects[$i];
                         if ($effect instanceof EffectInstance) {
                             $id = $effect->getId();
                             if ($id === Effect::REGENERATION) {
-                                $effect = $effect->setDuration(PracticeUtil::secondsToTicks(8))->setAmplifier(1);
+                                $effect = $effect->setDuration($eightSeconds)->setAmplifier(1);
                             } elseif ($id === Effect::ABSORPTION) {
-                                $effect = $effect->setDuration(PracticeUtil::minutesToTicks(2));
+                                $effect = $effect->setDuration($twoMin);
                             }
                         }
                         $effects[$i] = $effect;
@@ -391,11 +416,11 @@ class PracticeListener implements Listener
                     foreach($effects as $effect)
                         $p->addEffect($effect);
 
-                    $inv = $p->getInventory();
-
                     $heldItem = $inv->getHeldItemIndex();
 
-                    $inv->setItem($heldItem, $item->setCount($item->count - 1));
+                    $item = $item->setCount($item->count - 1);
+
+                    $inv->setItem($heldItem, $item);
 
                     $cancel = true;
 
@@ -408,7 +433,7 @@ class PracticeListener implements Listener
                 $slot = $p->getInventory()->getHeldItemIndex();
                 $effects = $item->getAdditionalEffects();
 
-                $p->getInventory()->setItem($slot, Item::get(0));
+                $inv->setItem($slot, Item::get(0));
 
                 foreach($effects as $effect) {
                     if($effect instanceof EffectInstance)
@@ -430,20 +455,26 @@ class PracticeListener implements Listener
         $level = $player->getLevel();
         $cancel = false;
 
-        if (PracticeCore::getPlayerHandler()->isPlayer($player)) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        $itemHandler = PracticeCore::getItemHandler();
+
+        $duelHandler = PracticeCore::getDuelHandler();
+
+        if ($playerHandler->isPlayer($player)) {
+            $p = $playerHandler->getPlayer($player);
 
             $exec = PracticeUtil::checkActions($action, PlayerInteractEvent::RIGHT_CLICK_BLOCK);
             if (($p->getDevice() !== PracticeUtil::WINDOWS_10 or $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) and $exec === true)
                 $p->addClick(false);
 
-            if (PracticeCore::getItemHandler()->isPracticeItem($item)) {
+            if ($itemHandler->isPracticeItem($item)) {
 
                 if (PracticeUtil::checkActions($action, PlayerInteractEvent::RIGHT_CLICK_BLOCK, PlayerInteractEvent::RIGHT_CLICK_AIR)) {
 
-                    $practiceItem = PracticeCore::getItemHandler()->getPracticeItem($item);
+                    $practiceItem = $itemHandler->getPracticeItem($item);
 
-                    if ($practiceItem instanceof PracticeItem and PracticeCore::getItemHandler()->canUseItem($p, $practiceItem)) {
+                    if ($practiceItem instanceof PracticeItem and $itemHandler->canUseItem($p, $practiceItem)) {
 
                         $name = $practiceItem->getLocalizedName();
                         $exec = ($practiceItem->canOnlyUseInLobby() ? PracticeUtil::areLevelsEqual($level, PracticeUtil::getDefaultLevel()) : true);
@@ -477,15 +508,15 @@ class PracticeListener implements Listener
 
 
                             } elseif ($name === 'exit.inventory') {
-                                PracticeCore::getItemHandler()->spawnHubItems($player, true);
+                                $itemHandler->spawnHubItems($player, true);
                             } elseif ($name === 'exit.queue') {
-                                PracticeCore::getDuelHandler()->removePlayerFromQueue($player, true);
+                                $duelHandler->removePlayerFromQueue($player, true);
                                 $p->updateScoreboard();
                                 ScoreboardUtil::updateSpawnScoreboards('in-queues');
                             } elseif ($name === 'exit.spectator') {
 
-                                if(PracticeCore::getDuelHandler()->isASpectator($player)) {
-                                    $duel = PracticeCore::getDuelHandler()->getDuelFromSpec($player);
+                                if($duelHandler->isASpectator($player)) {
+                                    $duel = $duelHandler->getDuelFromSpec($player);
                                     $duel->removeSpectator($player, true);
                                 } else PracticeUtil::resetPlayer($player);
 
@@ -513,18 +544,18 @@ class PracticeListener implements Listener
                     if (PracticeUtil::canUseItems($player)) {
 
                         if($checkPlaceBlock === true) {
-                            if($p->isInArena()) {
+                            if($p->isInArena())
                                 $cancel = !$p->getCurrentArena()->canBuild();
-                            } else {
+                            else {
                                 if ($p->isInDuel()) {
-                                    $duel = PracticeCore::getDuelHandler()->getDuel($p);
+                                    $duel = $duelHandler->getDuel($p);
                                     if($duel->isDuelRunning() and $duel->canBuild()) {
                                         $cancel = false;
                                     } else $cancel = true;
                                 } else {
                                     $cancel = true;
                                     if (!PracticeUtil::isInSpectatorMode($player) and PracticeUtil::testPermission($player, PermissionsHandler::PERMISSION_PLACE_BREAK, false))
-                                        $cancel = !PracticeCore::getPlayerHandler()->canPlaceNBreak($player->getName());
+                                        $cancel = !$playerHandler->canPlaceNBreak($player->getName());
                                 }
                             }
                             $event->setCancelled($cancel);
@@ -562,13 +593,13 @@ class PracticeListener implements Listener
                                         $use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK;
                                     } else $use = true;
                                 }
-                            } else {
+                            } else
                                 $use = PracticeUtil::checkActions($action, PlayerInteractEvent::RIGHT_CLICK_AIR);
-                            }
 
                             if ($use === true) PracticeUtil::throwPearl($item, $player);
 
                             $cancel = true;
+
                         } elseif ($item->getId() === Item::SPLASH_POTION and $item instanceof SplashPotion) {
 
                             $use = false;
@@ -613,13 +644,13 @@ class PracticeListener implements Listener
                                 $cancel = !$p->getCurrentArena()->canBuild();
                             } else {
                                 if ($p->isInDuel()) {
-                                    $duel = PracticeCore::getDuelHandler()->getDuel($p);
+                                    $duel = $duelHandler->getDuel($p);
                                     if($duel->isDuelRunning() and $duel->canBuild()) {
                                         $cancel = false;
                                     }
                                 } else {
                                     if (!PracticeUtil::isInSpectatorMode($player) and PracticeUtil::testPermission($player, PermissionsHandler::PERMISSION_PLACE_BREAK, false))
-                                        $cancel = !PracticeCore::getPlayerHandler()->canPlaceNBreak($player->getName());
+                                        $cancel = !$playerHandler->canPlaceNBreak($player->getName());
                                 }
                             }
                             $event->setCancelled($cancel);
@@ -640,12 +671,18 @@ class PracticeListener implements Listener
         $player = $event->getPlayer();
         $cancel = false;
 
-        if (PracticeCore::getPlayerHandler()->isPlayer($player)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
 
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+        $itemHandler = PracticeCore::getItemHandler();
+
+        $duelHandler = PracticeCore::getDuelHandler();
+
+        if ($playerHandler->isPlayer($player)) {
+
+            $p = $playerHandler->getPlayer($player);
 
 
-            if (PracticeCore::getItemHandler()->isPracticeItem($item))
+            if ($itemHandler->isPracticeItem($item))
                 $cancel = true;
 
             else {
@@ -653,14 +690,14 @@ class PracticeListener implements Listener
                     $cancel = !$p->getCurrentArena()->canBuild();
                 } else {
                     if ($p->isInDuel()) {
-                        $duel = PracticeCore::getDuelHandler()->getDuel($player->getName());
+                        $duel = $duelHandler->getDuel($player->getName());
                         if($duel->isDuelRunning() and $duel->canBuild()) {
                             $duel->addBlock($event->getBlock());
                         } else $cancel = true;
                     } else {
                         $cancel = true;
                         if (!PracticeUtil::isInSpectatorMode($player) and PracticeUtil::testPermission($player, PermissionsHandler::PERMISSION_PLACE_BREAK, false))
-                            $cancel = !PracticeCore::getPlayerHandler()->canPlaceNBreak($player->getName());
+                            $cancel = !$playerHandler->canPlaceNBreak($player->getName());
 
                     }
                 }
@@ -677,14 +714,21 @@ class PracticeListener implements Listener
 
         $cancel = false;
 
-        if (PracticeCore::getPlayerHandler()->isPlayer($player)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
 
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+        $itemHandler = PracticeCore::getItemHandler();
 
-            if (PracticeCore::getItemHandler()->isPracticeItem($item)) {
+        $duelHandler = PracticeCore::getDuelHandler();
+
+        if ($playerHandler->isPlayer($player)) {
+
+            $p = $playerHandler->getPlayer($player);
+
+            if ($itemHandler->isPracticeItem($item))
+
                 $cancel = true;
 
-            } else {
+            else {
 
                 if($p->isInArena()) {
 
@@ -693,7 +737,7 @@ class PracticeListener implements Listener
                 } else {
 
                     if ($p->isInDuel()) {
-                        $duel = PracticeCore::getDuelHandler()->getDuel($player->getName());
+                        $duel = $duelHandler->getDuel($player->getName());
                         if($duel->isDuelRunning() and $duel->canBreak())
                             $cancel = !$duel->removeBlock($event->getBlock());
                         else $cancel = true;
@@ -702,7 +746,7 @@ class PracticeListener implements Listener
                         $cancel = true;
 
                         if (!PracticeUtil::isInSpectatorMode($player) and PracticeUtil::testPermission($player, PermissionsHandler::PERMISSION_PLACE_BREAK, false))
-                            $cancel = !PracticeCore::getPlayerHandler()->canPlaceNBreak($player->getName());
+                            $cancel = !$playerHandler->canPlaceNBreak($player->getName());
 
                     }
                 }
@@ -714,11 +758,16 @@ class PracticeListener implements Listener
 
     //THE SAME AS BLOCKFROMTOEVENT IN NUKKIT
     public function onBlockReplace(BlockFormEvent $event): void {
-        $arena = PracticeCore::getArenaHandler()->getArenaClosestTo($event->getBlock());
+
+        $arenaHandler = PracticeCore::getArenaHandler();
+
+        $duelHandler = PracticeCore::getDuelHandler();
+
+        $arena = $arenaHandler->getArenaClosestTo($event->getBlock());
         $cancel = false;
         if(!is_null($arena) and ($arena->getArenaType() === PracticeArena::DUEL_ARENA)) {
-            if(PracticeCore::getDuelHandler()->isArenaInUse($arena->getName())) {
-                $duel = PracticeCore::getDuelHandler()->getDuel($arena->getName(), true);
+            if($duelHandler->isArenaInUse($arena->getName())) {
+                $duel = $duelHandler->getDuel($arena->getName(), true);
                 if($duel->isDuelRunning()) {
                     if($event->getNewState() instanceof Liquid)
                         $duel->addBlock($event->getBlock());
@@ -737,23 +786,26 @@ class PracticeListener implements Listener
 
     //USE FOR LAVA AND LIQUIDS
     public function onBlockSpread(BlockSpreadEvent $event): void {
-        $arena = PracticeCore::getArenaHandler()->getArenaClosestTo($event->getBlock());
+
+        $arenaHandler = PracticeCore::getArenaHandler();
+
+        $duelHandler = PracticeCore::getDuelHandler();
+
+        $arena = $arenaHandler->getArenaClosestTo($event->getBlock());
         $cancel = false;
         if(!is_null($arena) and ($arena->getArenaType() === PracticeArena::DUEL_ARENA)) {
-            if(PracticeCore::getDuelHandler()->isArenaInUse($arena->getName())) {
-                $duel = PracticeCore::getDuelHandler()->getDuel($arena->getName(), true);
+            if($duelHandler->isArenaInUse($arena->getName())) {
+                $duel = $duelHandler->getDuel($arena->getName(), true);
                 if($duel->isDuelRunning()) {
                     if($event->getNewState() instanceof Liquid)
                         $duel->addBlock($event->getBlock());
                     else $cancel = true;
                 }
                 else $cancel = true;
-            } else {
-                $cancel = true;
-            }
-        } else {
-            $cancel = true;
-        }
+
+            } else $cancel = true;
+
+        } else $cancel = true;
 
         if($cancel === true) $event->setCancelled();
     }
@@ -763,13 +815,19 @@ class PracticeListener implements Listener
         $item = $event->getItem();
         $player = $event->getPlayer();
 
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        $itemHandler = PracticeCore::getItemHandler();
+
+        $duelHandler = PracticeCore::getDuelHandler();
+
         $cancel = false;
 
-        if (PracticeCore::getPlayerHandler()->isPlayer($player)) {
+        if ($playerHandler->isPlayer($player)) {
 
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+            $p = $playerHandler->getPlayer($player);
 
-            if (PracticeCore::getItemHandler()->isPracticeItem($item)) {
+            if ($itemHandler->isPracticeItem($item)) {
 
                 $cancel = true;
 
@@ -779,7 +837,7 @@ class PracticeListener implements Listener
                 } else {
 
                     if ($p->isInDuel()) {
-                        $duel = PracticeCore::getDuelHandler()->getDuel($player->getName());
+                        $duel = $duelHandler->getDuel($player->getName());
                         if($duel->isDuelRunning() and $duel->canBuild())
                             $cancel = !$duel->removeBlock($event->getBlockClicked());
                         else $cancel = true;
@@ -788,7 +846,7 @@ class PracticeListener implements Listener
                         $cancel = true;
 
                         if (!PracticeUtil::isInSpectatorMode($player) and PracticeUtil::testPermission($player, PermissionsHandler::PERMISSION_PLACE_BREAK, false))
-                            $cancel = !PracticeCore::getPlayerHandler()->canPlaceNBreak($player->getName());
+                            $cancel = !$playerHandler->canPlaceNBreak($player->getName());
 
                         if (PracticeUtil::areLevelsEqual($player->getLevel(), PracticeUtil::getDefaultLevel()))
                             $cancel = true;
@@ -806,11 +864,17 @@ class PracticeListener implements Listener
         $player = $event->getPlayer();
         $cancel = false;
 
-        if (PracticeCore::getPlayerHandler()->isPlayer($player)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
 
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+        $itemHandler = PracticeCore::getItemHandler();
 
-            if (PracticeCore::getItemHandler()->isPracticeItem($item))
+        $duelHandler = PracticeCore::getDuelHandler();
+
+        if ($playerHandler->isPlayer($player)) {
+
+            $p = $playerHandler->getPlayer($player);
+
+            if ($itemHandler->isPracticeItem($item))
                 $cancel = true;
 
             else {
@@ -818,7 +882,7 @@ class PracticeListener implements Listener
                     $cancel = !$p->getCurrentArena()->canBuild();
                 } else {
                     if ($p->isInDuel()) {
-                        $duel = PracticeCore::getDuelHandler()->getDuel($player->getName());
+                        $duel = $duelHandler->getDuel($player->getName());
                         if($duel->isDuelRunning() and $duel->canBuild()) {
                             $duel->addBlock($event->getBlockClicked());
                         } else $cancel = true;
@@ -827,7 +891,7 @@ class PracticeListener implements Listener
                         $cancel = true;
 
                         if (!PracticeUtil::isInSpectatorMode($player) and PracticeUtil::testPermission($player, PermissionsHandler::PERMISSION_PLACE_BREAK, false))
-                            $cancel = !PracticeCore::getPlayerHandler()->canPlaceNBreak($player->getName());
+                            $cancel = !$playerHandler->canPlaceNBreak($player->getName());
 
                         if(PracticeUtil::areLevelsEqual($player->getLevel(), PracticeUtil::getDefaultLevel()))
                             $cancel = true;
@@ -850,9 +914,11 @@ class PracticeListener implements Listener
 
         $cancel = false;
 
-        if (PracticeCore::getPlayerHandler()->isPlayer($p)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
 
-            $player = PracticeCore::getPlayerHandler()->getPlayer($p);
+        if ($playerHandler->isPlayer($p)) {
+
+            $player = $playerHandler->getPlayer($p);
 
             $message = $event->getMessage();
 
@@ -907,6 +973,9 @@ class PracticeListener implements Listener
 
         $p = $event->getPlayer();
         $cancel = false;
+
+        $playerHandler = PracticeCore::getPlayerHandler();
+
         if (PracticeUtil::isRanksEnabled()) {
             $message = $event->getMessage();
             $event->setFormat(PracticeUtil::getChatFormat($p, $message));
@@ -914,8 +983,8 @@ class PracticeListener implements Listener
 
         if (!PracticeUtil::canPlayerChat($p)) $cancel = true;
         else {
-            if (PracticeCore::getPlayerHandler()->isPlayer($p)) {
-                $player = PracticeCore::getPlayerHandler()->getPlayer($p);
+            if ($playerHandler->isPlayer($p)) {
+                $player = $playerHandler->getPlayer($p);
                 if (!$player->isInAntiSpam())
                     $player->setInAntiSpam(true);
                 else {
@@ -956,24 +1025,28 @@ class PracticeListener implements Listener
         $pkt = $event->getPacket();
         $player = $event->getPlayer();
 
+        $playerHandler = PracticeCore::getPlayerHandler();
+
         if ($pkt instanceof LoginPacket) {
             $clientData = $pkt->clientData;
             if (isset($clientData['DeviceOS']) and isset($clientData['CurrentInputMode'])) {
+
                 $device = $clientData['DeviceOS'];
                 $input = $clientData['CurrentInputMode'];
-                if (PracticeCore::getPlayerHandler()->isPlayer($player)) {
-                    $p = PracticeCore::getPlayerHandler()->getPlayer($device);
+
+                if ($playerHandler->isPlayer($player)) {
+
+                    $p = $playerHandler->getPlayer($device);
                     $p->setDeviceOS(intval($device));
                     $p->setInput(intval($input));
-                } else {
-                    PracticeCore::getPlayerHandler()->putPendingPInfo($pkt->username, intval($device), intval($input));
-                }
+
+                } else $playerHandler->putPendingPInfo($pkt->username, intval($device), intval($input));
             }
         }
 
         if ($pkt instanceof PlayerActionPacket) {
-            if ($pkt->action === PlayerActionPacket::ACTION_START_BREAK and PracticeCore::getPlayerHandler()->isPlayer($player)) {
-                $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+            if ($pkt->action === PlayerActionPacket::ACTION_START_BREAK and $playerHandler->isPlayer($player)) {
+                $p = $playerHandler->getPlayer($player);
                 if ($p->getDevice() === PracticeUtil::WINDOWS_10 or $p->getDevice() === PracticeUtil::CONTROLS_MOUSE)
                     $p->addClick(true);
             }
@@ -986,27 +1059,28 @@ class PracticeListener implements Listener
 
             if ($cancel === true) {
 
-                if (PracticeCore::getPlayerHandler()->isPlayer($player)) {
+                if ($playerHandler->isPlayer($player)) {
 
-                    $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+                    $p = $playerHandler->getPlayer($player);
 
                     $p->addClick(false);
 
-                    $inv = $p->getPlayer()->getInventory();
+                    $pl = $p->getPlayer();
+
+                    $inv = $pl->getInventory();
 
                     $item = $inv->getItemInHand();
 
-                    if(PracticeUtil::canUseItems($p->getPlayer())) {
+                    if(PracticeUtil::canUseItems($pl)) {
 
                         if($item->getId() === Item::FISHING_ROD) {
-                            if(PracticeUtil::isTapToRodEnabled()) PracticeUtil::useRod($item, $p->getPlayer(), $p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE);
+                            if(PracticeUtil::isTapToRodEnabled()) PracticeUtil::useRod($item, $pl, $p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE);
                         } elseif ($item->getId() === Item::ENDER_PEARL and $item instanceof EnderPearl) {
-                            if(PracticeUtil::isTapToPearlEnabled() and $p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) PracticeUtil::throwPearl($item, $p->getPlayer(), true);
+                            if(PracticeUtil::isTapToPearlEnabled() and $p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) PracticeUtil::throwPearl($item, $pl, true);
                         } elseif ($item->getId() === Item::SPLASH_POTION and $item instanceof SplashPotion) {
-                            if(PracticeUtil::isTapToPotEnabled() and $p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) PracticeUtil::throwPotion($item, $p->getPlayer(), true);
+                            if(PracticeUtil::isTapToPotEnabled() and $p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) PracticeUtil::throwPotion($item, $pl, true);
                         } elseif ($item->getId() === Item::MUSHROOM_STEW and $item instanceof MushroomStew) {
                             if($p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) {
-                                $inv = $player->getInventory();
                                 $inv->setItemInHand(Item::get(Item::AIR));
                                 $newHealth = $player->getHealth() + 7.0;
                                 if($newHealth > $player->getMaxHealth()) $newHealth = $player->getMaxHealth();
@@ -1019,20 +1093,15 @@ class PracticeListener implements Listener
                 $event->setCancelled();
             }
         }
-
-        /* elseif ($pkt instanceof LevelEventPacket) {
-            $id = $pkt->evid;
-            if($id === LevelEventPacket::EVENT_START_RAIN or $id === LevelEventPacket::EVENT_START_THUNDER) {
-                $event->setCancelled();
-            }
-        }*/
     }
 
     public function onInventoryClosed(InventoryCloseEvent $event) : void {
 
         $p = $event->getPlayer();
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($p)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        if($playerHandler->isPlayerOnline($p)) {
             $inv = $event->getInventory();
             if($inv instanceof PracBaseInv) {
                 $menu = $inv->getMenu();
@@ -1048,9 +1117,11 @@ class PracticeListener implements Listener
         $lvl = $p->getLevel();
         $cancel = false;
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($p)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
 
-            $player = PracticeCore::getPlayerHandler()->getPlayer($p);
+        if($playerHandler->isPlayerOnline($p)) {
+
+            $player = $playerHandler->getPlayer($p);
 
             $testInv = false;
 
@@ -1063,7 +1134,7 @@ class PracticeListener implements Listener
                     $testInv = true;
 
                     if($cancel === true and PracticeUtil::testPermission($p, PermissionsHandler::PERMISSION_PLACE_BREAK, false))
-                        $cancel = !PracticeCore::getPlayerHandler()->canPlaceNBreak($p->getName());
+                        $cancel = !$playerHandler->canPlaceNBreak($p->getName());
                 }
 
             } else $testInv = true;
@@ -1101,9 +1172,11 @@ class PracticeListener implements Listener
         $p = $event->getPlayer();
         $cancel = false;
 
-        if (PracticeCore::getPlayerHandler()->isPlayer($p)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
 
-            $player = PracticeCore::getPlayerHandler()->getPlayer($p);
+        if ($playerHandler->isPlayer($p)) {
+
+            $player = $playerHandler->getPlayer($p);
             $level = $p->getLevel();
 
             if (PracticeUtil::isLobbyProtectionEnabled())
@@ -1118,15 +1191,21 @@ class PracticeListener implements Listener
 
         $plugin = $event->getPlugin();
 
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        $duelHandler = PracticeCore::getDuelHandler();
+
+        $server = $plugin->getServer();
+
         if($plugin->getName() === PracticeUtil::PLUGIN_NAME) {
 
-            $onlinePlayers = $this->getCore()->getServer()->getOnlinePlayers();
+            $onlinePlayers = $server->getOnlinePlayers();
 
             foreach($onlinePlayers as $player) {
 
-                if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
+                if($playerHandler->isPlayerOnline($player)) {
 
-                    $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+                    $p = $playerHandler->getPlayer($player);
 
                     if(!$p->isInDuel()) {
 
@@ -1134,7 +1213,7 @@ class PracticeListener implements Listener
 
                     } else {
 
-                        $duel = PracticeCore::getDuelHandler()->getDuel($player);
+                        $duel = $duelHandler->getDuel($player);
 
                         if(!$duel->didDuelEnd())
                             $duel->endDuelPrematurely(true);
@@ -1142,8 +1221,6 @@ class PracticeListener implements Listener
                 }
             }
         }
-
-        $server = $plugin->getServer();
 
         if($server->isRunning())
             PracticeUtil::kickAll('Restarting Server');

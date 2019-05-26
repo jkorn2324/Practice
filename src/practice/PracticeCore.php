@@ -114,10 +114,12 @@ class PracticeCore extends PluginBase
 
         PracticeUtil::reloadPlayers();
 
+        $scheduler = $this->getScheduler();
+
         $this->getServer()->getPluginManager()->registerEvents(new PracticeListener($this), $this);
-        $this->getScheduler()->scheduleDelayedTask(new SetTimeDayTask($this), 10);
-        $this->getScheduler()->scheduleDelayedTask(new PermissionsToCfgTask(), 10);
-        $this->getScheduler()->scheduleRepeatingTask(new PracticeTask($this), 1);
+        $scheduler->scheduleDelayedTask(new SetTimeDayTask($this), 10);
+        $scheduler->scheduleDelayedTask(new PermissionsToCfgTask(), 10);
+        $scheduler->scheduleRepeatingTask(new PracticeTask($this), 1);
     }
 
     public function onLoad() {

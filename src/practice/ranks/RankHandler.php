@@ -75,7 +75,9 @@ class RankHandler
                 }
             }
 
-            $data = PracticeCore::getPlayerHandler()->getPlayerData($name);
+            $playerHandler = PracticeCore::getPlayerHandler();
+
+            $data = $playerHandler->getPlayerData($name);
             $theRanks = $data["ranks"];
             if(is_array($theRanks)){
                 $theRanks = [];
@@ -83,27 +85,32 @@ class RankHandler
                     $theRanks[] = $r->getLocalizedName();
                 }
             }
-            $result = PracticeCore::getPlayerHandler()->setPlayerData($name, "ranks", $theRanks);
+            $result = $playerHandler->setPlayerData($name, "ranks", $theRanks);
         }
         return $result;
     }
 
+    /**
+     * @param $player
+     * @return array|Rank[]
+     */
     public function getRanksOf($player) : array {
 
         $result = [];
 
-        if(PracticeCore::getPlayerHandler()->isPlayer($player)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
 
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            $data = PracticeCore::getPlayerHandler()->getPlayerData($p->getPlayerName());
+        if($playerHandler->isPlayer($player)) {
+
+            $p = $playerHandler->getPlayer($player);
+            $data = $playerHandler->getPlayerData($p->getPlayerName());
             $ranksLocalized = $data["ranks"];
             $result = [];
 
             foreach($ranksLocalized as $str) {
                 $r = $this->getRankFromName($str);
-                if($r instanceof Rank) {
+                if($r instanceof Rank)
                     $result[] = $r;
-                }
             }
         }
 
@@ -114,8 +121,14 @@ class RankHandler
         return count($this->getRanksOf($player)) > 0;
     }
 
+    /**
+     * @param string $anyname
+     * @return Rank|null
+     */
     public function getRankFromName(string $anyname) {
+
         $result = null;
+
         foreach($this->allRanks as $rank){
             if($rank instanceof Rank){
                 $localizedName = $rank->getLocalizedName();
@@ -123,7 +136,7 @@ class RankHandler
                 if($localizedName === $anyname){
                     $result = $rank;
                     break;
-                } else if ($name === $anyname){
+                } elseif ($name === $anyname){
                     $result = $rank;
                     break;
                 }
@@ -137,9 +150,7 @@ class RankHandler
     }
 
     private function isStaffRank(Rank $rank) : bool {
-
-        $result = PracticeUtil::arr_contains_value($rank, $this->listOfStaffRanks());
-        return $result;
+        return PracticeUtil::arr_contains_value($rank, $this->listOfStaffRanks());
     }
 
     public function hasRank($player, Rank $rank) : bool {
@@ -160,11 +171,9 @@ class RankHandler
         $result = false;
         if($size > 0) {
             foreach($ranks as $rank) {
-                if($rank instanceof Rank){
-                    if($this->isStaffRank($rank)) {
-                        $result = true;
-                        break;
-                    }
+                if($this->isStaffRank($rank)){
+                    $result = true;
+                    break;
                 }
             }
         }
@@ -174,6 +183,7 @@ class RankHandler
     public function hasFamousOrYTRank($player) : bool {
 
         $ranks = $this->getRanksOf($player);
+
         $size = count($ranks);
         $result = false;
 

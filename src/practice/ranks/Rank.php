@@ -33,9 +33,8 @@ class Rank
 
     public function equals($object) {
         $result = false;
-        if($object instanceof Rank) {
+        if($object instanceof Rank)
             $result = $object->getLocalizedName() === $this->localizedName;
-        }
         return $result;
     }
 }

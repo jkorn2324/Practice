@@ -21,31 +21,36 @@ use practice\scoreboard\ScoreboardUtil;
 
 class DuelHandler
 {
-    
+    /* @var QueuedPlayer[] */
     private $queuedPlayers;
 
+    /* @var MatchedGroup[] */
     private $matchedGroups;
 
     /* @var DuelGroup[] */
     private $duels;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->queuedPlayers = [];
         $this->matchedGroups = [];
         $this->duels = [];
     }
-    
+
     // ------------------------------ QUEUE FUNCTIONS --------------------------------
 
-    public function addPlayerToQueue($player, string $queue, bool $isRanked = false) {
+    public function addPlayerToQueue($player, string $queue, bool $isRanked = false)
+    {
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
 
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+        if ($playerHandler->isPlayerOnline($player)) {
+
+            $p = $playerHandler->getPlayer($player);
 
             $name = $p->getPlayerName();
 
-            $peOnly = PracticeCore::getPlayerHandler()->canQueuePEOnly($name);
+            $peOnly = $playerHandler->canQueuePEOnly($name);
 
             $newQueue = new QueuedPlayer($name, $queue, $isRanked, $peOnly);
 
@@ -58,7 +63,7 @@ class DuelHandler
 
             PracticeCore::getItemHandler()->spawnQueueItems($p->getPlayer());
 
-            if($this->isPlayerInQueue($p->getPlayerName()))
+            if ($this->isPlayerInQueue($p->getPlayerName()))
                 unset($this->queuedPlayers[$p->getPlayerName()]);
 
             $this->queuedPlayers[$p->getPlayerName()] = $newQueue;
@@ -69,13 +74,14 @@ class DuelHandler
         }
     }
 
-    public function removePlayerFromQueue($player, bool $sendMsg = false) : void {
+    public function removePlayerFromQueue($player, bool $sendMsg = false): void
+    {
 
-        if($this->isPlayerInQueue($player)) {
+        if ($this->isPlayerInQueue($player)) {
 
             $queue = $this->getQueuedPlayer($player);
 
-            if($queue instanceof QueuedPlayer) {
+            if ($queue instanceof QueuedPlayer) {
 
                 $ranked = ($queue->isRanked() ? "Ranked" : "Unranked");
                 $arr = ["%ranked%" => $ranked, "%queue%" => $queue->getQueue()];
@@ -96,13 +102,14 @@ class DuelHandler
         }
     }
 
-    public function isPlayerInQueue($player) : bool {
+    public function isPlayerInQueue($player): bool
+    {
 
         $name = PracticeUtil::getPlayerName($player);
 
         $result = false;
 
-        if(!is_null($name))
+        if (!is_null($name))
             $result = array_key_exists($name, $this->queuedPlayers);
 
         return $result;
@@ -113,126 +120,128 @@ class DuelHandler
      * @param $player
      * @return QueuedPlayer|null
      */
-    public function getQueuedPlayer($player) {
+    public function getQueuedPlayer($player)
+    {
         $name = PracticeUtil::getPlayerName($player);
         $result = null;
-        if($this->isPlayerInQueue($player))
+        if ($this->isPlayerInQueue($player))
             $result = $this->queuedPlayers[$name];
         return $result;
     }
 
-    public function updateQueues() : bool {
+    public function updateQueues(): bool
+    {
 
         $result = false;
 
         $keys = array_keys($this->queuedPlayers);
 
-        foreach($keys as $key) {
+        foreach ($keys as $key) {
 
-            if(isset($this->queuedPlayers[$key])) {
+            if (isset($this->queuedPlayers[$key])) {
 
                 $player = $this->queuedPlayers[$key];
 
+                $pQueue = $player->getQueue();
+
                 $remove = false;
 
-                if($player instanceof QueuedPlayer) {
+                if ($player->isPlayerOnline()) {
 
-                    if ($player->isPlayerOnline()) {
+                    $p = $player->getPlayer();
 
-                        $p = $player->getPlayer();
+                    if ($p->isInArena()) {
 
-                        if ($p->isInArena()) {
+                        $ranked = ($player->isRanked ? "Ranked" : "Unranked");
+                        $arr = ["%ranked%" => $ranked, "%queue%" => $pQueue];
 
-                            $ranked = ($player->isRanked ? "Ranked" : "Unranked");
-                            $arr = ["%ranked%" => $ranked, "%queue%" => $player->getQueue()];
+                        $msg = PracticeUtil::getMessage("duels.queue.leave");
+                        $msg = PracticeUtil::str_replace($msg, $arr);
 
-                            $msg = PracticeUtil::getMessage("duels.queue.leave");
-                            $msg = PracticeUtil::str_replace($msg, $arr);
+                        $p->sendMessage($msg);
 
-                            $p->sendMessage($msg);
-
-                            $remove = true;
-                        }
-                    } else {
                         $remove = true;
                     }
+                } else $remove = true;
 
-                    if ($remove === true) {
-                        $result = true;
-                        unset($this->queuedPlayers[$key]);
-                    }
+                if ($remove === true) {
+                    $result = true;
+                    unset($this->queuedPlayers[$key]);
                 }
             }
-
         }
 
         return $result;
     }
 
-    public function getNumQueuedFor(string $queue, bool $ranked) : int {
+    public function getNumQueuedFor(string $queue, bool $ranked): int
+    {
 
         $result = 0;
 
-        foreach($this->queuedPlayers as $aQueue) {
-
-            if($aQueue instanceof QueuedPlayer) {
-
-                if($aQueue->getQueue() === $queue and $ranked === $aQueue->isRanked())
-                    $result++;
-            }
+        foreach ($this->queuedPlayers as $aQueue) {
+            if ($aQueue->getQueue() === $queue and $ranked === $aQueue->isRanked())
+                $result++;
         }
 
         return $result;
     }
 
 
-    public function getNumberOfQueuedPlayers() : int {
+    public function getNumberOfQueuedPlayers(): int
+    {
         return count($this->queuedPlayers);
     }
 
-    public function getQueuedPlayers() : array {
+    public function getQueuedPlayers(): array
+    {
         return $this->queuedPlayers;
     }
 
     // ------------------------------ MATCHED PLAYER FUNCTIONS --------------------------------
 
-    public function setPlayersMatched($player, $opponent, bool $isDirect = false, string $queue = null) : void {
+    public function setPlayersMatched($player, $opponent, bool $isDirect = false, string $queue = null): void
+    {
 
-        if(!$isDirect) {
+        if (!$isDirect) {
 
-            if($this->isPlayerInQueue($player) and $this->isPlayerInQueue($opponent)) {
+            $playerHandler = PracticeCore::getPlayerHandler();
+
+            if ($this->isPlayerInQueue($player) and $this->isPlayerInQueue($opponent)) {
 
                 $pQueue = $this->getQueuedPlayer($player);
                 $oQueue = $this->getQueuedPlayer($opponent);
 
-                if($pQueue instanceof QueuedPlayer and $oQueue instanceof QueuedPlayer) {
+                $pName = $pQueue->getPlayerName();
+                $oName = $oQueue->getPlayerName();
 
-                    $ranked = $pQueue->isRanked();
-                    $queue = $pQueue->getQueue();
+                $ranked = $pQueue->isRanked();
+                $queue = $pQueue->getQueue();
 
-                    $str = ($ranked ? "Ranked" : "Unranked");
+                $p = $pQueue->getPlayer();
+                $o = $oQueue->getPlayer();
 
-                    $oppElo = PracticeCore::getPlayerHandler()->getEloFrom($pQueue->getPlayerName(), $queue);
-                    $pElo = PracticeCore::getPlayerHandler()->getEloFrom($oQueue->getPlayerName(), $queue);
+                $str = ($ranked ? "Ranked" : "Unranked");
 
-                    $msg = PracticeUtil::getMessage("duels.queue.found-match");
-                    $msg = PracticeUtil::str_replace($msg, ["%ranked%" => $str, "%queue%" => $queue]);
-                    $oppMsg = PracticeUtil::str_replace($msg, ["%elo%" => (($ranked) ? "$oppElo" : ""), "%player%" => $pQueue->getPlayerName()]);
-                    $pMsg = PracticeUtil::str_replace($msg, ["%elo%" => (($ranked) ? "$pElo" : ""), "%player%" => $oQueue->getPlayerName()]);
+                $oppElo = $playerHandler->getEloFrom($pName, $queue);
+                $pElo = $playerHandler->getEloFrom($oName, $queue);
 
-                    $pQueue->getPlayer()->sendMessage($pMsg);
-                    $oQueue->getPlayer()->sendMessage($oppMsg);
+                $msg = PracticeUtil::getMessage("duels.queue.found-match");
+                $msg = PracticeUtil::str_replace($msg, ["%ranked%" => $str, "%queue%" => $queue]);
+                $oppMsg = PracticeUtil::str_replace($msg, ["%elo%" => (($ranked) ? "$oppElo" : ""), "%player%" => $pName]);
+                $pMsg = PracticeUtil::str_replace($msg, ["%elo%" => (($ranked) ? "$pElo" : ""), "%player%" => $oName]);
 
-                    $group = new MatchedGroup($player, $opponent, $queue, $ranked);
-                    $this->matchedGroups[] = $group;
+                $p->sendMessage($pMsg);
+                $o->sendMessage($oppMsg);
 
-                }
+                $group = new MatchedGroup($pName, $oName, $queue, $ranked);
+                $this->matchedGroups[] = $group;
 
-                unset($this->queuedPlayers[$pQueue->getPlayerName()], $this->queuedPlayers[$oQueue->getPlayerName()]);
+                unset($this->queuedPlayers[$pName], $this->queuedPlayers[$oName]);
             }
         } else {
 
-            if(!is_null($queue)) {
+            if (!is_null($queue)) {
 
                 if ($this->isPlayerInQueue($player)) $this->removePlayerFromQueue($player, true);
                 if ($this->isPlayerInQueue($opponent)) $this->removePlayerFromQueue($opponent, true);
@@ -247,25 +256,27 @@ class DuelHandler
      * @param string $queue
      * @return array|DuelArena[]
      */
-    public function getOpenArenas(string $queue) : array {
+    public function getOpenArenas(string $queue): array
+    {
 
         $result = [];
 
-        $arenas = PracticeCore::getArenaHandler()->getDuelArenas();
+        $arenaHandler = PracticeCore::getArenaHandler();
 
-        foreach($arenas as $arena) {
-            if($arena instanceof DuelArena) {
-                $closed = PracticeCore::getArenaHandler()->isArenaClosed($arena->getName());
-                if($closed === false) {
-                    $hasKit = $arena->hasKit($queue);
-                    if($hasKit === true) $result[] = $arena;
-                }
+        $arenas = $arenaHandler->getDuelArenas();
+
+        foreach ($arenas as $arena) {
+            $closed = $arenaHandler->isArenaClosed($arena->getName());
+            if ($closed === false) {
+                $hasKit = $arena->hasKit($queue);
+                if ($hasKit === true) $result[] = $arena;
             }
         }
         return $result;
     }
 
-    public function isAnArenaOpen(string $queue) : bool {
+    public function isAnArenaOpen(string $queue): bool
+    {
         return count($this->getOpenArenas($queue)) > 0;
     }
 
@@ -273,11 +284,12 @@ class DuelHandler
      * @param string $queue
      * @return mixed|DuelArena|null
      */
-    private function findRandomArena(string $queue) {
+    private function findRandomArena(string $queue)
+    {
 
         $result = null;
 
-        if($this->isAnArenaOpen($queue)) {
+        if ($this->isAnArenaOpen($queue)) {
             $openArenas = $this->getOpenArenas($queue);
             $count = count($openArenas);
             $rand = rand(0, $count - 1);
@@ -288,32 +300,34 @@ class DuelHandler
         return $result;
     }
 
-    public function isWaitingForDuelToStart($player) : bool {
+    public function isWaitingForDuelToStart($player): bool
+    {
         return !is_null($this->getGroupFrom($player));
     }
 
-    private function getMatchedIndexOf(MatchedGroup $group) : int {
+    private function getMatchedIndexOf(MatchedGroup $group): int
+    {
         $index = array_search($group, $this->matchedGroups);
-        if(is_bool($index) and $index === false)
+        if (is_bool($index) and $index === false)
             $index = -1;
 
         return $index;
     }
 
-    private function isValidMatched(MatchedGroup $group) : bool {
+    private function isValidMatched(MatchedGroup $group): bool
+    {
         return $this->getMatchedIndexOf($group) !== -1;
     }
 
-    public function getGroupFrom($player) {
+    public function getGroupFrom($player)
+    {
         $str = PracticeUtil::getPlayerName($player);
         $result = null;
-        if(!is_null($str)) {
-            foreach($this->matchedGroups as $group) {
-                if($group instanceof MatchedGroup) {
-                    if($group->getPlayerName() === $str or $group->getOpponentName() === $str) {
-                        $result = $group;
-                        break;
-                    }
+        if (!is_null($str)) {
+            foreach ($this->matchedGroups as $group) {
+                if ($group->getPlayerName() === $str or $group->getOpponentName() === $str) {
+                    $result = $group;
+                    break;
                 }
             }
         }
@@ -328,44 +342,38 @@ class DuelHandler
 
         $opponent = null;
 
-        if(isset($player) and $this->isPlayerInQueue($player)) {
+        if (isset($player) and $this->isPlayerInQueue($player)) {
 
             $pQueue = $this->getQueuedPlayer($player);
 
             $checkForPEQueue = $pQueue->isPEOnly();
 
-            if($pQueue instanceof QueuedPlayer) {
+            foreach ($this->queuedPlayers as $queue) {
 
-                foreach ($this->queuedPlayers as $queue) {
+                $equals = $queue->equals($pQueue);
 
-                    if ($queue instanceof QueuedPlayer) {
+                if ($equals !== true) {
 
-                        $equals = $queue->equals($pQueue);
+                    if ($pQueue->hasSameQueue($queue)) {
 
-                        if($equals !== true) {
+                        $found = false;
 
-                            if($pQueue->hasSameQueue($queue)) {
+                        if ($checkForPEQueue === true) {
 
-                                $found = false;
+                            if ($queue->getPlayer()->peOnlyQueue()) $found = true;
 
-                                if($checkForPEQueue === true) {
+                        } else {
 
-                                    if($queue->getPlayer()->peOnlyQueue()) $found = true;
+                            if ($queue->isPEOnly()) {
 
-                                } else {
+                                $found = $pQueue->getPlayer()->peOnlyQueue();
 
-                                    if($queue->isPEOnly()) {
+                            } else $found = true;
+                        }
 
-                                        $found = $pQueue->getPlayer()->peOnlyQueue();
-
-                                    } else $found = true;
-                                }
-
-                                if($found === true) {
-                                    $opponent = $queue;
-                                    break;
-                                }
-                            }
+                        if ($found === true) {
+                            $opponent = $queue;
+                            break;
                         }
                     }
                 }
@@ -374,7 +382,7 @@ class DuelHandler
         return $opponent;
     }
 
-    public function didFindMatch($player) : bool {
+    public function didFindMatch($player): bool {
         return !is_null($this->findQueueMatch($player));
     }
 
@@ -382,37 +390,39 @@ class DuelHandler
      * @param $player
      * @return \pocketmine\Player|null
      */
-    public function getMatchedPlayer($player) {
+    public function getMatchedPlayer($player)
+    {
         $opponent = null;
 
-        if($this->didFindMatch($player)) {
+        if ($this->didFindMatch($player)) {
 
             $otherQueue = $this->findQueueMatch($player);
 
-            if($otherQueue instanceof QueuedPlayer) {
-                if($otherQueue->isPlayerOnline()){
-                    $opponent = $otherQueue->getPlayer()->getPlayer();
-                }
-            }
+            if ($otherQueue->isPlayerOnline())
+                $opponent = $otherQueue->getPlayer()->getPlayer();
         }
+
         return $opponent;
     }
 
-    public function getAwaitingGroups() : array {
+    /**
+     * @return array|MatchedGroup[]
+     */
+    public function getAwaitingGroups(): array {
         return $this->matchedGroups;
     }
 
     // ------------------------------ DUEL PLAYER FUNCTIONS --------------------------------
 
-    public function startDuel(MatchedGroup $group) : void {
+    public function startDuel(MatchedGroup $group): void {
 
         $arena = $this->findRandomArena($group->getQueue());
 
-        if(!is_null($arena) and $this->isValidMatched($group)) {
+        if (!is_null($arena) and $this->isValidMatched($group)) {
 
             $index = $this->getMatchedIndexOf($group);
 
-            if($group->isPlayerOnline() and $group->isOpponentOnline()) {
+            if ($group->isPlayerOnline() and $group->isOpponentOnline()) {
                 $duel = new DuelGroup($group, $arena->getName());
                 //PracticeCore::getArenaHandler()->setArenaClosed($arena);
                 $this->duels[] = $duel;
@@ -423,15 +433,17 @@ class DuelHandler
         }
     }
 
-    private function getDuelIndexOf(DuelGroup $group) : int {
+    private function getDuelIndexOf(DuelGroup $group): int {
 
         $index = array_search($group, $this->duels);
-        if(is_bool($index) and $index === false)
+        if (is_bool($index) and $index === false)
             $index = -1;
+
         return $index;
     }
 
-    private function isValidDuel(DuelGroup $group) : bool {
+    private function isValidDuel(DuelGroup $group): bool
+    {
         return $this->getDuelIndexOf($group) !== -1;
     }
 
@@ -444,22 +456,25 @@ class DuelHandler
 
         $result = null;
 
-        if(isset($object) and !is_null($object)) {
-            if($isArena === false) {
-                if (PracticeCore::getPlayerHandler()->isPlayer($object)) {
-                    $p = PracticeCore::getPlayerHandler()->getPlayer($object);
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        $arenaHandler = PracticeCore::getArenaHandler();
+
+        if (isset($object) and !is_null($object)) {
+            if ($isArena === false) {
+                if ($playerHandler->isPlayer($object)) {
+                    $p = $playerHandler->getPlayer($object);
+                    $pl = $p->getPlayer();
                     foreach ($this->duels as $duel) {
-                        if ($duel instanceof DuelGroup) {
-                            if ($duel->isPlayer($p->getPlayer()) or $duel->isOpponent($p->getPlayer())) {
-                                $result = $duel;
-                                break;
-                            }
+                        if ($duel->isPlayer($pl) or $duel->isOpponent($pl)) {
+                            $result = $duel;
+                            break;
                         }
                     }
                 }
             } else {
-                if (is_string($object) and PracticeCore::getArenaHandler()->isDuelArena($object)) {
-                    $arena = PracticeCore::getArenaHandler()->getDuelArena($object);
+                if (is_string($object) and $arenaHandler->isDuelArena($object)) {
+                    $arena = $arenaHandler->getDuelArena($object);
                     $name = $arena->getName();
                     foreach ($this->duels as $duel) {
                         $arenaName = $duel->getArenaName();
@@ -474,37 +489,37 @@ class DuelHandler
         return $result;
     }
 
-    public function isInDuel($player) : bool {
+    public function isInDuel($player): bool {
         return PracticeCore::getPlayerHandler()->isPlayer($player) and !is_null($this->getDuel($player));
     }
 
-    public function isArenaInUse($arena) : bool {
+    public function isArenaInUse($arena): bool {
         return !is_null($this->getDuel($arena, true));
     }
 
     public function endDuel(DuelGroup $group) {
 
-        if($this->isValidDuel($group)) {
+        if ($this->isValidDuel($group)) {
             $index = $this->getDuelIndexOf($group);
             unset($this->duels[$index]);
+
         } else unset($group);
 
         $this->duels = array_values($this->duels);
     }
 
-    public function getDuelsInProgress() : array {
+    public function getDuelsInProgress(): array
+    {
         return $this->duels;
     }
 
-    public function getNumFightsFor(string $queue, bool $ranked) : int {
+    public function getNumFightsFor(string $queue, bool $ranked): int {
 
         $result = 0;
 
-        foreach($this->duels as $duel) {
-
-            if($duel->getQueue() === $queue and $ranked === $duel->isRanked())
+        foreach ($this->duels as $duel) {
+            if ($duel->getQueue() === $queue and $ranked === $duel->isRanked())
                 $result += 2;
-
         }
 
         return $result;
@@ -515,22 +530,25 @@ class DuelHandler
      * @return null|DuelGroup
      */
     public function getDuelFromSpec($spec) {
+
         $result = null;
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($spec)) {
-            $player = PracticeCore::getPlayerHandler()->getPlayer($spec);
-            foreach($this->duels as $duel) {
-                if($duel instanceof DuelGroup) {
-                    if($duel->isSpectator($player->getPlayerName())) {
-                        $result = $duel;
-                        break;
-                    }
+
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        if ($playerHandler->isPlayerOnline($spec)) {
+            $player = $playerHandler->getPlayer($spec);
+            foreach ($this->duels as $duel) {
+                if ($duel->isSpectator($player->getPlayerName())) {
+                    $result = $duel;
+                    break;
                 }
             }
         }
         return $result;
     }
 
-    public function isASpectator($player) : bool {
+    public function isASpectator($player): bool
+    {
         $duel = $this->getDuelFromSpec($player);
         return !is_null($duel);
     }

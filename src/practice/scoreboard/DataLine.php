@@ -22,8 +22,7 @@ class DataLine extends ScoreboardLine
 
     private $originalText;
 
-    public function __construct(int $id, string $text)
-    {
+    public function __construct(int $id, string $text) {
         $this->id = $id;
         $this->originalText = $text;
         $this->text = $text;
