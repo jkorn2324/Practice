@@ -41,6 +41,7 @@ use practice\duels\DuelHandler;
 use practice\duels\IvsIHandler;
 use practice\game\entity\FishingHook;
 use practice\game\items\ItemHandler;
+use practice\game\SetTimeDayTask;
 use practice\kits\KitHandler;
 use practice\parties\PartyManager;
 use practice\player\gameplay\ChatHandler;
@@ -111,14 +112,16 @@ class PracticeCore extends PluginBase
 
         $this->serverMuted = false;
 
+        PracticeUtil::reloadPlayers();
+
         $this->getServer()->getPluginManager()->registerEvents(new PracticeListener($this), $this);
+        $this->getScheduler()->scheduleDelayedTask(new SetTimeDayTask($this), 10);
         $this->getScheduler()->scheduleDelayedTask(new PermissionsToCfgTask(), 10);
         $this->getScheduler()->scheduleRepeatingTask(new PracticeTask($this), 1);
     }
 
     public function onLoad() {
         $this->loadLevels();
-        PracticeUtil::reloadPlayers();
     }
 
     public function onDisable() {
@@ -135,13 +138,8 @@ class PracticeCore extends PluginBase
             $files = scandir($worlds);
             $server = $this->getServer();
             foreach($files as $folderName) {
-                if(is_dir($folderName)) {
+                if(is_dir($folderName))
                     $server->loadLevel($folderName);
-
-                    $level = $server->getLevelByName($folderName);
-                    $level->setTime(6000);
-                    $level->stopTime();
-                }
             }
         }
     }
