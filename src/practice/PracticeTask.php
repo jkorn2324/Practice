@@ -101,15 +101,11 @@ class PracticeTask extends Task {
 
                 $queue = $queuedPlayers[$key];
 
-                if ($queue instanceof QueuedPlayer) {
-                    $name = $queue->getPlayerName();
+                $name = $queue->getPlayerName();
 
-                    if ($queue->isPlayerOnline()) {
-                        if ($duelHandler->didFindMatch($name)) {
-                            $opponent = $duelHandler->getMatchedPlayer($name);
-                            $duelHandler->setPlayersMatched($name, $opponent);
-                        }
-                    }
+                if ($queue->isPlayerOnline() and $duelHandler->didFindMatch($name)) {
+                    $opponent = $duelHandler->getMatchedPlayer($name);
+                    $duelHandler->setPlayersMatched($name, $opponent);
                 }
             }
         }

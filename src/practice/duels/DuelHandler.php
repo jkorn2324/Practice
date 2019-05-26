@@ -193,6 +193,9 @@ class DuelHandler
         return count($this->queuedPlayers);
     }
 
+    /**
+     * @return array|QueuedPlayer[]
+     */
     public function getQueuedPlayers(): array
     {
         return $this->queuedPlayers;
