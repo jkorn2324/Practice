@@ -45,18 +45,19 @@ class PracticeTask extends Task {
      * @param int $currentTick
      */
     public function onRun(int $currentTick) {
+
         $this->seconds--;
 
-        $this->broadcastAnnouncement();
+        $this->broadcastAnnouncement($currentTick);
         $this->updateDuels();
-        $this->updatePlayers();
+        $this->updatePlayers($currentTick);
         $this->checkForReload();
 
         PracticeCore::getPartyManager()->updateInvites();
         PracticeCore::getPlayerHandler()->updateLeaderboards();
     }
 
-    private function broadcastAnnouncement() : void {
+    private function broadcastAnnouncement(int $currentTick) : void {
         $server = $this->core->getServer();
         if($this->announcementTime > self::MAX_ANNOUNCEMENT_TIME) {
             $server->broadcastMessage(
@@ -64,10 +65,10 @@ class PracticeTask extends Task {
             );
             $this->announcementTime = 0;
         }
-        $this->announcementTime++;
+        if($currentTick % 20 === 0) $this->announcementTime++;
     }
 
-    private function updatePlayers() : void {
+    private function updatePlayers(int $currentTick) : void {
 
         $playerHandler = PracticeCore::getPlayerHandler();
 
@@ -75,7 +76,9 @@ class PracticeTask extends Task {
 
         /** @var PracticePlayer $player */
         foreach($playerHandler->getOnlinePlayers() as $player) {
-            $player->updatePlayer();
+            $player->updateNoDmgTicks();
+            if($currentTick % 20 === 0)
+                $player->updatePlayer();
         }
 
         if($duelHandler->updateQueues()) ScoreboardUtil::updateSpawnScoreboards("in-queues");
@@ -132,11 +135,10 @@ class PracticeTask extends Task {
         if($this->seconds < 0) {
             $server->reload();
         } elseif($this->seconds < 10) {
-            PracticeUtil::broadcastMsg($message . "$this->seconds seconds.");
+            PracticeUtil::broadcastMsg($message . "$this->seconds second(s).");
         } elseif($this->seconds == 60 or $this->seconds == 60*2 or $this->seconds == 60*5 or
             $this->seconds == 60*10 or $this->seconds == 60*15) {
-            PracticeUtil::broadcastMsg($message . $this->seconds / 60 . " minutes.");
+            PracticeUtil::broadcastMsg($message . $this->seconds / 60 . " minute(s).");
         }
     }
-
 }

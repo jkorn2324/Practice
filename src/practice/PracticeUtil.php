@@ -13,6 +13,7 @@ namespace practice;
 
 use pocketmine\block\Block;
 use pocketmine\command\CommandSender;
+use pocketmine\entity\projectile\Arrow;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\player\PlayerDeathEvent;
@@ -684,7 +685,7 @@ class PracticeUtil
                     if($requested->canSendDuelRequest())
                         $result = true;
                     else {
-                        $sec = self::ticksToSeconds($requested->getCantSpamDuelTicks());
+                        $sec = $requested->getCantDuelSpamSecs();
                         $msg = self::str_replace(self::getMessage('duels.misc.anti-spam'), ['%player%' => $rqName, '%time%' => "$sec"]);
                     }
                 }
@@ -1061,9 +1062,10 @@ class PracticeUtil
                     if($dmgr instanceof Player and $playerHandler->isPlayer($dmgr->getName())) {
                         $name = $dmgr->getName();
                         $attacker = PracticeCore::getPlayerHandler()->getPlayer($name);
-                        $differenceTicks = $attacker->getCurrentTick() - $attacker->getLastTickInCombat();
-                        $seconds = self::ticksToSeconds($differenceTicks);
-                        if($seconds <= 20) $found = true;
+                        $differenceSeconds = $attacker->getCurrentSec() - $attacker->getLastSecInCombat();
+                        /*$differenceTicks = $attacker->getCurrentTick() - $attacker->getLastTickInCombat();
+                        $seconds = self::ticksToSeconds($differenceTicks);*/
+                        if($differenceSeconds <= 20) $found = true;
                     }
                 }
 
@@ -1271,7 +1273,7 @@ class PracticeUtil
         return new Location($p->x, $p->y, $p->z, $p->yaw, $p->pitch, $p->getLevel());
     }
 
-    public static function clearEntitiesIn(Level $level) : void {
+    public static function clearEntitiesIn(Level $level, bool $proj = false) : void {
 
         $entities = $level->getEntities();
 
@@ -1283,6 +1285,7 @@ class PracticeUtil
             elseif ($entity instanceof FishingHook) $exec = false;
             elseif ($entity instanceof \pocketmine\entity\projectile\EnderPearl) $exec = false;
             elseif ($entity instanceof \pocketmine\entity\projectile\SplashPotion) $exec = false;
+            elseif ($entity instanceof Arrow and $proj === true) $exec = false;
 
             if($exec === true)
                 $entity->close();

@@ -33,9 +33,8 @@ class AntiCheatUtil
         $result = false;
         if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
             $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            if($p->canHitPlayer()) {
+            if($p->canHitPlayer())
                 $result = $p->getNoDamageTicks() <= 0;
-            }
         }
         return $result;
     }

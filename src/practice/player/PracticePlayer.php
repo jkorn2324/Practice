@@ -23,7 +23,6 @@ use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
-use practice\anticheat\AntiCheatUtil;
 use practice\arenas\FFAArena;
 use practice\arenas\PracticeArena;
 use practice\duels\groups\DuelGroup;
@@ -31,7 +30,6 @@ use practice\duels\misc\DuelInvInfo;
 use practice\game\entity\FishingHook;
 use practice\game\FormUtil;
 use practice\player\disguise\DisguiseInfo;
-use practice\player\info\PlayerCPSInfo;
 use practice\PracticeCore;
 use practice\PracticeUtil;
 use practice\scoreboard\Scoreboard;
@@ -56,24 +54,21 @@ class PracticePlayer
     private $currentArena;
 
     //INTEGERS
-    private $currentTick;
-    private $antiSendTicks;
-    private $lastTickHit;
-    private $combatTicks;
-    private $enderpearlTicks;
-    private $lastAntiSpamTick;
+    private $currentSec;
+    private $antiSendSecs;
+    private $lastSecHit;
+    private $combatSecs;
+    private $enderpearlSecs;
+    private $lastAntiSpamSec;
     private $deviceOs;
     private $input;
-    private $duelSpamTick;
+    private $duelSpamSec;
     private $noDamageTick;
 
     //ARRAYS
 
-    /* @var PlayerClick[] */
-    private $clicks;
     private $currentFormData;
 
-    /** @var float[] */
     private $cps = [];
 
     //OTHER
@@ -88,13 +83,6 @@ class PracticePlayer
 
     /* @var DisguiseInfo|null */
     //private $disguise;
-
-    //ANTICHEAT VARS
-
-    /* @var PlayerCPSInfo[] */
-    private $cpsHistory;
-
-
 
     public function __construct($player) {
 
@@ -118,27 +106,24 @@ class PracticePlayer
 
         $this->currentArena = PracticeArena::NO_ARENA;
 
-        $this->currentTick = 0;
-        $this->antiSendTicks = 0;
-        $this->lastTickHit = 0;
-        $this->combatTicks = 0;
-        $this->enderpearlTicks = 0;
-        $this->lastAntiSpamTick = 0;
+        $this->currentSec = 0;
+        $this->antiSendSecs = 0;
+        $this->lastSecHit = 0;
+        $this->combatSecs = 0;
+        $this->enderpearlSecs = 0;
+        $this->lastAntiSpamSec = 0;
         $this->deviceOs = -1;
         $this->input = -1;
-        $this->duelSpamTick = 0;
+        $this->duelSpamSec = 0;
         $this->noDamageTick = 0;
         $this->invId = -1;
 
-        $this->clicks = array();
-        $this->currentFormData = array();
+        $this->currentFormData = [];
 
         $this->fishing = null;
-        $this->duelResultInvs = array();
+        $this->duelResultInvs = [];
 
         $this->scoreboard = null;
-
-        $this->cpsHistory = [];
 
         //$this->disguise = null;
     }
@@ -160,43 +145,30 @@ class PracticePlayer
         return $this->disguise;
     }*/
 
+    public function setNoDamageTicks(int $del) : void {
+        $this->noDamageTick = $del;
+    }
+
     public function getNoDamageTicks() : int {
         return $this->noDamageTick;
     }
 
-    public function addCps(): void {
-        $microtime = microtime(true);
-        foreach($this->cps as $cps) {
-            if($microtime - $cps > 1) {
-                unset($this->cps[array_search($cps, $this->clicks)]);
-            }
-        }
-
-        $this->clicks[] = $microtime;
-        // Send/update the scoreboard
-    }
-
     public function updatePlayer() : void {
 
-        $this->currentTick++;
+        $this->currentSec++;
 
-        if($this->currentTick % 5 === 0 and $this->currentTick !== 0) {
-            $info = new PlayerCPSInfo($this->currentTick, $this->getCps());
-            $this->cpsHistory[] = $info;
-        }
+        $this->updateCps();
 
         if($this->isOnline() and !$this->isInArena()) {
 
             $p = $this->getPlayer();
             $level = $p->getLevel();
 
-            $seconds = PracticeUtil::secondsToTicks(3);
-
-            if($this->currentTick % $seconds === 0) {
+            if($this->currentSec % 5 === 0) {
 
                 $resetHunger = PracticeUtil::areLevelsEqual($level, PracticeUtil::getDefaultLevel());
 
-                if($resetHunger === false and $this->isInDuel()) {
+                if ($resetHunger === false and $this->isInDuel()) {
                     $duel = PracticeCore::getDuelHandler()->getDuel($this->playerName);
                     $resetHunger = PracticeUtil::equals_string($duel->getQueue(), 'Sumo', 'SumoPvP', 'sumo');
                 }
@@ -206,51 +178,40 @@ class PracticePlayer
                     $p->setSaturation(Attribute::getAttribute(Attribute::SATURATION)->getMaxValue());
                 }
             }
-
         }
 
-        if(PracticeUtil::isEnderpearlCooldownEnabled()){
-            if(!$this->canThrowPearl()){
-                $this->removeTickInThrow(1);
-
-                if($this->getEnderpearlTicks() <= 0)
+        if(PracticeUtil::isEnderpearlCooldownEnabled()) {
+            if(!$this->canThrowPearl()) {
+                $this->removeSecInThrow();
+                if($this->enderpearlSecs <= 0)
                     $this->setThrowPearl(true);
             }
         }
 
         if($this->isInAntiSpam()){
-            $ticks = $this->getTicksInAntiSpam();
-
-            $seconds = PracticeUtil::secondsToTicks(5);
-
-            if($ticks >= $seconds)
-                $this->setInAntiSpam(false);
-
+            $secs = $this->getSecsInAntiSpam();
+            if($secs >= 5) $this->setInAntiSpam(false);
         }
 
         if($this->isInCombat()){
-            $this->combatTicks--;
-            if($this->combatTicks <= 0){
+            $this->combatSecs--;
+            if($this->combatSecs <= 0){
                 $this->setInCombat(false);
             }
         }
 
+        $sb = $this->getCurrentScoreboard();
+
+        if($this->isInDuel() or $sb === Scoreboard::FFA_SCOREBOARD) $this->updateScoreboard();
+
+        if($this->canSendDuelRequest() !== true) $this->duelSpamSec--;
+    }
+
+    public function updateNoDmgTicks() : void {
         if($this->noDamageTick > 0) {
             $this->noDamageTick--;
             if($this->noDamageTick <= 0)
                 $this->noDamageTick = 0;
-
-        }
-
-        if($this->isInArena() and $this->currentTick % 5 === 0) $this->updateScoreboard();
-
-        if($this->canSendDuelRequest() !== true) $this->duelSpamTick--;
-
-        if($this->currentTick % 10 === 0 and $this->currentTick !== 0) {
-
-            if ($this->isAutoClicking())
-                //TODO CHANGE TO BAN
-                $this->kick('Autoclicking');
         }
     }
 
@@ -429,16 +390,12 @@ class PracticePlayer
 
                 $oppName = $opponent->getPlayerName();
 
-                $oppCps = $opponent->getCps();
-
-                $yourCps = $this->getCps();
-
                 $duration = $duel->getDurationString();
 
                 $scoreboard = $scoreboard->updateLine('opponent', ['%player%' => $oppName])
                     ->updateLine('duration', ['%time%' => $duration])
-                    ->updateLine('your-cps', ['%player%' => 'Your', '%clicks%' => $yourCps])
-                    ->updateLine('their-cps', ['%player%' => 'Their', '%clicks%' => $oppCps]);
+                    ->updateLine('your-cps', ['%player%' => 'Your', '%clicks%' => 0])
+                    ->updateLine('their-cps', ['%player%' => 'Their', '%clicks%' => 0]);
             }
         }
 
@@ -490,7 +447,7 @@ class PracticePlayer
             if(PracticeUtil::str_contains(' FFA', $arena) and PracticeUtil::str_contains(' FFA', $name))
                 $arena = PracticeUtil::str_replace($arena, [' FFA' => '']);
 
-            $cps = $this->getCps();
+            $cps = count($this->cps);
             $kills = $playerHandler->getKillsOf($this->playerName);
             $deaths = $playerHandler->getDeathsOf($this->playerName);
             $scoreboard = $scoreboard->updateLine('arena', ['%arena%' => $arena])
@@ -502,15 +459,16 @@ class PracticePlayer
     }
 
     public function setCantSpamDuel() : void {
-        $this->duelSpamTick = PracticeUtil::ticksToSeconds(20);
+        //$this->duelSpamTick = PracticeUtil::ticksToSeconds(20);
+        $this->duelSpamSec = 20;
     }
 
-    public function getCantSpamDuelTicks() : int {
-        return $this->duelSpamTick;
+    public function getCantDuelSpamSecs() : int {
+        return $this->duelSpamSec;
     }
 
     public function canSendDuelRequest() : bool {
-        return $this->duelSpamTick <= 0;
+        return $this->duelSpamSec <= 0;
     }
 
     public function hasDuelInvs() : bool {
@@ -525,13 +483,7 @@ class PracticePlayer
 
         $count = count($this->duelResultInvs);
 
-        $result = [];
-
-        if($count > 0) {
-            $result = $this->duelResultInvs[$count - 1];
-        }
-
-        return $result;
+        return ($count > 0) ? $this->duelResultInvs[$count - 1] : [];
     }
 
     public function addToDuelHistory(DuelInvInfo $player, DuelInvInfo $opponent) : void {
@@ -649,15 +601,15 @@ class PracticePlayer
     }
 
     public function setInAntiSpam(bool $res) : void {
-        if($res === true) $this->lastAntiSpamTick = $this->currentTick;
+        if($res === true) $this->lastAntiSpamSec = $this->currentSec;
         $this->setInAntiSpam = $res;
     }
 
-    private function getTicksInAntiSpam() : int {
-        return $this->currentTick - $this->lastAntiSpamTick;
+    private function getSecsInAntiSpam() : int {
+        return $this->currentSec - $this->lastAntiSpamSec;
     }
 
-    public function getCurrentTick() : int { return $this->currentTick; }
+    public function getCurrentSec() : int { return $this->currentSec; }
 
     public function isInvisible() : bool {
         return $this->getPlayer()->isInvisible();
@@ -682,15 +634,15 @@ class PracticePlayer
     public function setInCombat(bool $res) : void {
 
         if($res === true){
-            $this->lastTickHit = $this->currentTick;
-            $this->combatTicks = PracticeUtil::secondsToTicks(self::MAX_COMBAT_TICKS);
+            $this->lastSecHit = $this->currentSec;
+            $this->combatSecs = self::MAX_COMBAT_TICKS;
             if($this->isOnline()){
                 $p = $this->getPlayer();
                 if($this->inCombat === false)
                     $p->sendMessage(PracticeUtil::getMessage('general.combat.combat-place'));
             }
         } else {
-            $this->combatTicks = 0;
+            $this->combatSecs = 0;
             if($this->isOnline()){
                 $p = $this->getPlayer();
                 if($this->inCombat === true)
@@ -703,23 +655,19 @@ class PracticePlayer
 
     public function isInCombat() : bool { return $this->inCombat; }
 
-    public function getLastTickInCombat() : int { return $this->lastTickHit; }
+    public function getLastSecInCombat() : int { return $this->lastSecHit; }
 
-    public function getEnderpearlTicks() : int { return $this->enderpearlTicks; }
-
-    public function removeTickInThrow(int $amount) : void {
-        $this->enderpearlTicks -= $amount;
-        if($this->enderpearlTicks % 20 === 0){
-            $maxTicks = PracticeUtil::secondsToTicks(self::MAX_ENDERPEARL_SECONDS);
-            $sec = PracticeUtil::ticksToSeconds($this->enderpearlTicks);
-            if($sec < 0) $sec = 0;
-            if($this->enderpearlTicks < 0) $this->enderpearlTicks = 0;
-            $percent = floatval($this->enderpearlTicks / $maxTicks);
-            if($this->isOnline()){
-                $p = $this->getPlayer();
-                $p->setXpLevel($sec);
-                $p->setXpProgress($percent);
-            }
+    private function removeSecInThrow() : void {
+        $this->enderpearlSecs--;
+        $maxSecs = self::MAX_ENDERPEARL_SECONDS;
+        $sec = $this->enderpearlSecs;
+        if($sec < 0) $sec = 0;
+        if($this->enderpearlSecs < 0) $this->enderpearlTicks = 0;
+        $percent = floatval($this->enderpearlSecs / $maxSecs);
+        if($this->isOnline()){
+            $p = $this->getPlayer();
+            $p->setXpLevel($sec);
+            $p->setXpProgress($percent);
         }
     }
 
@@ -729,7 +677,7 @@ class PracticePlayer
 
     public function setThrowPearl(bool $res) : void {
         if($res === false){
-            $this->enderpearlTicks = PracticeUtil::secondsToTicks(self::MAX_ENDERPEARL_SECONDS);
+            $this->enderpearlSecs = self::MAX_ENDERPEARL_SECONDS;
             if($this->isOnline()){
                 $p = $this->getPlayer();
                 if($this->canThrowPearl === true)
@@ -739,7 +687,7 @@ class PracticePlayer
                 $p->setXpLevel(self::MAX_ENDERPEARL_SECONDS);
             }
         } else {
-            $this->enderpearlTicks = 0;
+            $this->enderpearlSecs = 0;
             if($this->isOnline()){
                 $p = $this->getPlayer();
                 if($this->canThrowPearl === false)
@@ -826,38 +774,69 @@ class PracticePlayer
         $this->canHitPlayer = $res;
     }
 
-    public function addClick(bool $clickedBlock) {
-        $type = ($clickedBlock === true ? PlayerClick::CLICK_BLOCK : PlayerClick::CLICK_AIR);
-        $click = new PlayerClick($this->currentTick, $type);
-        $exec = true;
-        $size = count($this->clicks);
-        if($size > 0){
+    private function updateCps() : void {
 
-            $lastClick = $this->clicks[$size - 1];
+        $cps = $this->cps;
 
-            if(isset($lastClick))
-                $exec = !$click->equals($lastClick);
+        $microtime = microtime(true);
 
+        $keys = array_keys($cps);
+
+        foreach($keys as $key)  {
+            $thecps = floatval($key);
+            if($microtime - $thecps > 1)
+                unset($cps[$key]);
         }
-        if($exec === true) $this->clicks[] = $click;
+
+        $this->cps = $cps;
     }
 
-    public function getCps() : int {
+    public function addCps(bool $clickedBlock): void {
 
-        $count = 0;
+        $microtime = microtime(true);
 
-        $size = count($this->clicks) - 1;
+        $keys = array_keys($this->cps);
 
-        for($i = $size; $i > -1; $i--) {
-            $click = $this->clicks[$i];
-            $difference = $this->currentTick - $click->getTickClicked();
-            if($difference <= 20 and $difference >= 0)
-                $count++;
-            else break;
+        $size = count($keys);
 
+        foreach($keys as $key) {
+            $cps = floatval($key);
+            if($microtime - $cps > 1)
+                unset($this->cps[$key]);
         }
 
-        return $count;
+        if($clickedBlock === true and $size > 0) {
+            $index = $size - 1;
+            $lastKey = $keys[$index];
+            $cps = floatval($lastKey);
+            if(isset($this->cps[$lastKey])) {
+                $val = $this->cps[$lastKey];
+                $diff = $microtime - $cps;
+                if ($val === true and $diff <= 0.05)
+                    unset($this->cps[$lastKey]);
+            }
+        }
+
+        $this->cps["$microtime"] = $clickedBlock;
+
+        $yourCPS = count($this->cps);
+
+        $sb = $this->getCurrentScoreboard();
+
+        if($this->isInDuel()) {
+
+            $duel = PracticeCore::getDuelHandler()->getDuel($this->playerName);
+
+            if($duel->isDuelRunning() and $duel->arePlayersOnline()) {
+
+                $other = $duel->isPlayer($this->playerName) ? $duel->getOpponent() : $duel->getPlayer();
+
+                $this->updateScoreboard('your-cps', ['%player%' => 'Your', '%clicks%' => $yourCPS]);
+                $other->updateScoreboard('their-cps', ['%player%' => 'Their', '%clicks%' => $yourCPS]);
+
+            }
+        } elseif ($sb === Scoreboard::FFA_SCOREBOARD)
+            $this->updateScoreboard('cps', ['%player%' => 'Your', '%clicks%' => $yourCPS]);
     }
 
     public function getInput() : int {
@@ -1003,85 +982,6 @@ class PracticePlayer
     }
 
     /* --------------------------------------------- ANTI CHEAT FUNCTIONS ---------------------------------------------*/
-
-    public function isAutoClicking() : bool {
-
-        return ($this->deviceOs === PracticeUtil::WINDOWS_10) ? $this->isCPSBetween15N20() : false;
-    }
-
-
-    public function isCPSBetween15N20() : bool {
-
-        $suspectCPS = [];
-
-        $clicks = [];
-
-        $size = count($this->cpsHistory) - 1;
-
-        for($i = $size; $i > -1; $i--) {
-
-            $pastCPS = $this->cpsHistory[$i];
-            $tick = $pastCPS->getTick();
-            $difference = $this->currentTick - $tick;
-            $seconds = PracticeUtil::ticksToSeconds($difference);
-
-            if($difference > -1) {
-
-                if($seconds <= 10) {
-
-                    $clicks[] = $pastCPS;
-                    $cps = $pastCPS->getCPS();
-
-                    if($cps >= 15 and $cps <= 20)
-                        $suspectCPS[] = $pastCPS;
-
-                } else break;
-            }
-        }
-
-        $suspectCPSLen = count($suspectCPS);
-
-        $clicksLen = count($clicks);
-
-        return $suspectCPSLen > 0 and $suspectCPSLen === $clicksLen;
-    }
-
-    /*private function doesCPSFluctuate() : bool {
-
-        $initialVal = -1;
-
-        $result = false;
-
-        $size = count($this->cpsHistory) - 1;
-
-        for($i = $size; $i > -1; $i--) {
-
-            $pastCPS = $this->cpsHistory[$i];
-            $tick = $pastCPS->getTick();
-            $difference = $this->currentTick - $tick;
-            $seconds = PracticeUtil::ticksToSeconds($difference);
-
-            if($difference > -1) {
-
-                if($seconds <= 5) {
-                    $cps = $pastCPS->getCPS();
-
-                    if ($initialVal === -1) $initialVal = $cps;
-                    else {
-                        if ($initialVal !== $cps) {
-                            $result = true;
-                            break;
-                        }
-                    }
-
-                } else break;
-            }
-        }
-
-        if($initialVal < 1) $result = true;
-
-        return $result;
-    }*/
 
     public function kick(string $msg) : void {
         if($this->isOnline()) {

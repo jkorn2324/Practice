@@ -90,7 +90,6 @@ class PracticeCore extends PluginBase
         $this->initNameConfig();
         $this->initRankConfig();
         $this->initCommands();
-        $this->loadLevels();
 
         self::$instance = $this;
 
@@ -116,10 +115,12 @@ class PracticeCore extends PluginBase
         $scheduler = $this->getScheduler();
 
         $this->getServer()->getPluginManager()->registerEvents(new PracticeListener($this), $this);
-        // $scheduler->scheduleDelayedTask(new SetTimeDayTask($this), 10);
+        $scheduler->scheduleDelayedTask(new SetTimeDayTask($this), 10);
         $scheduler->scheduleDelayedTask(new PermissionsToCfgTask(), 10);
         $scheduler->scheduleRepeatingTask(new PracticeTask($this), 1);
     }
+
+    public function onLoad() { $this->loadLevels(); }
 
     private function loadLevels() : void {
         $worlds = PracticeUtil::str_indexOf("/plugins", $this->getDataFolder()) . "/worlds";
@@ -135,11 +136,6 @@ class PracticeCore extends PluginBase
             }
 
             $server->loadLevel($folderName);
-        }
-
-        foreach($server->getLevels() as $level) {
-            $level->setTime(6000);
-            $level->stopTime();
         }
     }
 

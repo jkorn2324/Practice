@@ -169,10 +169,9 @@ class PracticeListener implements Listener
 
         $playerHandler = PracticeCore::getPlayerHandler();
 
-        $duelHandler = PracticeCore::getDuelHandler();
-
         $level = $p->getLevel();
-        PracticeUtil::clearEntitiesIn($level);
+
+        $duelHandler = PracticeCore::getDuelHandler();
 
         if($playerHandler->isPlayerOnline($p)) {
 
@@ -182,7 +181,12 @@ class PracticeListener implements Listener
 
             $diedFairly = true;
 
+            $proj = false;
+
             if($lastDamageCause != null) {
+
+                $proj = $lastDamageCause->getCause() === EntityDamageEvent::CAUSE_PROJECTILE;
+
                 if ($lastDamageCause->getCause() === EntityDamageEvent::CAUSE_VOID) {
                     $diedFairly = false;
                     //if($player->isInDuel())
@@ -198,7 +202,9 @@ class PracticeListener implements Listener
                     }
                 }
             }
-            
+
+            PracticeUtil::clearEntitiesIn($level, $proj);
+
             if($addToStats === true) {
                 if($diedFairly === true) {
                     if($lastDamageCause instanceof EntityDamageByEntityEvent) {
@@ -261,20 +267,23 @@ class PracticeListener implements Listener
 
         $playerHandler = PracticeCore::getPlayerHandler();
 
-        if($event->getEntity() instanceof Player) {
+        if($e instanceof Player) {
 
             if($event->getCause() === EntityDamageEvent::CAUSE_FALL) {
                 $cancel = true;
+
             } else {
 
-                if($playerHandler->isPlayerOnline($e)) {
-                    $player = $playerHandler->getPlayer($e);
+                if($playerHandler->isPlayerOnline($e->getName())) {
+                    $player = $playerHandler->getPlayer($e->getName());
+
                     $lvl = $player->getPlayer()->getLevel();
 
                     if (PracticeUtil::areLevelsEqual($lvl, PracticeUtil::getDefaultLevel()))
                         $cancel = boolval(PracticeUtil::isLobbyProtectionEnabled());
 
-                    if ($cancel === true) $cancel = boolval(!$player->isInDuel());
+                    if ($cancel === true) $cancel = boolval(!$player->isInDuel()) and boolval(!$player->isInArena());
+
                 } else $cancel = true;
             }
         }
@@ -351,20 +360,25 @@ class PracticeListener implements Listener
 
                 if(AntiCheatUtil::canDamage($attacked->getPlayerName()) and !$event->isCancelled()) {
 
+                    echo $attacked->getPlayerName() . "\n";
+
+                    $attacked->setNoDamageTicks($event->getAttackCooldown());
                     //$attacker->addHit($attacked->getPlayer(), $event->getAttackCooldown());
 
                     if(!$attacker->isInDuel() and !$attacked->isInDuel()) {
+
                         $attacker->setInCombat(true);
                         $attacked->setInCombat(true);
-                    }
 
-                    if($attacker->isInDuel() and $attacked->isInDuel()) {
+                    } else {
 
-                        $duel = $duelHandler->getDuel($attacker->getPlayer());
+                        if($attacked->isInDuel() and $attacked->isInDuel()) {
+                            $duel = $duelHandler->getDuel($attacker->getPlayer());
 
-                        if($duel->isSpleef())
-                            $cancel = true;
-                        else $duel->addHitFrom($attacked->getPlayer());
+                            if ($duel->isSpleef())
+                                $cancel = true;
+                            else $duel->addHitFrom($attacked->getPlayer());
+                        }
                     }
                 }
             }
@@ -465,7 +479,8 @@ class PracticeListener implements Listener
 
             $exec = PracticeUtil::checkActions($action, PlayerInteractEvent::RIGHT_CLICK_BLOCK);
             if (($p->getDevice() !== PracticeUtil::WINDOWS_10 or $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) and $exec === true)
-                $p->addClick(false);
+                $p->addCps(false);
+                //$p->addClick(false);
 
             if ($itemHandler->isPracticeItem($item)) {
 
@@ -1047,7 +1062,8 @@ class PracticeListener implements Listener
             if ($pkt->action === PlayerActionPacket::ACTION_START_BREAK and $playerHandler->isPlayer($player)) {
                 $p = $playerHandler->getPlayer($player);
                 if ($p->getDevice() === PracticeUtil::WINDOWS_10 or $p->getDevice() === PracticeUtil::CONTROLS_MOUSE)
-                    $p->addClick(true);
+                    $p->addCps(true);
+                    //$p->addClick(true);
             }
         } elseif ($pkt instanceof LevelSoundEventPacket) {
 
@@ -1062,8 +1078,9 @@ class PracticeListener implements Listener
 
                     $p = $playerHandler->getPlayer($player);
 
-                    // $p->addClick(false);
-                    $p->addCps();
+                    $p->addCps(true);
+                     //$p->addClick(false);
+                    //$p->addCps();
 
                     $pl = $p->getPlayer();
 

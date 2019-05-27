@@ -287,10 +287,8 @@ class DuelGroup
                 }
             }
 
-            if($duration % 5 === 0) {
-                $result = $duration % 20 !== 0;
-                $this->updateScoreboards($result);
-            }
+            if($duration % 20 === 0)
+                $this->updateScoreboards();
 
             $centerY = $this->getArena()->getSpawnPosition()->y;
 
@@ -326,46 +324,28 @@ class DuelGroup
         $this->currentTick++;
     }
 
-    private function updateScoreboards(bool $cps = true) : void {
+    private function updateScoreboards() : void {
+
+        $duration = $this->getDurationString();
 
         if($this->isPlayerOnline()) {
             $p = $this->getPlayer();
-            if($cps === true) {
-                $oppCps = 0;
-                if($this->isOpponentOnline())
-                    $oppCps = $this->getOpponent()->getCps();
-                $plCps = $p->getCps();
-                $p->updateScoreboard("your-cps", ["%player%" => "Your", "%clicks%" => $plCps]);
-                $p->updateScoreboard("their-cps", ["%player%" => "Their", "%clicks%" => $oppCps]);
-            } else
-                $p->updateScoreboard();
+            $p->updateScoreboard('duration', ['%time%' => $duration]);
         }
 
         if($this->isOpponentOnline()) {
-
             $o = $this->getOpponent();
-            if($cps === true) {
-                $oppCps = 0;
-
-                if ($this->isPlayerOnline())
-                    $oppCps = $this->getOpponent()->getCps();
-                $plCps = $p->getCps();
-                $o->updateScoreboard("your-cps", ["%player%" => "Your", "%clicks%" => $oppCps]);
-                $o->updateScoreboard("their-cps", ["%player%" => "Their", "%clicks%" => $plCps]);
-            } else $o->updateScoreboard();
+            $o->updateScoreboard('duration', ['%time%' => $duration]);
         }
 
-        if($cps === false) {
+        foreach ($this->spectators as $spectator) {
 
-            foreach ($this->spectators as $spectator) {
+            $spectator->update();
 
-                $spectator->update();
-
-                /*if(PracticeCore::getPlayerHandler()->isPlayerOnline($spectator)) {
-                    $pl = PracticeCore::getPlayerHandler()->getPlayer($spectator);
-                    $pl->updateScoreboard();
-                }*/
-            }
+            /*if(PracticeCore::getPlayerHandler()->isPlayerOnline($spectator)) {
+                $pl = PracticeCore::getPlayerHandler()->getPlayer($spectator);
+                $pl->updateScoreboard();
+            }*/
         }
     }
 
