@@ -17,7 +17,9 @@ use practice\PracticeUtil;
 class IvsIHandler
 {
 
+    /* @var LoadedRequest[] */
     private $loadedRequests;
+    /* @var Request[] */
     private $requests;
 
     public function __construct() {
@@ -25,18 +27,11 @@ class IvsIHandler
         $this->loadedRequests = [];
     }
 
-    public function loadRequest($player, $requested) : void {
+    public function loadRequest(string $player, string $requested) : void {
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($player) and PracticeCore::getPlayerHandler()->isPlayerOnline($requested)) {
+        $group = new LoadedRequest($player, $requested);
 
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player)->getPlayerName();
-
-            $r = PracticeCore::getPlayerHandler()->getPlayer($requested)->getPlayerName();
-
-            $group = new LoadedRequest($p, $r);
-
-            $this->loadedRequests[] = $group;
-        }
+        $this->loadedRequests[] = $group;
     }
 
     public function isLoadingRequest($player) : bool {
@@ -46,14 +41,15 @@ class IvsIHandler
     public function hasLoadedRequest($requestor, $requested) : bool {
         $result = false;
 
-        if(!is_null($this->getLoadedRequest($requestor)) and PracticeCore::getPlayerHandler()->isPlayerOnline($requested)) {
-            $rq = PracticeCore::getPlayerHandler()->getPlayer($requested);
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        if(!is_null($this->getLoadedRequest($requestor)) and $playerHandler->isPlayerOnline($requested)) {
+            $rq = $playerHandler->getPlayer($requested);
             $name = $rq->getPlayerName();
             $plLoaded = $this->getLoadedRequest($requestor);
-            if($plLoaded->getRequested() === $name) {
-                $result = true;
-            }
+            $result = $plLoaded->getRequested() === $name;
         }
+
         return $result;
     }
 
@@ -65,17 +61,26 @@ class IvsIHandler
 
         $request = null;
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-            $name = PracticeCore::getPlayerHandler()->getPlayer($player)->getPlayerName();
+        $name = PracticeUtil::getPlayerName($player);
+
+        if(!is_null($name) and PracticeCore::getPlayerHandler()->isPlayerOnline($name)) {
             foreach($this->loadedRequests as $load) {
-                if($load instanceof LoadedRequest) {
-                    if($name === $load->getRequestor()) {
-                        $request = $load;
-                        break;
-                    }
+                if($name === $load->getRequestor()) {
+                    $request = $load;
+                    break;
                 }
             }
         }
+
+        /*if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
+            $name = PracticeCore::getPlayerHandler()->getPlayer($player)->getPlayerName();
+            foreach($this->loadedRequests as $load) {
+                if($name === $load->getRequestor()) {
+                    $request = $load;
+                    break;
+                }
+            }
+        }*/
         return $request;
     }
 
@@ -113,7 +118,9 @@ class IvsIHandler
 
     public function sendRequest($requestor, $requested) : void {
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($requestor) and PracticeCore::getPlayerHandler()->isPlayerOnline($requested)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        if($playerHandler->isPlayerOnline($requestor) and $playerHandler->isPlayerOnline($requested)) {
 
             if($this->hasLoadedRequest($requestor, $requested)) {
 
@@ -145,11 +152,18 @@ class IvsIHandler
         return !is_null($this->getRequest($requested, $requestor));
     }
 
+    /**
+     * @param $requested
+     * @param $requestor
+     * @return Request|null
+     */
     public function getRequest($requested, $requestor) {
 
         $result = null;
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($requested) and PracticeCore::getPlayerHandler()->isPlayerOnline($requestor)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        if($playerHandler->isPlayerOnline($requested) and $playerHandler->isPlayerOnline($requestor)) {
 
             $requestorName = PracticeUtil::getPlayerName($requestor);
 
@@ -157,15 +171,12 @@ class IvsIHandler
 
             foreach($this->requests as $request) {
 
-                if($request instanceof Request) {
+                $rqName = $request->getRequestedName();
+                $plName = $request->getRequestorName();
 
-                    $rqName = $request->getRequestedName();
-                    $plName = $request->getRequestorName();
-
-                    if($rqName === $requestedName and $plName === $requestorName){
-                        $result = $request;
-                        break;
-                    }
+                if($rqName === $requestedName and $plName === $requestorName){
+                    $result = $request;
+                    break;
                 }
             }
         }
@@ -216,21 +227,17 @@ class IvsIHandler
 
                 $request = $this->requests[$i];
 
-                if ($request instanceof Request) {
+                $update = $request->update();
 
-                    $update = $request->updateTicks();
+                if ($update === true) {
 
-                    if ($update === true) {
+                    $request->setExpired();
 
-                        $request->setExpired();
+                    unset($this->requests[$i]);
 
-                        unset($this->requests[$i]);
-
-                        $this->requests = array_values($this->requests);
-                    }
+                    $this->requests = array_values($this->requests);
                 }
             }
         }
     }
-
 }

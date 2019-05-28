@@ -43,7 +43,7 @@ class PracticePlayer
     private $inCombat;
     private $canThrowPearl;
     private $hasKit;
-    private $setInAntiSpam;
+    private $antiSpam;
     private $canHitPlayer;
     private $isLookingAtForm;
     private $invId;
@@ -59,7 +59,7 @@ class PracticePlayer
     private $lastSecHit;
     private $combatSecs;
     private $enderpearlSecs;
-    private $lastAntiSpamSec;
+    private $antiSpamSecs;
     private $deviceOs;
     private $input;
     private $duelSpamSec;
@@ -100,7 +100,7 @@ class PracticePlayer
         $this->inCombat = false;
         $this->canThrowPearl = true;
         $this->hasKit = false;
-        $this->setInAntiSpam = false;
+        $this->antiSpam = false;
         $this->canHitPlayer = false;
         $this->isLookingAtForm = false;
 
@@ -111,7 +111,7 @@ class PracticePlayer
         $this->lastSecHit = 0;
         $this->combatSecs = 0;
         $this->enderpearlSecs = 0;
-        $this->lastAntiSpamSec = 0;
+        $this->antiSpamSecs = 0;
         $this->deviceOs = -1;
         $this->input = -1;
         $this->duelSpamSec = 0;
@@ -189,8 +189,8 @@ class PracticePlayer
         }
 
         if($this->isInAntiSpam()){
-            $secs = $this->getSecsInAntiSpam();
-            if($secs >= 5) $this->setInAntiSpam(false);
+            $this->antiSpamSecs--;
+            if($this->antiSpamSecs <= 0) $this->setInAntiSpam(false);
         }
 
         if($this->isInCombat()){
@@ -597,16 +597,14 @@ class PracticePlayer
     }
 
     public function isInAntiSpam() : bool {
-        return $this->setInAntiSpam;
+        return $this->antiSpam;
     }
 
     public function setInAntiSpam(bool $res) : void {
-        if($res === true) $this->lastAntiSpamSec = $this->currentSec;
-        $this->setInAntiSpam = $res;
-    }
-
-    private function getSecsInAntiSpam() : int {
-        return $this->currentSec - $this->lastAntiSpamSec;
+        $this->antiSpam = $res;
+        if($this->antiSpam === true)
+            $this->antiSpamSecs = 5;
+        else $this->antiSpamSecs = 0;
     }
 
     public function getCurrentSec() : int { return $this->currentSec; }

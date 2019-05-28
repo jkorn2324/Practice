@@ -23,7 +23,7 @@ class Request
 
     private $queue;
 
-    private $ticksFromRequest;
+    private $secsFromRequest;
 
     public function __construct($requestor, $requested, string $queue) {
 
@@ -35,28 +35,24 @@ class Request
             $this->requested = PracticeUtil::getPlayerName($requested);
         }
 
-        $this->ticksFromRequest = 0;
+        $this->secsFromRequest = 0;
 
         $this->queue = $queue;
     }
 
-    public function updateTicks() : bool {
+    public function update() : bool {
 
-        $this->ticksFromRequest++;
+        $this->secsFromRequest++;
 
         $delete = false;
-        $max = PracticeUtil::secondsToTicks(self::MAX_WAIT_SECONDS);
+        $max = self::MAX_WAIT_SECONDS;
 
-        if($this->ticksFromRequest >= $max) {
+        if($this->secsFromRequest >= $max) {
             $delete = true;
         } elseif (!$this->isRequestedOnline() or !$this->isRequestorOnline())
             $delete = true;
 
         return $delete;
-    }
-
-    public function getTicks() : int {
-        return $this->ticksFromRequest;
     }
 
     public function getQueue() : string {
@@ -135,9 +131,7 @@ class Request
             $requested = $this->getRequested();
             if($this->isRequestorOnline()) {
                 $player = $this->getRequestor();
-                if(!$requested->equals($player)) {
-                    $result = true;
-                }
+                $result = !$requested->equals($player);
             } else {
                 $msg = PracticeUtil::getMessage("not-online");
                 $msg = strval(str_replace("%player-name%", $this->player, $msg));
@@ -149,7 +143,6 @@ class Request
         return $result;
     }
 
-
     public static function canSend(PracticePlayer $p, $requestedPlayer) : bool {
         $result = false;
         $msg = null;
@@ -157,13 +150,10 @@ class Request
 
         if(PracticeCore::getPlayerHandler()->isPlayerOnline($requested)) {
             $rq = PracticeCore::getPlayerHandler()->getPlayer($requested);
-            if(!$rq->equals($p)) {
-                if(PracticeUtil::canRequestPlayer($p->getPlayer(), $rq)) {
-                    $result = true;
-                }
-            } else {
-                $msg = PracticeUtil::getMessage("duels.misc.fail-yourself");
-            }
+            if(!$rq->equals($p))
+                $result = PracticeUtil::canRequestPlayer($p->getPlayer(), $rq);
+            else $msg = PracticeUtil::getMessage("duels.misc.fail-yourself");
+
         } else {
             $msg = PracticeUtil::getMessage("not-online");
             $msg = strval(str_replace("%player-name%", $requested, $msg));
@@ -183,10 +173,9 @@ class Request
             $rqName = $object->getRequestedName();
             $plName = $object->getRequestorName();
 
-            if($rqName === $this->requested and $plName === $this->player) {
-                $result = true;
-            }
+            $result = $rqName === $this->requested and $plName === $this->player;
         }
+
         return $result;
     }
 }

@@ -6,6 +6,7 @@ namespace practice;
 
 
 use pocketmine\scheduler\Task;
+use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use practice\duels\groups\DuelGroup;
 use practice\duels\groups\QueuedPlayer;
@@ -26,6 +27,8 @@ class PracticeTask extends Task {
     /** @var string[] */
     private $announcements;
 
+    private $updateLeaderboardsTime;
+
     private const MAX_ANNOUNCEMENT_TIME = 45;
 
     /**
@@ -39,6 +42,7 @@ class PracticeTask extends Task {
             TextFormat::AQUA . 'Find a bug on the server? Use ' . TextFormat::YELLOW . '/report bug' . TextFormat::AQUA . ' to notify the staff of bugs on the server.',
             TextFormat::AQUA . 'Is a staff abusing or doing any other misconduct? Use ' . TextFormat::YELLOW . '/report staff' . TextFormat::AQUA . ' to notify the owner of abusing staff.'
         ];
+        $this->updateLeaderboardsTime = PracticeUtil::minutesToTicks(20);
     }
 
     /**
@@ -49,12 +53,12 @@ class PracticeTask extends Task {
         $this->seconds--;
 
         $this->broadcastAnnouncement($currentTick);
-        $this->updateDuels();
+        $this->updateDuels($currentTick);
         $this->updatePlayers($currentTick);
         $this->checkForReload();
 
         PracticeCore::getPartyManager()->updateInvites();
-        PracticeCore::getPlayerHandler()->updateLeaderboards();
+        if($currentTick % $this->updateLeaderboardsTime === 0 and $currentTick !== 0) PracticeCore::getPlayerHandler()->updateLeaderboards();
     }
 
     private function broadcastAnnouncement(int $currentTick) : void {
@@ -74,21 +78,24 @@ class PracticeTask extends Task {
 
         $duelHandler = PracticeCore::getDuelHandler();
 
-        /** @var PracticePlayer $player */
-        foreach($playerHandler->getOnlinePlayers() as $player) {
+        $update = $currentTick % 20 === 0;
+
+        $players = $playerHandler->getOnlinePlayers();
+
+        foreach($players as $player) {
             $player->updateNoDmgTicks();
-            if($currentTick % 20 === 0)
+            if($update === true)
                 $player->updatePlayer();
         }
 
         if($duelHandler->updateQueues()) ScoreboardUtil::updateSpawnScoreboards("in-queues");
     }
 
-    private function updateDuels() : void {
+    private function updateDuels(int $currentTick) : void {
 
         $duelHandler = PracticeCore::getDuelHandler();
 
-        PracticeCore::get1vs1Handler()->update();
+        if($currentTick % 20 === 0) PracticeCore::get1vs1Handler()->update();
 
         $queuedPlayers = $duelHandler->getQueuedPlayers();
 
@@ -124,11 +131,11 @@ class PracticeTask extends Task {
         foreach($duels as $duel) {
 
             if($duel instanceof DuelGroup) $duel->update();
-
         }
     }
 
     private function checkForReload(): void {
+
         $server = $this->core->getServer();
         $message = "[Server] Server restarting in ";
 

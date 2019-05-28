@@ -414,8 +414,10 @@ class PlayerHandler
 
             $this->createPlayerData($p->getPlayerName());
 
-            if(!PracticeCore::getRankHandler()->hasRanks($p)){
-                PracticeCore::getRankHandler()->setDefaultRank($p);
+            $rankHandler = PracticeCore::getRankHandler();
+
+            if(!$rankHandler->hasRanks($p)){
+                $rankHandler->setDefaultRank($p);
             } else {
                 PracticeCore::getPermissionHandler()->updatePermissions($p);
             }
@@ -467,6 +469,9 @@ class PlayerHandler
     }
 
 
+    /**
+     * @return PracticePlayer[]
+     */
     public function getOnlinePlayers() : array {
         $res = [];
 
@@ -485,10 +490,11 @@ class PlayerHandler
 
     public function getPlayersInFights() : int {
         $count = 0;
+        $duelHandler = PracticeCore::getDuelHandler();
         foreach($this->getOnlinePlayers() as $player) {
             if($player instanceof PracticePlayer) {
                 if($player->isInDuel()){
-                    $duel = PracticeCore::getDuelHandler()->getDuel($player->getPlayerName());
+                    $duel = $duelHandler->getDuel($player->getPlayerName());
                     if($duel->isDuelRunning()) $count++;
                 }
             }
@@ -794,11 +800,19 @@ class PlayerHandler
         else if($winnerDevice !== PracticeUtil::WINDOWS_10 and $loserDevice === PracticeUtil::WINDOWS_10)
             $winnerEloChange = intval($winnerEloChange * 1.1);
 
-        $result['winner'] = $winnerEloChange;
-        $result['loser'] = $loserEloChange;
+        /*$result['winner'] = $winnerEloChange;
+        $result['loser'] = $loserEloChange;*/
 
         $newWElo = $winnerElo + $winnerEloChange;
         $newLElo = $loserElo - $loserEloChange;
+
+        if($newLElo < 800) {
+            $newLElo = 800;
+            $loserEloChange = $loserElo - 800;
+        }
+
+        $result['winner'] = $winnerEloChange;
+        $result['loser'] = $loserEloChange;
 
         $this->setElo($winner, $queue, $newWElo);
         $this->setElo($loser, $queue, $newLElo);
@@ -926,7 +940,7 @@ class PlayerHandler
 
                 if(PracticeUtil::str_contains('.yml', $file)) {
 
-                    $name = str_replace('.yml', '', $file);
+                    $name = strval(str_replace('.yml', '', $file));
 
                     $stats = $this->getStatsFrom($name);
 

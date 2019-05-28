@@ -359,9 +359,7 @@ class PracticeListener implements Listener
                 $event->setKnockBack($kb);
 
                 if(AntiCheatUtil::canDamage($attacked->getPlayerName()) and !$event->isCancelled()) {
-
-                    echo $attacked->getPlayerName() . "\n";
-
+                    
                     $attacked->setNoDamageTicks($event->getAttackCooldown());
                     //$attacker->addHit($attacked->getPlayer(), $event->getAttackCooldown());
 

@@ -1679,7 +1679,7 @@ class PracticeUtil
             $leftKey = array_keys($arr1)[0];
             $leftVal = $arr1[$leftKey];
             $result[$leftKey] = $leftVal;
-            $arr1 = array_slice($arr2, 1, null, true);
+            $arr1 = array_slice($arr1, 1, null, true);
         }
 
         while(count($arr2) > 0) {

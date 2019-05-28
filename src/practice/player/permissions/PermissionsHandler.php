@@ -55,11 +55,9 @@ class PermissionsHandler
         $ownerPerms = [];
 
         foreach($perms as $perm) {
-            if($perm instanceof Permission) {
-                $defaultValue = $perm->getDefault();
-                if ($defaultValue === Permission::DEFAULT_OP)
-                    $ownerPerms[] = $perm->getName();
-            }
+            $defaultValue = $perm->getDefault();
+            if ($defaultValue === Permission::DEFAULT_OP)
+                $ownerPerms[] = $perm->getName();
         }
 
         $ownerPerms[] = self::PERMISSION_PLACE_BREAK;
