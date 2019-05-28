@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace practice\game\inventory\menus;
 
 use pocketmine\inventory\transaction\action\SlotChangeAction;
+use pocketmine\item\Item;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 use practice\arenas\TeleportArenaTask;
@@ -35,7 +36,9 @@ class FFAMenu extends BaseMenu
         $items = PracticeCore::getItemHandler()->getFFAItems();
 
         foreach ($items as $item) {
+
             if ($item instanceof PracticeItem) {
+
                 $i = clone $item->getItem();
                 $name = PracticeUtil::getUncoloredString($item->getName());
                 $numPlayers = PracticeCore::getArenaHandler()->getNumPlayersInArena($name);
@@ -50,16 +53,28 @@ class FFAMenu extends BaseMenu
         }
     }
 
-    public function onItemMoved(PracticePlayer $p, SlotChangeAction $action): void
-    {
+    public function onItemMoved(PracticePlayer $p, SlotChangeAction $action): void {
 
         $origItem = $action->getSourceItem();
 
+        $newItem = $action->getTargetItem();
+
         $player = $p->getPlayer();
 
-        if (PracticeUtil::canUseItems($player, true) and PracticeCore::getItemHandler()->isPracticeItem($origItem)) {
+        if(PracticeUtil::isPotion($origItem))
+            $origItem = $origItem->setCount(1);
 
-            $practiceItem = PracticeCore::getItemHandler()->getPracticeItem($origItem);
+        if(PracticeUtil::isPotion($newItem))
+            $newItem = $newItem->setCount(1);
+
+        $itemHandler = PracticeCore::getItemHandler();
+
+        $isPracItem = ($itemHandler->isPracticeItem($origItem)) or ($itemHandler->isPracticeItem($newItem));
+
+        if (PracticeUtil::canUseItems($player, true) and $isPracItem === true) {
+
+            $practiceItem = ($itemHandler->isPracticeItem($newItem)) ? $itemHandler->getPracticeItem($newItem) : $itemHandler->getPracticeItem($origItem);
+
             $arenaName = $practiceItem->getName();
 
             if (PracticeCore::getArenaHandler()->isFFAArena($arenaName)) {

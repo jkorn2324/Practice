@@ -69,6 +69,11 @@ class PracticeUtil
 
     # ITEM FUNCTIONS
 
+    public static function isPotion(Item $item, bool $testCount = false) : bool {
+        $potion = ($testCount === true) ? ($item->getId() === Item::POTION and $item->getCount() > 1) : $item->getId() === Item::POTION;
+        return $potion;
+    }
+
     public static function isSign(Item $item) : bool {
 
         $signs = [Item::SIGN, Item::BIRCH_SIGN, Item::SPRUCE_SIGN, Item::JUNGLE_SIGN, Item::DARKOAK_SIGN, Item::ACACIA_SIGN];

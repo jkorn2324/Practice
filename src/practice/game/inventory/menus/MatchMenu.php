@@ -10,8 +10,6 @@ declare(strict_types=1);
 
 namespace practice\game\inventory\menus;
 
-
-use muqsit\invmenu\InvMenu;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
 use pocketmine\item\Item;
 use pocketmine\Player;
@@ -81,6 +79,12 @@ class MatchMenu extends BaseMenu
         $player = $p->getPlayer();
 
         $itemHandler = PracticeCore::getItemHandler();
+
+        if(PracticeUtil::isPotion($origItem, true))
+            $origItem = $origItem->setCount(1);
+
+        if(PracticeUtil::isPotion($newItem, true))
+            $newItem = $newItem->setCount(1);
 
         $isPracItem = ($itemHandler->isPracticeItem($origItem)) or ($itemHandler->isPracticeItem($newItem));
 

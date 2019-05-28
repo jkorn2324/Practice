@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace practice;
 
-
 use pocketmine\scheduler\Task;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use practice\duels\groups\DuelGroup;
-use practice\duels\groups\QueuedPlayer;
-use practice\player\PracticePlayer;
 use practice\scoreboard\ScoreboardUtil;
 
 class PracticeTask extends Task {
