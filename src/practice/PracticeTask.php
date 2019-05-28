@@ -50,7 +50,9 @@ class PracticeTask extends Task {
      */
     public function onRun(int $currentTick) {
 
-        $this->seconds--;
+        // Makes sure that its being decremented each second and not each tick.
+        if($currentTick % 20 === 0 and $currentTick !== 0)
+            $this->seconds--;
 
         $this->broadcastAnnouncement($currentTick);
         $this->updateDuels($currentTick);
