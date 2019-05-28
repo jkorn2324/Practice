@@ -806,9 +806,9 @@ class PlayerHandler
         $newWElo = $winnerElo + $winnerEloChange;
         $newLElo = $loserElo - $loserEloChange;
 
-        if($newLElo < 800) {
-            $newLElo = 800;
-            $loserEloChange = $loserElo - 800;
+        if($newLElo < 700) {
+            $newLElo = 700;
+            $loserEloChange = $loserElo - 700;
         }
 
         $result['winner'] = $winnerEloChange;
