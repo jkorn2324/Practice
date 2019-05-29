@@ -285,9 +285,8 @@ class DuelGroup
 
             if($this->fightingTick > 0) {
                 $this->fightingTick--;
-                if($this->fightingTick <= 0) {
+                if($this->fightingTick <= 0)
                     $this->fightingTick = 0;
-                }
             }
 
             if($duration % 20 === 0)
