@@ -80,7 +80,8 @@ class DuelSpectator {
     }
 
     public function isOnline() : bool {
-        return !is_null($this->getPlayer());
+        $p = $this->getPlayer();
+        return !is_null($p) and $p->isOnline();
     }
 
     public function getPlayerName() : string {

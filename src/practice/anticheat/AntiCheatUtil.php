@@ -77,8 +77,9 @@ class AntiCheatUtil
      * @param string $message
      */
     private static function sendLog(string $message): void {
+
         foreach(Server::getInstance()->getOnlinePlayers() as $player) {
-            if(!PracticeCore::getPlayerHandler()->isMod($player->getName())) {
+            if(!PracticeCore::getPlayerHandler()->isStaffMember($player->getName())) {
                 continue;
             }
 

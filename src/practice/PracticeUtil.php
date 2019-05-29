@@ -871,7 +871,7 @@ class PracticeUtil
 
                         $invalidCmds = ['invite' => true, 'kick' => true, 'leave' => true];
 
-                        if(array_key_exists($command, $invalidCmds))
+                        if(isset($invalidCmds[$command]))
                             $msg = self::getMessage('party.general.fail.no-party');
 
                         else $result = true;
@@ -887,10 +887,10 @@ class PracticeUtil
 
                         } else {
 
-                            $invalidCmds = ['create' => true, 'invite' => true, 'kick' => true, 'accept'];
+                            $invalidCmds = ['create' => true, 'invite' => true, 'kick' => true, 'open' => true, 'close' => true, 'accept' => true, 'join' => true];
 
-                            if(array_key_exists($command, $invalidCmds))
-                                $msg = ($command === 'create') ? self::getMessage('party.create.fail-leave') : ($command === 'accept') ? self::getMessage('party.accept.in-party') : self::getMessage('party.general.fail-manager');
+                            if(isset($invalidCmds[$command]))
+                                $msg = ($command === 'create') ? self::getMessage('party.create.fail-leave') : ($command === 'accept' or $command === 'join') ? self::getMessage('party.accept.in-party') : self::getMessage('party.general.fail-manager');
                             else $result = true;
                         }
                     }
@@ -1583,7 +1583,7 @@ class PracticeUtil
         $result = true;
 
         foreach($needles as $key) {
-            if(!array_key_exists($key, $haystack)) {
+            if(!isset($haystack[$key])) {
                 $result = false;
                 break;
             }

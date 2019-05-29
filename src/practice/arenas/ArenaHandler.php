@@ -113,12 +113,17 @@ class ArenaHandler
 
         $map = $arena->toMap();
         $duelArenas = $this->getConfig()->get("duel-arenas");
-        if(!key_exists($name, $duelArenas)) {
+
+        if(!isset($duelArenas[$name])) {
             $duelArenas[$name] = $map;
             $this->getConfig()->set("duel-arenas", $duelArenas);
             //$this->getConfig()->set("ffa-arenas", $this->getConfig()->get("ffa-arenas"));
             $this->getConfig()->save();
         }
+
+        /*if(!key_exists($name, $duelArenas)) {
+
+        }*/
     }
 
     private function createFFAArena(string $name, Position $pos) : void {
@@ -129,7 +134,7 @@ class ArenaHandler
 
         $map = $arena->toMap();
         $ffaArenas = $this->getConfig()->get("ffa-arenas");
-        if(!key_exists($name, $ffaArenas)) {
+        if(!isset($ffaArenas[$name])) {
             $ffaArenas[$name] = $map;
             //$this->getConfig()->set("duel-arenas", $this->getConfig()->get("duel-arenas"));
             $this->getConfig()->set("ffa-arenas", $ffaArenas);
@@ -161,7 +166,7 @@ class ArenaHandler
 
         $duelArenas = $this->getConfig()->get("duel-arenas");
 
-        if(array_key_exists($name, $duelArenas)) {
+        if(isset($duelArenas[$name])) {
 
             unset($duelArenas[$name], $this->duelArenas[$name]);
             $this->getConfig()->set("duel-arenas", $duelArenas);
@@ -174,7 +179,7 @@ class ArenaHandler
 
         $ffaArenas = $this->getConfig()->get("ffa-arenas");
 
-        if(array_key_exists($name, $ffaArenas)) {
+        if(isset($ffaArenas[$name])) {
 
             unset($ffaArenas[$name], $this->ffaArenas[$name]);
             //$this->getConfig()->set("duel-arenas", $this->getConfig()->get("duel-arenas"));
@@ -223,6 +228,7 @@ class ArenaHandler
     }
 
     public function getFFAArena(string $name) {
+
         $result = null;
 
         if(isset($this->ffaArenas[$name]))
@@ -237,7 +243,7 @@ class ArenaHandler
 
         $result = null;
 
-        if(array_key_exists($name, $ffaArenas)) {
+        if(isset($ffaArenas[$name])) {
 
             $arena = $ffaArenas[$name];
             $arenaKit = Kit::NO_KIT;
@@ -274,7 +280,7 @@ class ArenaHandler
     }
 
     public function isFFAArena(string $name) : bool {
-        return !is_null($this->getFFAArena($name));
+        return isset($this->ffaArenas[$name]);
     }
 
     public function getDuelArena(string $name) {
@@ -291,7 +297,7 @@ class ArenaHandler
         $duelArenas = $this->getConfig()->get("duel-arenas");
         $result = null;
 
-        if(array_key_exists($name, $duelArenas)) {
+        if(isset($duelArenas[$name])) {
 
             $arena = $duelArenas[$name];
             $arenaCenter = null;
@@ -347,7 +353,7 @@ class ArenaHandler
     }
 
     public function isDuelArena(string $name) : bool {
-        return !is_null($this->getDuelArena($name));
+        return isset($this->duelArenas[$name]);
     }
 
     public function getArena(string $name) {
@@ -446,7 +452,7 @@ class ArenaHandler
     }
 
     public function isArenaClosed(string $arena) : bool {
-        return array_key_exists($arena, $this->closedArenas) and $this->closedArenas[$arena] === true;
+        return isset($this->closedArenas[$arena]) and $this->closedArenas[$arena] === true;
     }
 
     public function setArenaOpen($arena) : void {

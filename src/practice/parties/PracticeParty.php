@@ -28,13 +28,37 @@ class PracticeParty
 
     private $id;
 
+    private $open;
+
     public function __construct(string $leader, string $name = null)
     {
         $this->leader = $leader;
         $this->name = (!is_null($name)) ? $name : 'Party_' . (self::$partyID + 1);
         $this->id = self::$partyID;
         $this->players = [$leader => true];
+        $this->open = true;
         self::$partyID++;
+    }
+
+    public function isPartyOpen() : bool {
+        return $this->open;
+    }
+
+    public function setPartyOpen(bool $open) : self {
+
+        $msg = null;
+
+        //TODO ADD TO MESSAGES.YML
+
+        if($this->open === false and $open === true)
+            $msg = TextFormat::GREEN . 'Party is now open for anyone to join.';
+        elseif ($this->open === true and $open === false) $msg = TextFormat::RED . 'Party is now invite-only.';
+
+        if(!is_null($msg))
+            $this->broadcastMsg($msg);
+
+        $this->open = $open;
+        return $this;
     }
 
     public function addToParty(string $player) : void {
@@ -56,7 +80,7 @@ class PracticeParty
     }
 
     public function isInParty(string $player) : bool {
-        return PracticeCore::getPlayerHandler()->isPlayerOnline($player) and array_key_exists($player, $this->players);
+        return PracticeCore::getPlayerHandler()->isPlayerOnline($player) and isset($this->players[$player]);
     }
 
     public function removeFromParty(string $player, bool $kick = false) : bool {

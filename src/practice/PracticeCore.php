@@ -265,6 +265,7 @@ class PracticeCore extends PluginBase
         $this->registerCommand(new PingCommand());
         $this->registerCommand(new TeleportLevelCommand());
         $this->registerCommand(new KickAllCommand());
+        //TODO REGISTER THE COMMAND WHEN IT'S FINISHED
         //$this->registerCommand(new PartyCommand());
 
     }

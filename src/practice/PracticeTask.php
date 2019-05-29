@@ -53,7 +53,7 @@ class PracticeTask extends Task {
         $this->broadcastAnnouncement($currentTick);
         $this->updateDuels($currentTick);
         $this->updatePlayers($currentTick);
-        $this->checkForReload();
+        $this->checkForReload($currentTick);
 
         PracticeCore::getPartyManager()->updateInvites();
         if($currentTick % $this->updateLeaderboardsTime === 0 and $currentTick !== 0) PracticeCore::getPlayerHandler()->updateLeaderboards();
@@ -132,7 +132,7 @@ class PracticeTask extends Task {
         }
     }
 
-    private function checkForReload(): void {
+    private function checkForReload(int $currentTick): void {
 
         $server = $this->core->getServer();
         $message = "[Server] Server restarting in ";
@@ -140,10 +140,10 @@ class PracticeTask extends Task {
         if($this->seconds < 0) {
             $server->reload();
         } elseif($this->seconds < 10) {
-            PracticeUtil::broadcastMsg($message . "$this->seconds second(s).");
+            if($currentTick % 20 === 0) PracticeUtil::broadcastMsg($message . "$this->seconds second(s).");
         } elseif($this->seconds == 60 or $this->seconds == 60*2 or $this->seconds == 60*5 or
             $this->seconds == 60*10 or $this->seconds == 60*15) {
-            PracticeUtil::broadcastMsg($message . $this->seconds / 60 . " minute(s).");
+            if($currentTick % 20 === 0) PracticeUtil::broadcastMsg($message . $this->seconds / 60 . " minute(s).");
         }
     }
 }

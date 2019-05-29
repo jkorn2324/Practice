@@ -73,6 +73,8 @@ class DuelGroup
     private $opponentDevice;
     private $playerDevice;
 
+    private $maxCountdownTicks;
+
     public function __construct(MatchedGroup $group, string $arena)
     {
         $this->playerName = $group->getPlayerName();
@@ -80,6 +82,8 @@ class DuelGroup
         $this->winnerName = self::NONE;
         $this->loserName = self::NONE;
         $this->arenaName = $arena;
+
+        $this->maxCountdownTicks = PracticeUtil::secondsToTicks(self::MAX_COUNTDOWN_SEC);
 
         $this->queue = $group->getQueue();
         $this->ranked = $group->isRanked();
@@ -234,6 +238,9 @@ class DuelGroup
             return;
         }
 
+        $p = $this->getPlayer();
+        $o = $this->getOpponent();
+
         if ($this->isLoadingDuel()) {
 
             if (!PracticeCore::getArenaHandler()->isArenaClosed($this->arenaName))
@@ -241,39 +248,35 @@ class DuelGroup
 
             $this->countdownTick++;
 
-            $p = $this->getPlayer();
-            $o = $this->getOpponent();
-
             if($this->countdownTick === 5) {
+
                 $p->setScoreboard(Scoreboard::DUEL_SCOREBOARD);
                 $o->setScoreboard(Scoreboard::DUEL_SCOREBOARD);
+
             } else {
+
                 if($this->countdownTick % 2 === 0) {
                     $p->updateScoreboard("opponent", ["%player%" => $o->getPlayerName()]);
                     $o->updateScoreboard("opponent", ["%player%" => $p->getPlayerName()]);
                 }
             }
 
-            $max = PracticeUtil::secondsToTicks(self::MAX_COUNTDOWN_SEC);
-
             if ($this->countdownTick % 20 === 0 and $this->countdownTick !== 0) {
 
                 $second = self::MAX_COUNTDOWN_SEC - PracticeUtil::ticksToSeconds($this->countdownTick);
                 $msg = null;
 
-                if ($second != 0) {
+                if ($second !== 0) {
                     $msg = PracticeUtil::str_replace(PracticeUtil::getMessage("duels.start.countdown"), ["%seconds%" => "$second"]);
                 } else {
                     $ranked = ($this->ranked ? "Ranked" : "Unranked");
                     $msg = PracticeUtil::str_replace(PracticeUtil::getMessage("duels.start.go-msg"), ["%queue%" => $this->queue, "%ranked%" => $ranked]);
                 }
 
-                if (!is_null($msg)) {
-                    $this->broadcastMsg($msg);
-                }
+                if (!is_null($msg)) $this->broadcastMsg($msg);
             }
 
-            if ($this->countdownTick >= $max) $this->start();
+            if ($this->countdownTick >= $this->maxCountdownTicks) $this->start();
 
         } elseif ($this->isDuelRunning()) {
 
@@ -290,22 +293,19 @@ class DuelGroup
             if($duration % 20 === 0)
                 $this->updateScoreboards();
 
-            $centerY = $this->getArena()->getSpawnPosition()->y;
+            if($this->isSumo()) {
 
-            $playerY = $this->getPlayer()->getPlayer()->getPosition()->y;
+                if ($this->isPlayerBelowCenter($p, 3.0)) {
+                    $this->setResults($this->opponentName, $this->playerName);
+                    $this->endDuel();
+                    return;
+                }
 
-            $oppY = $this->getOpponent()->getPlayer()->getPosition()->y;
-
-            if($playerY + 2.5 <= $centerY) {
-                $this->setResults($this->opponentName, $this->playerName);
-                $this->endDuel();
-                return;
-            }
-
-            if($oppY + 2.5 <= $centerY) {
-                $this->setResults($this->playerName, $this->opponentName);
-                $this->endDuel();
-                return;
+                if ($this->isPlayerBelowCenter($o, 3.0)) {
+                    $this->setResults($this->playerName, $this->opponentName);
+                    $this->endDuel();
+                    return;
+                }
             }
 
             if($duration >= $maxDuration) {
@@ -313,15 +313,43 @@ class DuelGroup
                 $this->endDuel();
                 return;
             }
+
+            $size = count($this->spectators);
+
+            if($duration % 20 === 0 and $size > 0) {
+                $keys = array_keys($this->spectators);
+                foreach($keys as $key) {
+                    $spec = $this->spectators[$key];
+                    $spectator = $spec->getPlayer();
+                    if($spectator->isOnline()) {
+                        $pl = $spectator->getPlayer();
+                        if ($this->isPlayerBelowCenter($spectator, 1.0))
+                            $pl->teleport($this->arena->getSpawnPosition());
+                    } else unset($this->spectators[$key]);
+                }
+            }
+
         } else {
+
             $difference = $this->currentTick - $this->endTick;
             $seconds = PracticeUtil::ticksToSeconds($difference);
-            if($seconds >= self::MAX_END_DELAY_SEC) {
+
+            if($seconds >= self::MAX_END_DELAY_SEC)
                 $this->endDuel();
-            }
         }
 
         $this->currentTick++;
+    }
+
+    private function isPlayerBelowCenter(PracticePlayer $player, float $below) : bool {
+        $pos = $player->getPlayer()->getPosition();
+        $y = $pos->getY();
+        $centerY = $this->arena->getSpawnPosition()->y;
+        return $y + $below <= $centerY;
+    }
+
+    private function isSumo() : bool {
+        return PracticeUtil::equals_string($this->queue, 'Sumo', 'sumo', 'SUMO', 'sumopvp');
     }
 
     private function updateScoreboards() : void {
@@ -338,8 +366,10 @@ class DuelGroup
             $o->updateScoreboard('duration', ['%time%' => $duration]);
         }
 
-        foreach ($this->spectators as $spectator) {
+        $keys = array_keys($this->spectators);
 
+        foreach ($keys as $key) {
+            $spectator = $this->spectators[$key];
             $spectator->update();
 
             /*if(PracticeCore::getPlayerHandler()->isPlayerOnline($spectator)) {
@@ -419,7 +449,7 @@ class DuelGroup
 
         $messageList = $this->getFinalMessage($endPrematurely);
 
-        $messageList = PracticeUtil::arr_replace_values($messageList, ["*" => PracticeUtil::getLineSeparator($messageList)]);
+        $messageList = PracticeUtil::arr_replace_values($messageList, ['*' => PracticeUtil::getLineSeparator($messageList)]);
 
         $sizeMsgList = count($messageList);
 
@@ -444,7 +474,10 @@ class DuelGroup
             $p->getPlayer()->setNameTag($this->origOppTag);
         }
 
-        foreach($this->spectators as $spectator) {
+        $keys = array_keys($this->spectators);
+
+        foreach($keys as $key) {
+            $spectator = $this->spectators[$key];
             $spectator->resetPlayer();
         }
 
@@ -457,8 +490,9 @@ class DuelGroup
 
     private function getFinalMessage(bool $endPrematurely) : array {
 
-        $winnerChangedElo = 0;
-        $loserChangedElo = 0;
+        $resultMsg = $this->getResultMessage();
+
+        $result = ['*', $resultMsg, '*'];
 
         if($endPrematurely === false) {
 
@@ -472,25 +506,18 @@ class DuelGroup
 
                 $winnerChangedElo = $elo['winner'];
                 $loserChangedElo = $elo['loser'];
-            }
-        }
 
-        $result = [];
+                $eloChanges = $this->getEloChanges($winnerChangedElo, $loserChangedElo);
 
-        if($endPrematurely) {
-            $result = ["*", $this->getResultMessage(), "*"];
-        } else {
-            if($this->ranked) {
-                $result = ["*", $this->getResultMessage(), "*", $this->getEloChanges($winnerChangedElo, $loserChangedElo), "*"];
-            } else {
-                $result = ["*", $this->getResultMessage(), "*"];
+                array_push($result, $eloChanges, '*');
             }
 
             $size = count($this->spectators);
-            if(strlen($this->getSpectatorMessage()) > 0 and $size > 0 and $this->getSpectatorMessage() !== self::NO_SPEC_MSG) {
-                $result += [$this->getSpectatorMessage(), "*"];
-            }
+            $msg = $this->getSpectatorMessage();
+            if(strlen($msg) > 0 and $size > 0 and $msg !== self::NO_SPEC_MSG)
+                array_push($result, $msg, '*');
         }
+
         return $result;
     }
 
@@ -502,39 +529,38 @@ class DuelGroup
 
         $replaced = "";
 
-        if(count($this->spectators) > 0) {
-            $size = count($this->spectators);
-            $len = count($this->spectators);
+        $size = count($this->spectators);
+
+        if($size > 0) {
+
+            $len = $size;
             $left = "(+%left% more)";
+
             if($len > 4) {
                 $len = 4;
                 $others = $size - $len;
                 $left = PracticeUtil::str_replace($left, ["%left%" => "$others"]);
-            } else {
-                $left = null;
-            }
+            } else $left = null;
 
             $count = 0;
             $len = $len - 1;
 
-            foreach($this->spectators as $s) {
-                $spec = $s->getPlayerName();
-                if($count < $len) {
-                    $comma = ($count === $len ? "" : ", ");
-                    $replaced = $replaced . ($spec . $comma);
-                } else break;
+            $keys = array_keys($this->spectators);
 
+            foreach($keys as $key) {
+                $name = strval($key);
+                if($count < $len) {
+                    $comma = ($count === $len ? '' : ', ');
+                    $replaced = $replaced . ($name . $comma);
+                } else break;
                 $count++;
             }
 
-            if(!is_null($left)) {
-                $replaced = $replaced . " $left";
-            }
+            if(!is_null($left)) $replaced = $replaced . " $left";
 
             $result = PracticeUtil::str_replace($msg, ["%spec%" => $replaced, "%num%" => "$size"]);
-        } else {
-            $result = self::NO_SPEC_MSG;
-        }
+
+        } else $result = self::NO_SPEC_MSG;
 
         return $result;
     }
@@ -577,8 +603,9 @@ class DuelGroup
         if($this->isOpponentOnline()) {
             $o = $this->getOpponent();
             if(PracticeUtil::isLineSeparator($oppMsg)) {
-                if($o->getDevice() === PracticeUtil::WINDOWS_10) $oppMsg .= PracticeUtil::WIN10_ADDED_SEPARATOR;
+                if ($o->getDevice() === PracticeUtil::WINDOWS_10) $oppMsg .= PracticeUtil::WIN10_ADDED_SEPARATOR;
             }
+
             $o->sendMessage($oppMsg);
         }
 
@@ -594,30 +621,27 @@ class DuelGroup
 
             $spectators = $this->getSpectators();
 
+            $p = (!is_null($player) and PracticeCore::getPlayerHandler()->isPlayerOnline($player)) ? PracticeCore::getPlayerHandler()->getPlayer($player) : null;
+
+            $findPlayer = !is_null($p);
+
             foreach($spectators as $spec) {
 
-                $exec = true;
+                $exec = false;
 
-                if(!is_null($player) and PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-                    $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-                    if($spec->isOnline()) {
-                        $spectator = $spec->getPlayer();
-                        if($spectator->equals($p)) {
-                            $exec = false;
-                        }
-                    }
-                } else {
-                    if(!$spec->isOnline()) $exec = false;
+                if($spec->isOnline()) {
+                    $spectator = $spec->getPlayer();
+                    if($findPlayer === true and $spectator->equals($p))
+                        continue;
+                    else $exec = true;
                 }
 
                 if($exec === true) {
-                    if($spec->isOnline()) {
-                        $specMsg = $msg;
-                        $pl = $spec->getPlayer();
-                        if($pl->getDevice() === PracticeUtil::WINDOWS_10 and PracticeUtil::isLineSeparator($specMsg))
-                            $specMsg .= PracticeUtil::WIN10_ADDED_SEPARATOR;
-                        $pl->sendMessage($specMsg);
-                    }
+                    $specMsg = $msg;
+                    $pl = $spec->getPlayer();
+                    if($pl->getDevice() === PracticeUtil::WINDOWS_10 and PracticeUtil::isLineSeparator($specMsg))
+                        $specMsg .= PracticeUtil::WIN10_ADDED_SEPARATOR;
+                    $pl->sendMessage($specMsg);
                 }
             }
         }
@@ -639,7 +663,6 @@ class DuelGroup
                     break;
                 }
             }
-
 
             if($add === true) $this->oppHits[] = $hit;
 
@@ -777,73 +800,49 @@ class DuelGroup
 
             $pl = $p->getPlayer();
 
+            $name = $pl->getName();
+
             $spec = new DuelSpectator($pl);
 
             $center = $this->getArena()->getSpawnPosition();
 
             $spec->teleport($center);
 
-            $this->spectators[] = $spec;
+            $this->spectators[$name] = $spec;
 
             $msg = PracticeUtil::getMessage("duels.spectator.join");
-            $msg = PracticeUtil::str_replace($msg, ["%spec%" => $spec->getPlayerName()]);
+            $msg = PracticeUtil::str_replace($msg, ["%spec%" => $name]);
             $this->broadcastMsg($msg, true);
         }
     }
 
-    public function isSpectator($spec) : bool {
-        return $this->indexOfSpec($spec) !== -1;
+    public function isSpectator(string $spec) : bool {
+        return isset($this->spectators[$spec]);
     }
 
-    public function removeSpectator($spec, bool $msg = false) : void {
+    public function removeSpectator(string $spec, bool $msg = false) : void {
 
         if($this->isSpectator($spec)) {
 
             $p = PracticeCore::getPlayerHandler()->getPlayer($spec);
 
-            PracticeUtil::resetPlayer($p->getPlayer(), true);
+            $player = $p->getPlayer();
+
+            PracticeUtil::resetPlayer($player, true);
+
+            $spectators = $this->spectators;
 
             if($msg === true) {
                 $msg = PracticeUtil::str_replace(PracticeUtil::getMessage("duels.spectator.leave"), ["%spec%" => "You", "is" => "are"]);
                 $p->sendMessage($msg);
-                $broadcastedMsg = PracticeUtil::str_replace(PracticeUtil::getMessage("duels.spectator.leave"), ["%spec%" => $p->getPlayerName()]);
-                $this->broadcastMsg($broadcastedMsg, true, $p->getPlayer());
+                $broadcastedMsg = PracticeUtil::str_replace(PracticeUtil::getMessage("duels.spectator.leave"), ["%spec%" => $player->getName()]);
+                $this->broadcastMsg($broadcastedMsg, true, $player);
             }
 
-            $index = $this->indexOfSpec($spec);
-            unset($this->spectators[$index]);
-            $this->spectators = array_values($this->spectators);
+            unset($spectators[$spec]);
+            $this->spectators = $spectators;
         }
     }
-
-    private function indexOfSpec($spectator) : int {
-
-        $result = -1;
-        $count = 0;
-
-        $name = null;
-
-        if(!is_null(PracticeUtil::getPlayerName($spectator))) $name = PracticeUtil::getPlayerName($spectator);
-        elseif ($spectator instanceof DuelSpectator) $name = $spectator->getPlayerName();
-
-        if(!is_null($name)) {
-
-            foreach($this->spectators as $spec) {
-                if($spec->isOnline()) {
-                    $specName = $spec->getPlayerName();
-                    if($name === $specName) {
-                        $result = $count;
-                        break;
-                    }
-                }
-
-                $count++;
-            }
-        }
-
-        return $result;
-    }
-
 
     /**
      * @return array|DuelSpectator[]
@@ -852,16 +851,14 @@ class DuelGroup
 
         $result = [];
 
-        $specs = count($this->spectators) - 1;
+        $keys = array_keys($this->spectators);
 
-        for($i = $specs; $i > -1; $i--) {
-            $spec = $this->spectators[$i];
-            if($spec->isOnline()) {
+        foreach($keys as $key) {
+            $name = strval($key);
+            $spec = $this->spectators[$name];
+            if($spec->isOnline())
                 $result[] = $spec;
-            } else {
-                unset($this->spectators[$i]);
-                $this->spectators = array_values($this->spectators);
-            }
+            else unset($this->spectators[$key]);
         }
 
         return $result;
@@ -896,24 +893,24 @@ class DuelGroup
 
         if($minutes > 0) {
             if($minutes < 10) {
-                $s = PracticeUtil::str_replace($s, ["mm" => "0$minutes"]);
+                $s = PracticeUtil::str_replace($s, ['mm' => '0' . $minutes]);
             } else {
-                $s = PracticeUtil::str_replace($s,  ["mm" => "$minutes"]);
+                $s = PracticeUtil::str_replace($s,  ['mm' => $minutes]);
             }
         } else {
-            $s = PracticeUtil::str_replace($s,  ["mm" => "00"]);
+            $s = PracticeUtil::str_replace($s,  ['mm' => '00']);
         }
 
         $seconds = $seconds % 60;
 
         if($seconds > 0) {
             if($seconds < 10) {
-                $s = PracticeUtil::str_replace($s, ["ss" => "0$seconds"]);
+                $s = PracticeUtil::str_replace($s, ['ss' => '0' . $seconds]);
             } else {
-                $s = PracticeUtil::str_replace($s, ["ss" => "$seconds"]);
+                $s = PracticeUtil::str_replace($s, ['ss' => $seconds]);
             }
         } else {
-            $s = PracticeUtil::str_replace($s, ["ss" => "00"]);
+            $s = PracticeUtil::str_replace($s, ['ss' => '00']);
         }
 
         return $s;

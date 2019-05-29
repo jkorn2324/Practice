@@ -107,12 +107,7 @@ class DuelHandler
 
         $name = PracticeUtil::getPlayerName($player);
 
-        $result = false;
-
-        if (!is_null($name))
-            $result = array_key_exists($name, $this->queuedPlayers);
-
-        return $result;
+        return ($name !== null) and isset($this->queuedPlayers[$name]);
     }
 
 
@@ -540,8 +535,9 @@ class DuelHandler
 
         if ($playerHandler->isPlayerOnline($spec)) {
             $player = $playerHandler->getPlayer($spec);
+            $name = $player->getPlayerName();
             foreach ($this->duels as $duel) {
-                if ($duel->isSpectator($player->getPlayerName())) {
+                if ($duel->isSpectator($name)) {
                     $result = $duel;
                     break;
                 }

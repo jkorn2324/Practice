@@ -119,7 +119,7 @@ class PlayerHandler
 
         $id = -1;
 
-        if(array_key_exists($name, $this->closedInventoryIDs))
+        if(isset($this->closedInventoryIDs[$name]))
             $id = intval($this->closedInventoryIDs[$name]);
 
         return $id;
@@ -172,13 +172,13 @@ class PlayerHandler
 
             $data = yaml_parse_file($path);
 
-            if(!array_key_exists('scoreboards-enabled', $data))
+            if(!isset($data['scoreboards-enabled']))
                 $data['scoreboards-enabled'] = true;
 
-            if(!array_key_exists('place-break', $data))
+            if(!isset($data['place-break']))
                 $data['place-break'] = false;
 
-            if(!array_key_exists('pe-only', $data))
+            if(!isset($data['pe-only']))
                 $data['pe-only'] = false;
 
             $stats = $data['stats'];
@@ -205,7 +205,7 @@ class PlayerHandler
                     if($kitHandler->isDuelKit($kit))
                         $elo[$kit] = 1000;
                     else {
-                        if(array_key_exists($kit, $elo))
+                        if(isset($elo[$kit]))
                             unset($elo[$kit]);
                     }
                 }
@@ -228,7 +228,7 @@ class PlayerHandler
         $path = $this->playerFolderPath . "/$player.yml";
         if(file_exists($path)) {
             $data = yaml_parse_file($path, 0);
-            if(is_array($data) and array_key_exists('scoreboards-enabled', $data))
+            if(is_array($data) and isset($data['scoreboards-enabled']))
                 $result = boolval($data['scoreboards-enabled']);
         }
         return $result;
@@ -243,7 +243,7 @@ class PlayerHandler
         $path = $this->playerFolderPath . "/$player.yml";
         if(file_exists($path)) {
             $data = yaml_parse_file($path, 0);
-            if(is_array($data) and array_key_exists('place-break', $data))
+            if(is_array($data) and isset($data['place-break']))
                 $result = boolval($data['place-break']);
         }
         return $result;
@@ -267,7 +267,7 @@ class PlayerHandler
         $path = $this->playerFolderPath . "/$playerName.yml";
         if(file_exists($path)) {
             $data = yaml_parse_file($path, 0);
-            if(is_array($data) and array_key_exists('pe-only', $data))
+            if(is_array($data) and isset($data['pe-only']))
                 $result = boolval($data['pe-only']);
         }
 
@@ -286,7 +286,7 @@ class PlayerHandler
         $result = false;
         if(file_exists($path)) {
             $data = yaml_parse_file($path, 0);
-            if(is_array($data) and array_key_exists('muted', $data)) {
+            if(is_array($data) and isset($data['muted'])) {
                 $result = $data['muted'];
             }
         }
@@ -298,7 +298,7 @@ class PlayerHandler
         $path = $this->playerFolderPath . "/$player.yml";
         if(file_exists($path)) {
             $data = yaml_parse_file($path, 0);
-            if(is_array($data) and array_key_exists($key, $data)) {
+            if(is_array($data) and isset($data[$key])) {
                 $data[$key] = $value;
                 $executed = true;
             }
@@ -543,6 +543,19 @@ class PlayerHandler
         if(!is_null($name))
 
             $result = PracticeCore::getRankHandler()->hasRank($name, RankHandler::$MODERATOR);
+
+        return $result;
+    }
+
+    public function isBuilder($player) : bool {
+
+        $result = false;
+
+        $name = PracticeUtil::getPlayerName($player);
+
+        if(!is_null($name))
+
+            $result = PracticeCore::getRankHandler()->hasRank($name, RankHandler::$BUILDER);
 
         return $result;
     }
@@ -963,7 +976,7 @@ class PlayerHandler
 
                     } else {
 
-                        if(array_key_exists($queue, $elo))
+                        if(isset($elo[$queue]))
                             $resElo = intval($elo[$queue]);
                     }
 

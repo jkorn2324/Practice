@@ -78,7 +78,7 @@ class PartyCommand extends BaseCommand
 
             $check = ['help' => true, 'create' => true, 'invite' => true, 'kick' => true, 'leave' => true, 'accept' => true, 'join' => true, 'open' => true, 'close' => true];
 
-            if(array_key_exists($name, $check) and PracticeUtil::canExecutePartyCmd($sender, $name)) {
+            if(isset($check[$name]) and PracticeUtil::canExecutePartyCmd($sender, $name)) {
 
                 switch($name) {
                     case 'help':
@@ -98,6 +98,15 @@ class PartyCommand extends BaseCommand
                         break;
                     case 'accept':
                         $this->acceptRequest($sender, strval($args[1]));
+                        break;
+                    case 'join':
+                        $this->joinParty($sender, strval($args[1]));
+                        break;
+                    case 'open':
+                        $this->openParty($sender);
+                        break;
+                    case 'close':
+                        $this->closeParty($sender);
                         break;
                 }
 
@@ -188,5 +197,18 @@ class PartyCommand extends BaseCommand
             //$msg = TextFormat::RED . $player . 'is not online!';
 
         if(!is_null($msg)) $sender->sendMessage($msg);
+    }
+
+    // $PLAYER = PARTY OF THE PLAYER TO JOIN
+    private function joinParty(CommandSender $sender, string $player) : void {
+
+    }
+
+    private function openParty(CommandSender $sender) : void {
+
+    }
+
+    private function closeParty(CommandSender $sender) : void {
+
     }
 }

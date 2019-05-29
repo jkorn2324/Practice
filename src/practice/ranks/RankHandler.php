@@ -20,6 +20,7 @@ use practice\PracticeUtil;
 class RankHandler
 {
     public static $GUEST;
+    public static $BUILDER;
     public static $YOUTUBE;
     public static $FAMOUS;
     public static $MODERATOR;
@@ -31,15 +32,16 @@ class RankHandler
 
     public function __construct()
     {
-        self::$GUEST = new Rank("guest", "Guest");
-        self::$YOUTUBE = new Rank("youtube", "YouTube");
-        self::$FAMOUS = new Rank("famous", "Famous");
-        self::$MODERATOR = new Rank("mod", "Mod");
-        self::$ADMIN = new Rank("admin", "Admin");
-        self::$OWNER = new Rank("owner", "Owner");
-        self::$DEV = new Rank("dev", "Dev");
+        self::$GUEST = new Rank('guest', 'Guest');
+        self::$BUILDER = new Rank('builder', 'Builder');
+        self::$YOUTUBE = new Rank('youtube', 'YouTube');
+        self::$FAMOUS = new Rank('famous', 'Famous');
+        self::$MODERATOR = new Rank('mod', 'Mod');
+        self::$ADMIN = new Rank('admin', 'Admin');
+        self::$OWNER = new Rank('owner', 'Owner');
+        self::$DEV = new Rank('dev', 'Dev');
 
-        $this->allRanks = [self::$GUEST, self::$YOUTUBE, self::$FAMOUS, self::$MODERATOR, self::$ADMIN, self::$OWNER, self::$DEV];
+        $this->allRanks = [self::$GUEST, self::$BUILDER, self::$YOUTUBE, self::$FAMOUS, self::$MODERATOR, self::$ADMIN, self::$OWNER, self::$DEV];
     }
 
     public function setDefaultRank($player) : bool {
@@ -81,9 +83,8 @@ class RankHandler
             $theRanks = $data["ranks"];
             if(is_array($theRanks)){
                 $theRanks = [];
-                foreach($ranks as $r){
+                foreach($ranks as $r)
                     $theRanks[] = $r->getLocalizedName();
-                }
             }
             $result = $playerHandler->setPlayerData($name, "ranks", $theRanks);
         }
@@ -196,8 +197,9 @@ class RankHandler
     public function getInvalidRank(array $ranks) {
         $result = null;
         foreach($ranks as $name) {
-            if(is_null($this->getRankFromName(strval($name)))) {
-                $result = strval($name);
+            $name = strval($name);
+            if(is_null($this->getRankFromName($name))) {
+                $result = $name;
                 break;
             }
         }

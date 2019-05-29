@@ -43,6 +43,7 @@ class PermissionsHandler
 
         $array = [
             'content-creators' => [],
+            'builders' => [],
             'mods' => [],
             'admins' => [],
             'owners' => []
@@ -81,6 +82,8 @@ class PermissionsHandler
             $permissions = $this->getCCPermissions();
         elseif (PracticeCore::getPlayerHandler()->isOwner($p->getPlayerName()))
             $permissions = $this->getOwnerPermissions();
+        elseif (PracticeCore::getPlayerHandler()->isBuilder($p->getPlayerName()))
+            $permissions = $this->getBuilderPermissions();
 
         $size = count($permissions);
 
@@ -142,11 +145,22 @@ class PermissionsHandler
         } elseif (PracticeCore::getPlayerHandler()->isOwner($player)) {
             $ownerPerms = $this->getOwnerPermissions();
             $result = PracticeUtil::arr_contains_value($permission, $ownerPerms);
+        } elseif (PracticeCore::getPlayerHandler()->isBuilder($player)) {
+            $builderPerms = $this->getBuilderPermissions();
+            $result = PracticeUtil::arr_contains_value($permission, $builderPerms);
         }
 
         if($result === false) $result = $player->hasPermission($permission);
 
         return $result;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getBuilderPermissions() : array {
+        $permissions = $this->config->get('builders');
+        return $permissions;
     }
 
     /**
@@ -163,7 +177,9 @@ class PermissionsHandler
     public function getModPermissions() : array {
         $ccPerms = $this->getCCPermissions();
         $modPerms = $this->config->get('mods');
+        $builderPerms = $this->getBuilderPermissions();
         $result = array_merge($ccPerms, $modPerms);
+        $result = array_merge($result, $builderPerms);
         return $result;
     }
 

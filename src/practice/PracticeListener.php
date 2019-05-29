@@ -359,7 +359,7 @@ class PracticeListener implements Listener
                 $event->setKnockBack($kb);
 
                 if(AntiCheatUtil::canDamage($attacked->getPlayerName()) and !$event->isCancelled()) {
-                    
+
                     $attacked->setNoDamageTicks($event->getAttackCooldown());
                     //$attacker->addHit($attacked->getPlayer(), $event->getAttackCooldown());
 
@@ -529,7 +529,7 @@ class PracticeListener implements Listener
 
                                 if($duelHandler->isASpectator($player)) {
                                     $duel = $duelHandler->getDuelFromSpec($player);
-                                    $duel->removeSpectator($player, true);
+                                    $duel->removeSpectator($player->getName(), true);
                                 } else PracticeUtil::resetPlayer($player);
 
                                 $msg = PracticeUtil::getMessage('spawn-message');
@@ -590,7 +590,7 @@ class PracticeListener implements Listener
                                 $use = PracticeUtil::checkActions($action, PlayerInteractEvent::RIGHT_CLICK_AIR);
                             }
 
-                            if ($use) PracticeUtil::useRod($item, $player);
+                            if ($use === true) PracticeUtil::useRod($item, $player);
                             else $cancel = true;
 
                         } elseif ($item->getId() === Item::ENDER_PEARL and $item instanceof EnderPearl) {
@@ -628,7 +628,7 @@ class PracticeListener implements Listener
                                 $use = PracticeUtil::checkActions($action, PlayerInteractEvent::RIGHT_CLICK_AIR);
                             }
 
-                            if ($use) PracticeUtil::throwPotion($item, $player);
+                            if ($use === true) PracticeUtil::throwPotion($item, $player);
 
                             $cancel = true;
 
@@ -1197,6 +1197,8 @@ class PracticeListener implements Listener
             if (PracticeUtil::isLobbyProtectionEnabled())
                 $cancel = PracticeUtil::areLevelsEqual($level, PracticeUtil::getDefaultLevel()) or $player->isInDuel();
 
+            if($cancel === false)
+                $cancel = PracticeUtil::isInSpectatorMode($p);
         }
 
         if ($cancel === true) $event->setCancelled();

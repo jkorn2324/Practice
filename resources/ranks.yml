@@ -12,6 +12,12 @@ format:
     rank: "Guest"
     # The guest playerName format.
     p-name: "%player%"
+  # The builder format.
+  builder:
+    # The builder rank format.
+    rank: "Builder"
+    # The builder playerName format.
+    p-name: "%player%"
   # The youtube format.
   youtube:
     # The youtube rank format.

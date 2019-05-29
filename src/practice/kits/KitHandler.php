@@ -102,7 +102,7 @@ class KitHandler
         $map = $kit->toMap();
         $kitObj = $this->getConfig()->get("kits");
 
-        if(!key_exists($name, $kitObj)){
+        if(!isset($kitObj[$name])){
             $kitObj[$name] = $map;
             $this->getConfig()->set("kits", $kitObj);
             $this->getConfig()->save();
@@ -112,7 +112,7 @@ class KitHandler
         $settingsMap = $kitSettings->toMap();
 
         $settingsObj = $this->getConfig()->get("pvp");
-        if(!key_exists($name, $settingsObj)) {
+        if(!isset($settingsObj[$name])) {
             $settingsObj[$name] = $settingsMap;
             $this->getConfig()->set("pvp", $settingsObj);
             $this->getConfig()->save();
@@ -124,7 +124,7 @@ class KitHandler
         $kitObj = $this->getConfig()->get("kits");
         $result = false;
 
-        if(key_exists($name, $kitObj)){
+        if(isset($kitObj[$name])){
             unset($kitObj[$name], $this->kits[$name]);
             $result = true;
             PracticeCore::getPlayerHandler()->removeEloKit($name);
@@ -133,7 +133,7 @@ class KitHandler
         }
 
         $settingsObj = $this->getConfig()->get("pvp");
-        if(key_exists($name, $settingsObj)) {
+        if(isset($settingsObj[$name])) {
             unset($settingsObj[$name], $this->pvpSettings[$name]);
             $this->getConfig()->set("pvp", $settingsObj);
             $this->getConfig()->save();
@@ -144,7 +144,7 @@ class KitHandler
 
     public function updateKit(string $name, Kit $kit) : void {
         $obj = $this->getConfig()->get("kits");
-        if(key_exists($name, $obj)){
+        if(isset($obj[$name])){
             $this->kits[$name] = $kit;
             $obj[$name] = $kit->toMap();
             $this->getConfig()->set("kits", $obj);
@@ -167,7 +167,7 @@ class KitHandler
 
         $baseKit = null;
 
-        if(array_key_exists($name, $baseArr)){
+        if(isset($baseArr[$name])){
 
             $kitArmor = [];
             $kitItems = [];
@@ -254,7 +254,7 @@ class KitHandler
 
         $result = null;
 
-        if(array_key_exists($name, $baseArr)) {
+        if(isset($baseArr[$name])) {
 
             $settingsArr = $baseArr[$name];
 

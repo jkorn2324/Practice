@@ -24,8 +24,7 @@ use practice\PracticeUtil;
 class FFAMenu extends BaseMenu
 {
 
-    public function __construct()
-    {
+    public function __construct() {
 
         parent::__construct(new SingleChestInv($this));
 
@@ -69,11 +68,15 @@ class FFAMenu extends BaseMenu
 
         $itemHandler = PracticeCore::getItemHandler();
 
-        $isPracItem = ($itemHandler->isPracticeItem($origItem)) or ($itemHandler->isPracticeItem($newItem));
+        $origPracItem = $itemHandler->getPracticeItem($origItem);
+
+        $newPracItem = $itemHandler->getPracticeItem($newItem);
+
+        $isPracItem = ($origPracItem !== null) or ($newPracItem !== null);
 
         if (PracticeUtil::canUseItems($player, true) and $isPracItem === true) {
 
-            $practiceItem = ($itemHandler->isPracticeItem($newItem)) ? $itemHandler->getPracticeItem($newItem) : $itemHandler->getPracticeItem($origItem);
+            $practiceItem = ($newPracItem !== null) ? $newPracItem : $origPracItem;
 
             $arenaName = $practiceItem->getName();
 

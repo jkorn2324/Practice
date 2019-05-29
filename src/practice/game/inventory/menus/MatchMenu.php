@@ -26,8 +26,7 @@ class MatchMenu extends BaseMenu
 
     private $ranked;
 
-    public function __construct(bool $ranked)
-    {
+    public function __construct(bool $ranked) {
 
         parent::__construct(new SingleChestInv($this));
 
@@ -80,27 +79,29 @@ class MatchMenu extends BaseMenu
 
         $itemHandler = PracticeCore::getItemHandler();
 
-        if(PracticeUtil::isPotion($origItem, true))
-            $origItem = $origItem->setCount(1);
+        if($origItem->count > 1)
+            $origItem = clone $origItem->setCount(1);
 
-        if(PracticeUtil::isPotion($newItem, true))
-            $newItem = $newItem->setCount(1);
+        if($newItem->count > 1)
+            $newItem = clone $newItem->setCount(1);
 
-        $isPracItem = ($itemHandler->isPracticeItem($origItem)) or ($itemHandler->isPracticeItem($newItem));
+        $origPracItem = $itemHandler->getPracticeItem($origItem);
+
+        $newPracItem = $itemHandler->getPracticeItem($newItem);
+
+        $isPracItem = ($origPracItem !== null) or ($newPracItem !== null);
 
         if (PracticeUtil::canUseItems($player, true) and $isPracItem === true) {
 
-            $practiceItem = ($itemHandler->isPracticeItem($newItem)) ? $itemHandler->getPracticeItem($newItem) : $itemHandler->getPracticeItem($origItem);
+            $practiceItem = ($newPracItem !== null) ? $newPracItem : $origPracItem;
 
-            $queue = $practiceItem->getName();
-
-            $q = PracticeUtil::getUncoloredString($queue);
+            $queue = PracticeUtil::getUncoloredString($practiceItem->getName());
 
             $player->removeWindow($action->getInventory());
 
             $duelHandler = PracticeCore::getDuelHandler();
 
-            if (PracticeCore::getKitHandler()->isDuelKit($q) and !$duelHandler->isPlayerInQueue($player)) $duelHandler->addPlayerToQueue($p->getPlayerName(), $q, $this->ranked);
+            if (PracticeCore::getKitHandler()->isDuelKit($queue) and !$duelHandler->isPlayerInQueue($player)) $duelHandler->addPlayerToQueue($p->getPlayerName(), $queue, $this->ranked);
         }
     }
 

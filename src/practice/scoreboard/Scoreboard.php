@@ -158,7 +158,7 @@ class Scoreboard
         if($this->sent === true) {
             $value = null;
 
-            if(array_key_exists($key, $this->lines)) {
+            if(isset($this->lines[$key])) {
                 $line = $this->lines[$key];
                 if($line instanceof DataLine) {
                     $this->lines[$key] = $line->updateText($lines);
