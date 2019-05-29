@@ -1176,7 +1176,7 @@ class PracticeUtil
     public static function getChatFormat(Player $player, string $msg) : string {
         $name = self::getNameForChat($player);
         $formatted = PracticeCore::getRankHandler()->getFormattedRanksOf($player->getName());
-        $messageFormat = strVal(PracticeCore::getInstance()->getRankConfig()->get('chat-format'));
+        $messageFormat = strval(PracticeCore::getInstance()->getRankConfig()->get('chat-format'));
         $uncolored = self::getUncoloredString($formatted);
         $len = strlen($uncolored);
 
@@ -1190,6 +1190,29 @@ class PracticeUtil
 
         $messageFormat = str_replace('%player-name%', $name, $messageFormat);
         return str_replace('%msg%', $msg, $messageFormat);
+    }
+
+    public static function getNameTagFormat(Player $player) : string {
+
+        $name = self::getNameForChat($player);
+        $formattedRanks = PracticeCore::getRankHandler()->getFormattedRanksOf($player->getName());
+        $tagFormat = strval(PracticeCore::getInstance()->getRankConfig()->get('nametag-format'));
+        $uncolored = self::getUncoloredString($formattedRanks);
+        $len = strlen($uncolored);
+
+        if($len === 0) {
+            $index = strpos($tagFormat, ']');
+            if(is_int($index)) {
+                $replaced = substr($tagFormat, 0, $index + 1);
+                $tagFormat = str_replace($replaced, '', $tagFormat);
+            }
+        } else $tagFormat = self::str_replace($tagFormat, ['%formatted-ranks%' => $formattedRanks]);
+
+        $tagFormat = str_replace('%player-name%', $name, $tagFormat);
+
+        $hp = intval($player->getHealth());
+
+        return str_replace('%hp%', $hp, $tagFormat);
     }
 
     public static function getNameForChat(Player $player) : string {

@@ -139,6 +139,14 @@ class DuelGroup
         $o->placeInDuel($this);
     }
 
+    public function setONameTag(string $nameTag) : void {
+        $this->origOppTag = $nameTag;
+    }
+
+    public function setPNameTag(string $nameTag) : void {
+        $this->origPlayerTag = $nameTag;
+    }
+
     public function isOpponent($player): bool
     {
         $result = false;

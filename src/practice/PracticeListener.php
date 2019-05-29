@@ -97,6 +97,10 @@ class PracticeListener implements Listener
                 $playerHandler->removePendingPInfo($p);
             }
 
+            $nameTag = PracticeUtil::getNameTagFormat($p);
+
+            $p->setNameTag($nameTag);
+
             if($p->getGamemode() !== 0) $p->setGamemode(0);
 
             if($p->hasEffects()) $p->removeAllEffects();
@@ -250,6 +254,10 @@ class PracticeListener implements Listener
 
         $p = $event->getPlayer();
 
+        $nameTag = PracticeUtil::getNameTagFormat($p);
+
+        $p->setNameTag($nameTag);
+
         PracticeUtil::respawnPlayer($p);
 
         $spawnPos = PracticeUtil::getSpawnPosition();
@@ -377,6 +385,12 @@ class PracticeListener implements Listener
                                 $cancel = true;
                             else $duel->addHitFrom($attacked->getPlayer());
                         }
+                    }
+
+                    if($cancel === false and $attacked->isInArena()) {
+                        $p = $attacked->getPlayer();
+                        $nameTag = PracticeUtil::getNameTagFormat($p);
+                        $p->setNameTag($nameTag);
                     }
                 }
             }

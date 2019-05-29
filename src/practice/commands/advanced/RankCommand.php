@@ -115,6 +115,8 @@ class RankCommand extends BaseCommand
 
                 if(PracticeUtil::isRanksEnabled()){
 
+                    $p = $player->getPlayer();
+
                     if(PracticeCore::getRankHandler()->areRanksValid($ranks)) {
                         $rnks = [];
                         foreach($ranks as $r) {
@@ -140,6 +142,17 @@ class RankCommand extends BaseCommand
                         }
 
                         PracticeCore::getPermissionHandler()->updatePermissions($player);
+
+                        $nameTag = PracticeUtil::getNameTagFormat($p);
+                        if(!$player->isInDuel())
+                            $p->setNameTag($nameTag);
+                        else {
+                            $duel = PracticeCore::getDuelHandler()->getDuel($p->getName());
+                            if($duel->isPlayer($p))
+                                $duel->setPNameTag($nameTag);
+                            elseif ($duel->isOpponent($p))
+                                $duel->setONameTag($nameTag);
+                        }
 
                     } else {
                         $invalidRank = PracticeCore::getRankHandler()->getInvalidRank($ranks);
