@@ -21,7 +21,9 @@ class PartyInvite
 
     private $invited;
 
-    private $tick;
+    //private $tick;
+
+    private $seconds;
 
     private static $INVITEIDS = 0;
 
@@ -32,7 +34,8 @@ class PartyInvite
     public function __construct(string $sender, string $invited) {
         $this->sender = $sender;
         $this->invited = $invited;
-        $this->tick = 0;
+        //$this->tick = 0;
+        $this->seconds = 0;
         $this->id = self::$INVITEIDS;
         self::$INVITEIDS++;
     }
@@ -53,14 +56,21 @@ class PartyInvite
 
         $remove = false;
 
-        $ticks = PracticeUtil::secondsToTicks(self::MAX_INVITE_SECS);
-
-        if($this->tick > $ticks or !$this->arePlayersOnline()) {
+        if($this->seconds > self::MAX_INVITE_SECS or !$this->arePlayersOnline()) {
             $remove = true;
             $this->setExpired();
         }
 
-        $this->tick++;
+        /*$ticks = PracticeUtil::secondsToTicks(self::MAX_INVITE_SECS);
+
+        if($this->tick > $ticks or !$this->arePlayersOnline()) {
+            $remove = true;
+            $this->setExpired();
+        }*/
+
+        $this->seconds++;
+
+        //$this->tick++;
 
         return $remove;
     }

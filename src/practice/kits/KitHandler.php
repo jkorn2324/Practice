@@ -349,16 +349,22 @@ class KitHandler
 
 
     /**
+     * @param bool $checkForRepItem
      * @return array|string[]
      */
-    public function getDuelKitNames() : array {
+    public function getDuelKitNames(bool $checkForRepItem = false) : array {
 
         $kits = $this->getDuelKits();
 
         $result = [];
 
-        foreach($kits as $kit)
-            $result[] = $kit->getName();
+        foreach($kits as $kit) {
+
+            $exec = ($checkForRepItem === true) ? $kit->hasRepItem() : true;
+
+            if($exec === true)
+                $result[] = $kit->getName();
+        }
 
         return $result;
     }

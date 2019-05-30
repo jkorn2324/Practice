@@ -28,6 +28,7 @@ class PartyCommand extends BaseCommand
     public function __construct()
     {
         parent::__construct('party', 'The base party command.', '/party help');
+        parent::setAliases(['p']);
 
         $parameters = [
             0 => [
@@ -189,7 +190,7 @@ class PartyCommand extends BaseCommand
 
                 $invite = PracticeCore::getPartyManager()->getPendingInvite($player, $sender->getName());
 
-                PracticeCore::getPartyManager()->addPlayerToParty($invite);
+                PracticeCore::getPartyManager()->addPlayerToPartyFromInvite($invite);
 
             } else $msg = PracticeUtil::str_replace(PracticeUtil::getMessage('party.invite.no-pending-rq'), ['%player%' => $player]);
                 //$msg = TextFormat::RED . 'You do not have any pending requests from ' . $player . '.';
@@ -202,13 +203,57 @@ class PartyCommand extends BaseCommand
     // $PLAYER = PARTY OF THE PLAYER TO JOIN
     private function joinParty(CommandSender $sender, string $player) : void {
 
+        $msg = null;
+
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        $partyManager = PracticeCore::getPartyManager();
+
+        if($playerHandler->isPlayerOnline($sender->getName()) and $playerHandler->isPlayerOnline($player)) {
+
+            $sendr = $playerHandler->getPlayer($sender->getName());
+
+            //$p = $playerHandler->getPlayer($player);
+
+            if($partyManager->isPlayerInParty($player)) {
+
+                $party = $partyManager->getPartyFromPlayer($player);
+
+                $name = $party->getPartyName();
+
+                if($party->isPartyOpen()) {
+
+                    $party->addToParty($sendr->getPlayerName());
+
+                    //$partyManager->addPlayerToParty()
+
+                } else $msg = PracticeUtil::str_replace(PracticeUtil::getMessage('party.join.fail-not-open'), ['%party%' => $name]);
+
+            } else $msg = PracticeUtil::str_replace(PracticeUtil::getMessage('party.join.fail-no-party'), ['%player%' => $player]);
+
+        } else  $msg = PracticeUtil::str_replace(PracticeUtil::getMessage('not-online'), ["%player%" => $player]);
+
+        if(!is_null($msg))
+            $sender->sendMessage($msg);
     }
 
     private function openParty(CommandSender $sender) : void {
 
+        $partyManager = PracticeCore::getPartyManager();
+
+        if(PracticeCore::getPlayerHandler()->isPlayerOnline($sender->getName()) and $partyManager->isLeaderOFAParty($sender->getName())) {
+            $party = $partyManager->getPartyFromLeader($sender->getName());
+            $party->setPartyOpen(true);
+        }
     }
 
     private function closeParty(CommandSender $sender) : void {
 
+        $partyManager = PracticeCore::getPartyManager();
+
+        if(PracticeCore::getPlayerHandler()->isPlayerOnline($sender->getName()) and $partyManager->isLeaderOFAParty($sender->getName())) {
+            $party = $partyManager->getPartyFromLeader($sender->getName());
+            $party->setPartyOpen(false);
+        }
     }
 }

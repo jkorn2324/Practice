@@ -1425,56 +1425,6 @@ class PracticeUtil
         return $result;
     }
 
-
-    public static function arePositionsEqual($startPos1, $startPos2) : bool {
-
-        $result = false;
-
-        $lvl1 = null; $lvl2 = null;
-
-        $pos1 = null; $pos2 = null;
-
-        if($startPos1 instanceof Position) {
-            $pos1 = $startPos1;
-            $lvl1 = $pos1->getLevel();
-        } elseif ($startPos1 instanceof Location) {
-            $pos1 = new Position($startPos1->x, $startPos1->y, $startPos1->z, $startPos1->level);
-            $lvl1 = $pos1->getLevel();
-        } elseif ($startPos1 instanceof Vector3) {
-            $pos1 = new Position($startPos1->x, $startPos1->y, $startPos1->z);
-        }
-
-        if($startPos2 instanceof Position) {
-            $pos2 = $startPos2;
-            $lvl2 = $pos2->getLevel();
-        } elseif ($startPos1 instanceof Location) {
-            $pos2 = new Position($startPos2->x, $startPos2->y, $startPos2->z, $startPos2->level);
-            $lvl2 = $pos2->getLevel();
-        } elseif ($startPos1 instanceof Vector3) {
-            $pos2 = new Position($startPos2->x, $startPos2->y, $startPos2->z);
-        }
-
-        if($pos1 !== null and $pos2 !== null) {
-
-            $x1 = $pos1->x;
-            $x2 = $pos2->x;
-            $y1 = $pos1->y;
-            $y2 = $pos2->y;
-            $z1 = $pos1->z;
-            $z2 = $pos2->z;
-
-            if ($x1 === $x2 and $y1 === $y2 and $z1 === $z2) {
-
-                if($lvl1 !== null and $lvl2 !== null)
-                    $result = self::areLevelsEqual($lvl1, $lvl2);
-
-                else $result = true;
-            }
-        }
-
-        return $result;
-    }
-
     //BLOCK FUNCTIONS
 
     public static function isGravityBlock($block) : bool {

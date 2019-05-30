@@ -48,14 +48,13 @@ use pocketmine\item\ItemBlock;
 use pocketmine\item\MushroomStew;
 use pocketmine\item\Potion;
 use pocketmine\item\SplashPotion;
-use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
-use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\Player;
+use pocketmine\utils\TextFormat;
 use practice\anticheat\AntiCheatUtil;
 use practice\arenas\PracticeArena;
 use practice\game\FormUtil;
@@ -266,12 +265,12 @@ class PracticeListener implements Listener
 
         $prevSpawnPos = $event->getRespawnPosition();
 
-        if(!PracticeUtil::arePositionsEqual($prevSpawnPos, $spawnPos))
+        if($prevSpawnPos !== $spawnPos)
             $event->setRespawnPosition($spawnPos);
 
-        $spawnPos = $event->getRespawnPosition();
+        //$spawnPos = $event->getRespawnPosition();
 
-        PracticeUtil::onChunkGenerated($spawnPos->level, intval($spawnPos->x) >> 4, intval($spawnPos->y) >> 4, function(){});
+        //PracticeUtil::onChunkGenerated($spawnPos->level, intval($spawnPos->x) >> 4, intval($spawnPos->y) >> 4, function(){});
     }
 
     public function onEntityDamaged(EntityDamageEvent $event): void {
@@ -540,11 +539,15 @@ class PracticeListener implements Listener
 
 
                             } elseif ($name === 'exit.inventory') {
+
                                 $itemHandler->spawnHubItems($player, true);
+
                             } elseif ($name === 'exit.queue') {
+
                                 $duelHandler->removePlayerFromQueue($player, true);
                                 $p->updateScoreboard();
                                 ScoreboardUtil::updateSpawnScoreboards('in-queues');
+
                             } elseif ($name === 'exit.spectator') {
 
                                 if($duelHandler->isASpectator($player)) {
@@ -554,6 +557,20 @@ class PracticeListener implements Listener
 
                                 $msg = PracticeUtil::getMessage('spawn-message');
                                 $player->sendMessage($msg);
+
+                            } elseif (PracticeUtil::str_contains('party.', $name)) {
+
+                                $partyManager = PracticeCore::getPartyManager();
+
+                                if(PracticeUtil::str_contains('leader.', $name)) {
+                                    //TODO
+                                } elseif ($name === 'party.general.leave') {
+                                    if(!$partyManager->removePlayerFromParty($player->getName())){
+                                        //TODO ADD TO MESSAGES.YML
+                                        $msg = TextFormat::RED . 'You are not in a party!';
+                                        $player->sendMessage($msg);
+                                    }
+                                }
                             }
                         }
                     }

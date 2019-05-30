@@ -19,6 +19,7 @@ use practice\arenas\ArenaHandler;
 use practice\commands\advanced\ArenaCommand;
 use practice\commands\advanced\KitCommand;
 use practice\commands\advanced\MuteCommand;
+use practice\commands\advanced\PartyCommand;
 use practice\commands\advanced\RankCommand;
 use practice\commands\advanced\ReportCommand;
 use practice\commands\advanced\StatsCommand;

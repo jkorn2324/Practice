@@ -51,20 +51,15 @@ class PlayerHandler
 
         $result = [];
 
-        $duelKits = PracticeCore::getKitHandler()->getDuelKits();
+        $duelKits = PracticeCore::getKitHandler()->getDuelKitNames(true);
 
-        foreach($duelKits as $kit) {
-
-            $name = $kit->getName();
+        foreach($duelKits as $name) {
 
             $uncoloredName = PracticeUtil::getUncoloredString($name);
 
-            if($kit->hasRepItem()) {
+            $leaderboard = $this->getLeaderboardsFrom($uncoloredName);
 
-                $leaderboard = $this->getLeaderboardsFrom($uncoloredName);
-
-                $result[$uncoloredName] = $leaderboard;
-            }
+            $result[$uncoloredName] = $leaderboard;
         }
 
         $global = $this->getLeaderboardsFrom();
@@ -72,6 +67,8 @@ class PlayerHandler
         $result['global'] = $global;
 
         $this->leaderboards = $result;
+
+        PracticeUtil::broadcastMsg(TextFormat::AQUA . '[Zehox] Leaderboards are now up to date.');
     }
 
     public function getCurrentLeaderboards() : array {
@@ -137,16 +134,18 @@ class PlayerHandler
 
             $elo = [];
 
-            $kits = PracticeCore::getKitHandler()->getDuelKits();
+            $kits = PracticeCore::getKitHandler()->getDuelKitNames(true);
 
             $size = count($kits);
 
             if($size > 0) {
                 foreach($kits as $kit) {
-                    if($kit instanceof Kit) {
+                    $name = strval($kit);
+                    $elo[$name] = 1000;
+                    /*if($kit instanceof Kit) {
                         $name = $kit->getName();
                         $elo[$name] = 1000;
-                    }
+                    }*/
                 }
             }
 
@@ -478,9 +477,9 @@ class PlayerHandler
         $keys = array_keys($this->players);
 
         foreach($keys as $key) {
-            $player = $this->players[$key];
-            if($player instanceof PracticePlayer) {
-                if(isset($player) and !is_null($player) and $player->isOnline()){
+            if(isset($this->players[$key])) {
+                $player = $this->players[$key];
+                if(!is_null($player) and $player instanceof PracticePlayer and $player->isOnline()){
                     $res[] = $player;
                 }
             }
@@ -509,10 +508,10 @@ class PlayerHandler
         $keys = array_keys($this->players);
 
         foreach($keys as $key) {
-            $player = $this->players[$key];
-            if($player instanceof PracticePlayer) {
-                if(isset($player) and !is_null($player) and $player->isOnline()) {
-                    if($this->isStaffMember($player)) $res[] = $player->getPlayerName();
+            if(isset($this->players[$key])) {
+                $player = $this->players[$key];
+                if (!is_null($player) and $player instanceof PracticePlayer and $player->isOnline()) {
+                    if ($this->isStaffMember($player)) $res[] = $player->getPlayerName();
                 }
             }
         }
@@ -723,7 +722,9 @@ class PlayerHandler
 
         $restOfElo = '';
 
-        $eloTab = ' ';
+        $eloBeginTab = TextFormat::GOLD . '» ';
+
+        $eloEndTab = TextFormat::GOLD . '«';
 
         $size = count($e) - 1;
 
@@ -735,7 +736,7 @@ class PlayerHandler
             $eloKit = strval($eloKit);
             $eloOf = $e[$eloKit];
             $newLine = ($count === $size) ? '' : "\n";
-            $restOfElo .= $eloTab . TextFormat::AQUA . $eloKit . TextFormat::WHITE . " => $eloOf Elo" . $newLine;
+            $restOfElo .= $eloBeginTab . TextFormat::AQUA . $eloKit . TextFormat::WHITE . " => $eloOf Elo " . $eloEndTab . $newLine;
             $count++;
         }
 
@@ -761,10 +762,11 @@ class PlayerHandler
         $result = [
             'firstSeparator' => $lineSeparator,
             'title' => $title,
+            'secondSeparator' => $lineSeparator,
             'kills' => $kills,
             'deaths' => $deaths,
             'elo' => $elo,
-            'secondSeparator' => $lineSeparator
+            'thirdSeparator' => $lineSeparator
         ];
 
         return $result;
@@ -914,7 +916,10 @@ class PlayerHandler
 
         $arr = $this->listEloForAll($queue);
 
-        $sortedElo = PracticeUtil::sort_array($arr);
+        $sortedElo = $arr;
+        /*$sortedElo = PracticeUtil::sort_array($arr);*/
+
+        asort($sortedElo);
 
         $playerNames = array_keys($sortedElo);
 

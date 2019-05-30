@@ -73,7 +73,7 @@ general:
     # When a player uses a command while in a duel.
     command-msg: "You can't use this command while in a duel!"
     # Message when a player receives a request -> Must have %player% and %kit% in the message.
-    message: "You have received a %kit% duel-request from %player%! Use /accept to accept the duel.\nYou have 20 seconds to accept."
+    message: "You have received a %kit% duel-request from %player%! Use /accept to accept the duel.\nYou have 2 minutes to accept."
     # When
   # Frozen Messages
   frozen:
@@ -301,6 +301,9 @@ party:
     fail-leave: "You must leave your current party first."
   accept:
     in-party: "Can't accept party requests while in a party."
+  join:
+    fail-no-party: "%player% is not in a party."
+    fail-not-open: "%party% is not open to join!"
   general:
     fail-lobby: "You can only use party commands while in the lobby."
     fail-no-party: "Can't use this command as you aren't in a party."

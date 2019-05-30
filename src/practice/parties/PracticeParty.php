@@ -10,7 +10,6 @@ declare(strict_types=1);
 
 namespace practice\parties;
 
-use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 use practice\PracticeCore;
 use practice\PracticeUtil;
@@ -38,6 +37,10 @@ class PracticeParty
         $this->players = [$leader => true];
         $this->open = true;
         self::$partyID++;
+
+        $p = PracticeCore::getPlayerHandler()->getPlayer($leader);
+        $player = $p->getPlayer();
+        PracticeCore::getItemHandler()->spawnPartyItems($player, $this);
     }
 
     public function isPartyOpen() : bool {
@@ -69,7 +72,7 @@ class PracticeParty
 
             $pl = $p->getPlayer();
 
-            PracticeCore::getItemHandler()->spawnPartyItems($pl, true);
+            PracticeCore::getItemHandler()->spawnPartyItems($pl, $this);
 
             $this->players[$p->getPlayerName()] = true;
 
@@ -110,6 +113,7 @@ class PracticeParty
                     if(!is_null($newLeader)) {
                         $this->leader = $newLeader;
                         $newL = PracticeCore::getPlayerHandler()->getPlayer($newLeader);
+                        PracticeCore::getItemHandler()->spawnPartyItems($newL->getPlayer(), $this);
                         $newLeaderMsg = PracticeUtil::str_replace(PracticeUtil::getMessage('party.general.new-manager'), ['%player%' => 'You']);
                         $newL->sendMessage($newLeaderMsg);
                     }
@@ -125,6 +129,8 @@ class PracticeParty
             $singularMsg = ($kick === true) ? PracticeUtil::str_replace($kickMsg, ['%player%' => 'You', 'has' => 'have been']) : PracticeUtil::str_replace($leaveMsg, ['%player%' => 'You', 'has' => 'have']);
 
             $p->sendMessage($singularMsg);
+
+            PracticeUtil::resetPlayer($p->getPlayer());
 
             unset($this->players[$player]);
 
@@ -146,13 +152,11 @@ class PracticeParty
 
         $keys = array_keys($this->players);
 
+        $testIfNull = !is_null($pl);
+
         foreach($keys as $key) {
 
-            $exec = true;
-
-            if(!is_null($pl) and $pl === $key)
-                $exec = false;
-
+            $exec = ($testIfNull === true and $pl === $key) ? false : true;
 
             if($exec === true and PracticeCore::getPlayerHandler()->isPlayerOnline($key)) {
                 $p = PracticeCore::getPlayerHandler()->getPlayer($key);

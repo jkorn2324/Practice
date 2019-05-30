@@ -217,7 +217,9 @@ class FormUtil
         $items = $itemHandler->getFFAItems();
 
         foreach($items as $item) {
+
             if($item instanceof PracticeItem) {
+
                 $name = $item->getName();
                 $numPlayers = PracticeCore::getArenaHandler()->getNumPlayersInArena($name);
                 $name .= "\n" . TextFormat::RED . 'Players: ' . TextFormat::WHITE . $numPlayers;
@@ -560,6 +562,16 @@ class FormUtil
         $form->setTitle('Create a Party!');
 
         $form->addInput('Provide a name for your party:', 'MyParty');
+
+        return $form;
+    }
+
+    //TODO
+    public static function getPartySettingsForm() : CustomForm {
+
+        $form = new CustomForm(function(Player $event, $data = null) {
+
+        });
 
         return $form;
     }

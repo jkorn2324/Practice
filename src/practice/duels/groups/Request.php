@@ -15,7 +15,7 @@ use practice\PracticeUtil;
 class Request
 {
 
-    private const MAX_WAIT_SECONDS = 20;
+    private const MAX_WAIT_SECONDS = 120;
 
     private $player;
 

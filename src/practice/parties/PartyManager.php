@@ -41,7 +41,7 @@ class PartyManager
         $player->sendMessage($msg);
     }
 
-    public function addPlayerToParty(PartyInvite $invite) : bool {
+    public function addPlayerToPartyFromInvite(PartyInvite $invite) : bool {
 
         $result = false;
 
@@ -80,6 +80,8 @@ class PartyManager
         $result = false;
 
         if($this->isPlayerInParty($player)) {
+
+            $result = true;
 
             $party = $this->getPartyFromPlayer($player);
 
@@ -209,11 +211,11 @@ class PartyManager
 
             $key = $keys[$i];
 
-            $invite = $this->partyInvites[$key];
+            if(isset($this->partyInvites[$key])) {
 
-            if($invite->update()) {
+                $invite = $this->partyInvites[$key];
 
-                unset($this->partyInvites[$key]);
+                if ($invite->update()) unset($this->partyInvites[$key]);
             }
         }
     }

@@ -22,6 +22,7 @@ use pocketmine\utils\Color;
 use pocketmine\utils\TextFormat;
 use practice\arenas\FFAArena;
 use practice\kits\Kit;
+use practice\parties\PracticeParty;
 use practice\player\gameplay\reports\ReportInfo;
 use practice\player\PracticePlayer;
 use practice\PracticeCore;
@@ -44,6 +45,9 @@ class ItemHandler
 
     /* @var int */
     private $leaderboardItemsCount;
+
+    /* @var int */
+    private $partyItemsCount;
 
     /* @var ItemTextures */
     private $textures;
@@ -85,6 +89,7 @@ class ItemHandler
         $this->initDuelItems();
         $this->initFFAItems();
         $this->initLeaderboardItems();
+        $this->initPartyItems();
         $this->initMiscItems();
     }
 
@@ -223,6 +228,19 @@ class ItemHandler
         $this->itemList[] = $global;
 
         $this->leaderboardItemsCount = $count + 2;
+    }
+
+    private function initPartyItems() : void {
+
+        $settings = new PracticeItem('party.leader.settings', 0, Item::get(Item::COMPASS)->setCustomName(TextFormat::BOLD . TextFormat::BLUE . '» ' . TextFormat::GREEN . 'Party ' . TextFormat::GRAY . 'Settings ' . TextFormat::BLUE . '«'), $this->getTextureOf(Item::get(Item::GOLD_SWORD)));
+        $match = new PracticeItem('party.leader.match', 1, Item::get(Item::IRON_SWORD)->setCustomName(TextFormat::BOLD . TextFormat::BLUE . '» ' . TextFormat::AQUA . 'Start a Match' . TextFormat::BLUE . ' «'), $this->getTextureOf(Item::get(Item::IRON_SWORD)));
+        $queue = new PracticeItem('party.leader.queue', 2, Item::get(Item::GOLD_SWORD)->setCustomName(TextFormat::BOLD . TextFormat::BLUE . '» ' . TextFormat::GOLD . 'Duel Other Parties ' . TextFormat::BLUE . '«'), $this->getTextureOf(Item::get(Item::GOLD_SWORD)));
+
+        $leaveParty = new PracticeItem('party.general.leave', 8, Item::get(Item::REDSTONE_DUST, 0, 1)->setCustomName(TextFormat::GRAY . '» ' . TextFormat::RED . 'Leave Party ' . TextFormat::GRAY . '«'), $this->getTextureOf(Item::get(Item::REDSTONE_DUST)));
+
+        $this->itemList = array_merge($this->itemList, [$settings, $queue, $match, $leaveParty]);
+
+        $this->partyItemsCount = 4;
     }
 
     private function getTextureOf(Item $item) : string {
@@ -546,7 +564,63 @@ class ItemHandler
         return $result;
     }
 
-    public function spawnPartyItems(Player $player, bool $clearInv = false) : void {
-        //TODO CREATE PARTY ITEMS
+    public function spawnPartyItems(Player $player, PracticeParty $party, bool $clearInv = true) : void {
+
+        $start = $this->hubItemsCount + $this->duelItemsCount + $this->leaderboardItemsCount;
+
+        $size = $this->partyItemsCount + $start;
+
+        $leader = $party->isLeaderOfParty($player->getName());
+
+        $numPlayers = count($party->getMembers());
+
+        $inv = $player->getInventory();
+        $armorInv = $player->getArmorInventory();
+
+        if($clearInv === true) {
+            $inv->clearAll();
+            $armorInv->clearAll();
+        }
+
+        for($i = $start; $i < $size; $i++) {
+
+            if(isset($this->itemList[$i])) {
+
+                $item = $this->itemList[$i];
+
+                $localName = $item->getLocalizedName();
+
+                $slot = $item->getSlot();
+
+                if(PracticeUtil::str_contains($localName, 'party.')) {
+
+                    $exec = ($leader === false and PracticeUtil::str_contains('leader.', $localName)) ? false: true;
+
+                    if($exec === true) {
+
+                        $i = clone $item->getItem();
+
+                        if(PracticeUtil::str_contains('.match', $localName)) {
+
+                            if($numPlayers < 3) continue;
+
+                            $n = $numPlayers / 2;
+
+                            $replaced = $n . 'vs' . $n;
+
+                            $loreStr = TextFormat::RED . $replaced;
+
+                            $i = $i->setLore([$loreStr]);
+
+                        } elseif (PracticeUtil::str_contains('.queue', $localName)) {
+
+                            if($numPlayers !== 2) continue;
+                        }
+
+                        $inv->setItem($slot, $i);
+                    }
+                }
+            }
+        }
     }
 }

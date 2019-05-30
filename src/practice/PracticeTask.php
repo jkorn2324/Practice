@@ -55,7 +55,7 @@ class PracticeTask extends Task {
         $this->updatePlayers($currentTick);
         $this->checkForReload($currentTick);
 
-        PracticeCore::getPartyManager()->updateInvites();
+        if($currentTick % 20 === 0 and $currentTick !== 0) PracticeCore::getPartyManager()->updateInvites();
 
         if($currentTick % $this->updateLeaderboardsTime === 0 and $currentTick !== 0) PracticeCore::getPlayerHandler()->updateLeaderboards();
     }
