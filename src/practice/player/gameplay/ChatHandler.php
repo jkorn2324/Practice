@@ -24,7 +24,6 @@ class ChatHandler
         foreach($contents as $content) {
             $content = strtolower(trim($content));
             $this->contents[$content] = true;
-            //$this->contents = $content;
         }
     }
 

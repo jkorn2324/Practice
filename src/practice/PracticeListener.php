@@ -164,7 +164,7 @@ class PracticeListener implements Listener
 
         $event->setQuitMessage($msg);
 
-        $this->core->getScheduler()->scheduleDelayedTask(new UpdateScoreboardTask(), 1);
+        $this->core->getScheduler()->scheduleDelayedTask(new UpdateScoreboardTask($p->getName()), 1);
     }
 
     public function onDeath(PlayerDeathEvent $event): void {

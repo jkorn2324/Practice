@@ -25,13 +25,20 @@ class PracticeItem
     
     private $onlyExecuteInLobby;
 
-    public function __construct(string $name, int $slot, Item $item, bool $exec = true)
+    private $texture;
+
+    public function __construct(string $name, int $slot, Item $item, string $texture, bool $exec = true)
     {
         $this->localizedName = $name;
         $this->slot = $slot;
         $this->item = $item;
         $this->itemName = $item->getName();
         $this->onlyExecuteInLobby = $exec;
+        $this->texture = $texture;
+    }
+
+    public function getTexture() : string {
+        return $this->texture;
     }
 
     public function setItem(Item $item) : self {

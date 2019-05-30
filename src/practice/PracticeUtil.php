@@ -34,6 +34,7 @@ use pocketmine\utils\Internet;
 use pocketmine\utils\TextFormat;
 use practice\arenas\PracticeArena;
 use practice\game\entity\FishingHook;
+use practice\misc\PracticeChunkLoader;
 use practice\player\PracticePlayer;
 use practice\ranks\Rank;
 use practice\ranks\RankHandler;
@@ -971,7 +972,7 @@ class PracticeUtil
         }
     }
 
-    public static function resetPlayer(Player $player, bool $clearInv = true, bool $teleport = true) : void {
+    public static function resetPlayer(Player $player, bool $clearInv = true, bool $teleport = true, bool $disablePlugin = false) : void {
 
         $playerHandler = PracticeCore::getPlayerHandler();
 
@@ -983,7 +984,24 @@ class PracticeUtil
 
             if($player->getHealth() !== $player->getMaxHealth()) $player->setHealth($player->getMaxHealth());
 
-            if($teleport === true) $player->teleport(self::getSpawnPosition());
+            if($teleport === true) {
+
+                $pos = self::getSpawnPosition();
+
+                if($disablePlugin === true) {
+
+                    $player->teleport($pos);
+
+                } else {
+
+                    $x = $pos->x;
+                    $z = $pos->z;
+
+                    self::onChunkGenerated($pos->level, intval($x) >> 4, intval($z) >> 4, function () use ($player, $pos) {
+                        $player->teleport($pos);
+                    });
+                }
+            }
 
             if($player->isOnFire()) $player->extinguish();
 
@@ -1296,6 +1314,15 @@ class PracticeUtil
     }
 
     // LEVEL/POSITION FUNCTIONS
+
+    public static function onChunkGenerated(Level $level, int $x, int $z, callable $callable) : void {
+
+        if($level->isChunkGenerated($x, $z)) {
+            ($callable)();
+            return;
+        }
+        $level->registerChunkLoader(new PracticeChunkLoader($level, $x, $z, $callable), $x, $z, true);
+    }
 
     public static function playerToLocation(Player $p) : Location {
         return new Location($p->x, $p->y, $p->z, $p->yaw, $p->pitch, $p->getLevel());

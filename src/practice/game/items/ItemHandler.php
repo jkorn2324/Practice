@@ -13,7 +13,10 @@ namespace practice\game\items;
 use pocketmine\block\Block;
 use pocketmine\block\Skull;
 use pocketmine\item\Item;
+use pocketmine\item\ItemFactory;
+use pocketmine\network\mcpe\protocol\ResourcePacksInfoPacket;
 use pocketmine\Player;
+use pocketmine\resourcepacks\ResourcePack;
 use pocketmine\scheduler\Task;
 use pocketmine\utils\Color;
 use pocketmine\utils\TextFormat;
@@ -42,9 +45,37 @@ class ItemHandler
     /* @var int */
     private $leaderboardItemsCount;
 
+    /* @var ItemTextures */
+    private $textures;
+
+    private $potions;
+
+    private $buckets;
+
     public function __construct()
     {
         $this->itemList = [];
+        $this->textures = new ItemTextures();
+
+        $this->potions = [
+            'Water Bottle', 'Water Bottle', 'Water Bottle', 'Water Bottle', 'Water Bottle',
+            'Potion of Night Vision', 'Potion of Night Vision', 'Potion of Invisibility',
+            'Potion of Invisibility', 'Potion of Leaping', 'Potion of Leaping', 'Potion of Leaping',
+            'Potion of Fire Resistance', 'Potion of Fire Resistance', 'Potion of Swiftness', 'Potion of Swiftness',
+            'Potion of Swiftness', 'Potion of Slowness', 'Potion of Slowness', 'Potion of Water Breathing',
+            'Potion of Water Breathing', 'Potion of Healing', 'Potion of Healing', 'Potion of Harming',
+            'Potion of Harming', 'Potion of Poison', 'Potion of Poison', 'Potion of Regeneration', 'Potion of Regeneration',
+            'Potion of Regeneration', 'Potion of Strength', 'Potion of Strength', 'Potion of Strength', 'Potion of Weakness',
+            'Potion of Weakness', 'Potion of Decay'
+        ];
+
+        $this->buckets = [
+            8 => 'Water Bucket',
+            9 => 'Water Bucket',
+            10 => 'Lava Bucket',
+            11 => 'Lava Bucket'
+        ];
+
         $this->init();
     }
 
@@ -60,12 +91,12 @@ class ItemHandler
     private function initHubItems(): void
     {
 
-        $unranked = new PracticeItem('hub.unranked-duels', 0, Item::get(Item::IRON_SWORD)->setCustomName(PracticeUtil::getName('unranked-duels')));
-        $ranked = new PracticeItem('hub.ranked-duels', 1, Item::get(Item::DIAMOND_SWORD)->setCustomName(PracticeUtil::getName('ranked-duels')));
-        $ffa = new PracticeItem('hub.ffa', 2, Item::get(Item::IRON_AXE)->setCustomName(PracticeUtil::getName('play-ffa')));
-        $leaderboard = new PracticeItem('hub.leaderboard', 4, Item::get(Item::SKULL, 3, 1)->setCustomName(TextFormat::BLUE . '» ' . TextFormat::GREEN . 'Leaderboards ' . TextFormat::BLUE . '«'));
-        $settings = new PracticeItem('hub.settings', 7, Item::get(Item::CLOCK)->setCustomName(TextFormat::BLUE . '» ' . TextFormat::GOLD . 'Your Settings ' . TextFormat::BLUE . '«'));
-        $inv = new PracticeItem('hub.duel-inv', 8, Item::get(Item::CHEST)->setCustomName(PracticeUtil::getName('duel-inventory')));
+        $unranked = new PracticeItem('hub.unranked-duels', 0, Item::get(Item::IRON_SWORD)->setCustomName(PracticeUtil::getName('unranked-duels')), 'Iron Sword');
+        $ranked = new PracticeItem('hub.ranked-duels', 1, Item::get(Item::DIAMOND_SWORD)->setCustomName(PracticeUtil::getName('ranked-duels')), 'Diamond Sword');
+        $ffa = new PracticeItem('hub.ffa', 2, Item::get(Item::IRON_AXE)->setCustomName(PracticeUtil::getName('play-ffa')), 'Iron Axe');
+        $leaderboard = new PracticeItem('hub.leaderboard', 4, Item::get(Item::SKULL, 3, 1)->setCustomName(TextFormat::BLUE . '» ' . TextFormat::GREEN . 'Leaderboards ' . TextFormat::BLUE . '«'), 'Steve Head');
+        $settings = new PracticeItem('hub.settings', 7, Item::get(Item::CLOCK)->setCustomName(TextFormat::BLUE . '» ' . TextFormat::GOLD . 'Your Settings ' . TextFormat::BLUE . '«'), 'Clock');
+        $inv = new PracticeItem('hub.duel-inv', 8, Item::get(Item::CHEST)->setCustomName(PracticeUtil::getName('duel-inventory')), 'Chest');
 
         $this->itemList = [$unranked, $ranked, $ffa, $leaderboard, $settings, $inv];
 
@@ -91,7 +122,7 @@ class ItemHandler
             $i = $items[$localName];
 
             if ($i instanceof Item)
-                $this->itemList[] = new PracticeItem(strval($localName), $count, $i);
+                $this->itemList[] = new PracticeItem(strval($localName), $count, $i, $this->getTextureOf($i));
 
             $count++;
         }
@@ -139,7 +170,7 @@ class ItemHandler
             $item = $result[$key];
 
             if ($item instanceof Item)
-                $this->itemList[] = new PracticeItem(strval($key), $count, $item);
+                $this->itemList[] = new PracticeItem(strval($key), $count, $item, $this->getTextureOf($item));
 
             $count++;
         }
@@ -150,9 +181,9 @@ class ItemHandler
     private function initMiscItems(): void
     {
 
-        $exit_queue = new PracticeItem('exit.queue', 8, Item::get(Item::REDSTONE)->setCustomName(PracticeUtil::getName('leave-queue')));
-        $exit_spec = new PracticeItem('exit.spectator', 8, Item::get(Item::DYE, 1)->setCustomName(PracticeUtil::getName('spec-hub')), false);
-        $exit_inv = new PracticeItem('exit.inventory', 8, Item::get(Item::DYE, 1)->setCustomName(TextFormat::RED . 'Exit'));
+        $exit_queue = new PracticeItem('exit.queue', 8, Item::get(Item::REDSTONE)->setCustomName(PracticeUtil::getName('leave-queue')), $this->getTextureOf(Item::get(Item::REDSTONE_DUST)));
+        $exit_spec = new PracticeItem('exit.spectator', 8, Item::get(Item::DYE, 1)->setCustomName(PracticeUtil::getName('spec-hub')), $this->getTextureOf(Item::get(Item::DYE)), false);
+        $exit_inv = new PracticeItem('exit.inventory', 8, Item::get(Item::DYE, 1)->setCustomName(TextFormat::RED . 'Exit'), $this->getTextureOf(Item::get(Item::DYE)));
 
         array_push($this->itemList, $exit_queue, $exit_spec, $exit_inv);
     }
@@ -178,7 +209,7 @@ class ItemHandler
             $i = $items[$localName];
 
             if ($i instanceof Item)
-                $this->itemList[] = new PracticeItem(strval($localName), $count, $i);
+                $this->itemList[] = new PracticeItem(strval($localName), $count, $i, $this->getTextureOf($i));
 
             $count++;
         }
@@ -187,11 +218,32 @@ class ItemHandler
 
         $var = 'leaderboard.global';
 
-        $global = new PracticeItem($var, $count, $globalItem);
+        $global = new PracticeItem($var, $count, $globalItem, $this->getTextureOf($globalItem));
 
         $this->itemList[] = $global;
 
         $this->leaderboardItemsCount = $count + 2;
+    }
+
+    private function getTextureOf(Item $item) : string {
+
+        $i = clone $item;
+
+        $name = $i->getVanillaName();
+
+        if($i->getId() === Item::POTION) {
+            $meta = $i->getDamage();
+            $name = $this->potions[$meta];
+        } elseif ($i->getId() === Item::SPLASH_POTION) {
+            $meta = $i->getDamage();
+            $name = 'Splash ' . $this->potions[$meta];
+        } elseif ($i->getId() === Item::BUCKET) {
+            $meta = $i->getDamage();
+            if(isset($this->buckets[$meta]))
+                $name = $this->buckets[$meta];
+        }
+
+        return $this->textures->getTexture($name);
     }
 
     public function reload(): void

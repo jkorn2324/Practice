@@ -56,6 +56,11 @@ class FormUtil
 
                     $queue = $formData[$buttonIndex]['text'];
 
+                    $index = PracticeUtil::str_indexOf("\n", $queue);
+
+                    if($index !== -1)
+                        $queue = substr($queue, 0, $index);
+
                     $queue = PracticeUtil::getUncoloredString($queue);
 
                     if(PracticeCore::getKitHandler()->isDuelKit($queue)) PracticeCore::getDuelHandler()->addPlayerToQueue($p->getPlayerName(), $queue, boolval($formData['ranked']));
@@ -70,9 +75,24 @@ class FormUtil
         $items = PracticeCore::getItemHandler()->getDuelItems();
 
         foreach($items as $duelItem) {
+
             if($duelItem instanceof PracticeItem) {
+
                 $name = $duelItem->getName();
-                $form->addButton($name);
+
+                $uncolored = PracticeUtil::getUncoloredString($name);
+
+                $numInQueue = PracticeCore::getDuelHandler()->getNumQueuedFor($uncolored, $ranked);
+
+                $numInFights = PracticeCore::getDuelHandler()->getNumFightsFor($uncolored, $ranked);
+
+                $inQueues = "\n" . TextFormat::GOLD . '» ' . TextFormat::BLUE . 'In-Queues: ' . TextFormat::WHITE . $numInQueue;
+
+                $inFights = TextFormat::RED . 'In-Fights: ' . TextFormat::WHITE . $numInFights . TextFormat::GOLD . ' «';
+
+                $name .= $inQueues . TextFormat::DARK_GRAY . " | " . $inFights;
+
+                $form->addButton($name, 0, $duelItem->getTexture());
             }
         }
 
@@ -107,6 +127,13 @@ class FormUtil
 
                     $queue = PracticeUtil::getUncoloredString($queue);
 
+                    $index = PracticeUtil::str_indexOf("\n", $queue);
+
+                    if($index !== -1)
+                        $queue = substr($queue, 0, $index);
+
+                    $queue = PracticeUtil::getUncoloredString($queue);
+
                     if ($ivsiHandler->isLoadingRequest($event)) {
 
                         $request = $ivsiHandler->getLoadedRequest($event);
@@ -132,14 +159,14 @@ class FormUtil
         foreach($items as $duelItem) {
             if($duelItem instanceof PracticeItem) {
                 $name = $duelItem->getName();
-                $form->addButton($name);
+                $form->addButton($name, 0, $duelItem->getTexture());
             }
         }
 
         return $form;
     }
 
-    //TODO ADD EVENT WHEN CLICKED
+
     public static function getFFAForm() : SimpleForm {
 
         $title = PracticeUtil::getMessage('formwindow.ffa.title');
@@ -165,13 +192,19 @@ class FormUtil
 
                 $arenaName = $formData[$ffaArenaIndex]['text'];
 
+                $index = PracticeUtil::str_indexOf("\n", $arenaName);
+
+                if($index !== -1)
+                    $arenaName = substr($arenaName, 0, $index);
+
                 $arenaName = PracticeUtil::getUncoloredString($arenaName);
 
                 if ($arenaHandler->isFFAArena($arenaName)) {
 
                     $arena = $arenaHandler->getFFAArena($arenaName);
 
-                    PracticeCore::getInstance()->getScheduler()->scheduleDelayedTask(new TeleportArenaTask($p, $arena), 5);
+                    $p->teleportToFFA($arena);
+                    //PracticeCore::getInstance()->getScheduler()->scheduleDelayedTask(new TeleportArenaTask($p, $arena), 5);
                 }
             }
         });
@@ -179,12 +212,18 @@ class FormUtil
         $form->setTitle($title);
         $form->setContent($desc);
 
-        $items = PracticeCore::getItemHandler()->getFFAItems();
+        $itemHandler = PracticeCore::getItemHandler();
+
+        $items = $itemHandler->getFFAItems();
 
         foreach($items as $item) {
             if($item instanceof PracticeItem) {
                 $name = $item->getName();
-                $form->addButton($name);
+                $numPlayers = PracticeCore::getArenaHandler()->getNumPlayersInArena($name);
+                $name .= "\n" . TextFormat::RED . 'Players: ' . TextFormat::DARK_GRAY . $numPlayers;
+
+                $texture = $item->getTexture();
+                $form->addButton($name, 0, $texture);
             }
         }
 

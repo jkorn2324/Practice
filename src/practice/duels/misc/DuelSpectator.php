@@ -50,7 +50,7 @@ class DuelSpectator {
         }
     }
 
-    public function resetPlayer() : void {
+    public function resetPlayer(bool $disablePlugin = false) : void {
 
         if($this->isOnline()) {
 
@@ -58,7 +58,7 @@ class DuelSpectator {
 
             $p->boundingBox = $this->boundingBox;
 
-            PracticeUtil::resetPlayer($p, true);
+            PracticeUtil::resetPlayer($p, true, true, $disablePlugin);
         }
     }
 

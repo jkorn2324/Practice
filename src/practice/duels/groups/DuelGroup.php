@@ -213,7 +213,7 @@ class DuelGroup
         $this->winnerName = $winner;
         $this->loserName = $loser;
 
-        $this->endDuel($premature);
+        $this->endDuel($premature, $disablePlugin);
     }
 
     public function setResults(string $winner = self::NONE, string $loser = self::NONE) {
@@ -328,7 +328,7 @@ class DuelGroup
                 foreach($keys as $key) {
                     $spec = $this->spectators[$key];
                     $spectator = $spec->getPlayer();
-                    if($spectator->isOnline()) {
+                    if(!is_null($spectator) and $spectator->isOnline()) {
                         $pl = $spectator->getPlayer();
                         if ($this->isPlayerBelowCenter($spectator, 1.0))
                             $pl->teleport($this->arena->getSpawnPosition());
@@ -448,7 +448,7 @@ class DuelGroup
         }
     }
 
-    private function endDuel(bool $endPrematurely = false) : void {
+    private function endDuel(bool $endPrematurely = false, bool $disablePlugin = false) : void {
 
         //$this->updateBlocks();
 
@@ -468,7 +468,7 @@ class DuelGroup
         if($this->isPlayerOnline()) {
             $p = $this->getPlayer();
             if($p->getPlayer()->isAlive()) {
-                PracticeUtil::resetPlayer($p->getPlayer());
+                PracticeUtil::resetPlayer($p->getPlayer(), true, true, $disablePlugin);
             }
             $p->getPlayer()->setNameTag($this->origPlayerTag);
         }
@@ -476,7 +476,7 @@ class DuelGroup
         if($this->isOpponentOnline()) {
             $p = $this->getOpponent();
             if($p->getPlayer()->isAlive()) {
-                PracticeUtil::resetPlayer($p->getPlayer());
+                PracticeUtil::resetPlayer($p->getPlayer(), true, true, $disablePlugin);
             }
             $p->getPlayer()->setNameTag($this->origOppTag);
         }
@@ -485,7 +485,7 @@ class DuelGroup
 
         foreach($keys as $key) {
             $spectator = $this->spectators[$key];
-            $spectator->resetPlayer();
+            $spectator->resetPlayer($disablePlugin);
         }
 
         $this->spectators = [];

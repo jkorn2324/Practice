@@ -732,6 +732,7 @@ class PracticePlayer
     public function teleportToFFA(FFAArena $arena) {
 
         if($this->isOnline()) {
+
             $player = $this->getPlayer();
             $spawn = $arena->getSpawnPosition();
             $msg = null;
@@ -742,18 +743,26 @@ class PracticePlayer
                 $duelHandler->removePlayerFromQueue($player, true);
 
             if(!is_null($spawn)) {
-                $player->teleport($spawn);
+
+                PracticeUtil::onChunkGenerated($spawn->level, intval($spawn->x) >> 4, intval($spawn->z) >> 4, function() use($player, $spawn) {
+                    $player->teleport($spawn);
+                });
+
                 $arenaName = $arena->getName();
                 $this->currentArena = $arenaName;
+
                 if($arena->doesHaveKit()) {
                     $kit = $arena->getFirstKit();
                     $kit->giveTo($this, true);
                 }
+
                 $this->setCanHitPlayer(true);
                 $msg = PracticeUtil::getMessage('general.arena.join');
                 $msg = strval(str_replace('%arena-name%', $arenaName, $msg));
                 $this->setScoreboard(Scoreboard::FFA_SCOREBOARD);
+
             } else {
+
                 $msg = PracticeUtil::getMessage('general.arena.fail');
                 $msg = strval(str_replace('%arena-name%', $arena->getName(), $msg));
             }
@@ -906,7 +915,11 @@ class PracticePlayer
 
             $p->setGamemode(0);
 
-            $p->teleport($pos);
+            PracticeUtil::onChunkGenerated($pos->level, intval($pos->x) >> 4, intval($pos->z) >> 4, function() use($p, $pos) {
+                $p->teleport($pos);
+            });
+
+            //$p->teleport($pos);
 
             $queue = $grp->getQueue();
 

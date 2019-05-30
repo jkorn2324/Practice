@@ -1,0 +1,378 @@
+Apple: apple.png
+Golden Apple: apple_golden.png
+Armor Stand: armor_stand.png
+Arrow: arrow.png
+Black Bed: bed_black.png
+Blue Bed: bed_blue.png
+Brown Bed: bed_brown.png
+Cyan Bed: bed_cyan.png
+Gray Bed: bed_gray.png
+Green Bed: bed_green.png
+Light Blue Bed: bed_light_blue.png
+Lime Bed: bed_lime.png
+Magenta Bed: bed_magenta.png
+Orange Bed: bed_orange.png
+Pink Bed: bed_pink.png
+Purple Bed: bed_purple.png
+Red Bed: bed_red.png
+Silver Bed: bed_silver.png
+White Bed: bed_white.png
+Yellow Bed: bed_yellow.png
+Cooked Beef: beef_cooked.png
+Raw Beef: beef_raw.png
+Beetroot: beetroot.png
+Beetroot Soup: beetroot_soup.png
+Blaze Powder: blaze_powder.png
+Blaze Rod: blaze_rod.png
+Acacia Boat: boat_acacia.png
+Birch Boat: boat_birch.png
+Dark Oak Boat: boat_darkoak.png
+Jungle Boat: boat_jungle.png
+Oak Boat: boat_oak.png
+Spruce Boat: boat_spruce.png
+Bone Boat: bone.png
+Enchanted Book: book_enchanted.png
+Book: book_normal.png
+Book & Quill: book_portfolio.png
+Bow: bow_standby.png
+Bowl: bowl.png
+Bread: bread.png
+Brewing Stand: brewing_stand.png
+Brick: brick.png
+Bucket of Cod: bucket_cod.png
+Bucket: bucket_empty.png
+Bucket of Fish: bucket_fish.png
+Lava Bucket: bucket_lava.png
+Milk: bucket_milk.png
+Bucket of Pufferfish: bucket_pufferfish.png
+Bucket of Salmon: bucket_salmon.png
+Bucket of Tropical Fish: bucket_tropical.png
+Water Bucket: bucket_water.png
+Cake: cake.png
+Camera: camera.png
+Carrot: carrot.png
+Golden Carrot: carrot_golden.png
+Carrot on a Stick: carrot_on_a_stick.png
+Cauldron: cauldron.png
+Chain Boots: chainmail_boots.png
+Chain Chestplate: chainmail_chestplate.png
+Chain Helmet: chainmail_helmet.png
+Chain Leggings: chainmail_leggings.png
+Charcoal: charcoal.png
+Cooked Chicken: chicken_cooked.png
+Raw Chicken: chicken_raw.png
+Chorus Fruit: chorus_fruit.png
+Popped Chorus Fruit: chorus_fruit_popped.png
+Clay: clay_ball.png
+Clock: clock_item.png
+Coal: coal.png
+Comparator: comparator.png
+Compass: compass_item.png
+Cookie: cookie.png
+Diamond: diamond.png
+Diamond Axe: diamond_axe.png
+Diamond Boots: diamond_boots.png
+Diamond Chestplate: diamond_chestplate.png
+Diamond Helmet: diamond_helmet.png
+Diamond Hoe: diamond_hoe.png
+Diamond Horse Armor: diamond_horse_armor.png
+Diamond Leggings: diamond_leggings.png
+Diamond Pickaxe: diamond_pickaxe.png
+Diamond Shovel: diamond_shovel.png
+Diamond Sword: diamond_sword.png
+Acacia Door: door_acacia.png
+Acacia Birch: door_birch.png
+Dark Oak Door: door_dark_oak.png
+Iron Door: door_iron.png
+Jungle Door: door_jungle.png
+Spruce Door: door_spruce.png
+Door: door_wood.png
+Dragon's Breath: dragons_breath.png
+Dried Kelp: dried_kelp.png
+Ink Sac: dye_powder_black.png
+Lapis Lazuli: dye_powder_blue.png
+Cocoa Beans: dye_powder_brown.png
+Cyan Dye: dye_powder_cyan.png
+Gray Dye: dye_powder_gray.png
+Cactus Green: dye_powder_green.png
+Light Blue Dye: dye_powder_light_blue.png
+Lime Dye: dye_powder_lime.png
+Magenta Dye: dye_powder_magenta.png
+Orange Dye: dye_powder_orange.png
+Pink Dye: dye_powder_pink.png
+Purple Dye: dye_powder_purple.png
+Rose Red: dye_powder_red.png
+Light Gray Dye: dye_powder_silver.png
+Bone Meal: dye_powder_white.png
+Dandelion Yellow: dye_powder_yellow.png
+Egg: egg.png
+Spawn Bat: egg_bat.png
+Spawn Blaze: egg_blaze.png
+Spawn Cave Spider: egg_cave_spider.png
+Spawn Chicken: egg_chicken.png
+Spawn Clownfish: egg_clownfish.png
+Spawn Cod: egg_cod.png
+Spawn Cow: egg_cow.png
+Spawn Creeper: egg_creeper.png
+Spawn Dolphin: egg_dolphin.png
+Spawn Donkey: egg_donkey.png
+Spawn Drowned: egg_drowned.png
+Spawn Elder Guardian: egg_elderguardian.png
+Spawn Enderman: egg_enderman.png
+Spawn Endermite: egg_endermite.png
+Spawn Evoker: egg_evoker.png
+Spawn Fish: egg_fish.png
+Spawn Ghast: egg_ghast.png
+Spawn Guardian: egg_guardian.png
+Spawn Horse: egg_horse.png
+Spawn Husk: egg_husk.png
+Spawn Magma Cube: egg_lava_slime.png
+Spawn Llama: egg_llama.png
+Spawn Mule: egg_mule.png
+Spawn Mooshroom: egg_mushroomcow.png
+Spawn Ocelot: egg_ocelot.png
+Spawn Parrot: egg_parrot.png
+Spawn Phantom: egg_phantom.png
+Spawn Pig: egg_pig.png
+Spawn Dolphin: egg_pigzombie.png
+Spawn Polar Bear: egg_polarbear.png
+Spawn Pufferfish: egg_pufferfish.png
+Spawn Rabbit: egg_rabbit.png
+Spawn Salmon: egg_salmon.png
+Spawn Sheep: egg_sheep.png
+Spawn Shulker: egg_shulker.png
+Spawn Silverfish: egg_silverfish.png
+Spawn Skeleton: egg_skeleton.png
+Spawn Skeleton Horse: egg_skeletonhorse.png
+Spawn Slime: egg_slime.png
+Spawn Spider: egg_spider.png
+Spawn Squid: egg_squid.png
+Spawn Stray: egg_stray.png
+Spawn Turtle: egg_turtle.png
+Spawn Vex: egg_vex.png
+Spawn Villager: egg_villager.png
+Spawn Vindicator: egg_vindicator.png
+Spawn Witch: egg_witch.png
+Spawn Wither: egg_wither.png
+Spawn Wolf: egg_wolf.png
+Spawn Zombie: egg_zombie.png
+Spawn Zombie Horse: egg_zombiehorse.png
+Spawn Zombie Villager: egg_zombievillager.png
+Elytra: elytra.png
+Emerald: emerald.png
+Boots: empty_armor_slot_boots.png
+Chestplate: empty_armor_slot_chestplate.png
+Helmet: empty_armor_slot_helmet.png
+Leggings: empty_armor_slot_leggings.png
+Shield: empty_armor_slot_shield.png
+End Crystal: end_crystal.png
+Eye of Ender: ender_eye.png
+Ender Pearl: ender_pearl.png
+Bottle o' Enchanting: experience_bottle.png
+Feather: feather.png
+Fire Charge: fireball.png
+Fireworks: fireworks.png
+Tropical Fish: fish_clownfish_raw.png
+Cooked Fish: fish_cooked.png
+Pufferfish: fish_pufferfish_raw.png
+Raw Fish: fish_raw.png
+Cooked Salmon: fish_salmon_cooked.png
+Raw Salmon: fish_salmon_raw.png
+Fishing Rod: fishing_rod_uncast.png
+Flint: flint.png
+Flint and Steel: flint_and_steel.png
+Flower Pot: flower_pot.png
+Ghast Tear: ghast_tear.png
+Glowstone Dust: glowstone_dust.png
+Golden Axe: gold_axe.png
+Golden Boots: gold_boots.png
+Golden Chestplate: gold_chestplate.png
+Golden Helmet: gold_helmet.png
+Golden Hoe: gold_hoe.png
+Golden Horse Armor: gold_horse_armor.png
+Golden Ingot: gold_ingot.png
+Golden Leggings: gold_leggings.png
+Gold Nugget: gold_nugget.png
+Golden Pickaxe: gold_pickaxe.png
+Golden Shovel: gold_shovel.png
+Golden Sword: gold_sword.png
+Gunpowder: gunpowder.png
+Heart of the Sea: heartofthesea_closed.png
+Hopper: hopper.png
+Iron Axe: iron_axe.png
+Iron Boots: iron_boots.png
+Iron Chestplate: iron_chestplate.png
+Iron Helmet: iron_helmet.png
+Iron Hoe: iron_hoe.png
+Iron Horse Armor: iron_horse_armor.png
+Iron Ingot: iron_ingot.png
+Iron Leggings: iron_leggings.png
+Iron Nugget: iron_nugget.png
+Iron Pickaxe: iron_pickaxe.png
+Iron Shovel: iron_shovel.png
+Iron Sword: iron_sword.png
+Item Frame: item_frame.png
+Kelp: kelp.png
+Lead: lead.png
+Leather: leather.png
+Leather Boots: leather_boots.tga
+Leather Tunic: leather_chestplate.png
+Leather Cap: leather_helmet.tga
+Leather Horse Armor: leather_horse_armor.tga
+Leather Pants: leather_leggings.tga
+Lever: lever.png
+Magma Cream: magma_cream.png
+Empty Map: map_empty.png
+Melon: melon.png
+Glistering Melon: melon_speckled.png
+Minecart with Chest: minecart_chest.png
+Minecart with Command Block: minecart_command_block.png
+Minecart with Furnace: minecart_furnace.png
+Minecart with Hopper: minecart_hopper.png
+Minecart: minecart_normal.png
+Minecart with TNT: minecart_tnt.png
+Mushroom Stew: mushroom_stew.png
+Cooked Mutton: mutton_cooked.png
+Raw Mutton: mutton_raw.png
+Name Tag: name_tag.png
+Nautilus Shell: nautilus.png
+Nether Star: nether_star.png
+Nether Wart: nether_wart.png
+Nether Brick: netherbrick.png
+Painting: painting.png
+Paper: paper.png
+Phantom Membrane: phantom_membrane.png
+Cooked Porkchop: porkchop_cooked.png
+Raw Porkchop: porkchop_raw.png
+Potato: potato.png
+Baked Potato: potato_baked.png
+Poisonous Potato: potato_poisonous.png
+Water Bottle: potion_bottle_drinkable.png
+Empty Bottle: potion_bottle_empty.png
+Potion of Fire Resistance: potion_bottle_fireResistance.png
+Potion of Harming: potion_bottle_harm.png
+Potion of Healing: potion_bottle_heal.png
+Potion of Invisibility: potion_bottle_invisibility.png
+Potion of Leaping: potion_bottle_jump.png
+Potion of Slowness: potion_bottle_moveSlowdown.png
+Potion of Swiftness: potion_bottle_moveSpeed.png
+Potion of Night Vision: potion_bottle_nightVision.png
+Potion of Poison: potion_bottle_poison.png
+Potion of Regeneration: potion_bottle_regeneration.png
+Potion of Resistance: potion_bottle_resistance.png
+Potion of Slow Falling: potion_bottle_slowFall.png
+Potion of Fire Resistance: potion_bottle_fireResistance.png
+Potion of Harming: potion_bottle_harm.png
+Potion of Healing: potion_bottle_heal.png
+Potion of Invisibility: potion_bottle_invisibility.png
+Potion of Leaping: potion_bottle_jump.png
+Potion of Slowness: potion_bottle_moveSlowdown.png
+Potion of Swiftness: potion_bottle_moveSpeed.png
+Potion of Night Vision: potion_bottle_nightVision.png
+Potion of Poison: potion_bottle_poison.png
+Potion of Regeneration: potion_bottle_regeneration.png
+Potion of Resistance: potion_bottle_resistance.png
+Potion of Slow Falling: potion_bottle_slowFall.png
+Splash Water Bottle: potion_bottle_splash.png
+Splash Potion of Fire Resistance: potion_bottle_splash_fireResistance.png
+Splash Potion of Harming: potion_bottle_splash_harm.png
+Splash Potion of Healing: potion_bottle_splash_heal.png
+Splash Potion of Invisibility: potion_bottle_splash_invisibility.png
+Splash Potion of Leaping: potion_bottle_splash_jump.png
+Splash Potion of Slowness: potion_bottle_splash_moveSlowdown.png
+Splash Potion of Swiftness: potion_bottle_splash_moveSpeed.png
+Splash Potion of Night Vision: potion_bottle_splash_nightVision.png
+Splash Potion of Poison: potion_bottle_splash_poison.png
+Splash Potion of Regeneration: potion_bottle_splash_regeneration.png
+Splash Potion of Resistance: potion_bottle_splash_resistance.png
+Splash Potion of Slow Falling: potion_bottle_splash_slowFall.png
+Splash Potion of the Turtle Master: potion_bottle_turtleMaster.png
+Splash Potion of the Turtle Master: potion_bottle_splash_turtleMaster.png
+Potion of Water Breathing: potion_bottle_waterBreathing.png
+Splash Potion of Water Breathing: potion_bottle_splash_waterBreathing.png
+Potion of Strength: potion_bottle_strength.png
+Potion of Weakness: potion_bottle_weakness.png
+Splash Potion of Weakness: potion_bottle_splash_weakness.png
+Splash Potion of Strength: potion_bottle_splash_strength.png
+Potion of Decay: potion_bottle_wither.png
+Splash Potion of Decay: potion_bottle_splash_wither.png
+Prismarine Crystals: prismarine_crystals.png
+Prismarine Shard: prismarine_shard.png
+Pumpkin Pie: pumpkin_pie.png
+Quartz: quartz.png
+Quiver: quiver.png
+Cooked Rabbit: rabbit_cooked.png
+Rabbit Foot: rabbit_foot.png
+Rabbit Hide: rabbit_hide.png
+Raw Rabbit: rabbit_raw.png
+Rabbit Stew: rabbit_stew.png
+Record 11: record_11.png
+Record 13: record_13.png
+Record Blocks: record_blocks.png
+Record Cat: record_cat.png
+Record Chirp: record_chirp.png
+Record Far: record_far.png
+Record Mall: record_mall.png
+Record Mellohi: record_mellohi.png
+Record Stal: record_stal.png
+Record Strad: record_strad.png
+Record Wait: record_wait.png
+Record Ward: record_ward.png
+Redstone: redstone_dust.png
+Sugar Cane: reeds.png
+Repeater: repeater.png
+Rotten Flesh: rotten_flesh.png
+Ruby: ruby.png
+Saddle: saddle.png
+Sea Pickle: sea_pickle.png
+Beetroot Seeds: seeds_beetroot.png
+Melon Seeds: seeds_melon.png
+Pumpkin Seeds: seeds_pumpkin.png
+Wheat Seeds: seeds_wheat.png
+Shears: shears.png
+Shulker Shell: shulker_shell.png
+Sign: sign.png
+Creeper Head: skull_creeper.png
+Dragon Head: skull_dragon.png
+Skeleton Skull: skull_skeleton.png
+Steve Head: skull_steve.png
+Wither Skeleton Skull: skull_wither.png
+Zombie Head: skull_zombie.png
+Slimeball: slimeball.png
+Snowball: snowball.png
+Spawn Egg: spawn_egg.png
+Spider Eye: spider_eye.png
+Fermented Spider Eye: spider_eye_fermented.png
+Stick: stick.png
+Stone Axe: stone_axe.png
+Stone Hoe: stone_hoe.png
+Stone Pickaxe: stone_pickaxe.png
+Stone Shovel: stone_shovel.png
+Stone Sword: stone_sword.png
+String: string.png
+Sugar: sugar.png
+Arrow of Fire Resistance: tipped_arrow_fireres.png
+Arrow of Harming: tipped_arrow_harm.png
+Arrow of Healing: tipped_arrow_healing.png
+Arrow of Invisibility: tipped_arrow_invisibility.png
+Arrow of Leaping: tipped_arrow_leaping.png
+Arrow of Luck: tipped_arrow_luck.png
+Arrow of Night Vision: tipped_arrow_nightvision.png
+Arrow of Poison: tipped_arrow_poison.png
+Arrow of Regeneration: tipped_arrow_regen.png
+Arrow of Slowness: tipped_arrow_slow.png
+Arrow of Strength: tipped_arrow_strength.png
+Arrow of Swiftness: tipped_arrow_swift.png
+Arrow of Water Breathing: tipped_arrow_waterbreathing.png
+Arrow of Weakness: tipped_arrow_weakness.png
+Arrow of Decay: tipped_arrow_wither.png
+Totem: totem.png
+Trident: trident.png
+Turtle Helmet: turtle_helmet.png
+Turtle Shell: turtle_shell_piece.png
+Wheat: wheat.png
+Wooden Axe: wood_axe.png
+Wooden Hoe: wood_hoe.png
+Wooden Pickaxe: wood_pickaxe.png
+Wooden Shovel: wood_shovel.png
+Wooden Sword: wood_sword.png

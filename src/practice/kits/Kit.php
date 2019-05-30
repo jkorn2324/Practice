@@ -76,7 +76,7 @@ class Kit
 
         if(!is_null($p)){
 
-            if($msg){
+            if($msg === true){
                 $str = PracticeUtil::getMessage('general.kits.receive');
                 $str = strval(str_replace('%kit%', $this->name, $str));
                 $p->sendMessage($str);
@@ -86,6 +86,7 @@ class Kit
             $pl = $p->getPlayer();
             $itemInv = $pl->getInventory();
             $armorInv = $pl->getArmorInventory();
+
             $itemInv->clearAll();
             $armorInv->clearAll();
 
@@ -98,7 +99,9 @@ class Kit
                 }
             }
 
-            foreach(array_keys($this->armor) as $key){
+            $keys = array_keys($this->armor);
+
+            foreach($keys as $key){
                 $armor = $this->armor[$key];
                 if($armor instanceof Item){
                     $slot = PracticeUtil::getArmorFromKey($key);
