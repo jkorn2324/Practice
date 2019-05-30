@@ -68,7 +68,7 @@ class PlayerHandler
 
         $this->leaderboards = $result;
 
-        PracticeUtil::broadcastMsg(TextFormat::AQUA . '[Zehox] Leaderboards are now up to date.');
+        PracticeUtil::broadcastMsg(TextFormat::WHITE . '[' . TextFormat::RED . 'Zehox' . TextFormat::WHITE . ']' . TextFormat::BOLD . TextFormat::RED . ' Leaderboards are now up to date.');
     }
 
     public function getCurrentLeaderboards() : array {

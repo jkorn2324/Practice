@@ -270,18 +270,24 @@ class ItemHandler
         $this->init();
     }
 
-    public function spawnHubItems($player, bool $clear = false): void
-    {
+    public function spawnHubItems($player, bool $clear = false): void {
 
-        if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
+        $practicePlayer = null;
 
+        if($player instanceof PracticePlayer)
+            $practicePlayer = $player;
+        else if (PracticeCore::getPlayerHandler()->isPlayerOnline($player))
             $practicePlayer = PracticeCore::getPlayerHandler()->getPlayer($player);
 
-            $inventory = $practicePlayer->getPlayer()->getInventory();
+        if ($practicePlayer !== null) {
+
+            $p = $practicePlayer->getPlayer();
+
+            $inventory = $p->getInventory();
 
             if ($clear === true) {
                 $inventory->clearAll();
-                $practicePlayer->getPlayer()->getArmorInventory()->clearAll();
+                $p->getArmorInventory()->clearAll();
             }
 
             for ($i = 0; $i < $this->hubItemsCount; $i++) {
@@ -299,11 +305,8 @@ class ItemHandler
 
                         $exec = true;
 
-                        if (!$practicePlayer->hasInfoOfLastDuel()) {
-                            if ($practiceItem->getLocalizedName() === 'hub.duel-inv') {
-                                $exec = false;
-                            }
-                        }
+                        if (!$practicePlayer->hasInfoOfLastDuel())
+                            $exec = $practiceItem->getLocalizedName() !== 'hub.duel-inv';
 
                         if ($exec === true) $inventory->setItem($slot, $item);
                     }
@@ -564,15 +567,13 @@ class ItemHandler
         return $result;
     }
 
-    public function spawnPartyItems(Player $player, PracticeParty $party, bool $clearInv = true) : void {
+    public function spawnPartyItems(Player $player, int $members, bool $leader = false, bool $clearInv = true) : void {
 
         $start = $this->hubItemsCount + $this->duelItemsCount + $this->leaderboardItemsCount;
 
         $size = $this->partyItemsCount + $start;
 
-        $leader = $party->isLeaderOfParty($player->getName());
-
-        $numPlayers = count($party->getMembers());
+        $numPlayers = $members;
 
         $inv = $player->getInventory();
         $armorInv = $player->getArmorInventory();

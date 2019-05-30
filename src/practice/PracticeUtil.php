@@ -928,17 +928,17 @@ class PracticeUtil
         return $spawnPos;
     }
 
-    public static function respawnPlayer(Player $player, bool $clearInv = true, bool $reset = false) : void {
+    public static function respawnPlayer(PracticePlayer $player, bool $clearInv = false, bool $reset = false) : void {
 
-        $playerHandler = PracticeCore::getPlayerHandler();
+        $p = $player->getPlayer();
 
         if($reset === true)
 
-            self::resetPlayer($player, $clearInv, false);
+            self::resetPlayer($p, $clearInv, false);
 
         else {
 
-            if(self::isFrozen($player)) self::setFrozen($player, false);
+            if(self::isFrozen($p)) self::setFrozen($p, false);
 
             if(self::isInSpectatorMode($player)){
 
@@ -946,30 +946,23 @@ class PracticeUtil
 
             } else {
 
-                if (self::canFly($player)) { self::setCanFly($player, false); }
+                if (self::canFly($p)) { self::setCanFly($p, false); }
 
-                if ($playerHandler->isPlayerOnline($player)) {
-                    $p = $playerHandler->getPlayer($player);
-                    $p->setCanHitPlayer(false);
-                    if ($p->isInvisible()) { $p->setInvisible(false); }
-                }
+                $player->setCanHitPlayer(false);
+                if($player->isInvisible()) $player->setInvisible(false);
             }
 
-            if($playerHandler->isPlayerOnline($player)) {
+            /* if($player->isInArena()) $player->setCurrentArena(PracticeArena::NO_ARENA);
 
-                $p = $playerHandler->getPlayer($player);
+            if(!$player->canThrowPearl()) $player->setThrowPearl(true);
 
-                if($p->isInArena()) $p->setCurrentArena(PracticeArena::NO_ARENA);
+            if($player->isInCombat()) $player->setInCombat(false);
 
-                if(!$p->canThrowPearl()) $p->setThrowPearl(true);
-                if($p->isInCombat()) $p->setInCombat(false);
-
-                $p->setScoreboard(Scoreboard::SPAWN_SCOREBOARD);
-            }
-
-            ScoreboardUtil::updateSpawnScoreboards();
+            $player->setScoreboard(Scoreboard::SPAWN_SCOREBOARD); */
 
             PracticeCore::getItemHandler()->spawnHubItems($player, $clearInv);
+
+            ScoreboardUtil::updateSpawnScoreboards();
         }
     }
 

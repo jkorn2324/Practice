@@ -27,16 +27,15 @@ class ScoreboardUtil
 
         $online = count($onlinePlayers);
         $max_online = $server->getMaxPlayers();
-        $online_arr = ["%num%" => "$online", "%max-num%" => $max_online];
+        $online_arr = ['%num%' => "$online", '%max-num%' => $max_online];
 
         $in_fights = $playerHandler->getPlayersInFights();;
-        $in_fights_arr = ["%num%" => $in_fights];
+        $in_fights_arr = ['%num%' => $in_fights];
 
         $in_queues = PracticeCore::getDuelHandler()->getNumberOfQueuedPlayers();
-        $in_queues_arr = ["%num%" => $in_queues];
+        $in_queues_arr = ['%num%' => $in_queues];
 
-        $arr = ["online-players" => $online_arr, "in-fights" => $in_fights_arr, "in-queues" => $in_queues_arr];
-
+        $arr = ['online-players' => $online_arr, 'in-fights' => $in_fights_arr, 'in-queues' => $in_queues_arr];
 
         foreach ($onlinePlayers as $player) {
 
@@ -45,9 +44,7 @@ class ScoreboardUtil
                 $scoreboard = $p->getCurrentScoreboard();
 
                 if ($scoreboard === Scoreboard::SPAWN_SCOREBOARD) {
-
                     if ($key === "") $p->updateScoreboard();
-
                     else {
                         if (isset($arr[$key]) and count($arr[$key]) > 0) $p->updateScoreboard($key, $arr[$key]);
                     }

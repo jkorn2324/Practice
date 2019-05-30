@@ -62,6 +62,8 @@ use practice\game\inventory\InventoryUtil;
 use practice\game\inventory\menus\inventories\PracBaseInv;
 use practice\game\items\PracticeItem;
 use practice\player\permissions\PermissionsHandler;
+use practice\player\RespawnTask;
+use practice\scoreboard\Scoreboard;
 use practice\scoreboard\ScoreboardUtil;
 use practice\scoreboard\UpdateScoreboardTask;
 
@@ -78,8 +80,8 @@ class PracticeListener implements Listener
         return $this->core;
     }
 
-    public function onJoin(PlayerJoinEvent $event): void
-    {
+    public function onJoin(PlayerJoinEvent $event): void {
+
         $p = $event->getPlayer();
 
         $playerHandler = PracticeCore::getPlayerHandler();
@@ -98,28 +100,6 @@ class PracticeListener implements Listener
                 $playerHandler->removePendingPInfo($p);
             }
 
-            $nameTag = PracticeUtil::getNameTagFormat($p);
-
-            $p->setNameTag($nameTag);
-
-            if($p->getGamemode() !== 0) $p->setGamemode(0);
-
-            if($p->hasEffects()) $p->removeAllEffects();
-
-            $maxHealth = $p->getMaxHealth();
-
-            if($p->getHealth() !== $maxHealth) $p->setHealth($maxHealth);
-
-            if($p->isOnFire()) $p->extinguish();
-
-            if(PracticeUtil::isFrozen($p)) PracticeUtil::setFrozen($p, false);
-
-            if(PracticeUtil::isInSpectatorMode($p))
-
-                PracticeUtil::setInSpectatorMode($p, false);
-
-            PracticeCore::getItemHandler()->spawnHubItems($p, true);
-
             if($deviceOS !== -1 and $playerHandler->isScoreboardEnabled($p->getName()))
                 $pl->initScoreboard($deviceOS);
 
@@ -132,6 +112,28 @@ class PracticeListener implements Listener
     public function onLogin(PlayerLoginEvent $event) : void {
 
         $p = $event->getPlayer();
+
+        $nameTag = PracticeUtil::getNameTagFormat($p);
+
+        $p->setNameTag($nameTag);
+
+        if($p->getGamemode() !== 0) $p->setGamemode(0);
+
+        if($p->hasEffects()) $p->removeAllEffects();
+
+        $maxHealth = $p->getMaxHealth();
+
+        if($p->getHealth() !== $maxHealth) $p->setHealth($maxHealth);
+
+        if($p->isOnFire()) $p->extinguish();
+
+        if(PracticeUtil::isFrozen($p)) PracticeUtil::setFrozen($p, false);
+
+        if(PracticeUtil::isInSpectatorMode($p))
+
+            PracticeUtil::setInSpectatorMode($p, false);
+
+        PracticeCore::getItemHandler()->spawnHubItems($p, true);
 
         $p->teleport(PracticeUtil::getSpawnPosition());
     }
@@ -211,10 +213,17 @@ class PracticeListener implements Listener
             PracticeUtil::clearEntitiesIn($level, $proj);
 
             if($addToStats === true) {
+
                 if($diedFairly === true) {
+
                     if($lastDamageCause instanceof EntityDamageByEntityEvent) {
-                        if($playerHandler->isPlayerOnline($lastDamageCause->getDamager())) {
-                            $attacker = $playerHandler->getPlayer($lastDamageCause->getDamager());
+
+                        $damgr = $lastDamageCause->getDamager();
+
+                        if($playerHandler->isPlayerOnline($damgr)) {
+
+                            $attacker = $playerHandler->getPlayer($damgr);
+
                             if(!$attacker->equals($player)) {
 
                                 $arena = $attacker->getCurrentArena();
@@ -237,9 +246,9 @@ class PracticeListener implements Listener
 
                 if($player->isInDuel()) {
 
-                    $duel = $duelHandler->getDuel($p->getPlayer());
-                    $winner = ($duel->isPlayer($player->getPlayer()) ? $duel->getOpponent()->getPlayerName() : $duel->getPlayer()->getPlayerName());
-                    $loser = $player->getPlayerName();
+                    $duel = $duelHandler->getDuel($p);
+                    $winner = ($duel->isPlayer($p) ? $duel->getOpponent()->getPlayerName() : $duel->getPlayer()->getPlayerName());
+                    $loser = $p->getName();
 
                     if($diedFairly === true)
                         $duel->setResults($winner, $loser);
@@ -259,7 +268,7 @@ class PracticeListener implements Listener
 
         $p->setNameTag($nameTag);
 
-        PracticeUtil::respawnPlayer($p);
+        /**/
 
         $spawnPos = PracticeUtil::getSpawnPosition();
 
@@ -268,9 +277,20 @@ class PracticeListener implements Listener
         if($prevSpawnPos !== $spawnPos)
             $event->setRespawnPosition($spawnPos);
 
-        //$spawnPos = $event->getRespawnPosition();
+        $player = PracticeCore::getPlayerHandler()->getPlayer($p);
 
-        //PracticeUtil::onChunkGenerated($spawnPos->level, intval($spawnPos->x) >> 4, intval($spawnPos->y) >> 4, function(){});
+        if($player !== null) {
+
+            if($player->isInArena()) $player->setCurrentArena(PracticeArena::NO_ARENA);
+
+            if(!$player->canThrowPearl()) $player->setThrowPearl(true);
+
+            if($player->isInCombat()) $player->setInCombat(false);
+
+            $player->setScoreboard(Scoreboard::SPAWN_SCOREBOARD);
+
+            $this->core->getScheduler()->scheduleDelayedTask(new RespawnTask($player), 10);
+        }
     }
 
     public function onEntityDamaged(EntityDamageEvent $event): void {
@@ -418,10 +438,12 @@ class PracticeListener implements Listener
             if($item instanceof Food) {
 
                 $isGoldenHead = false;
+
                 if ($item->getId() === Item::GOLDEN_APPLE) $isGoldenHead = ($item->getDamage() === 1 or $item->getName() === PracticeUtil::getName('golden-head'));
 
                 if ($isGoldenHead === true) {
 
+                    /* @var $effects EffectInstance[] */
                     $effects = $item->getAdditionalEffects();
 
                     $size = count($effects);
@@ -430,17 +452,16 @@ class PracticeListener implements Listener
 
                     $twoMin = PracticeUtil::minutesToTicks(2);
 
-                    for ($i = 0; $i < $size; $i++) {
-                        $effect = $effects[$i];
-                        if ($effect instanceof EffectInstance) {
-                            $id = $effect->getId();
-                            if ($id === Effect::REGENERATION) {
-                                $effect = $effect->setDuration($eightSeconds)->setAmplifier(1);
-                            } elseif ($id === Effect::ABSORPTION) {
-                                $effect = $effect->setDuration($twoMin);
-                            }
-                        }
-                        $effects[$i] = $effect;
+                    $keys = array_keys($effects);
+
+                    foreach($keys as $key) {
+                        $effect = $effects[$key];
+                        $id = $effect->getId();
+                        if($id === Effect::REGENERATION)
+                            $effect = $effect->setDuration($eightSeconds)->setAmplifier(1);
+                        elseif ($id === Effect::ABSORPTION)
+                            $effect = $effect->setDuration($twoMin);
+                        $effects[$key] = $effect;
                     }
 
                     foreach($effects as $effect)
@@ -460,7 +481,7 @@ class PracticeListener implements Listener
                 }
             } elseif ($item instanceof Potion) {
 
-                $slot = $p->getInventory()->getHeldItemIndex();
+                $slot = $inv->getHeldItemIndex();
                 $effects = $item->getAdditionalEffects();
 
                 $inv->setItem($slot, Item::get(0));
@@ -1037,7 +1058,8 @@ class PracticeListener implements Listener
 
         if (!PracticeUtil::canPlayerChat($p)) $cancel = true;
         else {
-            if ($playerHandler->isPlayer($p)) {
+            $player = $playerHandler->getPlayer($p);
+            if ($player !== null) {
                 $player = $playerHandler->getPlayer($p);
                 if (!$player->isInAntiSpam())
                     $player->setInAntiSpam(true);
@@ -1082,19 +1104,25 @@ class PracticeListener implements Listener
         $playerHandler = PracticeCore::getPlayerHandler();
 
         if ($pkt instanceof LoginPacket) {
+
             $clientData = $pkt->clientData;
+
             if (isset($clientData['DeviceOS']) and isset($clientData['CurrentInputMode'])) {
 
                 $device = $clientData['DeviceOS'];
                 $input = $clientData['CurrentInputMode'];
 
-                if ($playerHandler->isPlayer($player)) {
+                $device = intval($device);
+                $input = intval($input);
 
-                    $p = $playerHandler->getPlayer($device);
-                    $p->setDeviceOS(intval($device));
-                    $p->setInput(intval($input));
+                $p = $playerHandler->getPlayer($player);
 
-                } else $playerHandler->putPendingPInfo($pkt->username, intval($device), intval($input));
+                if ($p !== null) {
+
+                    $p->setDeviceOS($device);
+                    $p->setInput($input);
+
+                } else $playerHandler->putPendingPInfo($pkt->username, $device, $input);
             }
         }
 

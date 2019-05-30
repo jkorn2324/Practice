@@ -40,7 +40,7 @@ class PracticeParty
 
         $p = PracticeCore::getPlayerHandler()->getPlayer($leader);
         $player = $p->getPlayer();
-        PracticeCore::getItemHandler()->spawnPartyItems($player, $this);
+        PracticeCore::getItemHandler()->spawnPartyItems($player, count($this->players), true);
     }
 
     public function isPartyOpen() : bool {
@@ -72,9 +72,9 @@ class PracticeParty
 
             $pl = $p->getPlayer();
 
-            PracticeCore::getItemHandler()->spawnPartyItems($pl, $this);
-
             $this->players[$p->getPlayerName()] = true;
+
+            PracticeCore::getItemHandler()->spawnPartyItems($pl, count($this->players));
 
             $msg = PracticeUtil::str_replace(PracticeUtil::getMessage('party.general.join-msg'), ["%player%" => $player]);
 
@@ -113,7 +113,7 @@ class PracticeParty
                     if(!is_null($newLeader)) {
                         $this->leader = $newLeader;
                         $newL = PracticeCore::getPlayerHandler()->getPlayer($newLeader);
-                        PracticeCore::getItemHandler()->spawnPartyItems($newL->getPlayer(), $this);
+                        PracticeCore::getItemHandler()->spawnPartyItems($newL->getPlayer(), count($this->players), true);
                         $newLeaderMsg = PracticeUtil::str_replace(PracticeUtil::getMessage('party.general.new-manager'), ['%player%' => 'You']);
                         $newL->sendMessage($newLeaderMsg);
                     }
