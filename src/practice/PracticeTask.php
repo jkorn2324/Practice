@@ -56,6 +56,7 @@ class PracticeTask extends Task {
         $this->checkForReload($currentTick);
 
         PracticeCore::getPartyManager()->updateInvites();
+
         if($currentTick % $this->updateLeaderboardsTime === 0 and $currentTick !== 0) PracticeCore::getPlayerHandler()->updateLeaderboards();
     }
 
@@ -118,12 +119,15 @@ class PracticeTask extends Task {
             }
         }
 
-        foreach($awaitingMatches as $match) {
+        if($currentTick % 4 === 0) {
 
-            $queue = $match->getQueue();
+            foreach ($awaitingMatches as $match) {
 
-            if($duelHandler->isAnArenaOpen($queue))
-                $duelHandler->startDuel($match);
+                $queue = $match->getQueue();
+
+                if ($duelHandler->isAnArenaOpen($queue))
+                    $duelHandler->startDuel($match);
+            }
         }
 
         foreach($duels as $duel) {

@@ -1228,7 +1228,7 @@ class PracticeUtil
         $rank = ($firstRank instanceof Rank) ? $firstRank->getLocalizedName() : RankHandler::$GUEST->getLocalizedName();
 
         $obj = $cfg->get('format');
-        $str = TextFormat::RESET . strVal($obj[$rank]['p-name']);
+        $str = TextFormat::RESET . strval($obj[$rank]['p-name']);
         $str = str_replace('%player%', $player->getName(), $str);
         return $str . TextFormat::RESET;
     }

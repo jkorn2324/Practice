@@ -510,12 +510,12 @@ class PracticeListener implements Listener
                             if (PracticeUtil::str_contains('hub.', $name)) {
                                 if (PracticeUtil::str_contains('unranked-duels', $name)) {
                                     if(PracticeUtil::isItemFormsEnabled()) {
-                                        $form = FormUtil::getDuelsForm();
+                                        $form = FormUtil::getMatchForm();
                                         $p->sendForm($form, true);
                                     } else InventoryUtil::sendMatchInv($player);
                                 } elseif (PracticeUtil::str_contains('ranked-duels', $name)) {
                                     if(PracticeUtil::isItemFormsEnabled()) {
-                                        $form = FormUtil::getDuelsForm(true);
+                                        $form = FormUtil::getMatchForm(true);
                                         $p->sendForm($form, true, true);
                                     } else InventoryUtil::sendMatchInv($player, true);
                                 } elseif (PracticeUtil::str_contains('ffa', $name)) {

@@ -62,7 +62,11 @@ class MatchMenu extends BaseMenu
                 $properCount = PracticeUtil::getProperCount($numInQueue);
 
                 $slot = $item->getSlot();
+
                 $i = clone $item->getItem();
+
+                if($i->getId() === Item::POTION) $properCount = 1;
+
                 $i = $i->setLore($lore)->setCount($properCount);
                 $this->getInventory()->setItem($slot, $i);
             }

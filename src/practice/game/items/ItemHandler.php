@@ -384,6 +384,9 @@ class ItemHandler
         return $item->equals($item1, true, false) and $item->getName() === $item1->getName();
     }
 
+    /**
+     * @return PracticeItem[]
+     */
     public function getDuelItems(): array
     {
 

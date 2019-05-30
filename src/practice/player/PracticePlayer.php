@@ -933,9 +933,16 @@ class PracticePlayer
 
             $p = $this->getPlayer();
 
-            $content = $form->jsonSerialize()['content'];
+            $formToJSON = $form->jsonSerialize();
 
-            if($isDuelForm) $content['ranked'] = $ranked;
+            $content = [];
+
+            if(isset($formToJSON['content']) and is_array($formToJSON['content']))
+                $content = $formToJSON['content'];
+            elseif (isset($formToJSON['buttons']) and is_array($formToJSON['buttons']))
+                $content = $formToJSON['buttons'];
+
+            if($isDuelForm === true) $content['ranked'] = $ranked;
 
             $exec = true;
 
@@ -964,6 +971,10 @@ class PracticePlayer
     public function removeForm() : array {
         $this->isLookingAtForm = false;
         $data = $this->currentFormData;
+        /*if(is_string($this->currentFormData))
+            $data = [$this->currentFormData];
+        elseif (is_array($this->currentFormData))
+            $data = $this->currentFormData;*/
         $this->currentFormData = [];
         return $data;
     }

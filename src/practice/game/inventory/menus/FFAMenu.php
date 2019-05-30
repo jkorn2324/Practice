@@ -45,7 +45,10 @@ class FFAMenu extends BaseMenu
 
                 $properCount = PracticeUtil::getProperCount($numPlayers);
 
+                if($i->getId() === Item::POTION) $properCount = 1;
+
                 $i = $i->setLore($lore)->setCount($properCount);
+
                 $slot = $item->getSlot();
                 $this->getInventory()->setItem($slot, $i);
             }
@@ -59,12 +62,6 @@ class FFAMenu extends BaseMenu
         $newItem = $action->getTargetItem();
 
         $player = $p->getPlayer();
-
-        if(PracticeUtil::isPotion($origItem))
-            $origItem = $origItem->setCount(1);
-
-        if(PracticeUtil::isPotion($newItem))
-            $newItem = $newItem->setCount(1);
 
         $itemHandler = PracticeCore::getItemHandler();
 

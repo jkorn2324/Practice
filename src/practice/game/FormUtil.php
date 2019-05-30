@@ -16,6 +16,7 @@ use jojoe77777\FormAPI\SimpleForm;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
+use practice\arenas\TeleportArenaTask;
 use practice\duels\groups\Request;
 use practice\game\items\PracticeItem;
 use practice\player\gameplay\reports\AbstractReport;
@@ -27,67 +28,113 @@ use practice\scoreboard\Scoreboard;
 class FormUtil
 {
 
-    public static function getDuelsForm(bool $ranked = false) : CustomForm {
+    public static function getMatchForm(bool $ranked = false) : SimpleForm {
 
         $replace = ($ranked ? 'Ranked' : 'Unranked');
 
-        $form = new CustomForm(function(Player $event, $data = null) {
+        $form = new SimpleForm(function(Player $event, $data = null) {
 
             $formData = [];
 
+            $playerHandler = PracticeCore::getPlayerHandler();
+
+            $ivsiHandler = PracticeCore::get1vs1Handler();
+
             if(PracticeCore::getPlayerHandler()->isPlayerOnline($event))
-                $formData = PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
+                $formData = $playerHandler->getPlayer($event)->removeForm();
 
-            if(is_null($data)){
+            if(is_null($data)) {
 
-                if(PracticeCore::get1vs1Handler()->isLoadingRequest($event)) PracticeCore::get1vs1Handler()->cancelRequest($event);
+                if ($ivsiHandler->isLoadingRequest($event)) $ivsiHandler->cancelRequest($event);
 
             } else {
+                if(is_int($data) and $playerHandler->isPlayerOnline($event)) {
 
-                if (is_array($data) and PracticeCore::getPlayerHandler()->isPlayerOnline($event)) {
+                    $p = $playerHandler->getPlayer($event);
 
-                    $p = PracticeCore::getPlayerHandler()->getPlayer($event);
+                    $buttonIndex = intval($data);
 
-                    $dropdownIndex = 0;
+                    $queue = $formData[$buttonIndex]['text'];
 
-                    $queueIndex = intval($data[$dropdownIndex]);
+                    $queue = PracticeUtil::getUncoloredString($queue);
 
-                    $queue = $formData[$dropdownIndex]['options'][$queueIndex];
+                    if(PracticeCore::getKitHandler()->isDuelKit($queue)) PracticeCore::getDuelHandler()->addPlayerToQueue($p->getPlayerName(), $queue, boolval($formData['ranked']));
 
-                    if (PracticeCore::get1vs1Handler()->isLoadingRequest($event)) {
-
-                        $request = PracticeCore::get1vs1Handler()->getLoadedRequest($event);
-
-                        $requested = $request->getRequested();
-
-                        if(PracticeCore::getKitHandler()->isDuelKit($queue)) $request->setQueue($queue);
-
-                        if (Request::canSend($p, $requested)) PracticeCore::get1vs1Handler()->sendRequest($event, $requested);
-
-                        else PracticeCore::get1vs1Handler()->cancelRequest($request);
-
-                    } else {
-
-                        if(PracticeCore::getKitHandler()->isDuelKit($queue)) PracticeCore::getDuelHandler()->addPlayerToQueue($p->getPlayerName(), $queue, boolval($formData['ranked']));
-
-                    }
                 } else return;
             }
+
         });
 
         $form->setTitle(PracticeUtil::str_replace(PracticeUtil::getMessage('formwindow.duel.title'), ['%ranked%' => $replace]));
-        $options = [];
 
         $items = PracticeCore::getItemHandler()->getDuelItems();
 
         foreach($items as $duelItem) {
             if($duelItem instanceof PracticeItem) {
                 $name = $duelItem->getName();
-                $options[] = $name;
+                $form->addButton($name);
             }
         }
 
-        $form->addDropdown(PracticeUtil::getMessage('formwindow.duel.content'), $options);
+        return $form;
+    }
+
+    public static function getDuelsForm() : SimpleForm {
+
+        $form = new SimpleForm(function(Player $event, $data = null) {
+
+            $formData = [];
+
+            $playerHandler = PracticeCore::getPlayerHandler();
+
+            $ivsiHandler = PracticeCore::get1vs1Handler();
+
+            if(PracticeCore::getPlayerHandler()->isPlayerOnline($event))
+                $formData = $playerHandler->getPlayer($event)->removeForm();
+
+            if(is_null($data)) {
+
+                if ($ivsiHandler->isLoadingRequest($event)) $ivsiHandler->cancelRequest($event);
+
+            } else {
+                if(is_int($data) and $playerHandler->isPlayerOnline($event)) {
+
+                    $p = $playerHandler->getPlayer($event);
+
+                    $buttonIndex = intval($data);
+
+                    $queue = $formData[$buttonIndex]['text'];
+
+                    $queue = PracticeUtil::getUncoloredString($queue);
+
+                    if ($ivsiHandler->isLoadingRequest($event)) {
+
+                        $request = $ivsiHandler->getLoadedRequest($event);
+
+                        $requested = $request->getRequested();
+
+                        if(PracticeCore::getKitHandler()->isDuelKit($queue)) $request->setQueue($queue);
+
+                        if (Request::canSend($p, $requested)) $ivsiHandler->sendRequest($event, $requested);
+
+                        else $ivsiHandler->cancelRequest($request);
+
+                    }
+                } else return;
+            }
+
+        });
+
+        $form->setTitle(PracticeUtil::getName('title-duel-inventory'));
+
+        $items = PracticeCore::getItemHandler()->getDuelItems();
+
+        foreach($items as $duelItem) {
+            if($duelItem instanceof PracticeItem) {
+                $name = $duelItem->getName();
+                $form->addButton($name);
+            }
+        }
 
         return $form;
     }
@@ -100,11 +147,32 @@ class FormUtil
 
         $form = new SimpleForm(function(Player $event, $data = null) {
 
-            if(PracticeCore::getPlayerHandler()->isPlayerOnline($event))
-                PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
+            $formData = [];
 
-            if(!is_null($data) and is_array($data)) {
-                //var_dump($data);
+            $playerHandler = PracticeCore::getPlayerHandler();
+
+            $arenaHandler = PracticeCore::getArenaHandler();
+
+            if($playerHandler->isPlayerOnline($event))
+                $formData = $playerHandler->getPlayer($event)->removeForm();
+
+
+            if(is_int($data) and $playerHandler->isPlayerOnline($event)) {
+
+                $p = $playerHandler->getPlayer($event);
+
+                $ffaArenaIndex = intval($data);
+
+                $arenaName = $formData[$ffaArenaIndex]['text'];
+
+                $arenaName = PracticeUtil::getUncoloredString($arenaName);
+
+                if ($arenaHandler->isFFAArena($arenaName)) {
+
+                    $arena = $arenaHandler->getFFAArena($arenaName);
+
+                    PracticeCore::getInstance()->getScheduler()->scheduleDelayedTask(new TeleportArenaTask($p, $arena), 5);
+                }
             }
         });
 

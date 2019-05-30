@@ -50,21 +50,15 @@ class DuelMenu extends BaseMenu
 
         $origItem = $action->getSourceItem();
 
-        $newItem = $action->getTargetItem();
-
         $player = $p->getPlayer();
 
-        $origPracItem = PracticeCore::getItemHandler()->getPracticeItem($origItem);
+        $itemHandler = PracticeCore::getItemHandler();
 
-        $newPracItem = PracticeCore::getItemHandler()->getPracticeItem($newItem);
+        if (PracticeUtil::canUseItems($player, true) and $itemHandler->isPracticeItem($origItem)) {
 
-        $isPracItem = ($newPracItem !== null) or ($origPracItem !== null);
+            $practiceItem = $itemHandler->getPracticeItem($origItem);
 
-        if (PracticeUtil::canUseItems($player, true) and ($isPracItem === true)) {
-
-            $practiceItem = ($newPracItem !== null) ? $newPracItem : $origPracItem;
-
-            $queue = $practiceItem->getName();
+            $queue = PracticeUtil::getUncoloredString($practiceItem->getName());
 
             $inventory = $action->getInventory();
 
