@@ -13,10 +13,10 @@ namespace practice\game;
 
 use jojoe77777\FormAPI\CustomForm;
 use jojoe77777\FormAPI\SimpleForm;
+use pocketmine\item\ItemFactory;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
-use practice\arenas\TeleportArenaTask;
 use practice\duels\groups\Request;
 use practice\game\items\PracticeItem;
 use practice\player\gameplay\reports\AbstractReport;
@@ -220,7 +220,7 @@ class FormUtil
             if($item instanceof PracticeItem) {
                 $name = $item->getName();
                 $numPlayers = PracticeCore::getArenaHandler()->getNumPlayersInArena($name);
-                $name .= "\n" . TextFormat::RED . 'Players: ' . TextFormat::DARK_GRAY . $numPlayers;
+                $name .= "\n" . TextFormat::RED . 'Players: ' . TextFormat::WHITE . $numPlayers;
 
                 $texture = $item->getTexture();
                 $form->addButton($name, 0, $texture);

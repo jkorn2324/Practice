@@ -503,7 +503,7 @@ class DuelGroup
 
         if($endPrematurely === false) {
 
-            if($this->ranked === true) {
+            if($this->ranked === true and $this->winnerName !== self::NONE and $this->loserName !== self::NONE) {
 
                 $winnerDevice = $this->isOpponent($this->winnerName) ? $this->opponentDevice : $this->playerDevice;
 

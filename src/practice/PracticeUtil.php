@@ -933,6 +933,7 @@ class PracticeUtil
         $playerHandler = PracticeCore::getPlayerHandler();
 
         if($reset === true)
+
             self::resetPlayer($player, $clearInv, false);
 
         else {

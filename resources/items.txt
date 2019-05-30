@@ -18,7 +18,7 @@ Red Bed: bed_red.png
 Silver Bed: bed_silver.png
 White Bed: bed_white.png
 Yellow Bed: bed_yellow.png
-Cooked Beef: beef_cooked.png
+Steak: beef_cooked.png
 Raw Beef: beef_raw.png
 Beetroot: beetroot.png
 Beetroot Soup: beetroot_soup.png

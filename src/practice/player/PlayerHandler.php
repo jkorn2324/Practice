@@ -678,12 +678,17 @@ class PlayerHandler
 
     private function getStatsFrom(string $player) : array {
 
-        $data = $this->getPlayerData($player);
-        $stats = $data['stats'];
         $result = [];
 
-        if(is_array($stats))
-            $result = $stats;
+        if($player !== 'None') {
+
+            $data = $this->getPlayerData($player);
+            $stats = $data['stats'];
+
+            if (is_array($stats))
+                $result = $stats;
+
+        }
 
         return $result;
     }

@@ -83,7 +83,7 @@ class AntiCheatUtil
                 continue;
             }
 
-            $player->sendMessage("§8[§eAntiCheat§8] " . $message);
+            $player->sendPopup("§8[§eAntiCheat§8] " . $message);
         }
     }
 

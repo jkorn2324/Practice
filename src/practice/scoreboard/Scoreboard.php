@@ -319,18 +319,28 @@ class Scoreboard
             }
         }
 
+        $lineSeparator = '-------------------';
+
+        if($this->deviceOS === PracticeUtil::WINDOWS_10) $lineSeparator = $lineSeparator . PracticeUtil::WIN10_ADDED_SEPARATOR;
+
         $baseLineSeparatorText = PracticeUtil::getLineSeparator($dataLines);
+
+        $len1 = strlen($lineSeparator);
+
+        $len2 = strlen($baseLineSeparatorText);
+
+        if($len2 > $len1) $lineSeparator = $baseLineSeparatorText;
 
         //$len = strlen($baseLineSeparatorText);
 
-        if($this->deviceOS === PracticeUtil::WINDOWS_10) $baseLineSeparatorText = $baseLineSeparatorText . PracticeUtil::WIN10_ADDED_SEPARATOR;
+        //if($this->deviceOS === PracticeUtil::WINDOWS_10) $lineSeparator = $lineSeparator . PracticeUtil::WIN10_ADDED_SEPARATOR;
 
         $keys = array_keys($this->lines);
 
         foreach($keys as $key) {
             $value = $this->lines[$key];
             if($value instanceof SeparatorLine) {
-                $text = $baseLineSeparatorText;
+                $text = $lineSeparator;
                 if($value->isVisible() === false) $text = PracticeUtil::str_replace($text, ["-" => " "]);
                 $value = $value->editText($text);
                 $this->lines[$key] = $value;

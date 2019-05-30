@@ -48,9 +48,11 @@ use pocketmine\item\ItemBlock;
 use pocketmine\item\MushroomStew;
 use pocketmine\item\Potion;
 use pocketmine\item\SplashPotion;
+use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
+use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\Player;
@@ -266,6 +268,10 @@ class PracticeListener implements Listener
 
         if(!PracticeUtil::arePositionsEqual($prevSpawnPos, $spawnPos))
             $event->setRespawnPosition($spawnPos);
+
+        $spawnPos = $event->getRespawnPosition();
+
+        PracticeUtil::onChunkGenerated($spawnPos->level, intval($spawnPos->x) >> 4, intval($spawnPos->y) >> 4, function(){});
     }
 
     public function onEntityDamaged(EntityDamageEvent $event): void {
@@ -954,9 +960,14 @@ class PracticeListener implements Listener
 
             if($firstChar === '/') {
 
-                $usableCommandsInCombat = ['ping', 'tell', 'say', 'me'];
+                $usableCommandsInCombat = ['ping', 'tell', 'say'];
 
-                $tests = ['/ping', '/tell', '/say', '/me'];
+                $tests = ['/ping', '/tell', '/say', '/w'];
+
+                if(PracticeUtil::str_contains('/me', $message)) {
+                    $event->setCancelled(true);
+                    return;
+                }
 
                 $sendMsg = PracticeUtil::str_contains_from_arr($message, $tests);
 
@@ -972,7 +983,7 @@ class PracticeListener implements Listener
 
                         if(PracticeUtil::str_contains($test, $message)) {
                             $use = true;
-                            if($value === 'say' or $value === 'me') $testInAntiSpam = true;
+                            if($value === 'say') $testInAntiSpam = true;
                             break;
                         }
                     }
@@ -1075,7 +1086,6 @@ class PracticeListener implements Listener
                 $p = $playerHandler->getPlayer($player);
                 if ($p->getDevice() === PracticeUtil::WINDOWS_10 or $p->getDevice() === PracticeUtil::CONTROLS_MOUSE)
                     $p->addCps(true);
-                    //$p->addClick(true);
             }
         } elseif ($pkt instanceof LevelSoundEventPacket) {
 
@@ -1091,8 +1101,6 @@ class PracticeListener implements Listener
                     $p = $playerHandler->getPlayer($player);
 
                     $p->addCps(true);
-                     //$p->addClick(false);
-                    //$p->addCps();
 
                     $pl = $p->getPlayer();
 
@@ -1100,19 +1108,19 @@ class PracticeListener implements Listener
 
                     $item = $inv->getItemInHand();
 
-                    if(PracticeUtil::canUseItems($pl)) {
+                    if (PracticeUtil::canUseItems($pl)) {
 
-                        if($item->getId() === Item::FISHING_ROD) {
-                            if(PracticeUtil::isTapToRodEnabled()) PracticeUtil::useRod($item, $pl, $p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE);
+                        if ($item->getId() === Item::FISHING_ROD) {
+                            if (PracticeUtil::isTapToRodEnabled()) PracticeUtil::useRod($item, $pl, $p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE);
                         } elseif ($item->getId() === Item::ENDER_PEARL and $item instanceof EnderPearl) {
-                            if(PracticeUtil::isTapToPearlEnabled() and $p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) PracticeUtil::throwPearl($item, $pl, true);
+                            if (PracticeUtil::isTapToPearlEnabled() and $p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) PracticeUtil::throwPearl($item, $pl, true);
                         } elseif ($item->getId() === Item::SPLASH_POTION and $item instanceof SplashPotion) {
-                            if(PracticeUtil::isTapToPotEnabled() and $p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) PracticeUtil::throwPotion($item, $pl, true);
+                            if (PracticeUtil::isTapToPotEnabled() and $p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) PracticeUtil::throwPotion($item, $pl, true);
                         } elseif ($item->getId() === Item::MUSHROOM_STEW and $item instanceof MushroomStew) {
-                            if($p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) {
+                            if ($p->getDevice() !== PracticeUtil::WINDOWS_10 and $p->getInput() !== PracticeUtil::CONTROLS_MOUSE) {
                                 $inv->setItemInHand(Item::get(Item::AIR));
                                 $newHealth = $player->getHealth() + 7.0;
-                                if($newHealth > $player->getMaxHealth()) $newHealth = $player->getMaxHealth();
+                                if ($newHealth > $player->getMaxHealth()) $newHealth = $player->getMaxHealth();
                                 $player->setHealth($newHealth);
                             }
                         }
