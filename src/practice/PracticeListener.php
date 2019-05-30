@@ -103,6 +103,10 @@ class PracticeListener implements Listener
             if($deviceOS !== -1 and $playerHandler->isScoreboardEnabled($p->getName()))
                 $pl->initScoreboard($deviceOS);
 
+            $nameTag = PracticeUtil::getNameTagFormat($p);
+
+            $p->setNameTag($nameTag);
+
             ScoreboardUtil::updateSpawnScoreboards('online-players');
 
             $event->setJoinMessage(PracticeUtil::str_replace(PracticeUtil::getMessage('join-msg'), ['%player%' => $p->getName()]));
@@ -112,10 +116,6 @@ class PracticeListener implements Listener
     public function onLogin(PlayerLoginEvent $event) : void {
 
         $p = $event->getPlayer();
-
-        $nameTag = PracticeUtil::getNameTagFormat($p);
-
-        $p->setNameTag($nameTag);
 
         if($p->getGamemode() !== 0) $p->setGamemode(0);
 
@@ -445,8 +445,6 @@ class PracticeListener implements Listener
 
                     /* @var $effects EffectInstance[] */
                     $effects = $item->getAdditionalEffects();
-
-                    $size = count($effects);
 
                     $eightSeconds = PracticeUtil::secondsToTicks(8);
 
