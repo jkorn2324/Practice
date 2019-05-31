@@ -1331,7 +1331,7 @@ class PracticeUtil
 
     public static function onChunkGenerated(Level $level, int $x, int $z, callable $callable) : void {
 
-        if($level->isChunkGenerated($x, $z)) {
+        if($level->isChunkPopulated($x, $z)) {
             ($callable)();
             return;
         }
