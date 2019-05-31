@@ -1116,6 +1116,23 @@ class PracticeUtil
 
     //TEXT/MESSAGE FUNCTIONS
 
+    public static function getRandomDeathMsg(string $killer, string $killed) {
+
+        $arr = PracticeCore::getInstance()->getMessageConfig()->get('duel-death-messages');
+
+        $count = count($arr);
+
+        $msg = null;
+
+        if($count > 0) {
+            $rand = rand(0, $count - 1);
+            $msg = strval($arr[$rand]);
+            $msg = self::str_replace($msg, ['%killer%' => $killer, '%killed%' => $killed]);
+        }
+
+        return $msg;
+    }
+
     public static function broadcastMsg(string $msg) : void {
 
         $server = Server::getInstance();

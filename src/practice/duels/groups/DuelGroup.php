@@ -617,7 +617,7 @@ class DuelGroup
         return $duration;
     }
 
-    private function broadcastMsg(string $msg, bool $sendSpecs = false, $player = null): void {
+    public function broadcastMsg(string $msg, bool $sendSpecs = false, $player = null): void {
 
         $oppMsg = $msg;
         $pMsg = $msg;

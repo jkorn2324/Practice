@@ -25,7 +25,8 @@ class ScoreboardUtil
     public static function getNames() : array {
 
         $result = [
-            'cps' => PracticeUtil::getName('scoreboard.player.cps'),
+            'player-cps' => PracticeUtil::getName('scoreboard.player.cps'),
+            'opponent-cps' => PracticeUtil::getName('scoreboard.opponent.cps'),
             'kills' => PracticeUtil::getName('scoreboard.arena-ffa.kills'),
             'deaths' => PracticeUtil::getName('scoreboard.arena-ffa.deaths'),
             'arena' => PracticeUtil::getName('scoreboard.arena-ffa.arena'),

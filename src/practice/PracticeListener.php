@@ -106,6 +106,8 @@ class PracticeListener implements Listener
 
             $p->setNameTag($nameTag);
 
+            ScoreboardUtil::updateSpawnScoreboards($pl);
+
             $this->core->getScheduler()->scheduleDelayedTask(new PlayerSpawnTask($pl), 10);
 
             $event->setJoinMessage(PracticeUtil::str_replace(PracticeUtil::getMessage('join-msg'), ['%player%' => $p->getName()]));
@@ -232,7 +234,7 @@ class PracticeListener implements Listener
                                 }
 
                                 $kills = $playerHandler->addKillFor($attacker->getPlayerName());
-                                $killsStr = PracticeUtil::str_replace(PracticeUtil::getName('scoreboard.ffa.kills'), ['%num%' => $kills]);
+                                $killsStr = PracticeUtil::str_replace(PracticeUtil::getName('scoreboard.arena-ffa.kills'), ['%num%' => $kills]);
                                 $attacker->updateLineOfScoreboard(4, ' ' . $killsStr);
                             }
                         }
@@ -245,14 +247,25 @@ class PracticeListener implements Listener
                 if($player->isInDuel()) {
 
                     $duel = $duelHandler->getDuel($p);
+
+                    $msg = $event->getDeathMessage();
+
                     $winner = ($duel->isPlayer($p) ? $duel->getOpponent()->getPlayerName() : $duel->getPlayer()->getPlayerName());
                     $loser = $p->getName();
+
+                    $randMsg = PracticeUtil::getRandomDeathMsg($winner, $loser);
+
+                    $msg = (!is_null($randMsg)) ? $randMsg : $msg;
+
+                    $duel->broadcastMsg($msg, true);
 
                     if($diedFairly === true)
                         $duel->setResults($winner, $loser);
                     else $duel->setResults();
 
                     $event->setDrops([]);
+
+                    $event->setDeathMessage('');
                 }
             }
         }

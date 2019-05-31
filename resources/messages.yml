@@ -312,8 +312,10 @@ party:
     leave-msg: "%player% has left the party!"
     new-manager: "%player% is now the new party manager."
 
-
-
+duel-death-messages:
+  - "%killed% has been memed by %killer%"
+  - "%killed% has been OOFed by %killer%"
+  - "%killed% has been shat on by %killer%"
 
 # Permission message when a command is run.
 permission-msg: "You do not have permission to use this command!"

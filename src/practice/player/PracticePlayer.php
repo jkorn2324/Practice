@@ -256,8 +256,8 @@ class PracticePlayer
         $opponentStr = PracticeUtil::str_replace($this->scoreboardNames['opponent'], ['%player%' => $name]);
         $durationStr = PracticeUtil::str_replace($this->scoreboardNames['duration'], ['%time%' => '00:00']);
 
-        $theirCPS = PracticeUtil::str_replace($this->scoreboardNames['cps'], ['%player%' => 'Their', '%clicks%' => 0]);
-        $yourCPS = PracticeUtil::str_replace($this->scoreboardNames['cps'], ['%player%' => 'Your', '%clicks%' => 0]);
+        $theirCPS = PracticeUtil::str_replace($this->scoreboardNames['opponent-cps'], ['%player%' => 'Their', '%clicks%' => 0]);
+        $yourCPS = PracticeUtil::str_replace($this->scoreboardNames['player-cps'], ['%player%' => 'Your', '%clicks%' => 0]);
 
         $arr = [$opponentStr, $durationStr, $theirCPS, $yourCPS];
 
@@ -311,7 +311,7 @@ class PracticePlayer
 
         $killsStr = PracticeUtil::str_replace($this->scoreboardNames['kills'], ['%num%' => $kills]);
         $deathsStr = PracticeUtil::str_replace($this->scoreboardNames['deaths'], ['%num%' => $deaths]);
-        $yourCPS = PracticeUtil::str_replace($this->scoreboardNames['cps'], ['%player%' => 'Your', '%clicks%' => 0]);
+        $yourCPS = PracticeUtil::str_replace($this->scoreboardNames['player-cps'], ['%player%' => 'Your', '%clicks%' => 0]);
         $arenaStr = trim(PracticeUtil::str_replace($this->scoreboardNames['arena'], ['%arena%' => $arenaName]));
 
         $arr = [$killsStr, $deathsStr, $arenaStr, $yourCPS];
@@ -802,7 +802,7 @@ class PracticePlayer
 
         $yourCPS = count($this->cps);
 
-        $yourCPSStr = PracticeUtil::str_replace($this->scoreboardNames['cps'], ['%player%' => 'Your', '%clicks%' => $yourCPS]);
+        $yourCPSStr = PracticeUtil::str_replace($this->scoreboardNames['player-cps'], ['%player%' => 'Your', '%clicks%' => $yourCPS]);
 
         if($this->scoreboardType === 'scoreboard.duel' and $this->isInDuel()) {
 
@@ -810,7 +810,7 @@ class PracticePlayer
 
             if($duel->isDuelRunning() and $duel->arePlayersOnline()) {
 
-                $theirCPSStr = PracticeUtil::str_replace($this->scoreboardNames['cps'], ['%player%' => 'Their', '%clicks%' => $yourCPS]);
+                $theirCPSStr = PracticeUtil::str_replace($this->scoreboardNames['opponent-cps'], ['%player%' => 'Their', '%clicks%' => $yourCPS]);
 
                 $other = $duel->isPlayer($this->playerName) ? $duel->getOpponent() : $duel->getPlayer();
 
@@ -854,7 +854,7 @@ class PracticePlayer
 
         $yourCPS = count($this->cps);
 
-        $yourCPSStr = PracticeUtil::str_replace($this->scoreboardNames['cps'], ['%player%' => 'Your', '%clicks%' => $yourCPS]);
+        $yourCPSStr = PracticeUtil::str_replace($this->scoreboardNames['player-cps'], ['%player%' => 'Your', '%clicks%' => $yourCPS]);
 
         if($this->scoreboardType === 'scoreboard.duel' and $this->isInDuel()) {
 
@@ -862,7 +862,7 @@ class PracticePlayer
 
             if($duel->isDuelRunning() and $duel->arePlayersOnline()) {
 
-                $theirCPSStr = PracticeUtil::str_replace($this->scoreboardNames['cps'], ['%player%' => 'Their', '%clicks%' => $yourCPS]);
+                $theirCPSStr = PracticeUtil::str_replace($this->scoreboardNames['opponent-cps'], ['%player%' => 'Their', '%clicks%' => $yourCPS]);
 
                 $other = $duel->isPlayer($this->playerName) ? $duel->getOpponent() : $duel->getPlayer();
 
