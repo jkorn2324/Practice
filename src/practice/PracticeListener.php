@@ -54,6 +54,7 @@ use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\Player;
+use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use practice\anticheat\AntiCheatUtil;
 use practice\arenas\PracticeArena;
@@ -62,8 +63,8 @@ use practice\game\inventory\InventoryUtil;
 use practice\game\inventory\menus\inventories\PracBaseInv;
 use practice\game\items\PracticeItem;
 use practice\player\permissions\PermissionsHandler;
+use practice\player\PlayerSpawnTask;
 use practice\player\RespawnTask;
-use practice\scoreboard\Scoreboard;
 use practice\scoreboard\ScoreboardUtil;
 use practice\scoreboard\UpdateScoreboardTask;
 
@@ -88,26 +89,24 @@ class PracticeListener implements Listener
 
         if (!is_null($p)) {
 
-            $pl = $playerHandler->addPlayer($p);
             $deviceOS = -1;
+            $input = -1;
 
-            if (!is_null($pl) and $playerHandler->hasPendingPInfo($p)) {
+            if($playerHandler->hasPendingPInfo($p)) {
                 $pInfo = $playerHandler->getPendingPInfo($p);
                 $deviceOS = intval($pInfo['device']);
                 $input = intval($pInfo['controls']);
-                $pl->setDeviceOS($deviceOS);
-                $pl->setInput($input);
                 $playerHandler->removePendingPInfo($p);
             }
 
-            if($deviceOS !== -1 and $playerHandler->isScoreboardEnabled($p->getName()))
-                $pl->initScoreboard($deviceOS);
+            $pl = $playerHandler->addPlayer($p, $deviceOS);
+            $pl->setInput($input);
 
             $nameTag = PracticeUtil::getNameTagFormat($p);
 
             $p->setNameTag($nameTag);
 
-            ScoreboardUtil::updateSpawnScoreboards('online-players');
+            $this->core->getScheduler()->scheduleDelayedTask(new PlayerSpawnTask($pl), 10);
 
             $event->setJoinMessage(PracticeUtil::str_replace(PracticeUtil::getMessage('join-msg'), ['%player%' => $p->getName()]));
         }
@@ -132,8 +131,6 @@ class PracticeListener implements Listener
         if(PracticeUtil::isInSpectatorMode($p))
 
             PracticeUtil::setInSpectatorMode($p, false);
-
-        PracticeCore::getItemHandler()->spawnHubItems($p, true);
 
         $p->teleport(PracticeUtil::getSpawnPosition());
     }
@@ -161,13 +158,13 @@ class PracticeListener implements Listener
             if ($pracPlayer->isInCombat()) PracticeUtil::kill($p);
 
             $playerHandler->removePlayer($p);
+
+            $msg = PracticeUtil::str_replace(PracticeUtil::getMessage('leave-msg'), ['%player%' => $p->getName()]);
+
+            $event->setQuitMessage($msg);
+
+            $this->core->getScheduler()->scheduleDelayedTask(new UpdateScoreboardTask($pracPlayer), 1);
         }
-
-        $msg = PracticeUtil::str_replace(PracticeUtil::getMessage('leave-msg'), ['%player%' => $p->getName()]);
-
-        $event->setQuitMessage($msg);
-
-        $this->core->getScheduler()->scheduleDelayedTask(new UpdateScoreboardTask($p->getName()), 1);
     }
 
     public function onDeath(PlayerDeathEvent $event): void {
@@ -234,13 +231,14 @@ class PracticeListener implements Listener
                                     $kit->giveTo($attacker->getPlayer());
                                 }
 
-                                $playerHandler->addKillFor($attacker->getPlayerName());
-                                $attacker->updateScoreboard();
+                                $kills = $playerHandler->addKillFor($attacker->getPlayerName());
+                                $killsStr = PracticeUtil::str_replace(PracticeUtil::getName('scoreboard.ffa.kills'), ['%num%' => $kills]);
+                                $attacker->updateLineOfScoreboard(4, ' ' . $killsStr);
                             }
                         }
                     }
                     $playerHandler->addDeathFor($player->getPlayerName());
-                    $player->updateScoreboard();
+                    //$player->updateScoreboard();
                 }
             } else {
 
@@ -287,7 +285,7 @@ class PracticeListener implements Listener
 
             if($player->isInCombat()) $player->setInCombat(false);
 
-            $player->setScoreboard(Scoreboard::SPAWN_SCOREBOARD);
+            //$player->setScoreboard(Scoreboard::SPAWN_SCOREBOARD);
 
             $this->core->getScheduler()->scheduleDelayedTask(new RespawnTask($player), 10);
         }
@@ -564,8 +562,10 @@ class PracticeListener implements Listener
                             } elseif ($name === 'exit.queue') {
 
                                 $duelHandler->removePlayerFromQueue($player, true);
-                                $p->updateScoreboard();
-                                ScoreboardUtil::updateSpawnScoreboards('in-queues');
+                                $p->setSpawnScoreboard();
+                                ScoreboardUtil::updateSpawnScoreboards($p);
+                                //$p->updateScoreboard();
+                                //ScoreboardUtil::updateSpawnScoreboards('in-queues');
 
                             } elseif ($name === 'exit.spectator') {
 

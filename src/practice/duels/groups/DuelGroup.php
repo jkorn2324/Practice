@@ -20,7 +20,7 @@ use practice\duels\misc\DuelSpectator;
 use practice\player\PracticePlayer;
 use practice\PracticeCore;
 use practice\PracticeUtil;
-use practice\scoreboard\Scoreboard;
+use practice\scoreboard\ScoreboardUtil;
 
 class DuelGroup
 {
@@ -135,8 +135,11 @@ class DuelGroup
     }
 
     private function placeInDuel(PracticePlayer $p, PracticePlayer $o) : void {
+
         $p->placeInDuel($this);
         $o->placeInDuel($this);
+
+
     }
 
     public function setONameTag(string $nameTag) : void {
@@ -257,6 +260,12 @@ class DuelGroup
             $this->countdownTick++;
 
             if($this->countdownTick === 5) {
+                $p->setDuelScoreboard($this);
+                $o->setDuelScoreboard($this);
+                ScoreboardUtil::updateSpawnScoreboards();
+            }
+
+            /*if($this->countdownTick === 5) {
 
                 $p->setScoreboard(Scoreboard::DUEL_SCOREBOARD);
                 $o->setScoreboard(Scoreboard::DUEL_SCOREBOARD);
@@ -267,7 +276,7 @@ class DuelGroup
                     $p->updateScoreboard("opponent", ["%player%" => $o->getPlayerName()]);
                     $o->updateScoreboard("opponent", ["%player%" => $p->getPlayerName()]);
                 }
-            }
+            }*/
 
             if ($this->countdownTick % 20 === 0 and $this->countdownTick !== 0) {
 
@@ -363,21 +372,27 @@ class DuelGroup
 
         $duration = $this->getDurationString();
 
+        $d = ScoreboardUtil::getNames()['duration'];
+
+        $durationStr = PracticeUtil::str_replace($d, ['%time%' => $duration]);
+
         if($this->isPlayerOnline()) {
             $p = $this->getPlayer();
-            $p->updateScoreboard('duration', ['%time%' => $duration]);
+            $p->updateLineOfScoreboard(2, ' ' . $durationStr);
+            //$p->updateScoreboard('duration', ['%time%' => $duration]);
         }
 
         if($this->isOpponentOnline()) {
             $o = $this->getOpponent();
-            $o->updateScoreboard('duration', ['%time%' => $duration]);
+            $o->updateLineOfScoreboard(2, ' ' . $durationStr);
+            //$o->updateScoreboard('duration', ['%time%' => $duration]);
         }
 
         $keys = array_keys($this->spectators);
 
         foreach ($keys as $key) {
             $spectator = $this->spectators[$key];
-            $spectator->update();
+            $spectator->update($durationStr);
 
             /*if(PracticeCore::getPlayerHandler()->isPlayerOnline($spectator)) {
                 $pl = PracticeCore::getPlayerHandler()->getPlayer($spectator);
@@ -820,6 +835,8 @@ class DuelGroup
             $msg = PracticeUtil::getMessage("duels.spectator.join");
             $msg = PracticeUtil::str_replace($msg, ["%spec%" => $name]);
             $this->broadcastMsg($msg, true);
+
+            $p->setSpectatorScoreboard($this);
         }
     }
 
@@ -921,5 +938,12 @@ class DuelGroup
         }
 
         return $s;
+    }
+
+    public function queueToString() : string {
+
+        $str = PracticeUtil::getName('scoreboard.duels.kit');
+
+        return PracticeUtil::str_replace($str, ['%kit%' => $this->queue]);
     }
 }

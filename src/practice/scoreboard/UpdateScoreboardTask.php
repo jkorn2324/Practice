@@ -12,6 +12,7 @@ namespace practice\scoreboard;
 
 
 use pocketmine\scheduler\Task;
+use practice\player\PracticePlayer;
 use practice\PracticeCore;
 
 class UpdateScoreboardTask extends Task
@@ -19,12 +20,10 @@ class UpdateScoreboardTask extends Task
 
     private $player;
 
-    public function __construct($player = null) {
-        if(!is_null($player)){
-            $playerHandler = PracticeCore::getPlayerHandler();
-            if($playerHandler->isPlayerOnline($player))
-                $this->player = $playerHandler->getPlayer($player);
-        }
+    public function __construct(PracticePlayer $player = null) {
+        if(!is_null($player) and $player->isOnline())
+            $this->player = $player;
+
     }
 
     /**
@@ -35,8 +34,6 @@ class UpdateScoreboardTask extends Task
      * @return void
      */
     public function onRun(int $currentTick) {
-        if(!is_null($this->player))
-            $this->player->updateScoreboard();
-        else ScoreboardUtil::updateSpawnScoreboards();
+        ScoreboardUtil::updateSpawnScoreboards($this->player);
     }
 }

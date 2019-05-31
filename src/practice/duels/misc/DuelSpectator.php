@@ -15,7 +15,6 @@ use pocketmine\level\Position;
 use pocketmine\Player;
 use practice\PracticeCore;
 use practice\PracticeUtil;
-use practice\scoreboard\Scoreboard;
 
 class DuelSpectator {
 
@@ -35,7 +34,7 @@ class DuelSpectator {
 
         if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
             $pl = PracticeCore::getPlayerHandler()->getPlayer($player);
-            $pl->setScoreboard(Scoreboard::SPEC_SCOREBOARD);
+            //$pl->setScoreboard(Scoreboard::SPEC_SCOREBOARD);
         }
 
         PracticeCore::getItemHandler()->spawnSpecItems($player);
@@ -68,10 +67,10 @@ class DuelSpectator {
         }
     }
 
-    public function update() : void {
+    public function update(string $duration) : void {
         if($this->isOnline()) {
             $p = $this->getPlayer();
-            $p->updateScoreboard();
+            $p->updateLineOfScoreboard(2, ' ' . $duration);
         }
     }
 

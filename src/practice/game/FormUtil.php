@@ -13,7 +13,6 @@ namespace practice\game;
 
 use jojoe77777\FormAPI\CustomForm;
 use jojoe77777\FormAPI\SimpleForm;
-use pocketmine\item\ItemFactory;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
@@ -23,7 +22,6 @@ use practice\player\gameplay\reports\AbstractReport;
 use practice\player\gameplay\reports\ReportInfo;
 use practice\PracticeCore;
 use practice\PracticeUtil;
-use practice\scoreboard\Scoreboard;
 
 class FormUtil
 {
@@ -490,13 +488,13 @@ class FormUtil
 
                     if ($resultSB === true) {
 
-                        if (!PracticeCore::getPlayerHandler()->isScoreboardEnabled($event->getName()))
-                            $p->setScoreboard(Scoreboard::SPAWN_SCOREBOARD, true);
+                        if (!PracticeCore::getPlayerHandler()->isScoreboardEnabled($event->getName()));
+                            $p->showScoreboard();
 
                     } else {
 
-                        if (PracticeCore::getPlayerHandler()->isScoreboardEnabled($event->getName()))
-                            $p->setScoreboard(Scoreboard::NO_SCOREBOARD);
+                        if (PracticeCore::getPlayerHandler()->isScoreboardEnabled($event->getName()));
+                            $p->hideScoreboard();
                     }
 
                     PracticeCore::getPlayerHandler()->enableScoreboard($event->getName(), $resultSB);

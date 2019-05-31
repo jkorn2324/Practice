@@ -12,68 +12,73 @@ namespace practice\scoreboard;
 
 use pocketmine\Player;
 use pocketmine\Server;
+use practice\player\PracticePlayer;
 use practice\PracticeCore;
+use practice\PracticeUtil;
 
 class ScoreboardUtil
 {
 
-    public static function updateSpawnScoreboards(string $key = ""): void {
+    /**
+     * @return array|string[]
+     */
+    public static function getNames() : array {
+
+        $result = [
+            'cps' => PracticeUtil::getName('scoreboard.player.cps'),
+            'kills' => PracticeUtil::getName('scoreboard.arena-ffa.kills'),
+            'deaths' => PracticeUtil::getName('scoreboard.arena-ffa.deaths'),
+            'arena' => PracticeUtil::getName('scoreboard.arena-ffa.arena'),
+            'online' => PracticeUtil::getName('scoreboard.spawn.online-players'),
+            'in-fights' => PracticeUtil::getName('scoreboard.spawn.in-fights'),
+            'in-queues' => PracticeUtil::getName('scoreboard.spawn.in-queues'),
+            'opponent' => PracticeUtil::getName('scoreboard.duels.opponent'),
+            'duration' => PracticeUtil::getName('scoreboard.duels.duration')
+        ];
+
+        return $result;
+    }
+
+    public static function updateSpawnScoreboards(PracticePlayer $player = null) : void {
+
+        $onlinePlayers = PracticeCore::getPlayerHandler()->getOnlinePlayers();
 
         $server = Server::getInstance();
 
-        $playerHandler = PracticeCore::getPlayerHandler();
+        $numOnline = count($server->getOnlinePlayers());
 
-        $onlinePlayers = $server->getOnlinePlayers();
+        $maxPlayers = $server->getMaxPlayers();
 
-        $online = count($onlinePlayers);
-        $max_online = $server->getMaxPlayers();
-        $online_arr = ['%num%' => "$online", '%max-num%' => $max_online];
+        $inFights = PracticeCore::getPlayerHandler()->getPlayersInFights();
 
-        $in_fights = $playerHandler->getPlayersInFights();;
-        $in_fights_arr = ['%num%' => $in_fights];
+        $inQueues = PracticeCore::getDuelHandler()->getNumberOfQueuedPlayers();
 
-        $in_queues = PracticeCore::getDuelHandler()->getNumberOfQueuedPlayers();
-        $in_queues_arr = ['%num%' => $in_queues];
+        $names = self::getNames();
 
-        $arr = ['online-players' => $online_arr, 'in-fights' => $in_fights_arr, 'in-queues' => $in_queues_arr];
+        $onlineStr = PracticeUtil::str_replace($names['online'], ['%num%' => $numOnline, '%max-num%' => $maxPlayers]);
+        $inFightsStr = PracticeUtil::str_replace($names['in-fights'], ['%num%' => $inFights]);
+        $inQueuesStr = PracticeUtil::str_replace($names['in-queues'], ['%num%' => $inQueues]);
 
-        foreach ($onlinePlayers as $player) {
+        $strarr = [1 => $onlineStr, 2 => $inFightsStr, 3 => $inQueuesStr];
 
-            if ($player->isConnected() and $playerHandler->isPlayer($player)) {
-                $p = $playerHandler->getPlayer($player);
-                $scoreboard = $p->getCurrentScoreboard();
+        $keys = array_keys($strarr);
 
-                if ($scoreboard === Scoreboard::SPAWN_SCOREBOARD) {
-                    if ($key === "") $p->updateScoreboard();
-                    else {
-                        if (isset($arr[$key]) and count($arr[$key]) > 0) $p->updateScoreboard($key, $arr[$key]);
-                    }
+        foreach($onlinePlayers as $online) {
+
+            $exec = ($player !== null) ? !$online->equals($player) : true;
+
+            if($exec === true and ($online->getScoreboard() === 'scoreboard.spawn')) {
+
+                foreach($keys as $key) {
+
+                    $key = intval($key);
+
+                    $val = ' ' . $strarr[$key];
+
+                    $online->updateLineOfScoreboard($key, $val);
                 }
             }
         }
     }
 
-    public static function updateFFAScoreboards(Player $pl = null): void {
-
-        $playerHandler = PracticeCore::getPlayerHandler();
-
-        $players = Server::getInstance()->getOnlinePlayers();
-
-        foreach ($players as $player) {
-            if ($playerHandler->isPlayer($player)) {
-                $p = $playerHandler->getPlayer($player);
-                $exec = true;
-
-                if (!is_null($pl))
-                    $exec = $p->getPlayerName() !== $pl->getName();
-
-                if ($exec === true) {
-                    $scoreboard = $p->getCurrentScoreboard();
-                    if ($scoreboard === Scoreboard::FFA_SCOREBOARD) {
-                        $p->updateScoreboard();
-                    }
-                }
-            }
-        }
-    }
 }

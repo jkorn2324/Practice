@@ -38,7 +38,6 @@ use practice\misc\PracticeChunkLoader;
 use practice\player\PracticePlayer;
 use practice\ranks\Rank;
 use practice\ranks\RankHandler;
-use practice\scoreboard\Scoreboard;
 use practice\scoreboard\ScoreboardUtil;
 
 class PracticeUtil
@@ -960,9 +959,13 @@ class PracticeUtil
 
             $player->setScoreboard(Scoreboard::SPAWN_SCOREBOARD); */
 
+            $player->setSpawnScoreboard();
+
             PracticeCore::getItemHandler()->spawnHubItems($player, $clearInv);
 
-            ScoreboardUtil::updateSpawnScoreboards();
+            ScoreboardUtil::updateSpawnScoreboards($player);
+
+            //ScoreboardUtil::updateSpawnScoreboards();
         }
     }
 
@@ -1025,10 +1028,10 @@ class PracticeUtil
                 if(!$p->canThrowPearl()) $p->setThrowPearl(true);
                 if($p->isInCombat()) $p->setInCombat(false);
 
-                $p->setScoreboard(Scoreboard::SPAWN_SCOREBOARD);
+                $p->setSpawnScoreboard();
             }
 
-            ScoreboardUtil::updateSpawnScoreboards();
+            //ScoreboardUtil::updateSpawnScoreboards();
 
             PracticeCore::getItemHandler()->spawnHubItems($player, $clearInv);
         }

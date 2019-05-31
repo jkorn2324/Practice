@@ -397,13 +397,13 @@ class PlayerHandler
         return $res;
     }
 
-    public function addPlayer($player) : PracticePlayer {
+    public function addPlayer($player, int $deviceOs = -1) : PracticePlayer {
         $p = null;
         if(isset($player) and !is_null($player)){
             if($player instanceof Player){
-                $p = new PracticePlayer($player);
+                $p = new PracticePlayer($player, $deviceOs);
             } elseif (is_string($player)){
-                $p = new PracticePlayer($player);
+                $p = new PracticePlayer($player, $deviceOs);
             }
         }
 
@@ -417,9 +417,7 @@ class PlayerHandler
 
             if(!$rankHandler->hasRanks($p)){
                 $rankHandler->setDefaultRank($p);
-            } else {
-                PracticeCore::getPermissionHandler()->updatePermissions($p);
-            }
+            } else PracticeCore::getPermissionHandler()->updatePermissions($p);
         }
 
         return $p;
@@ -787,14 +785,16 @@ class PlayerHandler
         return intval($stats['deaths']);
     }
 
-    public function addKillFor(string $player) : void {
+    public function addKillFor(string $player) : int {
         $kills = $this->getKillsOf($player) + 1;
         $this->updateStatsOf($player, 'kills', $kills);
+        return $kills;
     }
 
-    public function addDeathFor(string $player) : void {
+    public function addDeathFor(string $player) : int {
         $deaths = $this->getDeathsOf($player) + 1;
         $this->updateStatsOf($player, 'deaths', $deaths);
+        return $deaths;
     }
 
     public function setEloOf(string $winner, string $loser, string $queue, int $winnerDevice, int $loserDevice) : array {

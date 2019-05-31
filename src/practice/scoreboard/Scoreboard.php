@@ -6,283 +6,43 @@
  * Time: 16:37
  */
 
+declare(strict_types=1);
+
 namespace practice\scoreboard;
 
-
-use pocketmine\entity\Entity;
-use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\RemoveObjectivePacket;
 use pocketmine\network\mcpe\protocol\SetDisplayObjectivePacket;
 use pocketmine\network\mcpe\protocol\SetScorePacket;
 use pocketmine\network\mcpe\protocol\types\ScorePacketEntry;
-use pocketmine\Player;
-
-use pocketmine\utils\TextFormat;
-use practice\PracticeUtil;
-use practice\scoreboard\ScoreboardLine;
+use practice\player\PracticePlayer;
 
 class Scoreboard
 {
+
     private const SORT_ASCENDING = 0;
 
     private const SORT_DESCENDING = 1;
 
     private const SLOT_SIDEBAR = "sidebar";
 
-    public const SPAWN_SCOREBOARD = "board.spawn";
-
-    public const SPEC_SCOREBOARD = "board.spec";
-
-    public const DUEL_SCOREBOARD = "board.duel";
-
-    public const FFA_SCOREBOARD = "board.ffa";
-
-    public const NO_SCOREBOARD = "board.none";
+    /* @var ScorePacketEntry[] */
+    private $lines;
 
     private $title;
 
-    private $player;
-
-    /* @var ScoreboardLine[] */
-    private $lines;
-
-    private $separatorCount = 0;
-
     private $deviceOS;
 
-    private $type;
+    private $player;
 
-    private $sent;
-
-    public function __construct(Player $p, int $device, string $title, string $type) {
+    public function __construct(PracticePlayer $player, string $title) {
+        $this->deviceOS = $player->getDevice();
+        $this->player = $player->getPlayer();
         $this->title = $title;
-        $this->player = $p;
-        $this->deviceOS = $device;
-        $this->type = $type;
         $this->lines = [];
-        $this->sent = false;
+        $this->initScoreboard();
     }
 
-    public static function isValidBoardType(string $type) : bool {
-        return $type === self::SPEC_SCOREBOARD or $type === self::SPAWN_SCOREBOARD or $type === self::DUEL_SCOREBOARD or $type === self::FFA_SCOREBOARD or $type === self::NO_SCOREBOARD;
-    }
-
-    public function getType() : string {
-        return $this->type;
-    }
-
-    public function addLine(string $key, string $text) : self {
-        $id = count($this->lines);
-        $line = new DataLine($id, $text);
-        $this->lines[$key] = $line;
-        return $this;
-    }
-
-    public function addSeparator(string $format, bool $visible = true) : self {
-        $id = count($this->lines);
-        $line = new SeparatorLine($id, $format, $visible);
-        $this->separatorCount++;
-        $key = "separator-" . $this->separatorCount;
-        $this->lines[$key] = $line;
-        return $this;
-    }
-
-    public function hideLine($obj, bool $by_key = true) : self {
-
-        $keys = array_keys($this->lines);
-
-        foreach ($keys as $key) {
-            $value = $this->lines[$key];
-            if($by_key === true) {
-                if($obj === $key) {
-                    $value = $value->setHidden(true);
-                    $this->lines[$key] = $value;
-                    break;
-                }
-            } else {
-                $id = $value->getId();
-                if($obj === $id) {
-                    $value = $value->setHidden(true);
-                    $this->lines[$key] = $value;
-                    break;
-                }
-            }
-        }
-        return $this;
-    }
-
-    public function showLine($obj, bool $by_key = true) : self {
-
-        $keys = array_keys($this->lines);
-
-        foreach($keys as $key) {
-            $value = $this->lines[$key];
-            if($by_key === true) {
-                if($obj === $key) {
-                    $value = $value->setHidden(false);
-                    $this->lines[$key] = $value;
-                    break;
-                }
-            } else {
-                $id = $value->getId();
-                if($obj === $id) {
-                    $value = $value->setHidden(false);
-                    $this->lines[$key] = $value;
-                    break;
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    public function remove() : void {
-        $pkt = new RemoveObjectivePacket();
-        $pkt->objectiveName = $this->player->getName();
-        $this->player->dataPacket($pkt);
-    }
-
-    public function send() : void {
-
-        $packets = $this->build();
-
-        foreach($packets as $packet) {
-            $this->player->dataPacket($packet);
-        }
-
-        $this->sent = true;
-    }
-
-    public function resendLine(string $key, array $lines) : void {
-
-        if($this->sent === true) {
-            $value = null;
-
-            if(isset($this->lines[$key])) {
-                $line = $this->lines[$key];
-                if($line instanceof DataLine) {
-                    $this->lines[$key] = $line->updateText($lines);
-                    $value = $this->lines[$key];
-                }
-
-                if(!is_null($value) and $value instanceof DataLine) {
-
-                    $entry = new ScorePacketEntry();
-
-                    $entry->type = ScorePacketEntry::TYPE_FAKE_PLAYER;
-
-                    $entry->objectiveName = $this->player->getName();
-
-                    $entry->entityUniqueId = $this->player->getId();
-
-                    $id = $value->getId();
-
-                    $text = $value->getText();
-
-                    $entry->scoreboardId = $id;
-
-                    $entry->customName = $text;
-
-                    $entry->score = $id;
-
-                    $packet = new SetScorePacket();
-
-                    $packet->entries[] = $entry;
-
-                    $packet->type = SetScorePacket::TYPE_REMOVE;
-
-                    $this->player->dataPacket($packet);
-
-                    if($value->isHidden() === false) {
-
-                        $packet = new SetScorePacket();
-
-                        $packet->entries[] = $entry;
-
-                        $packet->type = SetScorePacket::TYPE_CHANGE;
-
-                        $this->player->dataPacket($packet);
-
-                    }
-                }
-            }
-
-            $this->remove();
-            $this->send();
-        }
-    }
-
-    public function resendAll(array $lines) : void {
-
-        if($this->sent === true) {
-
-            $this->lines = $lines;
-
-            $build = $this->buildEntries();
-
-            $keys = array_keys($this->lines);
-
-            for($i = 0; $i < count($build); $i++) {
-
-                $entry = $build[$i];
-
-                $line = $this->lines[$keys[$i]];
-
-                $packet = new SetScorePacket();
-
-                $packet->entries[] = $entry;
-
-                $packet->type = SetScorePacket::TYPE_REMOVE;
-
-                $this->player->dataPacket($packet);
-
-                if($line->isHidden() === false) {
-
-                    $packet = new SetScorePacket();
-
-                    $packet->entries[] = $entry;
-
-                    $packet->type = SetScorePacket::TYPE_CHANGE;
-
-                    $this->player->dataPacket($packet);
-
-                }
-            }
-        }
-
-        $this->remove();
-        $this->send();
-    }
-
-    /**
-     * @return ScoreboardLine[]
-     */
-    public function getLines() : array {
-        return $this->lines;
-    }
-
-    public function updateLine($key, array $values) : self {
-
-        $keys = array_keys($this->lines);
-
-        foreach($keys as $thekey) {
-            $value = $this->lines[$thekey];
-            if($value instanceof DataLine) {
-                if($key === $thekey) {
-                    $this->lines[$key] = $value->updateText($values);
-                    break;
-                }
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * @return DataPacket[]
-     */
-    private function build() {
-
-        $packets = [];
+    private function initScoreboard() : void {
 
         $pkt = new SetDisplayObjectivePacket();
         $pkt->objectiveName = $this->player->getName();
@@ -291,92 +51,90 @@ class Scoreboard
         $pkt->displaySlot = self::SLOT_SIDEBAR;
         $pkt->criteriaName = "dummy";
 
-        $packets[] = clone $pkt;
-
-        $setScorePkt = new SetScorePacket();
-        $setScorePkt->type = SetScorePacket::TYPE_CHANGE;
-        $setScorePkt->entries = $this->buildEntries();
-        $packets[] = clone $setScorePkt;
-        return $packets;
+        $this->player->dataPacket($pkt);
     }
 
-    /**
-     * @return ScorePacketEntry[]
-     */
-    private function buildEntries() {
+    public function clearScoreboard() : void {
 
-        $lines = [];
+        $packet = new SetScorePacket();
 
-        $dataLines = [];
+        $packet->entries = $this->lines;
 
-        $keys = array_keys($this->lines);
+        $packet->type = SetScorePacket::TYPE_REMOVE;
 
-        foreach($keys as $key) {
-            $value = $this->lines[$key];
-            if($value instanceof DataLine) {
-                $text = $value->getText();
-                $dataLines[] = PracticeUtil::str_replace($text, ["%" => ""]);
-            }
+        $this->player->dataPacket($packet);
+
+        $this->lines = [];
+    }
+
+    public function addLine(int $id, string $line) : void {
+
+        $entry = new ScorePacketEntry();
+
+        $entry->type = ScorePacketEntry::TYPE_FAKE_PLAYER;
+
+        if(isset($this->lines[$id])) {
+
+            $pkt = new SetScorePacket();
+
+            $pkt->entries[] = $this->lines[$id];
+
+            $pkt->type = SetScorePacket::TYPE_REMOVE;
+
+            $this->player->dataPacket($pkt);
+
+            unset($this->lines[$id]);
         }
 
-        $lineSeparator = '-------------------';
+        $entry->score = $id;
 
-        if($this->deviceOS === PracticeUtil::WINDOWS_10) $lineSeparator = $lineSeparator . PracticeUtil::WIN10_ADDED_SEPARATOR;
+        $entry->scoreboardId = $id;
 
-        $baseLineSeparatorText = PracticeUtil::getLineSeparator($dataLines);
+        $entry->entityUniqueId = $this->player->getId();
 
-        $len1 = strlen($lineSeparator);
+        $entry->objectiveName = $this->player->getName();
 
-        $len2 = strlen($baseLineSeparatorText);
+        $entry->customName = $line;
 
-        if($len2 > $len1) $lineSeparator = $baseLineSeparatorText;
+        $this->lines[$id] = $entry;
 
-        //$len = strlen($baseLineSeparatorText);
+        $pkt = new SetScorePacket();
 
-        //if($this->deviceOS === PracticeUtil::WINDOWS_10) $lineSeparator = $lineSeparator . PracticeUtil::WIN10_ADDED_SEPARATOR;
+        $pkt->entries[] = $entry;
 
-        $keys = array_keys($this->lines);
+        $pkt->type = SetScorePacket::TYPE_CHANGE;
 
-        foreach($keys as $key) {
-            $value = $this->lines[$key];
-            if($value instanceof SeparatorLine) {
-                $text = $lineSeparator;
-                if($value->isVisible() === false) $text = PracticeUtil::str_replace($text, ["-" => " "]);
-                $value = $value->editText($text);
-                $this->lines[$key] = $value;
-            }
+        $this->player->dataPacket($pkt);
+    }
+
+    public function removeLine(int $id) : void {
+
+        if(isset($this->lines[$id])) {
+
+            $line = $this->lines[$id];
+
+            $packet = new SetScorePacket();
+
+            $packet->entries[] = $line;
+
+            $packet->type = SetScorePacket::TYPE_REMOVE;
+
+            $this->player->dataPacket($packet);
         }
 
-        $keys = array_keys($this->lines);
+        unset($this->lines[$id]);
+    }
 
-        foreach($keys as $key) {
+    public function removeScoreboard() : void {
 
-            $value = $this->lines[$key];
+        $pkt = new RemoveObjectivePacket();
 
-            if($value->isHidden() === false) {
+        $pkt->objectiveName = $this->player->getName();
 
-                $id = $value->getId();
+        $this->player->dataPacket($pkt);
+    }
 
-                $text = $value->getText();
-
-                $entry = new ScorePacketEntry();
-
-                $entry->type = ScorePacketEntry::TYPE_FAKE_PLAYER;
-
-                $entry->objectiveName = $this->player->getName();
-
-                $entry->entityUniqueId = $this->player->getId();
-
-                $entry->scoreboardId = $id;
-
-                $entry->customName = $text;
-
-                $entry->score = $id;
-
-                $lines[] = $entry;
-            }
-        }
-
-        return $lines;
+    public function resendScoreboard() : void {
+        $this->initScoreboard();
     }
 }

@@ -33,6 +33,7 @@ use practice\player\disguise\DisguiseInfo;
 use practice\PracticeCore;
 use practice\PracticeUtil;
 use practice\scoreboard\Scoreboard;
+use practice\scoreboard\ScoreboardUtil;
 
 class PracticePlayer
 {
@@ -75,8 +76,12 @@ class PracticePlayer
     private $fishing;
     private $duelResultInvs;
 
-    /* @var Scoreboard|null */
+    /* @var Scoreboard */
     private $scoreboard;
+
+    private $scoreboardType;
+
+    private $scoreboardNames;
 
     /* @var \pocketmine\entity\Skin|null */
     //private $originalSkin;
@@ -84,7 +89,12 @@ class PracticePlayer
     /* @var DisguiseInfo|null */
     //private $disguise;
 
-    public function __construct($player) {
+    /**
+     * PracticePlayer constructor.
+     * @param $player
+     * @param int $deviceOs
+     */
+    public function __construct($player, int $deviceOs = -1) {
 
         //$this->originalSkin = null;
 
@@ -112,19 +122,20 @@ class PracticePlayer
         $this->combatSecs = 0;
         $this->enderpearlSecs = 0;
         $this->antiSpamSecs = 0;
-        $this->deviceOs = -1;
+        $this->deviceOs = $deviceOs;
         $this->input = -1;
         $this->duelSpamSec = 0;
         $this->noDamageTick = 0;
         $this->invId = -1;
+
+        $this->scoreboardNames = ScoreboardUtil::getNames();
 
         $this->currentFormData = [];
 
         $this->fishing = null;
         $this->duelResultInvs = [];
 
-        $this->scoreboard = null;
-
+        $this->initScoreboard(!PracticeCore::getPlayerHandler()->isScoreboardEnabled($this->playerName));
         //$this->disguise = null;
     }
 
@@ -144,6 +155,244 @@ class PracticePlayer
     public function getDisguise() {
         return $this->disguise;
     }*/
+
+    private function initScoreboard(bool $hide = false) : void {
+
+        $name = PracticeUtil::getName('server-name');
+        $this->scoreboardType = 'scoreboard.spawn';
+        $this->scoreboard = new Scoreboard($this, $name);
+        if($hide === true) $this->hideScoreboard();
+        else $this->setSpawnScoreboard(false, false);
+    }
+
+    public function hideScoreboard() : void {
+        $this->scoreboard->removeScoreboard();
+    }
+
+    public function showScoreboard() : void {
+        $this->scoreboard->resendScoreboard();
+        $this->setSpawnScoreboard(false, false);
+    }
+
+    public function getScoreboard() : string {
+        return $this->scoreboardType;
+    }
+
+    public function setSpawnScoreboard(bool $queue = false, bool $clear = true) : void {
+
+        if($clear === true) $this->scoreboard->clearScoreboard();
+
+        $server = Server::getInstance();
+
+        $onlinePlayers = count($server->getOnlinePlayers());
+
+        $inFights = PracticeCore::getPlayerHandler()->getPlayersInFights();
+
+        $inQueues = PracticeCore::getDuelHandler()->getNumberOfQueuedPlayers();
+
+        $onlineStr = PracticeUtil::str_replace($this->scoreboardNames['online'], ['%num%' => $onlinePlayers, '%max-num%' => $server->getMaxPlayers()]);
+        $inFightsStr = PracticeUtil::str_replace($this->scoreboardNames['in-fights'], ['%num%' => $inFights]);
+        $inQueuesStr = PracticeUtil::str_replace($this->scoreboardNames['in-queues'], ['%num%' => $inQueues]);
+
+        $arr = [$onlineStr, $inFightsStr, $inQueuesStr];
+
+        if($queue === true) {
+
+            $duelHandler = PracticeCore::getDuelHandler();
+
+            if ($duelHandler->isPlayerInQueue($this->playerName)) {
+
+                $queuePlayer = $duelHandler->getQueuedPlayer($this->playerName);
+
+                $str = ' ' . $queuePlayer->toString();
+
+                $this->scoreboard->addLine(5, $str);
+
+                $arr[] = $str . '   ';
+            }
+        }
+
+        $compare = PracticeUtil::getLineSeparator($arr);
+
+        $separator = '------------------';
+
+        $len = strlen($separator);
+
+        $len1 = strlen($compare);
+
+        $compare = substr($compare, 0, $len1 - 1);
+
+        $len1--;
+
+        if($len1 > $len) $separator = $compare;
+
+        if($this->deviceOs === PracticeUtil::WINDOWS_10) $separator .= PracticeUtil::WIN10_ADDED_SEPARATOR;
+
+        $this->scoreboard->addLine(0, ' ' . TextFormat::RED . TextFormat::WHITE . $separator);
+
+        $this->scoreboard->addLine(1, ' ' . $onlineStr);
+
+        $this->scoreboard->addLine(2, ' ' . $inFightsStr);
+
+        $this->scoreboard->addLine(3, ' ' . $inQueuesStr);
+
+        $this->scoreboard->addLine(4, ' ' . TextFormat::GOLD . TextFormat::WHITE . $separator);
+
+        if($queue === true)
+
+            $this->scoreboard->addLine(6, ' ' . TextFormat::GREEN . TextFormat::WHITE . $separator);
+
+        $this->scoreboardType = 'scoreboard.spawn';
+    }
+
+    public function setDuelScoreboard(DuelGroup $group) : void {
+
+        $this->scoreboard->clearScoreboard();
+
+        $opponent = ($group->isPlayer($this->playerName)) ? $group->getOpponent() : $group->getPlayer();
+
+        $name = $opponent->getPlayerName();
+
+        $opponentStr = PracticeUtil::str_replace($this->scoreboardNames['opponent'], ['%player%' => $name]);
+        $durationStr = PracticeUtil::str_replace($this->scoreboardNames['duration'], ['%time%' => '00:00']);
+
+        $theirCPS = PracticeUtil::str_replace($this->scoreboardNames['cps'], ['%player%' => 'Their', '%clicks%' => 0]);
+        $yourCPS = PracticeUtil::str_replace($this->scoreboardNames['cps'], ['%player%' => 'Your', '%clicks%' => 0]);
+
+        $arr = [$opponentStr, $durationStr, $theirCPS, $yourCPS];
+
+        $compare = PracticeUtil::getLineSeparator($arr);
+
+        $separator = '------------------';
+
+        $len = strlen($separator);
+
+        $len1 = strlen($compare);
+
+        $compare = substr($compare, 0, $len1 - 1);
+
+        $len1--;
+
+        if($len1 > $len) $separator = $compare;
+
+        if($this->deviceOs === PracticeUtil::WINDOWS_10) $separator .= PracticeUtil::WIN10_ADDED_SEPARATOR;
+
+        $this->scoreboard->addLine(0, ' ' . TextFormat::RED . TextFormat::WHITE . $separator);
+
+        $this->scoreboard->addLine(1, ' ' . $opponentStr);
+
+        $this->scoreboard->addLine(2, ' ' . $durationStr);
+
+        $this->scoreboard->addLine(3, ' ' . TextFormat::GREEN . TextFormat::WHITE . $separator);
+
+        $this->scoreboard->addLine(4, ' ' . $yourCPS);
+
+        $this->scoreboard->addLine(5, ' ' . $theirCPS);
+
+        $this->scoreboard->addLine(6, ' ' . TextFormat::BLUE . TextFormat::WHITE . $separator);
+
+        $this->scoreboardType = 'scoreboard.duel';
+    }
+
+    public function setFFAScoreboard(FFAArena $arena) : void {
+
+        $this->scoreboard->clearScoreboard();
+
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        $arenaName = $arena->getName();
+
+        $kills = $playerHandler->getKillsOf($this->playerName);
+
+        $deaths = $playerHandler->getDeathsOf($this->playerName);
+
+        if(PracticeUtil::str_contains('FFA', $this->scoreboardNames['arena']) and PracticeUtil::str_contains('FFA', $arenaName))
+            $arenaName = PracticeUtil::str_replace($arenaName, ['FFA' => '']);
+
+        $killsStr = PracticeUtil::str_replace($this->scoreboardNames['kills'], ['%num%' => $kills]);
+        $deathsStr = PracticeUtil::str_replace($this->scoreboardNames['deaths'], ['%num%' => $deaths]);
+        $yourCPS = PracticeUtil::str_replace($this->scoreboardNames['cps'], ['%player%' => 'Your', '%clicks%' => 0]);
+        $arenaStr = trim(PracticeUtil::str_replace($this->scoreboardNames['arena'], ['%arena%' => $arenaName]));
+
+        $arr = [$killsStr, $deathsStr, $arenaStr, $yourCPS];
+
+        $compare = PracticeUtil::getLineSeparator($arr);
+
+        $separator = '------------------';
+
+        $len = strlen($separator);
+
+        $len1 = strlen($compare);
+
+        $compare = substr($compare, 0, $len1 - 1);
+
+        $len1--;
+
+        if($len1 > $len) $separator = $compare;
+
+        if($this->deviceOs === PracticeUtil::WINDOWS_10) $separator .= PracticeUtil::WIN10_ADDED_SEPARATOR;
+
+        $this->scoreboard->addLine(0, ' ' . TextFormat::RED . TextFormat::WHITE . $separator);
+
+        $this->scoreboard->addLine(1, ' ' . $arenaStr);
+
+        $this->scoreboard->addLine(2, ' ' . TextFormat::GREEN . TextFormat::WHITE . $separator);
+
+        $this->scoreboard->addLine(3, ' ' . $yourCPS);
+
+        $this->scoreboard->addLine(4, ' ' . $killsStr);
+
+        $this->scoreboard->addLine(5, ' ' . $deathsStr);
+
+        $this->scoreboard->addLine(6, ' ' . TextFormat::GOLD . TextFormat::WHITE . $separator);
+
+        $this->scoreboardType = 'scoreboard.ffa';
+    }
+
+    public function setSpectatorScoreboard(DuelGroup $group) : void {
+
+        $this->scoreboard->clearScoreboard();
+
+        $duration = $group->getDurationString();
+
+        $queue = $group->queueToString();
+
+        $durationStr = PracticeUtil::str_replace($this->scoreboardNames['duration'], ['%time%' => $duration]);
+
+        $arr = [$durationStr, $queue];
+
+        $compare = PracticeUtil::getLineSeparator($arr);
+
+        $separator = '------------------';
+
+        $len = strlen($separator);
+
+        $len1 = strlen($compare);
+
+        $compare = substr($compare, 0, $len1 - 1);
+
+        $len1--;
+
+        if($len1 > $len) $separator = $compare;
+
+        if($this->deviceOs === PracticeUtil::WINDOWS_10) $separator .= PracticeUtil::WIN10_ADDED_SEPARATOR;
+
+        $this->scoreboard->addLine(0, ' ' . TextFormat::RED . TextFormat::WHITE . $separator);
+
+        $this->scoreboard->addLine(1, ' ' . $durationStr);
+
+        $this->scoreboard->addLine(2, ' ' . $queue);
+
+        $this->scoreboard->addLine(3, ' ' . TextFormat::RED . TextFormat::WHITE . $separator);
+
+        $this->scoreboardType = 'scoreboard.spec';
+    }
+
+    public function updateLineOfScoreboard(int $id, string $line) : void {
+
+        $this->scoreboard->addLine($id, $line);
+
+    }
 
     public function setNoDamageTicks(int $del) : void {
         $this->noDamageTick = $del;
@@ -200,10 +449,6 @@ class PracticePlayer
             }
         }
 
-        $sb = $this->getCurrentScoreboard();
-
-        if($this->isInDuel() or $sb === Scoreboard::FFA_SCOREBOARD) $this->updateScoreboard();
-
         if($this->canSendDuelRequest() !== true) $this->duelSpamSec--;
     }
 
@@ -213,249 +458,6 @@ class PracticePlayer
             if($this->noDamageTick <= 0)
                 $this->noDamageTick = 0;
         }
-    }
-
-    public function initScoreboard(int $device) : void {
-        if($this->isOnline()) {
-            $this->scoreboard = $this->getSpawnScoreboard($device);
-            $this->scoreboard->send();
-        }
-    }
-
-    public function setScoreboard(string $type = '', bool $enable = false) : void {
-
-        if(PracticeCore::getPlayerHandler()->isScoreboardEnabled($this->playerName)) {
-
-            $defaultType = Scoreboard::SPAWN_SCOREBOARD;
-
-            $set = false;
-
-            if (Scoreboard::isValidBoardType($type) and !is_null($this->scoreboard)) {
-                $currentType = $this->scoreboard->getType();
-                if ($currentType !== $type) {
-                    $defaultType = $type;
-                    $set = true;
-                } else $this->updateScoreboard();
-            }
-
-            if ($type === Scoreboard::NO_SCOREBOARD) {
-                $this->scoreboard->remove();
-                $this->scoreboard = null;
-                return;
-            }
-
-            if ($set === true) {
-
-                $this->scoreboard->remove();
-
-                $sb = $this->getScoreboardFromType($defaultType);
-
-                if(!is_null($sb)) $this->scoreboard = $sb;
-
-                $this->scoreboard->send();
-            }
-        } else {
-
-            if($enable === true) {
-
-                $sb = $this->getScoreboardFromType($type);
-
-                if(!is_null($sb)) {
-                    $this->scoreboard = $sb;
-                    $this->scoreboard->send();
-                }
-            } else {
-
-                if (!is_null($this->scoreboard))
-                    $this->scoreboard->remove();
-
-                $this->scoreboard = null;
-            }
-        }
-    }
-
-    /**
-     * @param string $type
-     * @return Scoreboard|null
-     */
-    private function getScoreboardFromType(string $type) {
-
-        $arr = [
-            Scoreboard::SPAWN_SCOREBOARD => $this->getSpawnScoreboard($this->getDevice()),
-            Scoreboard::FFA_SCOREBOARD => $this->getFFAScoreboard(),
-            Scoreboard::DUEL_SCOREBOARD => $this->getDuelScoreboard(),
-            Scoreboard::SPEC_SCOREBOARD => $this->getSpectatorScoreboard()
-        ];
-
-        return isset($arr[$type]) ? $arr[$type] : null;
-    }
-
-    public function updateScoreboard(string $key = '', array $values = []) : void {
-
-        if(!is_null($this->scoreboard)) {
-
-            $currentType = $this->scoreboard->getType();
-
-            $size = count($values);
-
-            if ($size === 0 and $key === '') {
-
-                $lines = [];
-
-                $sb = $this->getScoreboardFromType($currentType);
-
-                if(!is_null($sb)) $lines = $sb->getLines();
-
-                if (count($lines) > 0)
-                    $this->scoreboard->resendAll($lines);
-
-            } else $this->scoreboard->resendLine($key, $values);
-        }
-    }
-
-    public function getCurrentScoreboard() : string {
-
-        $type = Scoreboard::NO_SCOREBOARD;
-
-        if(!is_null($this->scoreboard))
-            $type = $this->scoreboard->getType();
-
-        return $type;
-    }
-
-    private function getSpawnScoreboard(int $device) : Scoreboard {
-
-        $duelHandler = PracticeCore::getDuelHandler();
-
-        $server = Server::getInstance();
-
-        $scoreboard = new Scoreboard($this->getPlayer(), $device, PracticeUtil::getName('server-name'), Scoreboard::SPAWN_SCOREBOARD);
-
-        $scoreboard = $scoreboard->addSeparator(TextFormat::BLUE)
-            ->addLine('online-players', PracticeUtil::getName('scoreboard.spawn.online-players'))
-            ->addLine('in-fights', PracticeUtil::getName('scoreboard.spawn.in-fights'))
-            ->addLine('in-queues', PracticeUtil::getName('scoreboard.spawn.in-queues'))
-            ->addSeparator(TextFormat::RED)
-            ->addLine('your-queue', PracticeUtil::getName('scoreboard.spawn.thequeue'))
-            ->addSeparator(TextFormat::GREEN);
-
-        $queue = $duelHandler->isPlayerInQueue($this->getPlayerName());
-
-        if($queue === false)
-            $scoreboard = $scoreboard->hideLine('your-queue')->hideLine('separator-3');
-        else $scoreboard = $scoreboard->showLine('your-queue')->showLine('separator-3');
-
-        $online = count($server->getOnlinePlayers());
-        $max_online = $server->getMaxPlayers();
-
-        $in_fights = PracticeCore::getPlayerHandler()->getPlayersInFights();;
-        $in_queues = $duelHandler->getNumberOfQueuedPlayers();
-
-        $scoreboard = $scoreboard->updateLine('online-players', ['%num%' => $online, '%max-num%' => $max_online])
-                        ->updateLine('in-fights', ['%num%' => $in_fights])
-                        ->updateLine('in-queues', ['%num%' => $in_queues]);
-
-        if($duelHandler->isPlayerInQueue($this->playerName)) {
-
-            $queue = $duelHandler->getQueuedPlayer($this->playerName);
-
-            $ranked = ($queue->isRanked()) ? 'Ranked' : 'Unranked';
-
-            $theQueue = $queue->getQueue();
-
-            $scoreboard = $scoreboard->updateLine('your-queue', ['%queue%' => $theQueue, '%ranked%' => $ranked]);
-        }
-
-        return $scoreboard;
-    }
-
-    private function getDuelScoreboard() : Scoreboard {
-
-        $scoreboard = new Scoreboard($this->getPlayer(), $this->getDevice(), PracticeUtil::getName('server-name'), Scoreboard::DUEL_SCOREBOARD);
-        $scoreboard = $scoreboard->addSeparator(TextFormat::BLUE)
-            ->addLine('opponent', PracticeUtil::getName('scoreboard.duels.opponent'))
-            ->addLine('duration', PracticeUtil::getName('scoreboard.duels.duration'))
-            ->addSeparator(TextFormat::RED)
-            ->addLine('your-cps', PracticeUtil::getName('scoreboard.player.cps'))
-            ->addLine('their-cps', PracticeUtil::getName('scoreboard.opponent.cps'))
-            ->addSeparator(TextFormat::GREEN);
-
-        if($this->isInDuel()) {
-
-            $duel = PracticeCore::getDuelHandler()->getDuel($this->playerName);
-
-            $opponent = ($duel->isOpponent($this->playerName)) ? $duel->getPlayer() : $duel->getOpponent();
-
-            if(!is_null($opponent)) {
-
-                $oppName = $opponent->getPlayerName();
-
-                $duration = $duel->getDurationString();
-
-                $scoreboard = $scoreboard->updateLine('opponent', ['%player%' => $oppName])
-                    ->updateLine('duration', ['%time%' => $duration])
-                    ->updateLine('your-cps', ['%player%' => 'Your', '%clicks%' => 0])
-                    ->updateLine('their-cps', ['%player%' => 'Their', '%clicks%' => 0]);
-            }
-        }
-
-        return $scoreboard;
-    }
-
-    private function getSpectatorScoreboard() : Scoreboard {
-
-        $duelHandler = PracticeCore::getDuelHandler();
-
-        $scoreboard = new Scoreboard($this->getPlayer(), $this->getDevice(), PracticeUtil::getName('server-name'), Scoreboard::SPEC_SCOREBOARD);
-
-        $scoreboard = $scoreboard->addSeparator(TextFormat::GREEN)
-            ->addLine('queue', PracticeUtil::getName('scoreboard.duels.kit'))
-            ->addLine('duration', PracticeUtil::getName('scoreboard.duels.duration'))
-            ->addSeparator(TextFormat::BLUE);
-
-        if($duelHandler->isASpectator($this->playerName)) {
-            $duel = $duelHandler->getDuelFromSpec($this->playerName);
-            $duration = $duel->getDurationString();
-            $queue = $duel->getQueue();
-            $scoreboard = $scoreboard->updateLine('queue', ['%kit%' => $queue])
-                ->updateLine('duration', ['%time%' => $duration]);
-        }
-
-        return $scoreboard;
-    }
-
-    private function getFFAScoreboard() : Scoreboard {
-
-        $scoreboard = new Scoreboard($this->getPlayer(), $this->getDevice(), PracticeUtil::getName('server-name'), Scoreboard::FFA_SCOREBOARD);
-
-        $scoreboard = $scoreboard->addSeparator(TextFormat::GOLD)
-            ->addLine('arena', PracticeUtil::getName('scoreboard.arena-ffa.arena'))
-            ->addSeparator(TextFormat::GREEN)
-            ->addLine('cps', PracticeUtil::getName('scoreboard.player.cps'))
-            ->addLine('kills', PracticeUtil::getName('scoreboard.arena-ffa.kills'))
-            ->addLine('deaths', PracticeUtil::getName('scoreboard.arena-ffa.deaths'))
-            ->addSeparator(TextFormat::BLUE);
-
-        if($this->isInArena()) {
-
-            $playerHandler = PracticeCore::getPlayerHandler();
-
-            $arena = $this->currentArena;
-
-            $name = PracticeUtil::getName('scoreboard.arena-ffa.arena');
-
-            if(PracticeUtil::str_contains(' FFA', $arena) and PracticeUtil::str_contains(' FFA', $name))
-                $arena = PracticeUtil::str_replace($arena, [' FFA' => '']);
-
-            $cps = count($this->cps);
-            $kills = $playerHandler->getKillsOf($this->playerName);
-            $deaths = $playerHandler->getDeathsOf($this->playerName);
-            $scoreboard = $scoreboard->updateLine('arena', ['%arena%' => $arena])
-                ->updateLine('cps', ['%player%' => 'Your', '%clicks%' => $cps])
-                ->updateLine('kills', ['%num%' => $kills])
-                ->updateLine('deaths', ['%num%' => $deaths]);
-        }
-        return $scoreboard;
     }
 
     public function setCantSpamDuel() : void {
@@ -759,7 +761,8 @@ class PracticePlayer
                 $this->setCanHitPlayer(true);
                 $msg = PracticeUtil::getMessage('general.arena.join');
                 $msg = strval(str_replace('%arena-name%', $arenaName, $msg));
-                $this->setScoreboard(Scoreboard::FFA_SCOREBOARD);
+
+                $this->setFFAScoreboard($arena);
 
             } else {
 
@@ -796,6 +799,29 @@ class PracticePlayer
         }
 
         $this->cps = $cps;
+
+        $yourCPS = count($this->cps);
+
+        $yourCPSStr = PracticeUtil::str_replace($this->scoreboardNames['cps'], ['%player%' => 'Your', '%clicks%' => $yourCPS]);
+
+        if($this->scoreboardType === 'scoreboard.duel' and $this->isInDuel()) {
+
+            $duel = PracticeCore::getDuelHandler()->getDuel($this->playerName);
+
+            if($duel->isDuelRunning() and $duel->arePlayersOnline()) {
+
+                $theirCPSStr = PracticeUtil::str_replace($this->scoreboardNames['cps'], ['%player%' => 'Their', '%clicks%' => $yourCPS]);
+
+                $other = $duel->isPlayer($this->playerName) ? $duel->getOpponent() : $duel->getPlayer();
+
+                $this->updateLineOfScoreboard(4, ' ' . $yourCPSStr);
+
+                $other->updateLineOfScoreboard(5,' ' . $theirCPSStr);
+            }
+        } elseif ($this->scoreboardType === 'scoreboard.ffa') {
+
+            $this->updateLineOfScoreboard(3, ' ' . $yourCPSStr);
+        }
     }
 
     public function addCps(bool $clickedBlock): void {
@@ -828,22 +854,26 @@ class PracticePlayer
 
         $yourCPS = count($this->cps);
 
-        $sb = $this->getCurrentScoreboard();
+        $yourCPSStr = PracticeUtil::str_replace($this->scoreboardNames['cps'], ['%player%' => 'Your', '%clicks%' => $yourCPS]);
 
-        if($this->isInDuel()) {
+        if($this->scoreboardType === 'scoreboard.duel' and $this->isInDuel()) {
 
             $duel = PracticeCore::getDuelHandler()->getDuel($this->playerName);
 
             if($duel->isDuelRunning() and $duel->arePlayersOnline()) {
 
+                $theirCPSStr = PracticeUtil::str_replace($this->scoreboardNames['cps'], ['%player%' => 'Their', '%clicks%' => $yourCPS]);
+
                 $other = $duel->isPlayer($this->playerName) ? $duel->getOpponent() : $duel->getPlayer();
 
-                $this->updateScoreboard('your-cps', ['%player%' => 'Your', '%clicks%' => $yourCPS]);
-                $other->updateScoreboard('their-cps', ['%player%' => 'Their', '%clicks%' => $yourCPS]);
+                $this->updateLineOfScoreboard(4, ' ' . $yourCPSStr);
 
+                $other->updateLineOfScoreboard(5,' ' . $theirCPSStr);
             }
-        } elseif ($sb === Scoreboard::FFA_SCOREBOARD)
-            $this->updateScoreboard('cps', ['%player%' => 'Your', '%clicks%' => $yourCPS]);
+        } elseif ($this->scoreboardType === 'scoreboard.ffa') {
+
+            $this->updateLineOfScoreboard(3, ' ' . $yourCPSStr);
+        }
     }
 
     public function getInput() : int {
@@ -919,8 +949,6 @@ class PracticePlayer
                 $p->teleport($pos);
             });
 
-            //$p->teleport($pos);
-
             $queue = $grp->getQueue();
 
             if($arena->hasKit($queue)){
@@ -984,10 +1012,6 @@ class PracticePlayer
     public function removeForm() : array {
         $this->isLookingAtForm = false;
         $data = $this->currentFormData;
-        /*if(is_string($this->currentFormData))
-            $data = [$this->currentFormData];
-        elseif (is_array($this->currentFormData))
-            $data = $this->currentFormData;*/
         $this->currentFormData = [];
         return $data;
     }

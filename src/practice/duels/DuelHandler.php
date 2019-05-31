@@ -68,9 +68,9 @@ class DuelHandler
 
             $this->queuedPlayers[$p->getPlayerName()] = $newQueue;
 
-            ScoreboardUtil::updateSpawnScoreboards();
+            $p->setSpawnScoreboard(true);
 
-            //$this->updateDuels();
+            ScoreboardUtil::updateSpawnScoreboards($p);
         }
     }
 
@@ -97,8 +97,6 @@ class DuelHandler
             }
 
             unset($this->queuedPlayers[$queue->getPlayerName()]);
-
-            //var_dump($this->queuedPlayers);
         }
     }
 

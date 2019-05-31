@@ -87,7 +87,7 @@ class PracticeTask extends Task {
                 $player->updatePlayer();
         }
 
-        if($duelHandler->updateQueues()) ScoreboardUtil::updateSpawnScoreboards("in-queues");
+        //if($duelHandler->updateQueues()) ScoreboardUtil::updateSpawnScoreboards("in-queues");
     }
 
     private function updateDuels(int $currentTick) : void {

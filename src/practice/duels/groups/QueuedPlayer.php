@@ -74,4 +74,13 @@ class QueuedPlayer
         }
         return $result;
     }
+
+    public function toString() : string {
+
+        $str = PracticeUtil::getName('scoreboard.spawn.thequeue');
+
+        $ranked = ($this->ranked === true) ? 'Ranked' : 'Unranked';
+
+        return PracticeUtil::str_replace($str, ['%ranked%' => $ranked, '%queue%' => $this->queue]);
+    }
 }
