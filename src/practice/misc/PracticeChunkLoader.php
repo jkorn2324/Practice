@@ -28,7 +28,7 @@ class PracticeChunkLoader implements ChunkLoader
 
     private $level;
 
-    private $id;
+    private $id = 0;
 
     private $callable;
 
@@ -49,6 +49,8 @@ class PracticeChunkLoader implements ChunkLoader
      * @return int
      */
     public function getLoaderId(): int {
+        if(is_null($this->id))
+            $this->id = Level::generateChunkLoaderId($this);
         return $this->id;
     }
 
