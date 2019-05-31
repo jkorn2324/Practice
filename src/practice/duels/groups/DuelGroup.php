@@ -899,11 +899,8 @@ class DuelGroup
     public function equals($object) : bool {
         $result = false;
         if($object instanceof DuelGroup) {
-            if($object->getPlayer() === $this->getPlayer() and $object->getOpponent() === $this->getOpponent()) {
-                if($object->getQueue() === $this->getQueue()) {
-                    $result = true;
-                }
-            }
+            if($object->getPlayer() === $this->getPlayer() and $object->getOpponent() === $this->getOpponent())
+                $result = $object->getQueue() === $this->getQueue();
         }
         return $result;
     }
