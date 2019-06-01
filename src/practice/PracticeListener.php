@@ -110,8 +110,6 @@ class PracticeListener implements Listener
 
             $p->setNameTag($nameTag);
 
-            ScoreboardUtil::updateSpawnScoreboards($pl);
-
             $this->core->getScheduler()->scheduleDelayedTask(new PlayerSpawnTask($pl), 10);
 
             $event->setJoinMessage(PracticeUtil::str_replace(PracticeUtil::getMessage('join-msg'), ['%player%' => $p->getName()]));
@@ -288,8 +286,6 @@ class PracticeListener implements Listener
 
         $p->setNameTag($nameTag);
 
-        /**/
-
         $spawnPos = PracticeUtil::getSpawnPosition();
 
         $prevSpawnPos = $event->getRespawnPosition();
@@ -307,7 +303,7 @@ class PracticeListener implements Listener
 
             if($player->isInCombat()) $player->setInCombat(false);
 
-            //$player->setScoreboard(Scoreboard::SPAWN_SCOREBOARD);
+            $player->setSpawnScoreboard();
 
             $this->core->getScheduler()->scheduleDelayedTask(new RespawnTask($player), 10);
         }
@@ -922,15 +918,18 @@ class PracticeListener implements Listener
                 $cancel = true;
 
             } else {
-                if($p->isInArena()) {
+
+                if($p->isInArena())
                     $cancel = !$p->getCurrentArena()->canBuild();
-                } else {
+
+                else {
 
                     if ($p->isInDuel()) {
                         $duel = $duelHandler->getDuel($player->getName());
                         if($duel->isDuelRunning() and $duel->canBuild())
                             $cancel = !$duel->removeBlock($event->getBlockClicked());
                         else $cancel = true;
+
                     } else {
 
                         $cancel = true;

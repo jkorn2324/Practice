@@ -383,7 +383,7 @@ class PracticePlayer
 
         $this->scoreboard->addLine(2, ' ' . $durationStr);
 
-        $this->scoreboard->addLine(3, ' ' . TextFormat::RED . TextFormat::WHITE . $separator);
+        $this->scoreboard->addLine(3, ' ' . TextFormat::BLACK . TextFormat::WHITE . $separator);
 
         $this->scoreboardType = 'scoreboard.spec';
     }

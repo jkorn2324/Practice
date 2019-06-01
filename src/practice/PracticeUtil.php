@@ -984,22 +984,11 @@ class PracticeUtil
                     if ($player->isInvisible()) $player->setInvisible(false);
                 }
 
-                /* if($player->isInArena()) $player->setCurrentArena(PracticeArena::NO_ARENA);
-
-                if(!$player->canThrowPearl()) $player->setThrowPearl(true);
-
-                if($player->isInCombat()) $player->setInCombat(false);
-
-                $player->setScoreboard(Scoreboard::SPAWN_SCOREBOARD); */
-
-                $player->setSpawnScoreboard();
-
                 PracticeCore::getItemHandler()->spawnHubItems($player, $clearInv);
 
                 ScoreboardUtil::updateSpawnScoreboards($player);
 
             }
-            //ScoreboardUtil::updateSpawnScoreboards();
         }
     }
 

@@ -42,7 +42,9 @@ class ScoreboardUtil
 
     public static function updateSpawnScoreboards(PracticePlayer $player = null) : void {
 
-        $onlinePlayers = PracticeCore::getPlayerHandler()->getOnlinePlayers();
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        $onlinePlayers = $playerHandler->getOnlinePlayers();
 
         $server = Server::getInstance();
 
@@ -50,7 +52,7 @@ class ScoreboardUtil
 
         $maxPlayers = $server->getMaxPlayers();
 
-        $inFights = PracticeCore::getPlayerHandler()->getPlayersInFights();
+        $inFights = $playerHandler->getPlayersInFights();
 
         $inQueues = PracticeCore::getDuelHandler()->getNumberOfQueuedPlayers();
 

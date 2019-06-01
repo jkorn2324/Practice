@@ -13,6 +13,7 @@ namespace practice\player;
 
 use pocketmine\scheduler\Task;
 use practice\PracticeCore;
+use practice\scoreboard\ScoreboardUtil;
 
 class PlayerSpawnTask extends Task
 {
@@ -32,6 +33,7 @@ class PlayerSpawnTask extends Task
      */
     public function onRun(int $currentTick)
     {
+        ScoreboardUtil::updateSpawnScoreboards($this->player);
         PracticeCore::getItemHandler()->spawnHubItems($this->player, true);
     }
 }
