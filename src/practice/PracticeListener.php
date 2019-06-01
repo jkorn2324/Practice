@@ -18,6 +18,7 @@ use pocketmine\event\block\BlockBurnEvent;
 use pocketmine\event\block\BlockFormEvent;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\block\BlockSpreadEvent;
+use pocketmine\event\entity\EntityDamageByChildEntityEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\inventory\InventoryCloseEvent;
@@ -49,6 +50,8 @@ use pocketmine\item\MushroomStew;
 use pocketmine\item\Potion;
 use pocketmine\item\SplashPotion;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
+use pocketmine\network\mcpe\protocol\InventorySlotPacket;
+use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
@@ -58,6 +61,7 @@ use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use practice\anticheat\AntiCheatUtil;
 use practice\arenas\PracticeArena;
+use practice\game\entity\FishingHook;
 use practice\game\FormUtil;
 use practice\game\inventory\InventoryUtil;
 use practice\game\inventory\menus\inventories\PracBaseInv;
@@ -149,6 +153,8 @@ class PracticeListener implements Listener
 
             $pracPlayer = $playerHandler->getPlayer($p);
 
+            if($pracPlayer->isFishing()) $pracPlayer->stopFishing(false);
+
             if($pracPlayer->isInParty()) {
                 $party = PracticeCore::getPartyManager()->getPartyFromPlayer($pracPlayer->getPlayerName());
                 $party->removeFromParty($pracPlayer->getPlayerName());
@@ -182,6 +188,9 @@ class PracticeListener implements Listener
         if($playerHandler->isPlayerOnline($p)) {
 
             $player = $playerHandler->getPlayer($p);
+
+            if($player->isFishing()) $player->stopFishing(false);
+
             $lastDamageCause = $p->getLastDamageCause();
             $addToStats = $player->isInArena() and ($player->getCurrentArenaType() === PracticeArena::FFA_ARENA);
 

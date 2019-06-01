@@ -119,15 +119,12 @@ class PracticeTask extends Task {
             }
         }
 
-        if($currentTick % 4 === 0) {
+        foreach ($awaitingMatches as $match) {
 
-            foreach ($awaitingMatches as $match) {
+            $queue = $match->getQueue();
 
-                $queue = $match->getQueue();
-
-                if ($duelHandler->isAnArenaOpen($queue))
-                    $duelHandler->startDuel($match);
-            }
+            if ($duelHandler->isAnArenaOpen($queue))
+                $duelHandler->startDuel($match);
         }
 
         foreach($duels as $duel) {

@@ -535,7 +535,7 @@ class PracticeUtil
 
             if($execute === true) {
 
-                $test = !$p->isInvisible() and !self::isFrozen($p->getPlayer());
+                $test = $p->isOnline() and !$p->isInvisible() and !self::isFrozen($p->getPlayer());
 
                 $result = ($test === true) ? true : $duelHandler->isASpectator($p->getPlayer());
             }
@@ -547,15 +547,29 @@ class PracticeUtil
 
         $playerHandler = PracticeCore::getPlayerHandler();
 
+        $use = false;
+
         if($playerHandler->isPlayerOnline($player)) {
+
+            $p = $playerHandler->getPlayer($player);
+
+            $pl = $p->getPlayer();
+
+            $use = $p->isOnline() and !self::isFrozen($pl) and !self::isInSpectatorMode($pl);
+        }
+
+        if($use === true) {
+
             $p = $playerHandler->getPlayer($player);
             $pl = $p->getPlayer();
             $potion->onClickAir($pl, $pl->getDirectionVector());
+
             if(!$pl->isCreative()) {
                 $inv = $pl->getInventory();
                 $inv->setItem($inv->getHeldItemIndex(), Item::get(0));
             }
-            if($animate) {
+
+            if($animate === true) {
                 $pkt = new AnimatePacket();
                 $pkt->action = AnimatePacket::ACTION_SWING_ARM;
                 $pkt->entityRuntimeId = $pl->getId();
@@ -575,9 +589,12 @@ class PracticeUtil
             $p = $playerHandler->getPlayer($player);
 
             $exec = self::isEnderpearlCooldownEnabled() ? $p->canThrowPearl() : true;
+
+            if($exec === true)
+                $exec = $p->isOnline() and !self::isFrozen($p->getPlayer()) and !self::isInSpectatorMode($p->getPlayer());
         }
 
-        if($exec) {
+        if($exec === true) {
 
             $p = $playerHandler->getPlayer($player);
             $pl = $p->getPlayer();
@@ -586,7 +603,7 @@ class PracticeUtil
             if(self::isEnderpearlCooldownEnabled())
                 $p->setThrowPearl(false);
 
-            if($animate) {
+            if($animate === true) {
                 $pkt = new AnimatePacket();
                 $pkt->action = AnimatePacket::ACTION_SWING_ARM;
                 $pkt->entityRuntimeId = $pl->getId();
@@ -609,7 +626,19 @@ class PracticeUtil
 
         $playerHandler = PracticeCore::getPlayerHandler();
 
+        $use = false;
+
         if($playerHandler->isPlayerOnline($player)) {
+
+            $p = $playerHandler->getPlayer($player);
+
+            $pl = $p->getPlayer();
+
+            $use = $p->isOnline() and !self::isFrozen($pl) and !self::isInSpectatorMode($pl);
+
+        }
+
+        if($use === true) {
 
             $p = $playerHandler->getPlayer($player);
 
@@ -937,34 +966,39 @@ class PracticeUtil
 
         else {
 
-            if(self::isFrozen($p)) self::setFrozen($p, false);
+            if($player->isOnline()) {
 
-            if(self::isInSpectatorMode($player)){
+                if (self::isFrozen($p)) self::setFrozen($p, false);
 
-                self::setInSpectatorMode($player, false);
+                if (self::isInSpectatorMode($player)) {
 
-            } else {
+                    self::setInSpectatorMode($player, false);
 
-                if (self::canFly($p)) { self::setCanFly($p, false); }
+                } else {
 
-                $player->setCanHitPlayer(false);
-                if($player->isInvisible()) $player->setInvisible(false);
+                    if (self::canFly($p)) {
+                        self::setCanFly($p, false);
+                    }
+
+                    $player->setCanHitPlayer(false);
+                    if ($player->isInvisible()) $player->setInvisible(false);
+                }
+
+                /* if($player->isInArena()) $player->setCurrentArena(PracticeArena::NO_ARENA);
+
+                if(!$player->canThrowPearl()) $player->setThrowPearl(true);
+
+                if($player->isInCombat()) $player->setInCombat(false);
+
+                $player->setScoreboard(Scoreboard::SPAWN_SCOREBOARD); */
+
+                $player->setSpawnScoreboard();
+
+                PracticeCore::getItemHandler()->spawnHubItems($player, $clearInv);
+
+                ScoreboardUtil::updateSpawnScoreboards($player);
+
             }
-
-            /* if($player->isInArena()) $player->setCurrentArena(PracticeArena::NO_ARENA);
-
-            if(!$player->canThrowPearl()) $player->setThrowPearl(true);
-
-            if($player->isInCombat()) $player->setInCombat(false);
-
-            $player->setScoreboard(Scoreboard::SPAWN_SCOREBOARD); */
-
-            $player->setSpawnScoreboard();
-
-            PracticeCore::getItemHandler()->spawnHubItems($player, $clearInv);
-
-            ScoreboardUtil::updateSpawnScoreboards($player);
-
             //ScoreboardUtil::updateSpawnScoreboards();
         }
     }

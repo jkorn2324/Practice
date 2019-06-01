@@ -379,9 +379,9 @@ class PracticePlayer
 
         $this->scoreboard->addLine(0, ' ' . TextFormat::RED . TextFormat::WHITE . $separator);
 
-        $this->scoreboard->addLine(1, ' ' . $durationStr);
+        $this->scoreboard->addLine(1, ' ' . $queue);
 
-        $this->scoreboard->addLine(2, ' ' . $queue);
+        $this->scoreboard->addLine(2, ' ' . $durationStr);
 
         $this->scoreboard->addLine(3, ' ' . TextFormat::RED . TextFormat::WHITE . $separator);
 
@@ -577,17 +577,19 @@ class PracticePlayer
         }
     }
 
-    public function stopFishing(bool $click = true) : void {
+    public function stopFishing(bool $click = true, bool $killEntity = true) : void {
 
         if($this->isFishing()) {
 
             if($this->fishing instanceof FishingHook) {
                 $rod = $this->fishing;
-                if($click) {
+                if($click === true) {
                     $rod->reelLine();
                 } elseif ($rod !== null) {
-                    $rod->kill();
-                    $rod->close();
+                    if(!$rod->isClosed() and $killEntity === true) {
+                        $rod->kill();
+                        $rod->close();
+                    }
                 }
             }
         }

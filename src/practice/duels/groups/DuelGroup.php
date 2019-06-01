@@ -138,8 +138,6 @@ class DuelGroup
 
         $p->placeInDuel($this);
         $o->placeInDuel($this);
-
-
     }
 
     public function setONameTag(string $nameTag) : void {
@@ -254,8 +252,8 @@ class DuelGroup
 
         if ($this->isLoadingDuel()) {
 
-            if (!PracticeCore::getArenaHandler()->isArenaClosed($this->arenaName))
-                PracticeCore::getArenaHandler()->setArenaClosed($this->arenaName);
+            /*if (!PracticeCore::getArenaHandler()->isArenaClosed($this->arenaName))
+                PracticeCore::getArenaHandler()->setArenaClosed($this->arenaName);*/
 
             $this->countdownTick++;
 
@@ -565,7 +563,6 @@ class DuelGroup
             } else $left = null;
 
             $count = 0;
-            $len = $len - 1;
 
             $keys = array_keys($this->spectators);
 
