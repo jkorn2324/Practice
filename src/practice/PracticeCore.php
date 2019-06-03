@@ -45,6 +45,7 @@ use practice\kits\KitHandler;
 use practice\parties\PartyManager;
 use practice\player\gameplay\ChatHandler;
 use practice\player\gameplay\ReportHandler;
+use practice\player\info\IPHandler;
 use practice\player\permissions\PermissionsHandler;
 use practice\player\permissions\PermissionsToCfgTask;
 use practice\player\PlayerHandler;
@@ -77,6 +78,8 @@ class PracticeCore extends PluginBase
 
     private static $partyManager;
 
+    private static $ipHandler;
+
     private $serverMuted;
 
     public function onEnable() {
@@ -108,6 +111,7 @@ class PracticeCore extends PluginBase
         self::$reportHandler = new ReportHandler();
         self::$permissionsHandler = new PermissionsHandler($this);
         self::$partyManager = new PartyManager();
+        self::$ipHandler = new IPHandler($this);
 
         $this->serverMuted = false;
 
@@ -205,6 +209,10 @@ class PracticeCore extends PluginBase
         return self::$partyManager;
     }
 
+    public static function getIPHandler() : IPHandler {
+        return self::$ipHandler;
+    }
+
     private function initMessageConfig() : void {
         $this->saveResource("messages.yml");
     }
@@ -244,6 +252,12 @@ class PracticeCore extends PluginBase
         $this->getServer()->getCommandMap()->register($cmd->getName(), $cmd);
     }
 
+    private function unregisterCommand(string $name) : void {
+        $map = $this->getServer()->getCommandMap();
+        $cmd = $map->getCommand($name);
+        if($cmd !== null) $this->getServer()->getCommandMap()->unregister($cmd);
+    }
+
     private function initCommands() : void {
 
         $this->registerCommand(new KitCommand());
@@ -269,6 +283,9 @@ class PracticeCore extends PluginBase
         //TODO REGISTER THE COMMAND WHEN IT'S FINISHED
         //$this->registerCommand(new PartyCommand());
 
+        $this->unregisterCommand('ban');
+        $this->unregisterCommand('banip');
+        $this->unregisterCommand('banlist');
     }
 
     private function registerEntities() : void {

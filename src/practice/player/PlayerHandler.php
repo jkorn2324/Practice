@@ -22,6 +22,7 @@ use practice\ranks\RankHandler;
 
 class PlayerHandler
 {
+    /* @var PracticePlayer[] */
     private $players;
     private $pendingDeviceData;
     private $playerFolderPath;
@@ -38,22 +39,24 @@ class PlayerHandler
         $this->initFiles($core);
     }
 
-    private function initFiles(PracticeCore $core) : void {
+    private function initFiles(PracticeCore $core): void
+    {
 
         $this->playerFolderPath = $core->getDataFolder() . '/players';
 
-        if(!is_dir($this->playerFolderPath)) {
+        if (!is_dir($this->playerFolderPath)) {
             mkdir($this->playerFolderPath);
         }
     }
 
-    public function updateLeaderboards() : void {
+    public function updateLeaderboards(): void
+    {
 
         $result = [];
 
         $duelKits = PracticeCore::getKitHandler()->getDuelKitNames(true);
 
-        foreach($duelKits as $name) {
+        foreach ($duelKits as $name) {
 
             $uncoloredName = PracticeUtil::getUncoloredString($name);
 
@@ -71,29 +74,32 @@ class PlayerHandler
         PracticeUtil::broadcastMsg(TextFormat::WHITE . '[' . TextFormat::RED . 'Zehox' . TextFormat::WHITE . ']' . TextFormat::BOLD . TextFormat::RED . ' Leaderboards are now up to date.');
     }
 
-    public function getCurrentLeaderboards() : array {
+    public function getCurrentLeaderboards(): array
+    {
         return $this->leaderboards;
     }
 
-    public function getOpenChestID(Player $player) : int {
+    public function getOpenChestID(Player $player): int
+    {
 
         $result = 1;
 
-        while(array_search($result, $this->closedInventoryIDs) !== false or !is_null($player->getWindow($result)))
+        while (array_search($result, $this->closedInventoryIDs) !== false or !is_null($player->getWindow($result)))
             $result++;
 
         return $result;
     }
 
-    public function setClosedInventoryID(int $id, Player $player) : bool {
+    public function setClosedInventoryID(int $id, Player $player): bool
+    {
 
         $result = false;
 
         $index = array_search($id, $this->closedInventoryIDs);
 
-        if(is_bool($index) and $index === false) $index = null;
+        if (is_bool($index) and $index === false) $index = null;
 
-        if(is_null($index)) {
+        if (is_null($index)) {
             $this->closedInventoryIDs[$player->getName()] = $id;
             $result = true;
         }
@@ -101,32 +107,41 @@ class PlayerHandler
         return $result;
     }
 
-    public function setOpenInventoryID(Player $player) : void {
+    public function setOpenInventoryID(Player $player): void
+    {
 
         $name = $player->getName();
 
         $id = $this->getClosedChestID($player);
 
-        if($id !== -1) unset($this->closedInventoryIDs[$name]);
+        if ($id !== -1) unset($this->closedInventoryIDs[$name]);
     }
 
-    private function getClosedChestID(Player $player) : int {
+    private function getClosedChestID(Player $player): int
+    {
 
         $name = $player->getName();
 
         $id = -1;
 
-        if(isset($this->closedInventoryIDs[$name]))
+        if (isset($this->closedInventoryIDs[$name]))
             $id = intval($this->closedInventoryIDs[$name]);
 
         return $id;
     }
 
-    private function createPlayerData(string $player) : void {
+    private function createPlayerData(string $player): void
+    {
 
         $path = $this->playerFolderPath . "/$player.yml";
 
-        if(!file_exists($path)) {
+        $p = $this->players[$player];
+
+        $address = $p->getPlayer()->getAddress();
+
+        $encodedIP = PracticeCore::getIPHandler()->encodeIP($address);
+
+        if (!file_exists($path)) {
 
             $file = fopen($path, 'wb');
 
@@ -138,14 +153,10 @@ class PlayerHandler
 
             $size = count($kits);
 
-            if($size > 0) {
-                foreach($kits as $kit) {
+            if ($size > 0) {
+                foreach ($kits as $kit) {
                     $name = strval($kit);
                     $elo[$name] = 1000;
-                    /*if($kit instanceof Kit) {
-                        $name = $kit->getName();
-                        $elo[$name] = 1000;
-                    }*/
                 }
             }
 
@@ -162,7 +173,8 @@ class PlayerHandler
                 ),
                 'scoreboards-enabled' => true,
                 'place-break' => false,
-                'pe-only' => false
+                'pe-only' => false,
+                'ips' => [$encodedIP]
             );
 
             yaml_emit_file($path, $data);
@@ -171,14 +183,27 @@ class PlayerHandler
 
             $data = yaml_parse_file($path);
 
-            if(!isset($data['scoreboards-enabled']))
+            $emit = false;
+
+            if (!isset($data['scoreboards-enabled'])) {
                 $data['scoreboards-enabled'] = true;
+                $emit = true;
+            }
 
-            if(!isset($data['place-break']))
+            if (!isset($data['place-break'])) {
                 $data['place-break'] = false;
+                $emit = true;
+            }
 
-            if(!isset($data['pe-only']))
+            if (!isset($data['pe-only'])) {
                 $data['pe-only'] = false;
+                $emit = true;
+            }
+
+            if (!isset($data['ips'])) {
+                $data['ips'] = [$encodedIP];
+                $emit = true;
+            }
 
             $stats = $data['stats'];
 
@@ -195,16 +220,16 @@ class PlayerHandler
 
             sort($duelKits);
 
-            if($keys !== $duelKits) {
+            if ($keys !== $duelKits) {
 
                 $difference = array_diff($duelKits, $keys);
 
-                foreach($difference as $kit) {
+                foreach ($difference as $kit) {
 
-                    if($kitHandler->isDuelKit($kit))
+                    if ($kitHandler->isDuelKit($kit))
                         $elo[$kit] = 1000;
                     else {
-                        if(isset($elo[$kit]))
+                        if (isset($elo[$kit]))
                             unset($elo[$kit]);
                     }
                 }
@@ -213,65 +238,75 @@ class PlayerHandler
 
                 $data['stats'] = $stats;
 
-                yaml_emit_file($path, $data);
+                $emit = true;
             }
+
+            if ($emit === true) yaml_emit_file($path, $data);
         }
     }
 
-    public function enableScoreboard(string $player, bool $enable = true) : void {
+    public function enableScoreboard(string $player, bool $enable = true): void
+    {
         $this->setPlayerData($player, 'scoreboards-enabled', $enable);
     }
 
-    public function isScoreboardEnabled(string $player) : bool {
+    public function isScoreboardEnabled(string $player): bool
+    {
         $result = true;
         $path = $this->playerFolderPath . "/$player.yml";
-        if(file_exists($path)) {
+        if (file_exists($path)) {
             $data = yaml_parse_file($path, 0);
-            if(is_array($data) and isset($data['scoreboards-enabled']))
+            if (is_array($data) and isset($data['scoreboards-enabled']))
                 $result = boolval($data['scoreboards-enabled']);
         }
         return $result;
     }
 
-    public function setPlaceNBreak(string $player, bool $enable = false) : void {
+    public function setPlaceNBreak(string $player, bool $enable = false): void
+    {
         $this->setPlayerData($player, 'place-break', $enable);
     }
 
-    public function canPlaceNBreak(string $player) : bool {
+    public function canPlaceNBreak(string $player): bool
+    {
         $result = false;
         $path = $this->playerFolderPath . "/$player.yml";
-        if(file_exists($path)) {
+        if (file_exists($path)) {
             $data = yaml_parse_file($path, 0);
-            if(is_array($data) and isset($data['place-break']))
+            if (is_array($data) and isset($data['place-break']))
                 $result = boolval($data['place-break']);
         }
         return $result;
     }
 
-    public function mutePlayer(string $name, bool $mute = true) : bool {
+    public function mutePlayer(string $name, bool $mute = true): bool
+    {
         return $this->setPlayerData($name, 'muted', $mute);
     }
 
-    public function unmutePlayer(string $name) : bool {
+    public function unmutePlayer(string $name): bool
+    {
         return $this->mutePlayer($name, false);
     }
 
-    public function setPEOnlySetting(string $playerName, bool $peOnly = true) : void {
+    public function setPEOnlySetting(string $playerName, bool $peOnly = true): void
+    {
         $this->setPlayerData($playerName, 'pe-only', $peOnly);
     }
 
-    public function canQueuePEOnly(string $playerName) : bool {
+    public function canQueuePEOnly(string $playerName): bool
+    {
 
         $result = false;
         $path = $this->playerFolderPath . "/$playerName.yml";
-        if(file_exists($path)) {
+        if (file_exists($path)) {
             $data = yaml_parse_file($path, 0);
-            if(is_array($data) and isset($data['pe-only']))
+            if (is_array($data) and isset($data['pe-only']))
                 $result = boolval($data['pe-only']);
         }
 
-        if($result === true) {
-            if($this->isPlayerOnline($playerName)) {
+        if ($result === true) {
+            if ($this->isPlayerOnline($playerName)) {
                 $p = $this->getPlayer($playerName);
                 $result = $p->peOnlyQueue();
             }
@@ -280,24 +315,26 @@ class PlayerHandler
         return $result;
     }
 
-    public function isPlayerMuted(string $name) : bool {
+    public function isPlayerMuted(string $name): bool
+    {
         $path = $this->playerFolderPath . "/$name.yml";
         $result = false;
-        if(file_exists($path)) {
+        if (file_exists($path)) {
             $data = yaml_parse_file($path, 0);
-            if(is_array($data) and isset($data['muted'])) {
+            if (is_array($data) and isset($data['muted'])) {
                 $result = $data['muted'];
             }
         }
         return $result;
     }
 
-    public function setPlayerData(string $player, string $key, $value) : bool {
+    public function setPlayerData(string $player, string $key, $value): bool
+    {
         $executed = true;
         $path = $this->playerFolderPath . "/$player.yml";
-        if(file_exists($path)) {
+        if (file_exists($path)) {
             $data = yaml_parse_file($path, 0);
-            if(is_array($data) and isset($data[$key])) {
+            if (is_array($data) and isset($data[$key])) {
                 $data[$key] = $value;
                 $executed = true;
             }
@@ -309,14 +346,15 @@ class PlayerHandler
         return $executed;
     }
 
-    public function getPlayerData($player) : array {
+    public function getPlayerData($player): array
+    {
 
         $name = null;
 
         $data = array();
 
-        if(isset($player) and !is_null($player)) {
-            if($player instanceof Player) {
+        if (isset($player) and !is_null($player)) {
+            if ($player instanceof Player) {
                 $name = $player->getName();
             } else if ($player instanceof PracticePlayer) {
                 $name = $player->getPlayerName();
@@ -325,33 +363,38 @@ class PlayerHandler
             }
         }
 
-        if(!is_null($name)) {
+        if (!is_null($name)) {
 
             $path = $this->playerFolderPath . "/$name.yml";
-            if(file_exists($path)) {
+            if (file_exists($path)) {
                 $d = yaml_parse_file($path, 0);
-                if(is_array($d)) $data = $d;
+                if (is_array($d)) $data = $d;
             }
         }
 
         return $data;
     }
 
-    public function putPendingPInfo(string $name, int $device, int $controls) : void {
+    public function putPendingPInfo(string $name, int $device, int $controls, int $clientID, string $deviceID): void
+    {
         $this->pendingDeviceData[$name] = [
             'device' => $device,
-            'controls' => $controls
+            'controls' => $controls,
+            'device-id' => $deviceID,
+            'client-id' => $clientID
         ];
     }
 
-    public function hasPendingPInfo($player) : bool {
+    public function hasPendingPInfo($player): bool
+    {
         return $this->getPendingPInfo($player) !== null;
     }
 
-    public function removePendingPInfo($player) : void {
-        if($this->hasPendingPInfo($player)){
+    public function removePendingPInfo($player): void
+    {
+        if ($this->hasPendingPInfo($player)) {
             $key = $this->getPendingDeviceKeyOf($player);
-            if(!is_null($key) and is_string($key)) unset($this->pendingDeviceData[$key]);
+            if (!is_null($key) and is_string($key)) unset($this->pendingDeviceData[$key]);
             /*
              * $val = $this->getPendingDeviceOs($player);
              * unset($val);
@@ -359,13 +402,14 @@ class PlayerHandler
         }
     }
 
-    private function getPendingDeviceKeyOf($player) {
+    private function getPendingDeviceKeyOf($player)
+    {
         $result = null;
         $name = PracticeUtil::getPlayerName($player);
-        if(!is_null($name) and is_string($name)) {
-            if(isset($this->pendingDeviceData[$name])) {
+        if (!is_null($name) and is_string($name)) {
+            if (isset($this->pendingDeviceData[$name])) {
                 $val = $this->pendingDeviceData[$name];
-                if(is_array($val)) $result = $name;
+                if (is_array($val)) $result = $name;
             }
         }
         return $result;
@@ -375,57 +419,57 @@ class PlayerHandler
      * @param $player
      * @return array|null
      */
-    public function getPendingPInfo($player) {
+    public function getPendingPInfo($player)
+    {
 
         $name = null;
         $res = null;
 
-        if(isset($player) and !is_null($player)){
-            if(is_string($player)){
+        if (isset($player) and !is_null($player)) {
+            if (is_string($player)) {
                 $name = $player;
-            } elseif ($player instanceof Player){
+            } elseif ($player instanceof Player) {
                 $name = $player->getName();
-            } elseif($player instanceof PracticePlayer) {
+            } elseif ($player instanceof PracticePlayer) {
                 $name = $player->getPlayerName();
             }
         }
 
-        if(!is_null($name) and is_string($name)){
-            if(isset($this->pendingDeviceData[$name]))
+        if (!is_null($name) and is_string($name)) {
+            if (isset($this->pendingDeviceData[$name]))
                 $res = $this->pendingDeviceData[$name];
         }
         return $res;
     }
 
-    public function addPlayer($player, int $deviceOs = -1) : PracticePlayer {
-        $p = null;
-        if(isset($player) and !is_null($player)){
-            if($player instanceof Player){
-                $p = new PracticePlayer($player, $deviceOs);
-            } elseif (is_string($player)){
-                $p = new PracticePlayer($player, $deviceOs);
-            }
-        }
+    public function addPlayer(Player $player, int $deviceOs = -1): PracticePlayer
+    {
 
-        if(!is_null($p)){
+        $p = new PracticePlayer($player, $deviceOs);
 
-            $this->players[$p->getPlayerName()] = $p;
+        $name = $player->getName();
 
-            $this->createPlayerData($p->getPlayerName());
+        $this->players[$name] = $p;
 
-            $rankHandler = PracticeCore::getRankHandler();
+        $this->createPlayerData($name);
 
-            if(!$rankHandler->hasRanks($p)){
-                $rankHandler->setDefaultRank($p);
-            } else PracticeCore::getPermissionHandler()->updatePermissions($p);
-        }
+        $rankHandler = PracticeCore::getRankHandler();
+
+        if (!$rankHandler->hasRanks($p)) {
+            $rankHandler->setDefaultRank($p);
+        } else PracticeCore::getPermissionHandler()->updatePermissions($p);
+
+        $address = $player->getAddress();
+
+        $this->updateAliases($address, $name);
 
         return $p;
     }
 
-    public function removePlayer($player) : void {
+    public function removePlayer($player): void
+    {
 
-        if($this->isPlayer($player)){
+        if ($this->isPlayer($player)) {
 
             $index = $this->getIndex($player);
 
@@ -433,11 +477,12 @@ class PlayerHandler
         }
     }
 
-    public function isPlayerOnline($player) : bool {
+    public function isPlayerOnline($player): bool
+    {
 
         $result = false;
 
-        if($this->isPlayer($player)){
+        if ($this->isPlayer($player)) {
             $p = $this->getPlayer($player);
             $result = $p->isOnline();
         }
@@ -445,7 +490,8 @@ class PlayerHandler
         return $result;
     }
 
-    public function isPlayer($player) : bool {
+    public function isPlayer($player): bool
+    {
         return !is_null($this->getPlayer($player));
     }
 
@@ -453,12 +499,13 @@ class PlayerHandler
      * @param $player -> Must be of types: string, PracticePlayer, or Player
      * @return PracticePlayer|null
      */
-    public function getPlayer($player) {
+    public function getPlayer($player)
+    {
         $res = null;
-        if($this->hasIndex($player)){
+        if ($this->hasIndex($player)) {
             $index = $this->getIndex($player);
             $test = $this->players[$index];
-            if($test instanceof PracticePlayer){
+            if ($test instanceof PracticePlayer) {
                 $res = $test;
             }
         }
@@ -469,15 +516,16 @@ class PlayerHandler
     /**
      * @return PracticePlayer[]
      */
-    public function getOnlinePlayers() : array {
+    public function getOnlinePlayers(): array
+    {
         $res = [];
 
         $keys = array_keys($this->players);
 
-        foreach($keys as $key) {
-            if(isset($this->players[$key])) {
+        foreach ($keys as $key) {
+            if (isset($this->players[$key])) {
                 $player = $this->players[$key];
-                if(!is_null($player) and $player instanceof PracticePlayer and $player->isOnline()){
+                if (!is_null($player) and $player instanceof PracticePlayer and $player->isOnline()) {
                     $res[] = $player;
                 }
             }
@@ -485,28 +533,30 @@ class PlayerHandler
         return $res;
     }
 
-    public function getPlayersInFights() : int {
+    public function getPlayersInFights(): int
+    {
         $count = 0;
         $duelHandler = PracticeCore::getDuelHandler();
-        foreach($this->getOnlinePlayers() as $player) {
-            if($player instanceof PracticePlayer) {
-                if($player->isInDuel()){
+        foreach ($this->getOnlinePlayers() as $player) {
+            if ($player instanceof PracticePlayer) {
+                if ($player->isInDuel()) {
                     $duel = $duelHandler->getDuel($player->getPlayerName());
-                    if($duel->isDuelRunning()) $count++;
+                    if ($duel->isDuelRunning()) $count++;
                 }
             }
         }
         return $count;
     }
 
-    public function getOnlineStaff() : array {
+    public function getOnlineStaff(): array
+    {
 
         $res = [];
 
         $keys = array_keys($this->players);
 
-        foreach($keys as $key) {
-            if(isset($this->players[$key])) {
+        foreach ($keys as $key) {
+            if (isset($this->players[$key])) {
                 $player = $this->players[$key];
                 if (!is_null($player) and $player instanceof PracticePlayer and $player->isOnline()) {
                     if ($this->isStaffMember($player)) $res[] = $player->getPlayerName();
@@ -517,13 +567,14 @@ class PlayerHandler
         return $res;
     }
 
-    public function isAdmin($player) : bool {
+    public function isAdmin($player): bool
+    {
 
         $result = false;
 
         $name = PracticeUtil::getPlayerName($player);
 
-        if(!is_null($name))
+        if (!is_null($name))
 
             $result = PracticeCore::getRankHandler()->hasRank($name, RankHandler::$ADMIN);
 
@@ -531,33 +582,36 @@ class PlayerHandler
 
     }
 
-    public function isMod($player) : bool {
+    public function isMod($player): bool
+    {
 
         $result = false;
 
         $name = PracticeUtil::getPlayerName($player);
 
-        if(!is_null($name))
+        if (!is_null($name))
 
             $result = PracticeCore::getRankHandler()->hasRank($name, RankHandler::$MODERATOR);
 
         return $result;
     }
 
-    public function isBuilder($player) : bool {
+    public function isBuilder($player): bool
+    {
 
         $result = false;
 
         $name = PracticeUtil::getPlayerName($player);
 
-        if(!is_null($name))
+        if (!is_null($name))
 
             $result = PracticeCore::getRankHandler()->hasRank($name, RankHandler::$BUILDER);
 
         return $result;
     }
 
-    public function isOwner($player) : bool {
+    public function isOwner($player): bool
+    {
 
         $result = false;
 
@@ -565,22 +619,23 @@ class PlayerHandler
 
         $rankHandler = PracticeCore::getRankHandler();
 
-        if(!is_null($name))
+        if (!is_null($name))
 
             $result = $rankHandler->hasRank($name, RankHandler::$DEV) or $rankHandler->hasRank($name, RankHandler::$OWNER);
 
         return $result;
     }
 
-    public function isStaffMember($player) : bool {
+    public function isStaffMember($player): bool
+    {
         $result = false;
         $name = PracticeUtil::getPlayerName($player);
 
-        if(!is_null($name)) {
+        if (!is_null($name)) {
 
             $result = PracticeCore::getRankHandler()->hasStaffRank($name);
 
-            if($result !== true and $this->isPlayerOnline($player)) {
+            if ($result !== true and $this->isPlayerOnline($player)) {
                 $p = $this->getPlayer($player);
                 $result = $p->getPlayer()->isOp();
             }
@@ -588,56 +643,88 @@ class PlayerHandler
         return $result;
     }
 
-    public function isContentCreator($player) : bool {
+    public function isContentCreator($player): bool
+    {
         $result = false;
         $name = PracticeUtil::getPlayerName($player);
 
-        if(!is_null($name))
+        if (!is_null($name))
             $result = PracticeCore::getRankHandler()->hasFamousOrYTRank($name);
 
         return $result;
     }
 
-    private function hasIndex($player) : bool {
+    private function hasIndex($player): bool
+    {
         return $this->getIndex($player) !== '';
     }
 
-    private function getIndex($player) : string {
+    private function getIndex($player): string
+    {
 
         $res = '';
         $name = null;
 
-        if(isset($player) and !is_null($player)){
-            if(is_string($player)){
+        if (isset($player) and !is_null($player)) {
+            if (is_string($player)) {
                 $name = $player;
-            } elseif ($player instanceof Player){
+            } elseif ($player instanceof Player) {
                 $name = $player->getName();
-            } elseif($player instanceof PracticePlayer) {
+            } elseif ($player instanceof PracticePlayer) {
                 $name = $player->getPlayerName();
             } elseif ($player instanceof Entity) {
                 $id = $player->getId();
                 $p = PracticeUtil::getPlayerByID($id);
-                if(!is_null($p)) $name = $p->getName();
+                if (!is_null($p)) $name = $p->getName();
             }
         }
 
-        if(!is_null($name) and isset($this->players[$name]))
+        if (!is_null($name) and isset($this->players[$name]))
             $res = $name;
 
         return $res;
     }
 
-    public function addEloKit(string $kit) : void {
+    private function updateAliases(string $address, string $name): void
+    {
+
+        $data = $this->getPlayerData($name);
+
+        if (isset($data['ips']) and isset($data['aliases'])) {
+
+            $edited = false;
+
+            $ipsEncoded = $data['ips'];
+
+            $ipHandler = PracticeCore::getIPHandler();
+
+            $ips = $ipHandler->decodeIPsFromArr($ipsEncoded);
+
+            $size = count($ips);
+            $path = $this->playerFolderPath . "/$name.yml";
+
+            if ($size > 1 and !PracticeUtil::arr_contains_value($address, $ips)) {
+                $ipsEncoded[] = $ipHandler->encodeIP($address);
+                $data['ips'] = $ipsEncoded;
+                $edited = true;
+            }
+
+            if ($edited === true) yaml_emit_file($path, $data);
+        }
+    }
+
+    public function addEloKit(string $kit): void
+    {
         $dir = $this->playerFolderPath;
-        if(is_dir($dir)) {
+        if (is_dir($dir)) {
             $files = scandir($dir);
-            foreach($files as $file) {
-                if(PracticeUtil::str_contains('.yml', strval($file))) {
+            foreach ($files as $file) {
+                if (PracticeUtil::str_contains('.yml', strval($file))) {
                     $playerName = strval(str_replace('.yml', '', $file));
                     $data = $this->getPlayerData($playerName);
-                    if(PracticeUtil::arr_contains_keys($data, 'stats')) {
+                    if (PracticeUtil::arr_contains_keys($data, 'stats')) {
                         $stats = $data['stats'];
-                        if(PracticeUtil::arr_contains_keys($stats, 'elo')) {
+                        if (PracticeUtil::arr_contains_keys($stats, 'elo')) {
                             $elo = $stats['elo'];
                             $elo[$kit] = 1000;
                             $stats['elo'] = $elo;
@@ -650,17 +737,18 @@ class PlayerHandler
         }
     }
 
-    public function removeEloKit(string $kit) : void {
+    public function removeEloKit(string $kit): void
+    {
         $dir = $this->playerFolderPath;
-        if(is_dir($dir)) {
+        if (is_dir($dir)) {
             $files = scandir($dir);
-            foreach($files as $file) {
-                if(PracticeUtil::str_contains('.yml', strval($file))) {
+            foreach ($files as $file) {
+                if (PracticeUtil::str_contains('.yml', strval($file))) {
                     $playerName = strval(str_replace('.yml', '', $file));
                     $data = $this->getPlayerData($playerName);
-                    if(PracticeUtil::arr_contains_keys($data, 'stats')) {
+                    if (PracticeUtil::arr_contains_keys($data, 'stats')) {
                         $stats = $data['stats'];
-                        if(PracticeUtil::arr_contains_keys($stats, 'elo')) {
+                        if (PracticeUtil::arr_contains_keys($stats, 'elo')) {
                             $elo = $stats['elo'];
                             unset($elo[$kit]);
                             $stats['elo'] = $elo;
@@ -673,11 +761,12 @@ class PlayerHandler
         }
     }
 
-    private function getStatsFrom(string $player) : array {
+    private function getStatsFrom(string $player): array
+    {
 
         $result = [];
 
-        if($player !== 'None') {
+        if ($player !== 'None') {
 
             $data = $this->getPlayerData($player);
             $stats = $data['stats'];
@@ -696,7 +785,8 @@ class PlayerHandler
      * @param bool $form = true
      * @return string[];
      */
-    public function getStats(string $player, bool $form = true) {
+    public function getStats(string $player, bool $form = true)
+    {
 
         $stats = $this->getStatsFrom($player);
 
@@ -730,7 +820,7 @@ class PlayerHandler
 
         $keys = array_keys($e);
 
-        foreach($keys as $eloKit) {
+        foreach ($keys as $eloKit) {
             $eloKit = strval($eloKit);
             $eloOf = $e[$eloKit];
             $newLine = ($count === $size) ? '' : "\n";
@@ -770,34 +860,40 @@ class PlayerHandler
         return $result;
     }
 
-    public function getEloFrom(string $player, string $kit) : int {
+    public function getEloFrom(string $player, string $kit): int
+    {
         $stats = $this->getStatsFrom($player);
         return intval($stats['elo'][$kit]);
     }
 
-    public function getKillsOf(string $player) : int {
+    public function getKillsOf(string $player): int
+    {
         $stats = $this->getStatsFrom($player);
         return intval($stats['kills']);
     }
 
-    public function getDeathsOf(string $player) : int {
+    public function getDeathsOf(string $player): int
+    {
         $stats = $this->getStatsFrom($player);
         return intval($stats['deaths']);
     }
 
-    public function addKillFor(string $player) : int {
+    public function addKillFor(string $player): int
+    {
         $kills = $this->getKillsOf($player) + 1;
         $this->updateStatsOf($player, 'kills', $kills);
         return $kills;
     }
 
-    public function addDeathFor(string $player) : int {
+    public function addDeathFor(string $player): int
+    {
         $deaths = $this->getDeathsOf($player) + 1;
         $this->updateStatsOf($player, 'deaths', $deaths);
         return $deaths;
     }
 
-    public function setEloOf(string $winner, string $loser, string $queue, int $winnerDevice, int $loserDevice) : array {
+    public function setEloOf(string $winner, string $loser, string $queue, int $winnerDevice, int $loserDevice): array
+    {
 
         $result = ['winner' => 0, 'loser' => 0];
 
@@ -815,9 +911,9 @@ class PlayerHandler
         $winnerEloChange = $newWinnerElo - $winnerElo;
         $loserEloChange = abs($loserElo - $newLoserElo);
 
-        if($winnerDevice === PracticeUtil::WINDOWS_10 and $loserDevice !== PracticeUtil::WINDOWS_10)
+        if ($winnerDevice === PracticeUtil::WINDOWS_10 and $loserDevice !== PracticeUtil::WINDOWS_10)
             $loserEloChange = intval($loserEloChange * 0.9);
-        else if($winnerDevice !== PracticeUtil::WINDOWS_10 and $loserDevice === PracticeUtil::WINDOWS_10)
+        else if ($winnerDevice !== PracticeUtil::WINDOWS_10 and $loserDevice === PracticeUtil::WINDOWS_10)
             $winnerEloChange = intval($winnerEloChange * 1.1);
 
         /*$result['winner'] = $winnerEloChange;
@@ -826,7 +922,7 @@ class PlayerHandler
         $newWElo = $winnerElo + $winnerEloChange;
         $newLElo = $loserElo - $loserEloChange;
 
-        if($newLElo < 700) {
+        if ($newLElo < 700) {
             $newLElo = 700;
             $loserEloChange = $loserElo - 700;
         }
@@ -840,24 +936,26 @@ class PlayerHandler
         return $result;
     }
 
-    private function setElo(string $player, string $queue, int $value) : void {
+    private function setElo(string $player, string $queue, int $value): void
+    {
         $key = 'elo.' . $queue;
         $this->updateStatsOf($player, $key, $value);
     }
 
-    private function updateStatsOf(string $player, string $key, $value) : void {
+    private function updateStatsOf(string $player, string $key, $value): void
+    {
         $stats = $this->getStatsFrom($player);
-        if(PracticeUtil::str_contains('.', $key)) {
+        if (PracticeUtil::str_contains('.', $key)) {
             $split = explode('.', $key);
-            if(PracticeUtil::arr_contains_keys($stats, $split[0])) {
+            if (PracticeUtil::arr_contains_keys($stats, $split[0])) {
                 $elo = $stats[$split[0]];
-                if(PracticeUtil::arr_contains_keys($elo, $split[1])) {
+                if (PracticeUtil::arr_contains_keys($elo, $split[1])) {
                     $elo[$split[1]] = $value;
                 }
                 $stats[$split[0]] = $elo;
             }
         } else {
-            if(PracticeUtil::arr_contains_keys($stats, $key)) {
+            if (PracticeUtil::arr_contains_keys($stats, $key)) {
                 $stats[$key] = $value;
             }
         }
@@ -867,19 +965,20 @@ class PlayerHandler
         yaml_emit_file($this->playerFolderPath . $file, $data);
     }
 
-    public function resetStats() : void {
+    public function resetStats(): void
+    {
 
         $dir = $this->playerFolderPath;
-        if(is_dir($dir)) {
+        if (is_dir($dir)) {
 
             $files = scandir($dir);
 
             foreach ($files as $file) {
                 $file = strval($file);
-                if(PracticeUtil::str_contains('.yml', $file)) {
+                if (PracticeUtil::str_contains('.yml', $file)) {
                     $playerName = str_replace('.yml', '', $file);
                     $data = $this->getPlayerData($playerName);
-                    if(PracticeUtil::arr_contains_keys($data, 'stats')) {
+                    if (PracticeUtil::arr_contains_keys($data, 'stats')) {
 
                         $stats = $data['stats'];
                         $stats['kills'] = 0;
@@ -887,7 +986,7 @@ class PlayerHandler
                         $elo = $stats['elo'];
                         $keys = array_keys($elo);
 
-                        foreach($keys as $key)
+                        foreach ($keys as $key)
                             $elo[$key] = 1000;
 
                         $stats['elo'] = $elo;
@@ -908,7 +1007,8 @@ class PlayerHandler
      * @param string $queue
      * @return string[]
      */
-    private function getLeaderboardsFrom(string $queue = 'global') : array {
+    private function getLeaderboardsFrom(string $queue = 'global'): array
+    {
 
         $result = [];
 
@@ -929,7 +1029,7 @@ class PlayerHandler
 
         $len = $size - $subtracted;
 
-        for($i = $size; $i >= $len; $i--) {
+        for ($i = $size; $i >= $len; $i--) {
             $place = $size - $i;
             $name = strval($playerNames[$i]);
             $elo = intval($sortedElo[$name]);
@@ -939,9 +1039,9 @@ class PlayerHandler
 
         $size = count($result);
 
-        if($size > 10) {
-            for($i = $size; $i > 9; $i--) {
-                if(isset($result[$i]))
+        if ($size > 10) {
+            for ($i = $size; $i > 9; $i--) {
+                if (isset($result[$i]))
                     unset($result[$i]);
             }
         }
@@ -949,19 +1049,20 @@ class PlayerHandler
         return $result;
     }
 
-    private function listEloForAll(string $queue) : array {
+    private function listEloForAll(string $queue): array
+    {
 
         $player_array = [];
 
-        if(is_dir($this->playerFolderPath)) {
+        if (is_dir($this->playerFolderPath)) {
 
             $files = scandir($this->playerFolderPath);
 
-            foreach($files as $file) {
+            foreach ($files as $file) {
 
                 $file = strval($file);
 
-                if(PracticeUtil::str_contains('.yml', $file)) {
+                if (PracticeUtil::str_contains('.yml', $file)) {
 
                     $name = strval(str_replace('.yml', '', $file));
 
@@ -971,7 +1072,7 @@ class PlayerHandler
 
                     $resElo = 0;
 
-                    if($queue === 'global') {
+                    if ($queue === 'global') {
 
                         $total = 0;
 
@@ -986,7 +1087,7 @@ class PlayerHandler
 
                     } else {
 
-                        if(isset($elo[$queue]))
+                        if (isset($elo[$queue]))
                             $resElo = intval($elo[$queue]);
                     }
 

@@ -53,6 +53,7 @@ class PracticePlayer
     private $playerName;
     private $currentName;
     private $currentArena;
+    private $deviceId;
 
     //INTEGERS
     private $currentSec;
@@ -65,6 +66,8 @@ class PracticePlayer
     private $input;
     private $duelSpamSec;
     private $noDamageTick;
+    private $lastMicroTimeHit;
+    private $cid;
 
     //ARRAYS
 
@@ -82,6 +85,8 @@ class PracticePlayer
     private $scoreboardType;
 
     private $scoreboardNames;
+
+    private $enderpearlThrows;
 
     /* @var \pocketmine\entity\Skin|null */
     //private $originalSkin;
@@ -127,6 +132,7 @@ class PracticePlayer
         $this->duelSpamSec = 0;
         $this->noDamageTick = 0;
         $this->invId = -1;
+        $this->lastMicroTimeHit = 0;
 
         $this->scoreboardNames = ScoreboardUtil::getNames();
 
@@ -134,8 +140,12 @@ class PracticePlayer
 
         $this->fishing = null;
         $this->duelResultInvs = [];
+        $this->enderpearlThrows = [];
 
         $this->initScoreboard(!PracticeCore::getPlayerHandler()->isScoreboardEnabled($this->playerName));
+
+        $this->cid = 0;
+        $this->deviceId = '';
         //$this->disguise = null;
     }
 
@@ -659,12 +669,15 @@ class PracticePlayer
 
     public function getLastSecInCombat() : int { return $this->lastSecHit; }
 
+    public function trackHit() : void {
+        $this->lastMicroTimeHit = microtime(true);
+    }
+
     private function removeSecInThrow() : void {
         $this->enderpearlSecs--;
         $maxSecs = self::MAX_ENDERPEARL_SECONDS;
         $sec = $this->enderpearlSecs;
         if($sec < 0) $sec = 0;
-        if($this->enderpearlSecs < 0) $this->enderpearlTicks = 0;
         $percent = floatval($this->enderpearlSecs / $maxSecs);
         if($this->isOnline()){
             $p = $this->getPlayer();
@@ -826,6 +839,84 @@ class PracticePlayer
         }
     }
 
+    public function trackThrow() : void {
+
+        $time = microtime(true);
+
+        $key = "$time";
+
+        $this->enderpearlThrows[$key] = false;
+    }
+
+    public function checkSwitching() : void {
+
+        $time = microtime(true);
+
+        $count = count($this->enderpearlThrows);
+
+        $keys = array_keys($this->enderpearlThrows);
+
+        if($count > 0 and $this->isOnline()) {
+
+            $len = $count - 1;
+
+            $lastThrow = floatval($keys[$len]);
+
+            $differenceHitNThrow = abs($time - $lastThrow) + 10;
+            $differenceHitNThisHit = abs($time - $this->lastMicroTimeHit);
+
+            $ticks = 0.05 * 11.25;
+
+            $result = $this->lastMicroTimeHit !== 0 and $differenceHitNThrow < $differenceHitNThisHit and $differenceHitNThisHit <= $ticks;
+
+            /*$print = ($result === true) ? "true" : "false";
+
+            $str = "$print : $differenceHitNThisHit : $differenceHitNThrow \n";
+            var_dump($str);*/
+
+            if($result === true) $this->enderpearlThrows["$lastThrow"] = true;
+        }
+    }
+
+    public function isSwitching() : bool {
+
+        $keys = array_keys($this->enderpearlThrows);
+
+        $count = count($this->enderpearlThrows);
+
+        $result = false;
+
+        $time = microtime(true);
+
+        //$difference = 0;
+
+        if($count > 0) {
+
+            $len = $count - 1;
+
+            $key = $keys[$len];
+
+            $lastMicroTime = floatval($key);
+
+            $result = boolval($this->enderpearlThrows[$key]);
+
+            if($result === true) {
+
+                $ticks = 0.05 * 12.5;
+
+                $difference = abs($time - $lastMicroTime);
+
+                $result = $difference <= $ticks;
+            }
+        }
+
+        /*$print = ($result === true ? "true" : "false") . " : $difference";
+
+        var_dump($print);*/
+
+        return $result;
+    }
+
     public function addCps(bool $clickedBlock): void {
 
         $microtime = microtime(true);
@@ -886,6 +977,60 @@ class PracticePlayer
         return $this->deviceOs;
     }
 
+    public function getDeviceID() : string {
+        return $this->deviceId;
+    }
+
+    public function getCID() : int {
+        return $this->cid;
+    }
+
+    public function getDeviceToStr() : string {
+
+        $str = 'Unknown';
+
+        switch($this->deviceOs) {
+            case PracticeUtil::ANDROID:
+                $str = 'Android';
+                break;
+            case PracticeUtil::IOS:
+                $str = 'iOS';
+                break;
+            case PracticeUtil::MAC_EDU:
+                $str = 'MacOS';
+                break;
+            case PracticeUtil::FIRE_EDU:
+                $str = 'FireOS';
+                break;
+            case PracticeUtil::GEAR_VR:
+                $str = 'GearVR';
+                break;
+            case PracticeUtil::HOLOLENS_VR:
+                $str = 'HoloVR';
+                break;
+            case PracticeUtil::WINDOWS_10:
+                $str = 'Win10';
+                break;
+            case PracticeUtil::WINDOWS_32:
+                $str = 'Win32';
+                break;
+            case PracticeUtil::DEDICATED:
+                $str = 'Dedic.';
+                break;
+            case PracticeUtil::ORBIS:
+                $str = 'Orb';
+                break;
+            case PracticeUtil::NX:
+                $str = 'NX';
+                break;
+        }
+
+        if($this->input === PracticeUtil::CONTROLS_CONTROLLER)
+            $str = 'Controller';
+
+        return TextFormat::WHITE . '[' . TextFormat::GREEN . $str . TextFormat::WHITE . ']';
+    }
+
     public function setInput(int $val) : void {
         if($this->input === -1)
             $this->input = $val;
@@ -894,6 +1039,14 @@ class PracticePlayer
     public function setDeviceOS(int $val) : void {
         if($this->deviceOs === PracticeUtil::UNKNOWN)
             $this->deviceOs = $val;
+    }
+
+    public function setCID(int $cid) : void {
+        $this->cid = $cid;
+    }
+
+    public function setDeviceID(string $id) : void {
+        $this->deviceId = $id;
     }
 
     public function peOnlyQueue() : bool {

@@ -300,7 +300,7 @@ class PracticeUtil
 
     public static function currentTimeMillis() : float {
         $time = microtime(true);
-        return round($time * 1000);
+        return $time * 1000;
     }
 
     public static function secondsToTicks(int $seconds) : int {
@@ -597,6 +597,9 @@ class PracticeUtil
         if($exec === true) {
 
             $p = $playerHandler->getPlayer($player);
+
+            $p->trackThrow();
+
             $pl = $p->getPlayer();
             $item->onClickAir($pl, $pl->getDirectionVector());
 
@@ -1475,12 +1478,12 @@ class PracticeUtil
 
     //SERVER FUNCTIONS
 
-    public static function kickAll(string $msg) : void {
+    public static function kickAll(string $msg, bool $admin = true) : void {
 
         $players = Server::getInstance()->getOnlinePlayers();
 
         foreach($players as $player)
-            $player->kick($msg);
+            $player->kick($msg, $admin);
     }
 
     public static function reloadPlayers() : void {

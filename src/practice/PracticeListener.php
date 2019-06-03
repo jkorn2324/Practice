@@ -50,18 +50,14 @@ use pocketmine\item\MushroomStew;
 use pocketmine\item\Potion;
 use pocketmine\item\SplashPotion;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
-use pocketmine\network\mcpe\protocol\InventorySlotPacket;
-use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use practice\anticheat\AntiCheatUtil;
 use practice\arenas\PracticeArena;
-use practice\game\entity\FishingHook;
 use practice\game\FormUtil;
 use practice\game\inventory\InventoryUtil;
 use practice\game\inventory\menus\inventories\PracBaseInv;
@@ -95,16 +91,22 @@ class PracticeListener implements Listener
 
             $deviceOS = -1;
             $input = -1;
+            $cid = -1;
+            $deviceId = '';
 
             if($playerHandler->hasPendingPInfo($p)) {
                 $pInfo = $playerHandler->getPendingPInfo($p);
                 $deviceOS = intval($pInfo['device']);
                 $input = intval($pInfo['controls']);
+                $deviceId = strval($pInfo['device-id']);
+                $cid = intval($pInfo['client-id']);
                 $playerHandler->removePendingPInfo($p);
             }
 
             $pl = $playerHandler->addPlayer($p, $deviceOS);
             $pl->setInput($input);
+            $pl->setCID($cid);
+            $pl->setDeviceID($deviceId);
 
             $nameTag = PracticeUtil::getNameTagFormat($p);
 
@@ -120,20 +122,19 @@ class PracticeListener implements Listener
 
         $p = $event->getPlayer();
 
-        if($p->getGamemode() !== 0) $p->setGamemode(0);
+        if ($p->getGamemode() !== 0) $p->setGamemode(0);
 
-        if($p->hasEffects()) $p->removeAllEffects();
+        if ($p->hasEffects()) $p->removeAllEffects();
 
         $maxHealth = $p->getMaxHealth();
 
-        if($p->getHealth() !== $maxHealth) $p->setHealth($maxHealth);
+        if ($p->getHealth() !== $maxHealth) $p->setHealth($maxHealth);
 
-        if($p->isOnFire()) $p->extinguish();
+        if ($p->isOnFire()) $p->extinguish();
 
-        if(PracticeUtil::isFrozen($p)) PracticeUtil::setFrozen($p, false);
+        if (PracticeUtil::isFrozen($p)) PracticeUtil::setFrozen($p, false);
 
-        if(PracticeUtil::isInSpectatorMode($p))
-
+        if (PracticeUtil::isInSpectatorMode($p))
             PracticeUtil::setInSpectatorMode($p, false);
 
         $p->teleport(PracticeUtil::getSpawnPosition());
@@ -209,9 +210,8 @@ class PracticeListener implements Listener
                     if ($p->isInsideOfSolid()) {
                         $pos = $p->getPosition();
                         $block = $level->getBlock($pos);
-                        if (PracticeUtil::isGravityBlock($block)) {
+                        if (PracticeUtil::isGravityBlock($block))
                             $diedFairly = false;
-                        }
                     }
                 }
             }
@@ -318,12 +318,12 @@ class PracticeListener implements Listener
 
         if($e instanceof Player) {
 
-            if($event->getCause() === EntityDamageEvent::CAUSE_FALL) {
+            if ($event->getCause() === EntityDamageEvent::CAUSE_FALL)
                 $cancel = true;
 
-            } else {
+            else {
 
-                if($playerHandler->isPlayerOnline($e->getName())) {
+                if ($playerHandler->isPlayerOnline($e->getName())) {
                     $player = $playerHandler->getPlayer($e->getName());
 
                     $lvl = $player->getPlayer()->getLevel();
@@ -351,9 +351,15 @@ class PracticeListener implements Listener
 
         $kitHandler = PracticeCore::getKitHandler();
 
+        $trackHit = false;
+
         if($event->getCause() !== EntityDamageEvent::CAUSE_PROJECTILE
             and $entity instanceof Player and $damager instanceof Player) {
-            AntiCheatUtil::checkForReach($entity, $damager);
+
+            if(AntiCheatUtil::canDamage($entity->getName()) and !$event->isCancelled()) {
+                AntiCheatUtil::checkForReach($entity, $damager);
+                $trackHit = true;
+            }
         }
 
         $cancel = false;
@@ -410,7 +416,15 @@ class PracticeListener implements Listener
                 if(AntiCheatUtil::canDamage($attacked->getPlayerName()) and !$event->isCancelled()) {
 
                     $attacked->setNoDamageTicks($event->getAttackCooldown());
-                    //$attacker->addHit($attacked->getPlayer(), $event->getAttackCooldown());
+
+                    if($trackHit === true) {
+
+                        if($attacker->isSwitching()) {
+                            //$attacker->kick('Switching is not allowed.');
+                            return;
+                        }
+                        $attacker->trackHit();
+                    }
 
                     if(!$attacker->isInDuel() and !$attacked->isInDuel()) {
 
@@ -438,6 +452,32 @@ class PracticeListener implements Listener
         }
 
         if($cancel === true) $event->setCancelled();
+    }
+
+    public function onEntityDamagedByChildEntity(EntityDamageByChildEntityEvent $event) : void {
+
+        $child = $event->getChild();
+
+        $damaged = $event->getEntity();
+
+        if(!$event->isCancelled() and $child instanceof \pocketmine\entity\projectile\EnderPearl and $damaged instanceof Player) {
+
+            $throwerEntity = $child->getOwningEntity();
+
+            echo 'oedbce - found';
+
+            $playerHandler = PracticeCore::getPlayerHandler();
+
+            if($throwerEntity !== null and $throwerEntity instanceof Player
+                and $playerHandler->isPlayerOnline($throwerEntity->getName())) {
+
+                echo 'oedbce - check';
+
+                $thrower = $playerHandler->getPlayer($throwerEntity->getName());
+
+                $thrower->checkSwitching();
+            }
+        }
     }
 
     public function onPlayerConsume(PlayerItemConsumeEvent $event): void {
@@ -582,8 +622,6 @@ class PracticeListener implements Listener
                                 $duelHandler->removePlayerFromQueue($player, true);
                                 $p->setSpawnScoreboard();
                                 ScoreboardUtil::updateSpawnScoreboards($p);
-                                //$p->updateScoreboard();
-                                //ScoreboardUtil::updateSpawnScoreboards('in-queues');
 
                             } elseif ($name === 'exit.spectator') {
 
@@ -1124,12 +1162,27 @@ class PracticeListener implements Listener
 
         if ($pkt instanceof LoginPacket) {
 
+            $ip = $player->getAddress();
+
+            $ipSafe = PracticeCore::getIPHandler()->isIpSafe($ip);
+
+            if($ipSafe === false) {
+                $player->kick('Turn off your VPN/Proxy to play.', false);
+                return;
+            }
+
             $clientData = $pkt->clientData;
 
-            if (isset($clientData['DeviceOS']) and isset($clientData['CurrentInputMode'])) {
+            if (isset($clientData['DeviceOS']) and isset($clientData['CurrentInputMode']) and isset($clientData['ClientRandomID']) and isset($clientData['DeviceId'])) {
 
                 $device = $clientData['DeviceOS'];
                 $input = $clientData['CurrentInputMode'];
+
+                $deviceID = $clientData['DeviceId'];
+                $cid = $clientData['ClientRandomID'];
+
+                $deviceID = strval($deviceID);
+                $cid = intval($cid);
 
                 $device = intval($device);
                 $input = intval($input);
@@ -1140,8 +1193,10 @@ class PracticeListener implements Listener
 
                     $p->setDeviceOS($device);
                     $p->setInput($input);
+                    $p->setDeviceID($deviceID);
+                    $p->setCID($cid);
 
-                } else $playerHandler->putPendingPInfo($pkt->username, $device, $input);
+                } else $playerHandler->putPendingPInfo($pkt->username, $device, $input, $cid, $deviceID);
             }
         }
 
@@ -1326,6 +1381,6 @@ class PracticeListener implements Listener
         }
 
         if($server->isRunning())
-            PracticeUtil::kickAll('Restarting Server');
+            PracticeUtil::kickAll('Restarting Server', false);
     }
 }

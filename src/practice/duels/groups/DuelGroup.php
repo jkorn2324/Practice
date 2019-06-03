@@ -100,8 +100,8 @@ class DuelGroup
         $this->opponentDevice = $opponent->getDevice();
         $this->playerDevice = $player->getDevice();
 
-        $p->setNameTag(TextFormat::RED . $this->playerName);
-        $o->setNameTag(TextFormat::RED . $this->opponentName);
+        $p->setNameTag(TextFormat::RED . $this->playerName . ' ' . $player->getDeviceToStr());
+        $o->setNameTag(TextFormat::RED . $this->opponentName . ' ' . $opponent->getDeviceToStr());
 
         $this->started = false;
         $this->ended = false;

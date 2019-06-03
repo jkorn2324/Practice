@@ -533,7 +533,7 @@ class FormUtil
         }
 
         if($changePEOnlySettings === true) $form->addToggle('Enable PE Only Queues', PracticeCore::getPlayerHandler()->canQueuePEOnly($player));
-        else $form->addLabel('Enable PE Only Queues:\n' . TextFormat::RED . "Windows 10/Controller players can't change this setting.");
+        else $form->addLabel('Enable PE Only Queues:' . "\n" . TextFormat::RED . "Windows 10/Controller players can't change this setting.");
 
         if($op === true) $form->addToggle('Enable Placing and Breaking Blocks', PracticeCore::getPlayerHandler()->canPlaceNBreak($player));
 
