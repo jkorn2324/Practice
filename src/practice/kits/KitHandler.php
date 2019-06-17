@@ -13,8 +13,6 @@ namespace practice\kits;
 use pocketmine\item\Item;
 use pocketmine\Player;
 use pocketmine\utils\Config;
-use practice\arenas\DuelArena;
-use practice\arenas\FFAArena;
 use practice\game\effects\PracticeEffect;
 use practice\PracticeCore;
 use practice\PracticeUtil;
@@ -125,14 +123,20 @@ class KitHandler
         $result = false;
 
         if(isset($kitObj[$name])){
+
             unset($kitObj[$name], $this->kits[$name]);
             $result = true;
-            PracticeCore::getPlayerHandler()->removeEloKit($name);
+            $execute = PracticeUtil::isMysqlEnabled();
+
+            if($execute === true) PracticeCore::getMysqlHandler()->removeEloColumn($name);
+            else PracticeCore::getPlayerHandler()->removeEloKit($name);
+
             $this->getConfig()->set("kits", $kitObj);
             $this->getConfig()->save();
         }
 
         $settingsObj = $this->getConfig()->get("pvp");
+
         if(isset($settingsObj[$name])) {
             unset($settingsObj[$name], $this->pvpSettings[$name]);
             $this->getConfig()->set("pvp", $settingsObj);
@@ -350,9 +354,11 @@ class KitHandler
 
     /**
      * @param bool $checkForRepItem
+     * @param bool $database
+     * @param bool $withKeys
      * @return array|string[]
      */
-    public function getDuelKitNames(bool $checkForRepItem = false) : array {
+    public function getDuelKitNames(bool $checkForRepItem = false, bool $database = false, bool $withKeys = false) : array {
 
         $kits = $this->getDuelKits();
 
@@ -362,16 +368,19 @@ class KitHandler
 
             $exec = ($checkForRepItem === true) ? $kit->hasRepItem() : true;
 
-            if($exec === true)
-                $result[] = $kit->getName();
+            if($exec === true) {
+                $str = ($database === false) ? $kit->getName() : $kit->getLocalizedName();
+                if($withKeys) $result[$str] = $kit->getName();
+                else $result[] = $str;
+            }
         }
 
         return $result;
     }
 
-    public function isDuelKit(string $kit) : bool {
+    public function isDuelKit(string $kit, bool $database = false) : bool {
 
-        $duelKits = $this->getDuelKitNames();
+        $duelKits = $this->getDuelKitNames(false, $database);
 
         $result = PracticeUtil::arr_contains_value($kit, $duelKits);
 

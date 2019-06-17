@@ -13,6 +13,7 @@ namespace practice;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\entity\Entity;
+use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
 use practice\arenas\ArenaHandler;
@@ -33,6 +34,7 @@ use practice\commands\basic\FreezeCommand;
 use practice\commands\basic\HealCommand;
 use practice\commands\basic\KickAllCommand;
 use practice\commands\basic\PingCommand;
+use practice\commands\basic\PlayerInfoCommand;
 use practice\commands\basic\SpawnCommand;
 use practice\commands\basic\SpectateCommand;
 use practice\commands\basic\TeleportLevelCommand;
@@ -42,6 +44,7 @@ use practice\game\entity\FishingHook;
 use practice\game\items\ItemHandler;
 use practice\game\SetTimeDayTask;
 use practice\kits\KitHandler;
+use practice\manager\MysqlManager;
 use practice\parties\PartyManager;
 use practice\player\gameplay\ChatHandler;
 use practice\player\gameplay\ReportHandler;
@@ -80,6 +83,8 @@ class PracticeCore extends PluginBase
 
     private static $ipHandler;
 
+    private static $mysqlManager;
+
     private $serverMuted;
 
     public function onEnable() {
@@ -91,6 +96,7 @@ class PracticeCore extends PluginBase
         $this->initDataFolder();
         $this->saveDefaultConfig();
         $this->initMessageConfig();
+        $this->initMysqlConfig();
         $this->initNameConfig();
         $this->initRankConfig();
         $this->initCommands();
@@ -101,7 +107,9 @@ class PracticeCore extends PluginBase
         self::$kitHandler = new KitHandler();
         self::$arenaHandler = new ArenaHandler();
 
-        self::$playerHandler->updateLeaderboards();
+        self::$mysqlManager = new MysqlManager($this->getDataFolder());
+
+        //self::$playerHandler->updateLeaderboards();
 
         self::$itemHandler = new ItemHandler();
         self::$rankHandler = new RankHandler();
@@ -213,6 +221,14 @@ class PracticeCore extends PluginBase
         return self::$ipHandler;
     }
 
+    public static function getMysqlHandler() : MysqlManager {
+        return self::$mysqlManager;
+    }
+
+    private function initMysqlConfig() : void {
+        $this->saveResource("mysql.yml");
+    }
+
     private function initMessageConfig() : void {
         $this->saveResource("messages.yml");
     }
@@ -280,12 +296,13 @@ class PracticeCore extends PluginBase
         $this->registerCommand(new PingCommand());
         $this->registerCommand(new TeleportLevelCommand());
         $this->registerCommand(new KickAllCommand());
+        $this->registerCommand(new PlayerInfoCommand());
         //TODO REGISTER THE COMMAND WHEN IT'S FINISHED
         //$this->registerCommand(new PartyCommand());
 
-        $this->unregisterCommand('ban');
+        /*$this->unregisterCommand('ban');
         $this->unregisterCommand('banip');
-        $this->unregisterCommand('banlist');
+        $this->unregisterCommand('banlist');*/
     }
 
     private function registerEntities() : void {

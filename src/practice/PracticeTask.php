@@ -57,7 +57,7 @@ class PracticeTask extends Task {
 
         if($currentTick % 20 === 0 and $currentTick !== 0) PracticeCore::getPartyManager()->updateInvites();
 
-        if($currentTick % $this->updateLeaderboardsTime === 0 and $currentTick !== 0) PracticeCore::getPlayerHandler()->updateLeaderboards();
+        //if($currentTick % $this->updateLeaderboardsTime === 0 and $currentTick !== 0) PracticeCore::getPlayerHandler()->updateLeaderboards();
     }
 
     private function broadcastAnnouncement(int $currentTick) : void {
@@ -75,7 +75,7 @@ class PracticeTask extends Task {
 
         $playerHandler = PracticeCore::getPlayerHandler();
 
-        $duelHandler = PracticeCore::getDuelHandler();
+        //$duelHandler = PracticeCore::getDuelHandler();
 
         $update = $currentTick % 20 === 0;
 

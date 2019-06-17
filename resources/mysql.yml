@@ -1,0 +1,17 @@
+# This config deals with configuring mysql to store data for the server.
+
+# Host -> The host for mysql
+host: 'localhost'
+
+# Username -> The user that has permissions for mysql (usually is root)
+username: 'root'
+
+# Password -> The password to access mysql
+# (MUST BE CHANGED TO FIT THE PASSWORD YOU CHOSE WHEN DOWNLOADED)
+password: 'password'
+
+# Database Name -> The name of the database that holds the server data.
+database-name: 'practice'
+
+# The port that the database is on. (Usually 3306)
+port: 3306

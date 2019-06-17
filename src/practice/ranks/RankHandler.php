@@ -44,51 +44,29 @@ class RankHandler
         $this->allRanks = [self::$GUEST, self::$BUILDER, self::$YOUTUBE, self::$FAMOUS, self::$MODERATOR, self::$ADMIN, self::$OWNER, self::$DEV];
     }
 
-    public function setDefaultRank($player) : bool {
-        return $this->setRank($player, false, self::$GUEST);
+    public function setDefaultRank(PracticePlayer $player) : bool {
+        return $this->setRank($player->getPlayer(), false, self::$GUEST);
     }
 
-    public function setRank($player, bool $sendMsg = false, Rank...$ranks) : bool {
+    public function setRank(Player $player, bool $sendMsg = false, Rank...$ranks) : bool {
 
-        $result = false;
+        $name = $player->getName();
 
-        $name = null;
-        $isPlayer = false;
-        if(isset($player) and !is_null($player)) {
+        $msg = $this->toMsg($ranks);
 
-            if ($player instanceof Player) {
-                $name = $player->getName();
-                $isPlayer = true;
-            } else if (is_string($player)){
-                $name = $player;
-            } else if ($player instanceof PracticePlayer){
-                $isPlayer = true;
-                $name = $player->getPlayerName();
-            }
+        if ($sendMsg === true and !is_null($msg)) $player->sendMessage($msg);
+
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        $data = $playerHandler->getPlayerData($name);
+        $theRanks = $data["ranks"];
+        if(is_array($theRanks)){
+            $theRanks = [];
+            foreach($ranks as $r)
+                $theRanks[] = $r->getLocalizedName();
         }
 
-        if(!is_null($name)) {
-
-            $msg = $this->toMsg($ranks);
-
-            if ($sendMsg === true and $isPlayer === true) {
-                if (!is_null($msg)) {
-                    $player->sendMessage($msg);
-                }
-            }
-
-            $playerHandler = PracticeCore::getPlayerHandler();
-
-            $data = $playerHandler->getPlayerData($name);
-            $theRanks = $data["ranks"];
-            if(is_array($theRanks)){
-                $theRanks = [];
-                foreach($ranks as $r)
-                    $theRanks[] = $r->getLocalizedName();
-            }
-            $result = $playerHandler->setPlayerData($name, "ranks", $theRanks);
-        }
-        return $result;
+        return $playerHandler->setPlayerData($name, 'ranks', $theRanks);
     }
 
     /**
@@ -105,13 +83,16 @@ class RankHandler
 
             $p = $playerHandler->getPlayer($player);
             $data = $playerHandler->getPlayerData($p->getPlayerName());
-            $ranksLocalized = $data["ranks"];
-            $result = [];
 
-            foreach($ranksLocalized as $str) {
-                $r = $this->getRankFromName($str);
-                if($r instanceof Rank)
-                    $result[] = $r;
+            if(isset($data['ranks'])) {
+                $ranksLocalized = $data["ranks"];
+                $result = [];
+
+                foreach ($ranksLocalized as $str) {
+                    $r = $this->getRankFromName($str);
+                    if ($r instanceof Rank)
+                        $result[] = $r;
+                }
             }
         }
 

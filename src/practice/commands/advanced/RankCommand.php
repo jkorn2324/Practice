@@ -128,16 +128,18 @@ class RankCommand extends BaseCommand
 
                         $exec = false;
 
-                        if($count === 2) $exec = PracticeCore::getRankHandler()->setRank($player->getPlayer(), true, $rnks[0], $rnks[1]);
-                        else $exec = PracticeCore::getRankHandler()->setRank($player->getPlayer(), true, $rnks[0]);
+                        $name = $p->getName();
+
+                        if($count === 2) $exec = PracticeCore::getRankHandler()->setRank($p, true, $rnks[0], $rnks[1]);
+                        else $exec = PracticeCore::getRankHandler()->setRank($p, true, $rnks[0]);
 
                         if(!$exec){
                             $msg = PracticeUtil::getMessage("general.rank.failed");
-                            $msg = strval(str_replace("%player%", $player->getPlayerName(), $msg));
+                            $msg = strval(str_replace("%player%", $name, $msg));
                         } else {
                             if($playerName !== $sender->getName()){
                                 $msg = PracticeUtil::getMessage("general.rank.change-op");
-                                $msg = strval(str_replace("%player%", $player->getPlayerName(), $msg));
+                                $msg = strval(str_replace("%player%", $name, $msg));
                             }
                         }
 

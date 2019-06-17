@@ -33,7 +33,7 @@ class PlayerSpawnTask extends Task
      */
     public function onRun(int $currentTick)
     {
-        ScoreboardUtil::updateSpawnScoreboards($this->player);
         PracticeCore::getItemHandler()->spawnHubItems($this->player, true);
+        ScoreboardUtil::updateSpawnScoreboards($this->player);
     }
 }

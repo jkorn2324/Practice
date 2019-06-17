@@ -525,7 +525,7 @@ class FormUtil
 
         $form->addToggle('Enable Scoreboard', PracticeCore::getPlayerHandler()->isScoreboardEnabled($player));
 
-        $changePEOnlySettings = false;
+        $changePEOnlySettings = true;
 
         if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
             $p = PracticeCore::getPlayerHandler()->getPlayer($player);
@@ -570,6 +570,54 @@ class FormUtil
         $form = new CustomForm(function(Player $event, $data = null) {
 
         });
+
+        return $form;
+    }
+
+    public static function getBanForm(string $player, bool $permBan) : CustomForm {
+
+        $form = new CustomForm(function(Player $event, $data = null) {
+
+            $formData = [];
+            $playerHandler = PracticeCore::getPlayerHandler();
+            if($playerHandler->isPlayerOnline($event))
+                $formData = $playerHandler->getPlayer($event)->removeForm();
+
+            //TODO
+            if(!is_null($data) and is_array($data)) {
+                var_dump($data);
+            }
+        });
+
+
+        //TODO ADD TO NAMES.YML
+        $form->setTitle('Ban Player: ' . $player);
+
+        $form->addInput('Reason for ban: ');
+
+        if($permBan === false) {
+
+            $numDays = [];
+
+            for($i = 0; $i < 31; $i++)
+                $numDays[] = $i;
+
+            $form->addDropdown('# of Days Banned:', $numDays);
+
+            $numHrs = [];
+
+            for($i = 0; $i < 24; $i++)
+                $numHrs[] = $i;
+
+            $form->addDropdown('# of Hours Banned: ', $numHrs);
+
+            $numMins = [];
+
+            for($i = 0; $i < 60; $i++)
+                $numMins[] = $i;
+
+            $form->addDropdown('# of Mins Banned: ', $numMins);
+        }
 
         return $form;
     }

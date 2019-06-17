@@ -24,3 +24,6 @@ enable-ranks: false
 
 # Determines whether chat filter is enabled.
 enable-chat-filter: false
+
+# Determines whether mysql is enabled.
+enable-mysql: false

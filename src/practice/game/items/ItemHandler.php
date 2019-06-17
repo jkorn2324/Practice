@@ -279,7 +279,7 @@ class ItemHandler
         else if (PracticeCore::getPlayerHandler()->isPlayerOnline($player))
             $practicePlayer = PracticeCore::getPlayerHandler()->getPlayer($player);
 
-        if ($practicePlayer !== null) {
+        if ($practicePlayer !== null and $practicePlayer->isOnline()) {
 
             $p = $practicePlayer->getPlayer();
 

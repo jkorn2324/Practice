@@ -62,6 +62,7 @@ use practice\game\FormUtil;
 use practice\game\inventory\InventoryUtil;
 use practice\game\inventory\menus\inventories\PracBaseInv;
 use practice\game\items\PracticeItem;
+use practice\player\info\CheckIpTask;
 use practice\player\permissions\PermissionsHandler;
 use practice\player\PlayerSpawnTask;
 use practice\player\RespawnTask;
@@ -89,24 +90,7 @@ class PracticeListener implements Listener
 
         if (!is_null($p)) {
 
-            $deviceOS = -1;
-            $input = -1;
-            $cid = -1;
-            $deviceId = '';
-
-            if($playerHandler->hasPendingPInfo($p)) {
-                $pInfo = $playerHandler->getPendingPInfo($p);
-                $deviceOS = intval($pInfo['device']);
-                $input = intval($pInfo['controls']);
-                $deviceId = strval($pInfo['device-id']);
-                $cid = intval($pInfo['client-id']);
-                $playerHandler->removePendingPInfo($p);
-            }
-
-            $pl = $playerHandler->addPlayer($p, $deviceOS);
-            $pl->setInput($input);
-            $pl->setCID($cid);
-            $pl->setDeviceID($deviceId);
+            $pl = $playerHandler->addPlayer($p);
 
             $nameTag = PracticeUtil::getNameTagFormat($p);
 
@@ -591,12 +575,12 @@ class PracticeListener implements Listener
                                 if (PracticeUtil::str_contains('unranked-duels', $name)) {
                                     if(PracticeUtil::isItemFormsEnabled()) {
                                         $form = FormUtil::getMatchForm();
-                                        $p->sendForm($form, true);
+                                        $p->sendForm($form, ['ranked' => false]);
                                     } else InventoryUtil::sendMatchInv($player);
                                 } elseif (PracticeUtil::str_contains('ranked-duels', $name)) {
                                     if(PracticeUtil::isItemFormsEnabled()) {
                                         $form = FormUtil::getMatchForm(true);
-                                        $p->sendForm($form, true, true);
+                                        $p->sendForm($form, ['ranked' => true]);
                                     } else InventoryUtil::sendMatchInv($player, true);
                                 } elseif (PracticeUtil::str_contains('ffa', $name)) {
                                     if(PracticeUtil::isItemFormsEnabled()) {
@@ -793,6 +777,7 @@ class PracticeListener implements Listener
 
         $item = $event->getItem();
         $player = $event->getPlayer();
+        $block = $event->getBlock();
         $cancel = false;
 
         $playerHandler = PracticeCore::getPlayerHandler();
@@ -805,24 +790,23 @@ class PracticeListener implements Listener
 
             $p = $playerHandler->getPlayer($player);
 
+            $name = $player->getName();
 
             if ($itemHandler->isPracticeItem($item))
                 $cancel = true;
-
             else {
                 if($p->isInArena()) {
                     $cancel = !$p->getCurrentArena()->canBuild();
                 } else {
                     if ($p->isInDuel()) {
-                        $duel = $duelHandler->getDuel($player->getName());
-                        if($duel->isDuelRunning() and $duel->canBuild()) {
-                            $duel->addBlock($event->getBlock());
-                        } else $cancel = true;
+                        $duel = $duelHandler->getDuel($name);
+                        if($duel->isDuelRunning() and $duel->canBuild())
+                            $duel->addBlock($block);
+                        else $cancel = true;
                     } else {
                         $cancel = true;
                         if (!PracticeUtil::isInSpectatorMode($player) and PracticeUtil::testPermission($player, PermissionsHandler::PERMISSION_PLACE_BREAK, false))
-                            $cancel = !$playerHandler->canPlaceNBreak($player->getName());
-
+                            $cancel = !$playerHandler->canPlaceNBreak($name);
                     }
                 }
             }
@@ -1173,31 +1157,17 @@ class PracticeListener implements Listener
 
             $clientData = $pkt->clientData;
 
-            if (isset($clientData['DeviceOS']) and isset($clientData['CurrentInputMode']) and isset($clientData['ClientRandomID']) and isset($clientData['DeviceId'])) {
+            $device = (isset($clientData['DeviceOS'])) ? intval($clientData['DeviceOS']) : -1;
 
-                $device = $clientData['DeviceOS'];
-                $input = $clientData['CurrentInputMode'];
+            $input = (isset($clientData['CurrentInputMode'])) ? intval($clientData['CurrentInputMode']) : -1;
 
-                $deviceID = $clientData['DeviceId'];
-                $cid = $clientData['ClientRandomID'];
+            $cid = (isset($clientData['ClientRandomId'])) ? intval($clientData['ClientRandomId']) : -1;
 
-                $deviceID = strval($deviceID);
-                $cid = intval($cid);
+            $deviceID = (isset($clientData['DeviceId'])) ? strval($clientData['DeviceId']) : '';
 
-                $device = intval($device);
-                $input = intval($input);
+            $deviceModel = (isset($clientData['DeviceModel'])) ? strval($clientData['DeviceModel']) : '';
 
-                $p = $playerHandler->getPlayer($player);
-
-                if ($p !== null) {
-
-                    $p->setDeviceOS($device);
-                    $p->setInput($input);
-                    $p->setDeviceID($deviceID);
-                    $p->setCID($cid);
-
-                } else $playerHandler->putPendingPInfo($pkt->username, $device, $input, $cid, $deviceID);
-            }
+            if($player !== null) $playerHandler->putPendingPInfo($pkt->username, $device, $input, $cid, $deviceID, $deviceModel);
         }
 
         if ($pkt instanceof PlayerActionPacket) {

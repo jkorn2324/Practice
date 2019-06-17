@@ -214,8 +214,14 @@ class ArenaCommand extends BaseCommand
                 }
 
                 if($exec) {
+
                     PracticeCore::getArenaHandler()->updateArena($arena, $theArena);
-                    PracticeCore::getPlayerHandler()->addEloKit($kit);
+
+                    $execute = PracticeUtil::isMysqlEnabled();
+
+                    if($execute === true) PracticeCore::getMysqlHandler()->addEloColumn($kit);
+                    else PracticeCore::getPlayerHandler()->addEloKit($kit);
+
                     $msg = PracticeUtil::getMessage("general.arena.update");
                     $msg = strval(str_replace("%arena-name%", $arena, $msg));
                     PracticeCore::getItemHandler()->reload();

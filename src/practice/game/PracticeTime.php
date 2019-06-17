@@ -66,6 +66,31 @@ class PracticeTime {
         return $this;
     }
 
+    public function add(string $key, int $value) : self {
+
+        switch($key) {
+            case 'hr':
+                $this->hour += $value;
+                break;
+            case 'min':
+                $this->minute += $value;
+                break;
+            case 'day':
+                $this->minute += $value;
+                break;
+            case 'mon':
+                $this->month += $value;
+                break;
+            case 'yr':
+                $this->year += $value;
+                break;
+        }
+
+        $this->totalMinTime = $this->initTotalMinTime();
+
+        return $this;
+    }
+
     private function initTotalMinTime() : int {
 
         return intval(abs(((($this->year - 2018) * self::ONE_YEAR_IN_MIN) + ($this->month * self::ONE_MONTH_IN_MIN) + ($this->day * self::ONE_DAY_IN_MIN) + ($this->hour * self::ONE_HOUR_IN_MIN)) + $this->minute));
@@ -283,8 +308,18 @@ class PracticeTime {
         return $result;
     }
 
-    public function dateForFile() : string {
+    public function dateForFile(bool $ban = false) : string {
         //05-06-2019 Reports
-        return "$this->month-$this->day-$this->year Reports";
+        $hour = $timeOfDay = $this->hour > 11 ? 'pm' : 'am';
+        $extended = ($ban === true) ? 'at ' . $hour : 'Reports';
+        return "$this->month-$this->day-$this->year " . $extended;
+    }
+
+    public function formatToSql() : string {
+        $day = $this->formatNum($this->day);
+        $hour = $this->formatNum($this->hour);
+        $min = $this->formatNum($this->minute);
+        $sec = $this->formatNum($this->second);
+        return "$this->year-$this->month-$day $hour:$min:$sec";
     }
 }

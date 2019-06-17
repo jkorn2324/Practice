@@ -74,15 +74,19 @@ class PermissionsHandler
 
         $permissions = [];
 
-        if(PracticeCore::getPlayerHandler()->isMod($p->getPlayerName()))
+        $name = $p->getPlayerName();
+
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        if($playerHandler->isMod($name))
             $permissions = $this->getModPermissions();
-        elseif (PracticeCore::getPlayerHandler()->isAdmin($p->getPlayerName()))
+        elseif ($playerHandler->isAdmin($name))
             $permissions = $this->getAdminPermissions();
-        elseif (PracticeCore::getPlayerHandler()->isContentCreator($p->getPlayerName()))
+        elseif ($playerHandler->isContentCreator($name))
             $permissions = $this->getCCPermissions();
-        elseif (PracticeCore::getPlayerHandler()->isOwner($p->getPlayerName()))
+        elseif ($playerHandler->isOwner($name))
             $permissions = $this->getOwnerPermissions();
-        elseif (PracticeCore::getPlayerHandler()->isBuilder($p->getPlayerName()))
+        elseif ($playerHandler->isBuilder($name))
             $permissions = $this->getBuilderPermissions();
 
         $size = count($permissions);
@@ -100,22 +104,22 @@ class PermissionsHandler
                     $player->addAttachment(PracticeCore::getInstance(), $permission->getName(), true);
                 }
             }
-        }
 
-        $effectivePermissions = $player->getEffectivePermissions();
+            $effectivePermissions = $player->getEffectivePermissions();
 
-        $keys = array_keys($effectivePermissions);
+            $keys = array_keys($effectivePermissions);
 
-        foreach($keys as $key) {
+            foreach($keys as $key) {
 
-            $perm = $effectivePermissions[$key];
+                $perm = $effectivePermissions[$key];
 
-            $permName = $perm->getPermission();
+                $permName = $perm->getPermission();
 
-            $attachment = $perm->getAttachment();
+                $attachment = $perm->getAttachment();
 
-            if(!PracticeUtil::arr_contains_value($permName, $permissions) and !is_null($attachment))
-                $player->removeAttachment($attachment);
+                if(!PracticeUtil::arr_contains_value($permName, $permissions) and !is_null($attachment))
+                    $player->removeAttachment($attachment);
+            }
         }
     }
 
@@ -133,19 +137,21 @@ class PermissionsHandler
 
         $result = false;
 
-        if(PracticeCore::getPlayerHandler()->isAdmin($player)) {
+        $playerHandler = PracticeCore::getPlayerHandler();
+
+        if($playerHandler->isAdmin($player)) {
             $adminPerms = $this->getAdminPermissions();
             $result = PracticeUtil::arr_contains_value($permission, $adminPerms);
-        } elseif (PracticeCore::getPlayerHandler()->isMod($player)) {
+        } elseif ($playerHandler->isMod($player)) {
             $modPerms = $this->getModPermissions();
             $result = PracticeUtil::arr_contains_value($permission, $modPerms);
-        } elseif (PracticeCore::getPlayerHandler()->isContentCreator($player)) {
+        } elseif ($playerHandler->isContentCreator($player)) {
             $ccPerms = $this->getCCPermissions();
             $result = PracticeUtil::arr_contains_value($permission, $ccPerms);
-        } elseif (PracticeCore::getPlayerHandler()->isOwner($player)) {
+        } elseif ($playerHandler->isOwner($player)) {
             $ownerPerms = $this->getOwnerPermissions();
             $result = PracticeUtil::arr_contains_value($permission, $ownerPerms);
-        } elseif (PracticeCore::getPlayerHandler()->isBuilder($player)) {
+        } elseif ($playerHandler->isBuilder($player)) {
             $builderPerms = $this->getBuilderPermissions();
             $result = PracticeUtil::arr_contains_value($permission, $builderPerms);
         }

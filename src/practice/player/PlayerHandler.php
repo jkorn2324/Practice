@@ -15,7 +15,9 @@ use pocketmine\entity\Entity;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
-use practice\kits\Kit;
+use practice\manager\tasks\AddToDatabaseTask;
+use practice\manager\tasks\CreatePDataTask;
+use practice\manager\tasks\UpdateEloTask;
 use practice\PracticeCore;
 use practice\PracticeUtil;
 use practice\ranks\RankHandler;
@@ -71,11 +73,13 @@ class PlayerHandler
 
         $this->leaderboards = $result;
 
-        PracticeUtil::broadcastMsg(TextFormat::WHITE . '[' . TextFormat::RED . 'Zehox' . TextFormat::WHITE . ']' . TextFormat::BOLD . TextFormat::RED . ' Leaderboards are now up to date.');
+        //PracticeUtil::broadcastMsg(TextFormat::WHITE . '[' . TextFormat::RED . 'Zehox' . TextFormat::WHITE . ']' . TextFormat::BOLD . TextFormat::RED . ' Leaderboards are now up to date.');
     }
 
     public function getCurrentLeaderboards(): array
     {
+        $update = PracticeUtil::isMysqlEnabled();
+        if($update === true) $this->updateLeaderboards();
         return $this->leaderboards;
     }
 
@@ -130,8 +134,7 @@ class PlayerHandler
         return $id;
     }
 
-    private function createPlayerData(string $player): void
-    {
+    private function createPlayerData(string $player, bool $asyncIt = false): void {
 
         $path = $this->playerFolderPath . "/$player.yml";
 
@@ -141,107 +144,119 @@ class PlayerHandler
 
         $encodedIP = PracticeCore::getIPHandler()->encodeIP($address);
 
-        if (!file_exists($path)) {
+        if($asyncIt === true) {
 
-            $file = fopen($path, 'wb');
+            $server = Server::getInstance();
 
-            fclose($file);
+            $guestRank = RankHandler::$GUEST->getLocalizedName();
 
-            $elo = [];
-
-            $kits = PracticeCore::getKitHandler()->getDuelKitNames(true);
-
-            $size = count($kits);
-
-            if ($size > 0) {
-                foreach ($kits as $kit) {
-                    $name = strval($kit);
-                    $elo[$name] = 1000;
-                }
-            }
-
-            $data = array(
-                'aliases' => [$player],
-                'stats' => array(
-                    'kills' => 0,
-                    'deaths' => 0,
-                    'elo' => $elo
-                ),
-                'muted' => false,
-                'ranks' => array(
-                    RankHandler::$GUEST->getLocalizedName()
-                ),
-                'scoreboards-enabled' => true,
-                'place-break' => false,
-                'pe-only' => false,
-                'ips' => [$encodedIP]
-            );
-
-            yaml_emit_file($path, $data);
+            $server->getAsyncPool()->submitTask(new CreatePDataTask($player, $this->playerFolderPath, $guestRank, $encodedIP, PracticeCore::getKitHandler()->getDuelKitNames(true)));
 
         } else {
 
-            $data = yaml_parse_file($path);
+            if (!file_exists($path)) {
 
-            $emit = false;
+                $file = fopen($path, 'wb');
 
-            if (!isset($data['scoreboards-enabled'])) {
-                $data['scoreboards-enabled'] = true;
-                $emit = true;
-            }
+                fclose($file);
 
-            if (!isset($data['place-break'])) {
-                $data['place-break'] = false;
-                $emit = true;
-            }
+                $elo = [];
 
-            if (!isset($data['pe-only'])) {
-                $data['pe-only'] = false;
-                $emit = true;
-            }
+                $kits = PracticeCore::getKitHandler()->getDuelKitNames(true);
 
-            if (!isset($data['ips'])) {
-                $data['ips'] = [$encodedIP];
-                $emit = true;
-            }
+                $size = count($kits);
 
-            $stats = $data['stats'];
-
-            $elo = $stats['elo'];
-
-            $kitHandler = PracticeCore::getKitHandler();
-
-            //$duelKits = PracticeCore::getKitHandler()->getDuelKits();
-            $duelKits = $kitHandler->getDuelKitNames();
-
-            $keys = array_keys($elo);
-
-            sort($keys);
-
-            sort($duelKits);
-
-            if ($keys !== $duelKits) {
-
-                $difference = array_diff($duelKits, $keys);
-
-                foreach ($difference as $kit) {
-
-                    if ($kitHandler->isDuelKit($kit))
-                        $elo[$kit] = 1000;
-                    else {
-                        if (isset($elo[$kit]))
-                            unset($elo[$kit]);
+                if ($size > 0) {
+                    foreach ($kits as $kit) {
+                        $name = strval($kit);
+                        $elo[$name] = 1000;
                     }
                 }
 
-                $stats['elo'] = $elo;
+                $data = array(
+                    'aliases' => [$player],
+                    'stats' => array(
+                        'kills' => 0,
+                        'deaths' => 0,
+                        'elo' => $elo
+                    ),
+                    'muted' => false,
+                    'ranks' => array(
+                        RankHandler::$GUEST->getLocalizedName()
+                    ),
+                    'scoreboards-enabled' => true,
+                    'place-break' => false,
+                    'pe-only' => false,
+                    'ips' => [$encodedIP]
+                );
 
-                $data['stats'] = $stats;
+                yaml_emit_file($path, $data);
 
-                $emit = true;
+            } else {
+
+                $data = yaml_parse_file($path);
+
+                $emit = false;
+
+                if (!isset($data['scoreboards-enabled'])) {
+                    $data['scoreboards-enabled'] = true;
+                    $emit = true;
+                }
+
+                if (!isset($data['place-break'])) {
+                    $data['place-break'] = false;
+                    $emit = true;
+                }
+
+                if (!isset($data['pe-only'])) {
+                    $data['pe-only'] = false;
+                    $emit = true;
+                }
+
+                if (!isset($data['ips'])) {
+                    $data['ips'] = [$encodedIP];
+                    $emit = true;
+                }
+
+                if ($emit === true) yaml_emit_file($path, $data);
+
+                $stats = $data['stats'];
+
+                $elo = $stats['elo'];
+
+                $kitHandler = PracticeCore::getKitHandler();
+
+                $duelKits = $kitHandler->getDuelKitNames();
+
+                $keys = array_keys($elo);
+
+                sort($keys);
+
+                sort($duelKits);
+
+                if ($keys !== $duelKits) {
+
+                    $difference = array_diff($duelKits, $keys);
+
+                    foreach ($difference as $kit) {
+
+                        if ($kitHandler->isDuelKit($kit))
+                            $elo[$kit] = 1000;
+                        else {
+                            if (isset($elo[$kit]))
+                                unset($elo[$kit]);
+                        }
+                    }
+
+                    $stats['elo'] = $elo;
+
+                    $data['stats'] = $stats;
+
+                    $emit = true;
+                }
+
+                if ($emit === true) yaml_emit_file($path, $data);
             }
-
-            if ($emit === true) yaml_emit_file($path, $data);
         }
     }
 
@@ -328,6 +343,14 @@ class PlayerHandler
         return $result;
     }
 
+    /**
+     * @param string $player
+     * @return array
+     */
+    public function getIps(string $player) {
+        return $this->getPlayerData($player)['ips'];
+    }
+
     public function setPlayerData(string $player, string $key, $value): bool
     {
         $executed = true;
@@ -339,6 +362,7 @@ class PlayerHandler
                 $executed = true;
             }
             yaml_emit_file($path, $data);
+
         } else {
             $this->createPlayerData($player);
             $executed = $this->setPlayerData($player, $key, $value);
@@ -375,81 +399,54 @@ class PlayerHandler
         return $data;
     }
 
-    public function putPendingPInfo(string $name, int $device, int $controls, int $clientID, string $deviceID): void
+    public function putPendingPInfo(string $name, int $device, int $controls, int $clientID, string $deviceID, string $deviceModel): void
     {
         $this->pendingDeviceData[$name] = [
             'device' => $device,
             'controls' => $controls,
             'device-id' => $deviceID,
-            'client-id' => $clientID
+            'client-id' => $clientID,
+            'device-model' => $deviceModel
         ];
     }
 
-    public function hasPendingPInfo($player): bool
+    public function addPlayer(Player $player) : PracticePlayer
     {
-        return $this->getPendingPInfo($player) !== null;
-    }
-
-    public function removePendingPInfo($player): void
-    {
-        if ($this->hasPendingPInfo($player)) {
-            $key = $this->getPendingDeviceKeyOf($player);
-            if (!is_null($key) and is_string($key)) unset($this->pendingDeviceData[$key]);
-            /*
-             * $val = $this->getPendingDeviceOs($player);
-             * unset($val);
-             */
-        }
-    }
-
-    private function getPendingDeviceKeyOf($player)
-    {
-        $result = null;
-        $name = PracticeUtil::getPlayerName($player);
-        if (!is_null($name) and is_string($name)) {
-            if (isset($this->pendingDeviceData[$name])) {
-                $val = $this->pendingDeviceData[$name];
-                if (is_array($val)) $result = $name;
-            }
-        }
-        return $result;
-    }
-
-    /**
-     * @param $player
-     * @return array|null
-     */
-    public function getPendingPInfo($player)
-    {
-
-        $name = null;
-        $res = null;
-
-        if (isset($player) and !is_null($player)) {
-            if (is_string($player)) {
-                $name = $player;
-            } elseif ($player instanceof Player) {
-                $name = $player->getName();
-            } elseif ($player instanceof PracticePlayer) {
-                $name = $player->getPlayerName();
-            }
-        }
-
-        if (!is_null($name) and is_string($name)) {
-            if (isset($this->pendingDeviceData[$name]))
-                $res = $this->pendingDeviceData[$name];
-        }
-        return $res;
-    }
-
-    public function addPlayer(Player $player, int $deviceOs = -1): PracticePlayer
-    {
-
-        $p = new PracticePlayer($player, $deviceOs);
 
         $name = $player->getName();
 
+        $deviceOS = -1;
+
+        $controls = -1;
+
+        $deviceID = '';
+
+        $clientID = -1;
+
+        $deviceModel = 'unknown';
+
+        if(isset($this->pendingDeviceData[$name])) {
+
+            $pendingDeviceData = $this->pendingDeviceData[$name];
+
+            $deviceOS = intval($pendingDeviceData['device']);
+
+            $deviceID = strval($pendingDeviceData['device-id']);
+
+            $clientID = intval($pendingDeviceData['client-id']);
+
+            $controls = intval($pendingDeviceData['controls']);
+
+            $deviceModel = strval($pendingDeviceData['device-model']);
+        }
+
+        $p = new PracticePlayer($player, $deviceOS, $controls, $deviceID, $clientID, $deviceModel);
+
         $this->players[$name] = $p;
+
+        $server = PracticeCore::getInstance()->getServer();
+
+        if(PracticeUtil::isMysqlEnabled()) $server->getAsyncPool()->submitTask(new AddToDatabaseTask($name));
 
         $this->createPlayerData($name);
 
@@ -466,15 +463,18 @@ class PlayerHandler
         return $p;
     }
 
-    public function removePlayer($player): void
+    public function removePlayer(Player $player): void
     {
 
-        if ($this->isPlayer($player)) {
+        //TODO TEST
 
-            $index = $this->getIndex($player);
+        $name = $player->getName();
 
-            unset($this->players[$index]);
-        }
+        if(isset($this->players[$name]))
+            unset($this->players[$name]);
+
+        if(isset($this->pendingDeviceData[$name]))
+            unset($this->pendingDeviceData[$name]);
     }
 
     public function isPlayerOnline($player): bool
@@ -667,7 +667,9 @@ class PlayerHandler
 
         if (isset($player) and !is_null($player)) {
             if (is_string($player)) {
-                $name = $player;
+                $testPlayer = Server::getInstance()->getPlayer($player);
+                if($testPlayer !== null)
+                    $name = $testPlayer->getName();
             } elseif ($player instanceof Player) {
                 $name = $player->getName();
             } elseif ($player instanceof PracticePlayer) {
@@ -764,17 +766,22 @@ class PlayerHandler
     private function getStatsFrom(string $player): array
     {
 
+        $enabled = PracticeUtil::isMysqlEnabled();
+
         $result = [];
 
-        if ($player !== 'None') {
+        if($enabled === false) {
 
-            $data = $this->getPlayerData($player);
-            $stats = $data['stats'];
+            if ($player !== 'None') {
 
-            if (is_array($stats))
-                $result = $stats;
+                $data = $this->getPlayerData($player);
+                $stats = $data['stats'];
 
-        }
+                if (is_array($stats))
+                    $result = $stats;
+
+            }
+        } else $result = PracticeCore::getMysqlHandler()->getStats($player);
 
         return $result;
     }
@@ -790,115 +797,118 @@ class PlayerHandler
 
         $stats = $this->getStatsFrom($player);
 
-        $title = '{color}' . 'Stats of ' . TextFormat::GOLD . $player . '{color}';
+        $title = TextFormat::GOLD . '   » ' . TextFormat::BOLD . TextFormat::BLUE . 'Stats of ' . $player . TextFormat::RESET . TextFormat::GOLD . ' «';
 
-        $color = ($form === true) ? TextFormat::DARK_GRAY : TextFormat::GRAY;
+        $k = $stats['kills'];
 
-        $title = PracticeUtil::str_replace($title, ['{color}' => $color]) . ($form === true) ? '' : ':';
+        $kills = TextFormat::GOLD . '   » ' . TextFormat::GREEN . 'Kills' . TextFormat::WHITE . ': ' . $k . TextFormat::GOLD . ' «';
 
-        $k = intval($stats['kills']);
+        $d = $stats['deaths'];
 
-        $kills = TextFormat::GREEN . 'Kills' . TextFormat::WHITE . ": $k";
+        $deaths = TextFormat::GOLD . '   » ' . TextFormat::RED . 'Deaths' . TextFormat::WHITE . ': ' . $d . TextFormat::GOLD . ' «';
 
-        $d = intval($stats['deaths']);
+        $eloFormat = TextFormat::GOLD . '   » ' . TextFormat::AQUA . '{kit}' . TextFormat::WHITE . ': {elo}' . TextFormat::GOLD . ' «';
 
-        $deaths = TextFormat::RED . 'Deaths' . TextFormat::WHITE . ": $d";
+        unset($stats['kills'], $stats['deaths']);
 
-        $e = $stats['elo'];
+        $eloTitle = TextFormat::GOLD . '   » ' . TextFormat::BOLD . TextFormat::BLUE . 'Elo of ' . $player . TextFormat::RESET . TextFormat::GOLD . ' «';
 
-        $elo = TextFormat::BLUE . 'Elo' . TextFormat::WHITE . ': {elo}';
+        $eloArray = [];
 
-        $restOfElo = '';
+        $keys = array_keys($stats);
 
-        $eloBeginTab = TextFormat::GOLD . '» ';
+        $kitArr = PracticeCore::getKitHandler()->getDuelKitNames(false, true, true);
 
-        $eloEndTab = TextFormat::GOLD . '«';
-
-        $size = count($e) - 1;
+        $eloStr = '';
 
         $count = 0;
 
-        $keys = array_keys($e);
+        $len = count($keys) - 1;
 
-        foreach ($keys as $eloKit) {
-            $eloKit = strval($eloKit);
-            $eloOf = $e[$eloKit];
-            $newLine = ($count === $size) ? '' : "\n";
-            $restOfElo .= $eloBeginTab . TextFormat::AQUA . $eloKit . TextFormat::WHITE . " => $eloOf Elo " . $eloEndTab . $newLine;
+        foreach($keys as $key) {
+            $key = strval($key);
+            $name = $kitArr[$key];
+            $elo = intval($stats[$key]);
+            $line = ($count === $len) ? "" : "\n";
+            $str = PracticeUtil::str_replace($eloFormat, ['{kit}' => $name, '{elo}' => $elo]) . $line;
+            $eloArray[] = $str;
+            $eloStr .= $str;
             $count++;
         }
 
-        $size = $size + 1;
+        $arr = array_merge([$title, $kills, $deaths], $eloArray);
 
-        $replace = ($size > 0) ? "\n$restOfElo" : 'None';
+        $lineSeparator = TextFormat::GRAY . PracticeUtil::getLineSeparator($arr);
 
-        $elo = PracticeUtil::str_replace($elo, ['{elo}' => $replace]);
-
-        $result = [
-            'title' => $title,
-            'kills' => $kills,
-            'deaths' => $deaths,
-            'elo' => $elo
-        ];
-
-        $lineSeparator = PracticeUtil::getLineSeparator($result);
-
-        $len = strlen($lineSeparator) - 4;
-
-        $lineSeparator = substr($lineSeparator, 0, $len);
-
-        $result = [
-            'firstSeparator' => $lineSeparator,
-            'title' => $title,
-            'secondSeparator' => $lineSeparator,
-            'kills' => $kills,
-            'deaths' => $deaths,
-            'elo' => $elo,
-            'thirdSeparator' => $lineSeparator
-        ];
-
-        return $result;
+        return ['title' => $title, 'firstSeparator' => $lineSeparator, 'kills' => $kills, 'deaths' => $deaths, 'secondSeparator' => $lineSeparator, 'eloTitle' => $eloTitle, 'thirdSeparator' => $lineSeparator, 'elo' => $eloStr, 'fourthSeparator' => $lineSeparator];
     }
 
     public function getEloFrom(string $player, string $kit): int
     {
         $stats = $this->getStatsFrom($player);
-        return intval($stats['elo'][$kit]);
+        $yamlRes = intval($stats['elo'][$kit]);
+        $enabled = PracticeUtil::isMysqlEnabled();
+        return (($enabled === true) ? PracticeCore::getMysqlHandler()->getElo($player, $kit) : $yamlRes);
     }
 
     public function getKillsOf(string $player): int
     {
         $stats = $this->getStatsFrom($player);
-        return intval($stats['kills']);
+        $yamlRes = intval($stats['kills']);
+        $enabled = PracticeUtil::isMysqlEnabled();
+        return (($enabled === true) ? PracticeCore::getMysqlHandler()->getKills($player) : $yamlRes);
     }
 
     public function getDeathsOf(string $player): int
     {
         $stats = $this->getStatsFrom($player);
-        return intval($stats['deaths']);
+        $yamlRes = intval($stats['deaths']);
+        $enabled = PracticeUtil::isMysqlEnabled();
+        return ($enabled === true) ? PracticeCore::getMysqlHandler()->getDeaths($player) : $yamlRes;
     }
 
     public function addKillFor(string $player): int
     {
-        $kills = $this->getKillsOf($player) + 1;
-        $this->updateStatsOf($player, 'kills', $kills);
-        return $kills;
+        $enabled = PracticeUtil::isMysqlEnabled();
+
+        $res = 0;
+
+        if($enabled === false) {
+            $res = $this->getKillsOf($player) + 1;
+            $this->updateStatsOf($player, 'kills', $res);
+        } else $res = PracticeCore::getMysqlHandler()->addKill($player);
+
+        return $res;
     }
 
     public function addDeathFor(string $player): int
     {
-        $deaths = $this->getDeathsOf($player) + 1;
-        $this->updateStatsOf($player, 'deaths', $deaths);
-        return $deaths;
+        $enabled = PracticeUtil::isMysqlEnabled();
+
+        $res = 0;
+
+        if($enabled === false) {
+            $res = $this->getDeathsOf($player) + 1;
+            $this->updateStatsOf($player, 'deaths', $res);
+        } else $res = PracticeCore::getMysqlHandler()->addDeath($player);
+
+        return $res;
     }
 
     public function setEloOf(string $winner, string $loser, string $queue, int $winnerDevice, int $loserDevice): array
     {
 
-        $result = ['winner' => 0, 'loser' => 0];
+        $result = ['winner' => 1000, 'loser' => 1000, 'winner-change' => 0, 'loser-change' => 0];
 
-        $winnerElo = $this->getEloFrom($winner, $queue);
-        $loserElo = $this->getEloFrom($loser, $queue);
+        $mysqlHandler = PracticeCore::getMysqlHandler();
+
+        $enabled = PracticeUtil::isMysqlEnabled();
+
+        $winnerElo = ($enabled === true) ? $mysqlHandler->getElo($winner, $queue) : $this->getEloFrom($winner, $queue);
+        $loserElo = ($enabled === true) ? $mysqlHandler->getElo($loser, $queue) : $this->getEloFrom($loser, $queue);
+
+        /*$winnerElo = $this->getEloFrom($winner, $queue);
+        $loserElo = $this->getEloFrom($loser, $queue);*/
 
         $kFactor = 32;
 
@@ -916,9 +926,6 @@ class PlayerHandler
         else if ($winnerDevice !== PracticeUtil::WINDOWS_10 and $loserDevice === PracticeUtil::WINDOWS_10)
             $winnerEloChange = intval($winnerEloChange * 1.1);
 
-        /*$result['winner'] = $winnerEloChange;
-        $result['loser'] = $loserEloChange;*/
-
         $newWElo = $winnerElo + $winnerEloChange;
         $newLElo = $loserElo - $loserEloChange;
 
@@ -927,17 +934,25 @@ class PlayerHandler
             $loserEloChange = $loserElo - 700;
         }
 
-        $result['winner'] = $winnerEloChange;
-        $result['loser'] = $loserEloChange;
+        $result['winner'] = $newWElo;
+        $result['loser'] = $newLElo;
 
-        $this->setElo($winner, $queue, $newWElo);
-        $this->setElo($loser, $queue, $newLElo);
+        $result['winner-change'] = $winnerEloChange;
+        $result['loser-change'] = $loserEloChange;
+
+        $server = PracticeCore::getInstance()->getServer();
+
+        if($enabled === true)
+            $server->getAsyncPool()->submitTask(new UpdateEloTask($winner, $loser, $newWElo, $newLElo, $queue));
+        else {
+           $this->setElo($winner, $queue, $newWElo);
+           $this->setElo($loser, $queue, $newLElo);
+        }
 
         return $result;
     }
 
-    private function setElo(string $player, string $queue, int $value): void
-    {
+    private function setElo(string $player, string $queue, int $value): void {
         $key = 'elo.' . $queue;
         $this->updateStatsOf($player, $key, $value);
     }
@@ -965,8 +980,7 @@ class PlayerHandler
         yaml_emit_file($this->playerFolderPath . $file, $data);
     }
 
-    public function resetStats(): void
-    {
+    public function resetStats(): void {
 
         $dir = $this->playerFolderPath;
         if (is_dir($dir)) {
@@ -1007,42 +1021,56 @@ class PlayerHandler
      * @param string $queue
      * @return string[]
      */
-    private function getLeaderboardsFrom(string $queue = 'global'): array
+    public function getLeaderboardsFrom(string $queue = 'global'): array
     {
+
+        $enabled = PracticeUtil::isMysqlEnabled();
 
         $result = [];
 
         $format = "\n" . TextFormat::GRAY . '%spot%. ' . TextFormat::AQUA . '%player% ' . TextFormat::WHITE . '(%elo%)';
 
-        $arr = $this->listEloForAll($queue);
+        if($enabled === false) {
 
-        $sortedElo = $arr;
-        /*$sortedElo = PracticeUtil::sort_array($arr);*/
+            $sortedElo = $this->listEloForAll($queue);
 
-        asort($sortedElo);
+            $playerNames = array_keys($sortedElo);
 
-        $playerNames = array_keys($sortedElo);
+            $size = count($sortedElo) - 1;
 
-        $size = count($sortedElo) - 1;
+            $subtracted = ($size > 10) ? 9 : $size;
 
-        $subtracted = ($size > 10) ? 9 : $size;
+            $len = $size - $subtracted;
 
-        $len = $size - $subtracted;
+            for ($i = $size; $i >= $len; $i--) {
+                $place = $size - $i;
+                $name = strval($playerNames[$i]);
+                $elo = intval($sortedElo[$name]);
+                $string = PracticeUtil::str_replace($format, ['%spot%' => $place + 1, '%player%' => $name, '%elo%' => $elo]);
+                $result[] = $string;
+            }
 
-        for ($i = $size; $i >= $len; $i--) {
-            $place = $size - $i;
-            $name = strval($playerNames[$i]);
-            $elo = intval($sortedElo[$name]);
-            $string = PracticeUtil::str_replace($format, ['%spot%' => $place + 1, '%player%' => $name, '%elo%' => $elo]);
-            $result[] = $string;
-        }
+            $size = count($result);
 
-        $size = count($result);
+            if ($size > 10) {
+                for ($i = $size; $i > 9; $i--) {
+                    if (isset($result[$i]))
+                        unset($result[$i]);
+                }
+            }
+        } else {
 
-        if ($size > 10) {
-            for ($i = $size; $i > 9; $i--) {
-                if (isset($result[$i]))
-                    unset($result[$i]);
+            $leaderboard = PracticeCore::getMysqlHandler()->getLeaderboardsFrom($queue);
+
+            $size = count($leaderboard);
+
+            $keys = array_keys($leaderboard);
+
+            for($i = 0; $i < $size; $i++) {
+                $name = strval($keys[$i]);
+                $elo = intval($leaderboard[$name]);
+                $string = PracticeUtil::str_replace($format, ['%spot%' => $i + 1, '%player%' => $name, '%elo%' => $elo]);
+                $result[] = $string;
             }
         }
 
@@ -1095,6 +1123,8 @@ class PlayerHandler
                 }
             }
         }
+
+        asort($player_array);
 
         return $player_array;
     }

@@ -419,7 +419,9 @@ class DuelHandler
             $index = $this->getMatchedIndexOf($group);
 
             if ($group->isPlayerOnline() and $group->isOpponentOnline()) {
+
                 $duel = new DuelGroup($group, $arena->getName());
+
                 PracticeCore::getArenaHandler()->setArenaClosed($arena->getName());
                 //PracticeCore::getArenaHandler()->setArenaClosed($arena);
                 $this->duels[] = $duel;

@@ -12,6 +12,7 @@ namespace practice\commands\advanced;
 use pocketmine\command\CommandSender;
 use pocketmine\Player;
 use pocketmine\Server;
+use pocketmine\utils\TextFormat;
 use practice\commands\BaseCommand;
 use practice\commands\parameters\BaseParameter;
 use practice\commands\parameters\Parameter;
@@ -42,8 +43,7 @@ class ReportCommand extends BaseCommand
                 new BaseParameter("list", $this->getPermission(), "Lists all of the reports based on type, or in a given time span.")
             ],
             5 => [
-                //TODO ADD LATER ON WHEN YOU COME UP WITH AN IDEA
-                //new BaseParameter("edit", $this->getPermission(), "Allows operator to delete, or clear reports.")
+                new BaseParameter('clear', $this->getPermission(), "Clears all the reports.")
             ]
         ];
         $this->setParameters($parameters);
@@ -71,8 +71,8 @@ class ReportCommand extends BaseCommand
                 case "list":
                     $this->listReports($sender);
                     break;
-                case "edit":
-                    //TODO
+                case "clear":
+                    $this->clearReports($sender);
                     break;
                 default:
             }
@@ -120,6 +120,17 @@ class ReportCommand extends BaseCommand
             $p = PracticeCore::getPlayerHandler()->getPlayer($sender->getName());
             $form = FormUtil::getReportsForm();
             $p->sendForm($form);
+        }
+    }
+
+    private function clearReports(CommandSender $sender) : void
+    {
+
+        if (PracticeUtil::canExecBasicCommand($sender, false)) {
+            $p = PracticeCore::getPlayerHandler()->getPlayer($sender->getName());
+            $msg = TextFormat::GREEN . 'Successfully cleared all reports!';
+            $p->sendMessage($msg);
+            PracticeCore::getReportHandler()->clearReports();
         }
     }
 }

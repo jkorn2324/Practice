@@ -28,6 +28,7 @@ class ReportHandler {
     }
 
     private function initFile() : void {
+
         $dataFolder = PracticeCore::getInstance()->getDataFolder();
 
         if(is_dir($dataFolder)) {
@@ -175,7 +176,10 @@ class ReportHandler {
             }
         }
 
-        foreach ($reports as $val){
+        $count = count($reports);
+
+        for($i = $count - 1; $i > -1; $i--) {
+            $val = $reports[$i];
             if ($val instanceof AbstractReport){
                 $t = $val->getType();
                 if($type === ReportInfo::ALL_REPORTS) {
@@ -187,5 +191,32 @@ class ReportHandler {
         }
 
         return $results;
+    }
+
+    public function getReportsOf(string $player) : array {
+
+        $reportData = yaml_parse_file($this->file, 0);
+
+        $keys = array_keys($reportData);
+
+        $reports = [];
+
+        foreach($keys as $key) {
+            $report = $reportData[$key];
+            $parsed = AbstractReport::parseReport($report);
+            if(!is_null($parsed)) {
+                $name = null;
+                if($parsed instanceof StaffReport)
+                    $name = $parsed->getReportedStaff();
+                elseif ($parsed instanceof HackReport)
+                    $name = $parsed->getReportedPlayer();
+                if($name !== null and $name === $player) $reports[] = $parsed;
+            }
+        }
+        return $reports;
+    }
+
+    public function clearReports() : void {
+        yaml_emit_file($this->file, []);
     }
 }

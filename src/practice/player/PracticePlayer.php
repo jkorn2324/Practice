@@ -54,6 +54,7 @@ class PracticePlayer
     private $currentName;
     private $currentArena;
     private $deviceId;
+    private $deviceModel;
 
     //INTEGERS
     private $currentSec;
@@ -96,19 +97,25 @@ class PracticePlayer
 
     /**
      * PracticePlayer constructor.
-     * @param $player
+     * @param Player $player
      * @param int $deviceOs
+     * @param int $input
+     * @param string $deviceID
+     * @param int $clientID
      */
-    public function __construct($player, int $deviceOs = -1) {
+    public function __construct(Player $player, int $deviceOs, int $input, string $deviceID, int $clientID, string $deviceModel) {
 
-        //$this->originalSkin = null;
+        $this->deviceOs = $deviceOs;
 
-        if($player instanceof Player){
-            $this->playerName = $player->getName();
-           // $this->originalSkin = $player->getSkin();
-        } else if (is_string($player)){
-            $this->playerName = $player;
-        }
+        $this->input = $input;
+
+        $this->deviceId = $deviceID;
+
+        $this->cid = $clientID;
+
+        $this->deviceModel = $deviceModel;
+
+        $this->playerName = $player->getName();
 
         $this->currentName = $this->playerName;
 
@@ -127,8 +134,6 @@ class PracticePlayer
         $this->combatSecs = 0;
         $this->enderpearlSecs = 0;
         $this->antiSpamSecs = 0;
-        $this->deviceOs = $deviceOs;
-        $this->input = -1;
         $this->duelSpamSec = 0;
         $this->noDamageTick = 0;
         $this->invId = -1;
@@ -143,9 +148,6 @@ class PracticePlayer
         $this->enderpearlThrows = [];
 
         $this->initScoreboard(!PracticeCore::getPlayerHandler()->isScoreboardEnabled($this->playerName));
-
-        $this->cid = 0;
-        $this->deviceId = '';
         //$this->disguise = null;
     }
 
@@ -985,7 +987,7 @@ class PracticePlayer
         return $this->cid;
     }
 
-    public function getDeviceToStr() : string {
+    public function getDeviceToStr(bool $forInfo = false) : string {
 
         $str = 'Unknown';
 
@@ -1025,13 +1027,15 @@ class PracticePlayer
                 break;
         }
 
-        if($this->input === PracticeUtil::CONTROLS_CONTROLLER)
+        if($this->input === PracticeUtil::CONTROLS_CONTROLLER and $forInfo === false)
             $str = 'Controller';
 
-        return TextFormat::WHITE . '[' . TextFormat::GREEN . $str . TextFormat::WHITE . ']';
+        $format = ($forInfo === false) ? TextFormat::WHITE . '[' . TextFormat::GREEN . $str . TextFormat::WHITE . ']' : $str;
+
+        return $format;
     }
 
-    public function setInput(int $val) : void {
+    /*public function setInput(int $val) : void {
         if($this->input === -1)
             $this->input = $val;
     }
@@ -1047,7 +1051,7 @@ class PracticePlayer
 
     public function setDeviceID(string $id) : void {
         $this->deviceId = $id;
-    }
+    }*/
 
     public function peOnlyQueue() : bool {
         return $this->deviceOs !== PracticeUtil::WINDOWS_10 and $this->input === PracticeUtil::CONTROLS_TOUCH;
@@ -1123,7 +1127,7 @@ class PracticePlayer
         }
     }
 
-    public function sendForm(Form $form, bool $isDuelForm = false, bool $ranked = false) {
+    public function sendForm(Form $form, array $addedContent = []) {
 
         if($this->isOnline() and !$this->isLookingAtForm) {
 
@@ -1138,7 +1142,10 @@ class PracticePlayer
             elseif (isset($formToJSON['buttons']) and is_array($formToJSON['buttons']))
                 $content = $formToJSON['buttons'];
 
-            if($isDuelForm === true) $content['ranked'] = $ranked;
+            if(!empty($addedContent))
+                $content = array_replace($content, $addedContent);
+
+            //if($isDuelForm === true) $content['ranked'] = $ranked;
 
             $exec = true;
 
@@ -1169,6 +1176,44 @@ class PracticePlayer
         $data = $this->currentFormData;
         $this->currentFormData = [];
         return $data;
+    }
+
+    /**
+     * @return array|string[]
+     */
+    public function getDeviceInfo() : array {
+
+        $title = TextFormat::GOLD . '   » ' . TextFormat::BOLD . TextFormat::BLUE . 'Info of ' . $this->playerName . TextFormat::RESET . TextFormat::GOLD . ' «';
+
+        $deviceOS = TextFormat::GOLD . '   » ' . TextFormat::AQUA . 'Device-OS' . TextFormat::WHITE . ': ' . $this->getDeviceToStr(true) . TextFormat::GOLD . ' «';
+
+        $deviceModel = TextFormat::GOLD . '   » ' . TextFormat::AQUA . 'Device-Model' . TextFormat::WHITE . ': ' . $this->deviceModel . TextFormat::GOLD . ' «';
+
+        $c = 'Unknown';
+
+        switch($this->input) {
+            case PracticeUtil::CONTROLS_CONTROLLER:
+                $c = 'Controller';
+                break;
+            case PracticeUtil::CONTROLS_MOUSE:
+                $c = 'Mouse';
+                break;
+            case PracticeUtil::CONTROLS_TOUCH:
+                $c = 'Touch';
+                break;
+        }
+
+        $deviceInput = TextFormat::GOLD . '   » ' . TextFormat::AQUA . 'Device-Input' . TextFormat::WHITE . ': ' . $c . TextFormat::GOLD . ' «';
+
+        $numReports = count(PracticeCore::getReportHandler()->getReportsOf($this->playerName));
+
+        $numOfReports = TextFormat::GOLD . '   » ' . TextFormat::AQUA . 'Times-Reported' . TextFormat::WHITE . ': ' . $numReports . TextFormat::GOLD . ' «';
+
+        $arr = [$title, $deviceOS, $deviceModel, $deviceInput, $numOfReports];
+
+        $lineSeparator = TextFormat::GRAY . PracticeUtil::getLineSeparator($arr);
+
+        return [$title, $lineSeparator, $deviceOS, $deviceModel, $deviceInput, $numOfReports, $lineSeparator];
     }
 
     public function equals($object) : bool {

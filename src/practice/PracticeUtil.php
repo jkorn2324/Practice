@@ -296,6 +296,11 @@ class PracticeUtil
         $cfg->save();
     }
 
+    public static function isMysqlEnabled() : bool {
+        $cfg = PracticeCore::getInstance()->getConfig();
+        return boolval($cfg->get('enable-mysql'));
+    }
+
     //TIME FUNCTIONS
 
     public static function currentTimeMillis() : float {
@@ -1497,16 +1502,19 @@ class PracticeUtil
 
             foreach($players as $p) {
 
-                $pl = $playerHandler->addPlayer($p);
+                $playerHandler->addPlayer($p);
 
-                if(!is_null($pl) and $playerHandler->hasPendingPInfo($p)) {
-                    $plInfo = $playerHandler->getPendingPInfo($p);
+                //$name = $p->getName();
+
+                /*if(!is_null($pl) and $playerHandler->hasPendingPInfo($name)) {
+                    $plInfo = $playerHandler->getPendingPInfo($name);
                     $device = intval($plInfo['device']);
                     $input = intval($plInfo['controls']);
                     $pl->setDeviceOS($device);
                     $pl->setInput($input);
-                    $playerHandler->removePendingPInfo($p);
-                }
+                    $playerHandler->removePendingPInfo($name);
+                }*/
+
                 self::resetPlayer($p, true);
             }
         }

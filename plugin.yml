@@ -151,3 +151,6 @@ permissions:
   practice.permission.party.create:
     description: "Allows player to create parties."
     default: op
+  practice.permission.pinfo:
+    description: "Allows player to see other player's info."
+    default: op

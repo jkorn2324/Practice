@@ -11,7 +11,12 @@ declare(strict_types=1);
 namespace practice\scoreboard;
 
 
+use pocketmine\Player;
+use pocketmine\scheduler\AsyncTask;
 use pocketmine\scheduler\Task;
+use pocketmine\Server;
+use practice\duels\DuelHandler;
+use practice\player\PlayerHandler;
 use practice\player\PracticePlayer;
 use practice\PracticeCore;
 
@@ -23,14 +28,11 @@ class UpdateScoreboardTask extends Task
     public function __construct(PracticePlayer $player = null) {
         if(!is_null($player) and $player->isOnline())
             $this->player = $player;
-
     }
 
     /**
      * Actions to execute when run
-     *
-     * @param int $currentTick
-     *
+     * @param int $currentTick;
      * @return void
      */
     public function onRun(int $currentTick) {

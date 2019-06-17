@@ -58,7 +58,7 @@ class DuelGroup
     /* @var DuelSpectator[] */
     private $spectators;
 
-    private $blocks = [];
+    private $blocks;
 
     /* @var DuelPlayerHit[] */
     private $playerHits;
@@ -79,6 +79,19 @@ class DuelGroup
     {
         $this->playerName = $group->getPlayerName();
         $this->opponentName = $group->getOpponentName();
+
+        $duelHandler = PracticeCore::getDuelHandler();
+
+        if($duelHandler->isASpectator($this->playerName)) {
+            $duel = $duelHandler->getDuelFromSpec($this->playerName);
+            $duel->removeSpectator($this->playerName);
+        }
+
+        if($duelHandler->isASpectator($this->opponentName)) {
+            $duel = $duelHandler->getDuelFromSpec($this->opponentName);
+            $duel->removeSpectator($this->opponentName);
+        }
+
         $this->winnerName = self::NONE;
         $this->loserName = self::NONE;
         $this->arenaName = $arena;
@@ -100,8 +113,8 @@ class DuelGroup
         $this->opponentDevice = $opponent->getDevice();
         $this->playerDevice = $player->getDevice();
 
-        $p->setNameTag(TextFormat::RED . $this->playerName . ' ' . $player->getDeviceToStr());
-        $o->setNameTag(TextFormat::RED . $this->opponentName . ' ' . $opponent->getDeviceToStr());
+        $p->setNameTag(TextFormat::RED . $this->playerName /*. ' ' . $player->getDeviceToStr()*/);
+        $o->setNameTag(TextFormat::RED . $this->opponentName/* . ' ' . $opponent->getDeviceToStr()*/);
 
         $this->started = false;
         $this->ended = false;
@@ -120,6 +133,7 @@ class DuelGroup
         $this->placeInDuel($player, $opponent);
 
         $this->spectators = [];
+        $this->blocks = [];
     }
 
     public function isRanked() : bool {
@@ -186,6 +200,14 @@ class DuelGroup
     public function getOpponent()
     {
         return PracticeCore::getPlayerHandler()->getPlayer($this->opponentName);
+    }
+
+    public function getPlayerName() : string {
+        return $this->playerName;
+    }
+
+    public function getOpponentName() : string {
+        return $this->opponentName;
     }
 
     public function endDuelPrematurely(bool $disablePlugin = false) : void {
@@ -524,10 +546,12 @@ class DuelGroup
 
                 $elo = PracticeCore::getPlayerHandler()->setEloOf($this->winnerName, $this->loserName, $this->queue, $winnerDevice, $loserDevice);
 
-                $winnerChangedElo = $elo['winner'];
-                $loserChangedElo = $elo['loser'];
+                $winnerChangedElo = $elo['winner-change'];
+                $loserChangedElo = $elo['loser-change'];
+                $newWElo = $elo['winner'];
+                $newLElo = $elo['loser'];
 
-                $eloChanges = $this->getEloChanges($winnerChangedElo, $loserChangedElo);
+                $eloChanges = $this->getEloChanges($newWElo, $newLElo, $winnerChangedElo, $loserChangedElo);
 
                 array_push($result, $eloChanges, '*');
             }
@@ -596,10 +620,8 @@ class DuelGroup
         return $result;
     }
 
-    private function getEloChanges(int $winner, int $loser) : string {
+    private function getEloChanges(int $wElo, int $lElo, int $winner, int $loser) : string {
         $result = PracticeUtil::getMessage("duels.end.elo-changes");
-        $wElo = PracticeCore::getPlayerHandler()->getEloFrom($this->winnerName, $this->queue);
-        $lElo = PracticeCore::getPlayerHandler()->getEloFrom($this->loserName, $this->queue);
         $result = PracticeUtil::str_replace($result, ["%winner%" => $this->winnerName, "%loser%" => $this->loserName, "%newWElo%" => "$wElo", "%newLElo%" => $lElo]);
         return PracticeUtil::str_replace($result, ["%wElo%" => "$winner", "%lElo%" => "$loser"]);
     }
@@ -769,12 +791,13 @@ class DuelGroup
 
         $size = count($this->blocks);
 
+        $spleef = $this->isSpleef();
+
         for($i = 0; $i < $size; $i++) {
             $block = $this->blocks[$i];
             if($block instanceof Position) {
-                $spleef = $this->isSpleef();
-                $replacedBlock = ($spleef === true) ? Block::get(Block::SNOW_BLOCK) : Block::get(0);
-                $level->setBlock($block, $replacedBlock);
+                $id = ($spleef === true) ? Block::SNOW_BLOCK : Block::AIR;
+                $level->setBlockIdAt($block->x, $block->y, $block->z, $id);
             }
         }
 

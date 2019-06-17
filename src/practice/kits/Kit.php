@@ -247,6 +247,7 @@ class Kit
     }
 
     public function getLocalizedName() : string {
-        return strval(str_replace(' ', '', $this->name));
+        $local = PracticeUtil::str_replace($this->name, [' ' => '']);
+        return strtolower($local);
     }
 }

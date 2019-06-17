@@ -12,6 +12,8 @@ namespace practice\scoreboard;
 
 use pocketmine\Player;
 use pocketmine\Server;
+use practice\duels\DuelHandler;
+use practice\player\PlayerHandler;
 use practice\player\PracticePlayer;
 use practice\PracticeCore;
 use practice\PracticeUtil;
@@ -54,7 +56,9 @@ class ScoreboardUtil
 
         $inFights = $playerHandler->getPlayersInFights();
 
-        $inQueues = PracticeCore::getDuelHandler()->getNumberOfQueuedPlayers();
+        $duelHandler = PracticeCore::getDuelHandler();
+
+        $inQueues = $duelHandler->getNumberOfQueuedPlayers();
 
         $names = self::getNames();
 

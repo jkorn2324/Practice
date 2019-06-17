@@ -6,8 +6,9 @@
  * Time: 09:28
  */
 
-namespace practice\game\entity;
+declare(strict_types=1);
 
+namespace practice\game\entity;
 
 use pocketmine\entity\Entity;
 use pocketmine\entity\projectile\Projectile;
@@ -19,7 +20,6 @@ use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\EntityEventPacket;
 use pocketmine\Player;
 use pocketmine\utils\Random;
-use practice\player\PracticePlayer;
 use practice\PracticeCore;
 
 class FishingHook extends Projectile
@@ -40,7 +40,7 @@ class FishingHook extends Projectile
     public $width = 0.2;
     public $height = 0.2;
     public $gravity = 0.07;
-    public $drag = 0.04;
+    public $drag = 0.03;
 
     public function onUpdate(int $currentTick): bool
     {
@@ -131,7 +131,6 @@ class FishingHook extends Projectile
                     $pracPlayer = $playerHandler->getPlayer($p);
                     if($pracPlayer->isFishing()) $pracPlayer->stopFishing();
                 }
-
             }
         }
 
@@ -205,7 +204,8 @@ class FishingHook extends Projectile
 
         if($entityHit instanceof Player and $playerHandler->isPlayerOnline($entityHit->getPlayer())) {
             $p = $playerHandler->getPlayer($entityHit->getPlayer());
-            $p->stopFishing(false, false);
+            if($p !== null and $p->isOnline())
+                $p->stopFishing(false, false);
         }
     }
 
