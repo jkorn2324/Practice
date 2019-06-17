@@ -154,3 +154,6 @@ permissions:
   practice.permission.pinfo:
     description: "Allows player to see other player's info."
     default: op
+  practice.permission.report.clear:
+    description: "Allows player to clear all reports."
+    default: op
