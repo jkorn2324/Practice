@@ -816,8 +816,7 @@ class PlayerHandler
 
         $enable = PracticeUtil::isMysqlEnabled();
 
-        if($enable === false)
-            $stats = $stats['elo'];
+        if($enable === false) $stats = $stats['elo'];
 
         $keys = array_keys($stats);
 
