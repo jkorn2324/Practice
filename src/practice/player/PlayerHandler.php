@@ -51,8 +51,7 @@ class PlayerHandler
         }
     }
 
-    public function updateLeaderboards(): void
-    {
+    public function updateLeaderboards(bool $message = false): void {
 
         $result = [];
 
@@ -73,7 +72,7 @@ class PlayerHandler
 
         $this->leaderboards = $result;
 
-        //PracticeUtil::broadcastMsg(TextFormat::WHITE . '[' . TextFormat::RED . 'Zehox' . TextFormat::WHITE . ']' . TextFormat::BOLD . TextFormat::RED . ' Leaderboards are now up to date.');
+        if($message === true) PracticeUtil::broadcastMsg(TextFormat::WHITE . '[' . TextFormat::RED . 'Zehox' . TextFormat::WHITE . ']' . TextFormat::BOLD . TextFormat::RED . ' Leaderboards are now up to date.');
     }
 
     public function getCurrentLeaderboards(): array
@@ -815,9 +814,14 @@ class PlayerHandler
 
         $eloArray = [];
 
+        $enable = PracticeUtil::isMysqlEnabled();
+
+        if($enable === false)
+            $stats = $stats['elo'];
+
         $keys = array_keys($stats);
 
-        $kitArr = PracticeCore::getKitHandler()->getDuelKitNames(false, true, true);
+        $kitArr = PracticeCore::getKitHandler()->getDuelKitNames(false, $enable === true, true);
 
         $eloStr = '';
 

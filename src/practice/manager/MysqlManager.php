@@ -30,7 +30,7 @@ class MysqlManager
     public function __construct(string $directory) {
         $name = 'mysql.yml';
         $this->dir = $directory . $name;
-        $this->initDatabase();
+        if(PracticeUtil::isMysqlEnabled()) $this->initDatabase();
     }
 
     private function getConfig() : Config {

@@ -12,6 +12,7 @@ namespace practice\duels\groups;
 
 use pocketmine\block\Block;
 use pocketmine\level\Position;
+use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 use practice\arenas\DuelArena;
 use practice\duels\misc\DuelInvInfo;
@@ -274,9 +275,6 @@ class DuelGroup
 
         if ($this->isLoadingDuel()) {
 
-            /*if (!PracticeCore::getArenaHandler()->isArenaClosed($this->arenaName))
-                PracticeCore::getArenaHandler()->setArenaClosed($this->arenaName);*/
-
             $this->countdownTick++;
 
             if($this->countdownTick === 5) {
@@ -284,19 +282,6 @@ class DuelGroup
                 $o->setDuelScoreboard($this);
                 ScoreboardUtil::updateSpawnScoreboards();
             }
-
-            /*if($this->countdownTick === 5) {
-
-                $p->setScoreboard(Scoreboard::DUEL_SCOREBOARD);
-                $o->setScoreboard(Scoreboard::DUEL_SCOREBOARD);
-
-            } else {
-
-                if($this->countdownTick % 2 === 0) {
-                    $p->updateScoreboard("opponent", ["%player%" => $o->getPlayerName()]);
-                    $o->updateScoreboard("opponent", ["%player%" => $p->getPlayerName()]);
-                }
-            }*/
 
             if ($this->countdownTick % 20 === 0 and $this->countdownTick !== 0) {
 
@@ -399,13 +384,11 @@ class DuelGroup
         if($this->isPlayerOnline()) {
             $p = $this->getPlayer();
             $p->updateLineOfScoreboard(2, ' ' . $durationStr);
-            //$p->updateScoreboard('duration', ['%time%' => $duration]);
         }
 
         if($this->isOpponentOnline()) {
             $o = $this->getOpponent();
             $o->updateLineOfScoreboard(2, ' ' . $durationStr);
-            //$o->updateScoreboard('duration', ['%time%' => $duration]);
         }
 
         $keys = array_keys($this->spectators);
@@ -413,11 +396,6 @@ class DuelGroup
         foreach ($keys as $key) {
             $spectator = $this->spectators[$key];
             $spectator->update($durationStr);
-
-            /*if(PracticeCore::getPlayerHandler()->isPlayerOnline($spectator)) {
-                $pl = PracticeCore::getPlayerHandler()->getPlayer($spectator);
-                $pl->updateScoreboard();
-            }*/
         }
     }
 
@@ -434,11 +412,6 @@ class DuelGroup
     public function didDuelEnd(): bool
     {
         return $this->started === true and $this->ended === true;
-    }
-
-    private function endPremature(): bool
-    {
-        return !$this->started and $this->ended;
     }
 
     public function arePlayersOnline(): bool
@@ -484,8 +457,6 @@ class DuelGroup
     }
 
     private function endDuel(bool $endPrematurely = false, bool $disablePlugin = false) : void {
-
-        //$this->updateBlocks();
 
         $this->clearBlocks();
 
@@ -752,6 +723,11 @@ class DuelGroup
      */
     public function getArena() {
         return $this->arena;
+    }
+
+    public function canPlaceBlock(Player $player, Position $block) : bool {
+        $result = false;
+        return true;
     }
 
     public function canBuild() : bool {

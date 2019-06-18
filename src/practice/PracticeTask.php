@@ -57,7 +57,7 @@ class PracticeTask extends Task {
 
         if($currentTick % 20 === 0 and $currentTick !== 0) PracticeCore::getPartyManager()->updateInvites();
 
-        //if($currentTick % $this->updateLeaderboardsTime === 0 and $currentTick !== 0) PracticeCore::getPlayerHandler()->updateLeaderboards();
+        if($currentTick % $this->updateLeaderboardsTime === 0 and $currentTick !== 0 and !PracticeUtil::isMysqlEnabled()) PracticeCore::getPlayerHandler()->updateLeaderboards(true);
     }
 
     private function broadcastAnnouncement(int $currentTick) : void {

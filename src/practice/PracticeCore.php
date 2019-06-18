@@ -109,7 +109,8 @@ class PracticeCore extends PluginBase
 
         self::$mysqlManager = new MysqlManager($this->getDataFolder());
 
-        //self::$playerHandler->updateLeaderboards();
+        if(!PracticeUtil::isMysqlEnabled())
+            self::$playerHandler->updateLeaderboards();
 
         self::$itemHandler = new ItemHandler();
         self::$rankHandler = new RankHandler();
