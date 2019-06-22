@@ -725,9 +725,25 @@ class DuelGroup
         return $this->arena;
     }
 
-    public function canPlaceBlock(Player $player, Position $block) : bool {
-        $result = false;
-        return true;
+    public function canPlaceBlock(Block $against) : bool {
+        $count = $this->countPlaced($against);
+        return $count < 5;
+    }
+
+    private function countPlaced(Block $against) : int {
+
+        $count = 0;
+
+        $blAgainst = $against->asPosition();
+
+        if(!$this->isSpleef() and $this->isPlacedBlock($against)) {
+            $level = $this->arena->getLevel();
+            $testPos = $blAgainst->subtract(0, 1, 0);
+            $belowBlock = $level->getBlock($testPos);
+            $count = $this->countPlaced($belowBlock) + 1;
+        }
+
+        return $count;
     }
 
     public function canBuild() : bool {

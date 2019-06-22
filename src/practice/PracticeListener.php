@@ -800,9 +800,14 @@ class PracticeListener implements Listener
                 } else {
                     if ($p->isInDuel()) {
                         $duel = $duelHandler->getDuel($name);
-                        if($duel->isDuelRunning() and $duel->canBuild())
-                            $duel->addBlock($block);
-                        else $cancel = true;
+                        if($duel->isDuelRunning() and $duel->canBuild()) {
+                            $blockAgainst = $event->getBlockAgainst();
+                            $blockReplaced = $event->getBlockReplaced();
+                            $place = $duel->canPlaceBlock($blockAgainst);
+                            if($place === true)
+                                $duel->addBlock($blockReplaced);
+                            else $cancel = true;
+                        } else $cancel = true;
                     } else {
                         $cancel = true;
                         if (!PracticeUtil::isInSpectatorMode($player) and PracticeUtil::testPermission($player, PermissionsHandler::PERMISSION_PLACE_BREAK, false))

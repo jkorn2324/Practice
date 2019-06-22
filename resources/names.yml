@@ -93,7 +93,7 @@ scoreboard:
     # CPS Message -> Must have %player% and %clicks%.
     cps: "%player% CPS: %clicks%"
     # Ping Message -> Must have %player% and %ping%.
-    ping: "%player% Ping: "%ping%"
+    ping: "%player% Ping: %ping%"
     # Elo Message -> Must have %player% and %elo%.
     elo: "%player% Elo: %elo"
   # Opponent -> mainly for cps and ping.
@@ -101,6 +101,6 @@ scoreboard:
     # CPS Message -> Must have %player% and %clicks%.
     cps: "%player% CPS: %clicks%"
     # Ping Message -> Must have %player% and %ping%.
-    ping: "%player% Ping: "%ping%"
+    ping: "%player% Ping: %ping%"
     # Elo Message -> Must have %player% and %elo%.
     elo: "%player% Elo: %elo"

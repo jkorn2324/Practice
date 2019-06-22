@@ -34,7 +34,7 @@ class PracticeTask extends Task {
     public function __construct(PracticeCore $core) {
         $this->core = $core;
         $this->announcements = [
-            TextFormat::AQUA . 'See a hacker online? Use ' . TextFormat::YELLOW . '/report hacker' . TextFormat::AQUA .' to notify the staff of hackers on the server.',
+            TextFormat::AQUA . 'See a hacker online? Use ' . TextFormat::YELLOW . '/report player' . TextFormat::AQUA .' to notify the staff of hackers on the server.',
             TextFormat::AQUA . 'Find a bug on the server? Use ' . TextFormat::YELLOW . '/report bug' . TextFormat::AQUA . ' to notify the staff of bugs on the server.',
             TextFormat::AQUA . 'Is a staff abusing or doing any other misconduct? Use ' . TextFormat::YELLOW . '/report staff' . TextFormat::AQUA . ' to notify the owner of abusing staff.'
         ];
