@@ -344,7 +344,7 @@ class DuelGroup
                     $spectator = $spec->getPlayer();
                     if(!is_null($spectator) and $spectator->isOnline()) {
                         $pl = $spectator->getPlayer();
-                        if ($this->isPlayerBelowCenter($spectator, 1.0))
+                        if ($this->isPlayerBelowCenter($spectator, 3.0))
                             $pl->teleport($this->arena->getSpawnPosition());
                     } else unset($this->spectators[$key]);
                 }
@@ -493,6 +493,8 @@ class DuelGroup
             $spectator = $this->spectators[$key];
             $spectator->resetPlayer($disablePlugin);
         }
+
+        PracticeUtil::clearEntitiesIn($this->arena->getLevel(), true, true);
 
         $this->spectators = [];
 

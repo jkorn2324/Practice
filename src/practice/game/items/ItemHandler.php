@@ -10,20 +10,10 @@ declare(strict_types=1);
 
 namespace practice\game\items;
 
-use pocketmine\block\Block;
-use pocketmine\block\Skull;
 use pocketmine\item\Item;
-use pocketmine\item\ItemFactory;
-use pocketmine\network\mcpe\protocol\ResourcePacksInfoPacket;
 use pocketmine\Player;
-use pocketmine\resourcepacks\ResourcePack;
-use pocketmine\scheduler\Task;
-use pocketmine\utils\Color;
 use pocketmine\utils\TextFormat;
 use practice\arenas\FFAArena;
-use practice\kits\Kit;
-use practice\parties\PracticeParty;
-use practice\player\gameplay\reports\ReportInfo;
 use practice\player\PracticePlayer;
 use practice\PracticeCore;
 use practice\PracticeUtil;

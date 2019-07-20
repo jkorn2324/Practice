@@ -13,7 +13,6 @@ namespace practice\player\permissions;
 use pocketmine\permission\Permission;
 use pocketmine\permission\PermissionManager;
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\utils\Config;
 use practice\player\PracticePlayer;
 use practice\PracticeCore;
@@ -29,9 +28,29 @@ class PermissionsHandler
 
     private $configPath;
 
+    /* @var string[]|array */
+    private $builderPerms;
+
+    /* @var string[]|array */
+    private $contentCreatorPerms;
+
+    /* @var string[]|array */
+    private $modPermissions;
+
+    /* @var string[]|array */
+    private $adminPermissions;
+
+    /* @var string[]|array */
+    private $ownerPermissions;
+
     public function __construct(PracticeCore $core) {
         $path = $core->getDataFolder();
         $this->configPath = $path . '/permissions.yml';
+        $this->builderPerms = [];
+        $this->contentCreatorPerms = [];
+        $this->modPermissions = [];
+        $this->adminPermissions = [];
+        $this->ownerPermissions = [];
         //$this->initConfig();
     }
 
@@ -66,8 +85,29 @@ class PermissionsHandler
         $array['owners'] = $ownerPerms;
 
         $this->config = new Config($this->configPath, Config::YAML, $array);
-
         $this->config->save();
+
+        if($this->config->exists('builders'))
+            $this->builderPerms = $this->config->get('builders');
+
+        if($this->config->exists('content-creators'))
+            $this->contentCreatorPerms = $this->config->get('content-creators');
+
+        if($this->config->exists('mods')) {
+            $this->modPermissions = $this->config->get('mods');
+            $this->modPermissions = array_merge($this->modPermissions, $this->contentCreatorPerms);
+            $this->modPermissions = array_merge($this->modPermissions, $this->builderPerms);
+        }
+
+        if($this->config->exists('admins')) {
+            $this->adminPermissions = $this->config->get('admins');
+            $this->adminPermissions = array_merge($this->adminPermissions, $this->modPermissions);
+        }
+
+        if($this->config->exists('owners')) {
+            $this->ownerPermissions = $this->config->get('owners');
+            $this->ownerPermissions = array_merge($this->ownerPermissions, $this->adminPermissions);
+        }
     }
 
     public function updatePermissions(PracticePlayer $p) : void {
@@ -165,49 +205,34 @@ class PermissionsHandler
      * @return string[]
      */
     public function getBuilderPermissions() : array {
-        $permissions = $this->config->get('builders');
-        return $permissions;
+        return $this->builderPerms;
     }
 
     /**
      * @return string[]
      */
     public function getCCPermissions() : array {
-        $permissions = $this->config->get('content-creators');
-        return $permissions;
+        return $this->contentCreatorPerms;
     }
 
     /**
      * @return string[]
      */
     public function getModPermissions() : array {
-        $ccPerms = $this->getCCPermissions();
-        $modPerms = $this->config->get('mods');
-        $builderPerms = $this->getBuilderPermissions();
-        $result = array_merge($ccPerms, $modPerms);
-        $result = array_merge($result, $builderPerms);
-        return $result;
+        return $this->modPermissions;
     }
 
     /**
      * @return string[]
      */
     public function getAdminPermissions() : array {
-        $modPerms = $this->getModPermissions();
-        $adminPerms = $this->config->get('admins');
-        $result = array_merge($modPerms, $adminPerms);
-        return $result;
+        return $this->adminPermissions;
     }
 
     /**
      * @return string[]
      */
     public function getOwnerPermissions() : array {
-        $adminPerms = $this->getAdminPermissions();
-        $ownerPerms = $this->config->get('owners');
-        $result = array_merge($adminPerms, $ownerPerms);
-        return $result;
+        return $this->ownerPermissions;
     }
-
-
 }

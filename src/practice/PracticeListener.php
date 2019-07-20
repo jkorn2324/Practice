@@ -62,7 +62,6 @@ use practice\game\FormUtil;
 use practice\game\inventory\InventoryUtil;
 use practice\game\inventory\menus\inventories\PracBaseInv;
 use practice\game\items\PracticeItem;
-use practice\player\info\CheckIpTask;
 use practice\player\permissions\PermissionsHandler;
 use practice\player\PlayerSpawnTask;
 use practice\player\RespawnTask;
@@ -77,10 +76,10 @@ class PracticeListener implements Listener
         $this->core = $c;
     }
 
-    private function getCore(): PracticeCore
+    /*private function getCore(): PracticeCore
     {
         return $this->core;
-    }
+    }*/
 
     public function onJoin(PlayerJoinEvent $event): void {
 
@@ -179,11 +178,7 @@ class PracticeListener implements Listener
 
             $diedFairly = true;
 
-            $proj = false;
-
             if($lastDamageCause != null) {
-
-                $proj = $lastDamageCause->getCause() === EntityDamageEvent::CAUSE_PROJECTILE;
 
                 if ($lastDamageCause->getCause() === EntityDamageEvent::CAUSE_VOID) {
                     $diedFairly = false;
@@ -200,8 +195,6 @@ class PracticeListener implements Listener
                 }
             }
 
-            PracticeUtil::clearEntitiesIn($level, $proj);
-
             if($addToStats === true) {
 
                 if($diedFairly === true) {
@@ -214,6 +207,8 @@ class PracticeListener implements Listener
 
                             $attacker = $playerHandler->getPlayer($damgr);
 
+                            $p = $attacker->getPlayer();
+
                             if(!$attacker->equals($player)) {
 
                                 $arena = $attacker->getCurrentArena();
@@ -221,8 +216,10 @@ class PracticeListener implements Listener
                                 if($arena->doesHaveKit()) {
                                     $event->setDrops([]);
                                     $kit = $arena->getFirstKit();
-                                    $kit->giveTo($attacker->getPlayer());
+                                    $kit->giveTo($p);
                                 }
+
+                                $p->setHealth($p->getMaxHealth());
 
                                 $kills = $playerHandler->addKillFor($attacker->getPlayerName());
                                 $killsStr = PracticeUtil::str_replace(PracticeUtil::getName('scoreboard.arena-ffa.kills'), ['%num%' => $kills]);
@@ -300,24 +297,50 @@ class PracticeListener implements Listener
 
         $playerHandler = PracticeCore::getPlayerHandler();
 
+        $duelHandler = PracticeCore::getDuelHandler();
+
+        $cause = $event->getCause();
+
+
         if($e instanceof Player) {
 
-            if ($event->getCause() === EntityDamageEvent::CAUSE_FALL)
+            $name = $e->getName();
+
+            if ($cause === EntityDamageEvent::CAUSE_FALL)
                 $cancel = true;
 
             else {
 
-                if ($playerHandler->isPlayerOnline($e->getName())) {
-                    $player = $playerHandler->getPlayer($e->getName());
+                if ($playerHandler->isPlayerOnline($name)) {
+                    
+                    $player = $playerHandler->getPlayer($name);
 
                     $lvl = $player->getPlayer()->getLevel();
 
-                    if (PracticeUtil::areLevelsEqual($lvl, PracticeUtil::getDefaultLevel()))
+                    if (PracticeUtil::areLevelsEqual($lvl, PracticeUtil::getDefaultLevel())) {
+
+                        if($cause === EntityDamageEvent::CAUSE_VOID) {
+
+                            if($duelHandler->isASpectator($name)) {
+                                $duel = $duelHandler->getDuelFromSpec($name);
+                                $center = $duel->getArena()->getSpawnPosition();
+                                PracticeUtil::teleportPlayer($player, $center);
+                            } else
+                                PracticeUtil::teleportPlayer($player);
+
+                            $event->setCancelled(true);
+                            return;
+                        }
+
                         $cancel = boolval(PracticeUtil::isLobbyProtectionEnabled());
+                    }
 
                     if ($cancel === true) $cancel = boolval(!$player->isInDuel()) and boolval(!$player->isInArena());
 
                 } else $cancel = true;
+
+                if(PracticeUtil::isInSpectatorMode($name))
+                    $cancel = true;
             }
         }
 
@@ -679,12 +702,10 @@ class PracticeListener implements Listener
                             if (PracticeUtil::isTapToRodEnabled()) {
                                 if($checkActions === true) {
                                     if($p->getDevice() === PracticeUtil::WINDOWS_10 or $p->getInput() === PracticeUtil::CONTROLS_MOUSE) {
-                                        $use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK;
+                                        $use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK and $action !== PlayerInteractEvent::LEFT_CLICK_AIR;
                                     } else $use = true;
                                 }
-                            } else {
-                                $use = PracticeUtil::checkActions($action, PlayerInteractEvent::RIGHT_CLICK_AIR);
-                            }
+                            } else $use = PracticeUtil::checkActions($action, PlayerInteractEvent::RIGHT_CLICK_AIR);
 
                             if ($use === true) PracticeUtil::useRod($item, $player);
                             else $cancel = true;
@@ -698,7 +719,7 @@ class PracticeListener implements Listener
                             if (PracticeUtil::isTapToPearlEnabled()) {
                                 if($checkActions === true) {
                                     if($p->getDevice() === PracticeUtil::WINDOWS_10 or $p->getInput() === PracticeUtil::CONTROLS_MOUSE) {
-                                        $use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK;
+                                        $use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK and $action !== PlayerInteractEvent::LEFT_CLICK_AIR;
                                     } else $use = true;
                                 }
                             } else
@@ -717,7 +738,7 @@ class PracticeListener implements Listener
                             if (PracticeUtil::isTapToPotEnabled()) {
                                 if($checkActions === true) {
                                     if($p->getDevice() === PracticeUtil::WINDOWS_10 or $p->getInput() === PracticeUtil::CONTROLS_MOUSE) {
-                                        $use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK;
+                                        $use = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK and $action !== PlayerInteractEvent::LEFT_CLICK_AIR;
                                     } else $use = true;
                                 }
                             } else {
@@ -1354,6 +1375,11 @@ class PracticeListener implements Listener
                 }
             }
         }
+
+        $levels = $server->getLevels();
+
+        foreach($levels as $lvl)
+            PracticeUtil::clearEntitiesIn($lvl, false, true);
 
         if($server->isRunning())
             PracticeUtil::kickAll('Restarting Server', false);

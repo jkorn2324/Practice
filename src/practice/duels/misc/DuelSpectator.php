@@ -32,10 +32,10 @@ class DuelSpectator {
 
         PracticeUtil::setInSpectatorMode($player, true, true);
 
-        if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
+        /*if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
             $pl = PracticeCore::getPlayerHandler()->getPlayer($player);
             //$pl->setScoreboard(Scoreboard::SPEC_SCOREBOARD);
-        }
+        }*/
 
         PracticeCore::getItemHandler()->spawnSpecItems($player);
     }

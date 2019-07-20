@@ -72,7 +72,17 @@ class PlayerHandler
 
         $this->leaderboards = $result;
 
-        if($message === true) PracticeUtil::broadcastMsg(TextFormat::WHITE . '[' . TextFormat::RED . 'Zehox' . TextFormat::WHITE . ']' . TextFormat::BOLD . TextFormat::RED . ' Leaderboards are now up to date.');
+        $serverName = PracticeUtil::getName('server-name');
+
+        $msg = TextFormat::BOLD . TextFormat::DARK_GRAY . '[' . TextFormat::WHITE . 'Server' . TextFormat::DARK_GRAY . ']' . TextFormat::RESET . TextFormat::WHITE . ' Leaderboards are now updated.';
+
+        if(PracticeUtil::str_contains('Operix', $serverName))
+            $msg = TextFormat::BOLD . TextFormat::DARK_GRAY . '[' . TextFormat::LIGHT_PURPLE . 'Operix' . TextFormat::DARK_GRAY . ']' . TextFormat::RESET . TextFormat::LIGHT_PURPLE . ' Leaderboards are now updated.';
+        elseif (PracticeUtil::str_contains('Mineceit', $serverName))
+            $msg = TextFormat::BOLD . TextFormat::DARK_GRAY . '[' . TextFormat::DARK_PURPLE . 'Mineceit' . TextFormat::DARK_GRAY . ']' . TextFormat::RESET . TextFormat::DARK_PURPLE . ' Leaderboards are now updated.';
+
+        if($message === true) PracticeUtil::broadcastMsg($msg);
+        //if($message === true) PracticeUtil::broadcastMsg(TextFormat::WHITE . '[' . TextFormat::LIGHT_PURPLE . 'Operix' . TextFormat::WHITE . ']' . TextFormat::BOLD . TextFormat::LIGHT_PURPLE . ' Leaderboards are now up to date.');
     }
 
     public function getCurrentLeaderboards(): array
@@ -1114,7 +1124,7 @@ class PlayerHandler
                         foreach ($keys as $q)
                             $total += intval($elo[$q]);
 
-                        $resElo = intval($total / $count);
+                        $resElo = ($count !== 0) ? intval($total / $count) : 1000;
 
                     } else {
 

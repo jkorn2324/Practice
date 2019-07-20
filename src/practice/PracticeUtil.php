@@ -561,6 +561,11 @@ class PracticeUtil
             $pl = $p->getPlayer();
 
             $use = $p->isOnline() and !self::isFrozen($pl) and !self::isInSpectatorMode($pl);
+
+            if($use === true and $p->isInDuel()) {
+                $duel = PracticeCore::getDuelHandler()->getDuel($p->getPlayerName());
+                $use = !$duel->isLoadingDuel();
+            }
         }
 
         if($use === true) {
@@ -597,6 +602,11 @@ class PracticeUtil
 
             if($exec === true)
                 $exec = $p->isOnline() and !self::isFrozen($p->getPlayer()) and !self::isInSpectatorMode($p->getPlayer());
+
+            if($exec === true and $p->isInDuel()) {
+                $duel = PracticeCore::getDuelHandler()->getDuel($p->getPlayerName());
+                $exec = !$duel->isLoadingDuel();
+            }
         }
 
         if($exec === true) {
@@ -644,6 +654,10 @@ class PracticeUtil
 
             $use = $p->isOnline() and !self::isFrozen($pl) and !self::isInSpectatorMode($pl);
 
+            if($use === true and $p->isInDuel()) {
+                $duel = PracticeCore::getDuelHandler()->getDuel($p->getPlayerName());
+                $use = !$duel->isLoadingDuel();
+            }
         }
 
         if($use === true) {
@@ -962,6 +976,27 @@ class PracticeUtil
         $spawnPos = $lvl->getSpawnLocation();
         if(is_null($spawnPos)) $spawnPos = $lvl->getSafeSpawn();
         return $spawnPos;
+    }
+
+    /**
+     * @param PracticePlayer|Player $player
+     * @param Position|null $pos
+     */
+    public static function teleportPlayer($player, Position $pos = null) : void {
+
+        $p = (($player instanceof PracticePlayer) ? $player->getPlayer() : $player);
+
+        if($p !== null and $p instanceof Player) {
+
+            $pos = ($pos !== null ? $pos : self::getSpawnPosition());
+
+            $x = $pos->x;
+            $z = $pos->z;
+
+            self::onChunkGenerated($pos->level, intval($x) >> 4, intval($z) >> 4, function () use ($p, $pos) {
+                $p->teleport($pos);
+            });
+        }
     }
 
     public static function respawnPlayer(PracticePlayer $player, bool $clearInv = false, bool $reset = false) : void {
@@ -1373,7 +1408,7 @@ class PracticeUtil
         return new Location($p->x, $p->y, $p->z, $p->yaw, $p->pitch, $p->getLevel());
     }
 
-    public static function clearEntitiesIn(Level $level, bool $proj = false) : void {
+    public static function clearEntitiesIn(Level $level, bool $proj = false, bool $all = false) : void {
 
         $entities = $level->getEntities();
 
@@ -1382,10 +1417,10 @@ class PracticeUtil
             $exec = true;
 
             if($entity instanceof Player) $exec = false;
-            elseif ($entity instanceof FishingHook) $exec = false;
-            elseif ($entity instanceof \pocketmine\entity\projectile\EnderPearl) $exec = false;
-            elseif ($entity instanceof \pocketmine\entity\projectile\SplashPotion) $exec = false;
-            elseif ($entity instanceof Arrow and $proj === true) $exec = false;
+            elseif ($all === false and $entity instanceof FishingHook) $exec = false;
+            elseif ($all === false and $entity instanceof \pocketmine\entity\projectile\EnderPearl) $exec = false;
+            elseif ($all === false and $entity instanceof \pocketmine\entity\projectile\SplashPotion) $exec = false;
+            elseif ($all === false and $entity instanceof Arrow) $exec = $proj;
 
             if($exec === true)
                 $entity->close();
@@ -1419,8 +1454,60 @@ class PracticeUtil
         return $result;
     }
 
-    public static function isALevel($s) : bool {
-        return is_string($s) and !is_null(Server::getInstance()->getLevelByName($s));
+    /**
+     * @param string|Level $level
+     * @param bool $loaded
+     * @return bool
+     */
+    public static function isALevel($level, bool $loaded = true) : bool {
+
+        $server = Server::getInstance();
+
+        $lvl = ($level instanceof Level) ? $level : $server->getLevelByName($level);
+
+        $result = false;
+
+        if(is_string($level) and $loaded === false) {
+            $levels = self::getLevelsFromFolder();
+
+            if(in_array($level, $levels))
+                $result = true;
+
+        } elseif ($lvl instanceof Level) {
+            $name = $lvl->getName();
+            if($loaded === true)
+                $result = $server->isLevelLoaded($name);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param PracticeCore|null $core
+     * @return array|string[]
+     */
+    public static function getLevelsFromFolder($core = null) {
+
+        $core = ($core instanceof PracticeCore) ? $core : PracticeCore::getInstance();
+
+        $index = self::str_indexOf("/plugin_data", $core->getDataFolder());
+
+        $substr = substr($core->getDataFolder(), 0, $index);
+
+        $worlds = $substr . "/worlds";
+
+        if(!is_dir($worlds))
+            return [];
+
+        $files = scandir($worlds);
+
+        return $files;
+    }
+
+    public static function loadLevel(string $level) : void {
+        $server = Server::getInstance();
+        if(!$server->isLevelLoaded($level) and !self::str_contains('.', $level))
+            $server->loadLevel($level);
     }
 
     public static function areLevelsEqual(Level $a, Level $b) : bool {
@@ -1442,8 +1529,14 @@ class PracticeUtil
         }
         return $result;
     }
-    
+
+    /**
+     * @param $posArr
+     * @param $level
+     * @return Location|Position|null
+     */
     public static function getPositionFromMap($posArr, $level) {
+
         $result = null;
 
         if(!is_null($posArr) and is_array($posArr) and self::arr_contains_keys($posArr,'x', 'y', 'z')) {

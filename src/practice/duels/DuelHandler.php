@@ -214,26 +214,29 @@ class DuelHandler
                 $ranked = $pQueue->isRanked();
                 $queue = $pQueue->getQueue();
 
-                $p = $pQueue->getPlayer();
-                $o = $oQueue->getPlayer();
+                if($this->isAnArenaOpen($queue)) {
 
-                $str = ($ranked ? "Ranked" : "Unranked");
+                    $p = $pQueue->getPlayer();
+                    $o = $oQueue->getPlayer();
 
-                $oppElo = $playerHandler->getEloFrom($pName, $queue);
-                $pElo = $playerHandler->getEloFrom($oName, $queue);
+                    $str = ($ranked ? "Ranked" : "Unranked");
 
-                $msg = PracticeUtil::getMessage("duels.queue.found-match");
-                $msg = PracticeUtil::str_replace($msg, ["%ranked%" => $str, "%queue%" => $queue]);
-                $oppMsg = PracticeUtil::str_replace($msg, ["%elo%" => (($ranked) ? "$oppElo" : ""), "%player%" => $pName]);
-                $pMsg = PracticeUtil::str_replace($msg, ["%elo%" => (($ranked) ? "$pElo" : ""), "%player%" => $oName]);
+                    $oppElo = $playerHandler->getEloFrom($pName, $queue);
+                    $pElo = $playerHandler->getEloFrom($oName, $queue);
 
-                $p->sendMessage($pMsg);
-                $o->sendMessage($oppMsg);
+                    $msg = PracticeUtil::getMessage("duels.queue.found-match");
+                    $msg = PracticeUtil::str_replace($msg, ["%ranked%" => $str, "%queue%" => $queue]);
+                    $oppMsg = PracticeUtil::str_replace($msg, ["%elo%" => (($ranked) ? "$oppElo" : ""), "%player%" => $pName]);
+                    $pMsg = PracticeUtil::str_replace($msg, ["%elo%" => (($ranked) ? "$pElo" : ""), "%player%" => $oName]);
 
-                $group = new MatchedGroup($pName, $oName, $queue, $ranked);
-                $this->matchedGroups[] = $group;
+                    $p->sendMessage($pMsg);
+                    $o->sendMessage($oppMsg);
 
-                unset($this->queuedPlayers[$pName], $this->queuedPlayers[$oName]);
+                    $group = new MatchedGroup($pName, $oName, $queue, $ranked);
+                    $this->matchedGroups[] = $group;
+
+                    unset($this->queuedPlayers[$pName], $this->queuedPlayers[$oName]);
+                }
             }
         } else {
 

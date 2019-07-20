@@ -14,14 +14,12 @@ use pocketmine\inventory\ContainerInventory;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\network\mcpe\protocol\BlockEntityDataPacket;
-use pocketmine\network\mcpe\protocol\types\ContainerIds;
+use pocketmine\network\mcpe\protocol\BlockActorDataPacket;
 use pocketmine\Player;
 use practice\game\inventory\InventoryTask;
 use practice\game\inventory\menus\BaseMenu;
 use practice\game\inventory\menus\data\PracHolderData;
 use practice\PracticeCore;
-use practice\PracticeUtil;
 
 abstract class PracBaseInv extends ContainerInventory {
 
@@ -148,7 +146,7 @@ abstract class PracBaseInv extends ContainerInventory {
     protected function sendTileEntity(Player $player, Vector3 $pos, CompoundTag $tag) : void {
         $writer = new NetworkLittleEndianNBTStream();
         $tag->setString('id', $this->getTEId());
-        $pkt = new BlockEntityDataPacket();
+        $pkt = new BlockActorDataPacket();
         $pkt->x = $pos->x;
         $pkt->y = $pos->y;
         $pkt->z = $pos->z;

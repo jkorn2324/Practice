@@ -21,14 +21,16 @@ class ArenaHandler
 {
 
     private $configPath;
+
+    /* @var Config */
     private $config;
 
     private $closedArenas;
 
-    /* @var DuelArena[] */
+    /* @var DuelArena[]|array */
     private $duelArenas;
 
-    /* @var FFAArena[] */
+    /* @var FFAArena[]|array */
     private $ffaArenas;
 
     public function __construct() {
@@ -79,8 +81,9 @@ class ArenaHandler
         $ffaArenaKeys = array_keys($ffaKeys);
 
         foreach($ffaArenaKeys as $key) {
+            $key = strval($key);
             if($this->isFFAArenaFromConfig($key)) {
-                $arena = $this->getFFAArenaFromCfg($key);
+                $arena = $this->getFFAArenaFromConfig($key);
                 $this->ffaArenas[$key] = $arena;
             }
         }
@@ -90,8 +93,9 @@ class ArenaHandler
         $duelArenaKeys = array_keys($duelKeys);
 
         foreach($duelArenaKeys as $key) {
-            if($this->isDuelArenaFromCfg($key)){
-                $arena = $this->getDuelArenaFromCfg($key);
+            $key = strval($key);
+            if($this->isDuelArenaFromConfig($key)){
+                $arena = $this->getDuelArenaFromConfig($key);
                 $this->duelArenas[$key] = $arena;
             }
         }
@@ -237,7 +241,7 @@ class ArenaHandler
         return $result;
     }
 
-    private function getFFAArenaFromCfg(string $name) {
+    private function getFFAArenaFromConfig(string $name) {
 
         $ffaArenas = $this->getConfig()->get("ffa-arenas");
 
@@ -259,7 +263,14 @@ class ArenaHandler
                 $spawnArr = $arena["spawn"];
                 $level = $arena["level"];
 
-                $arenaSpawn = PracticeUtil::getPositionFromMap($spawnArr, $level);
+                $arenaSpawn = null;
+
+                if(PracticeUtil::isALevel($level))
+                    $arenaSpawn = PracticeUtil::getPositionFromMap($spawnArr, $level);
+                elseif (PracticeUtil::isALevel($level, false)) {
+                    PracticeUtil::loadLevel($level);
+                    $arenaSpawn = PracticeUtil::getPositionFromMap($spawnArr, $level);
+                }
 
                 $arenaBuild = boolval($canBuild);
 
@@ -268,15 +279,14 @@ class ArenaHandler
                 if(!is_null($arenaSpawn)) $foundArena = true;
             }
 
-            if($foundArena) {
+            if($foundArena)
                 $result = new FFAArena($name, $arenaBuild, $arenaSpawn, $arenaKit);
-            }
         }
         return $result;
     }
 
     private function isFFAArenaFromConfig(string $name) : bool {
-        return !is_null($this->getFFAArenaFromCfg($name));
+        return !is_null($this->getFFAArenaFromConfig($name));
     }
 
     public function isFFAArena(string $name) : bool {
@@ -292,7 +302,7 @@ class ArenaHandler
         return $result;
     }
 
-    private function getDuelArenaFromCfg(string $name) {
+    private function getDuelArenaFromConfig(string $name) {
 
         $duelArenas = $this->getConfig()->get("duel-arenas");
         $result = null;
@@ -348,8 +358,8 @@ class ArenaHandler
         return $result;
     }
 
-    private function isDuelArenaFromCfg(string $name) : bool {
-        return !is_null($this->getDuelArenaFromCfg($name));
+    private function isDuelArenaFromConfig(string $name) : bool {
+        return !is_null($this->getDuelArenaFromConfig($name));
     }
 
     public function isDuelArena(string $name) : bool {

@@ -12,14 +12,14 @@ namespace practice\game\entity;
 
 use pocketmine\entity\Entity;
 use pocketmine\entity\projectile\Projectile;
+use pocketmine\event\entity\EntityCombustByEntityEvent;
+use pocketmine\event\entity\EntityDamageByChildEntityEvent;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\item\Item;
-use pocketmine\level\particle\BubbleParticle;
-use pocketmine\level\particle\WaterParticle;
 use pocketmine\math\RayTraceResult;
-use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\protocol\EntityEventPacket;
+use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\Player;
-use pocketmine\utils\Random;
 use practice\PracticeCore;
 
 class FishingHook extends Projectile
@@ -39,8 +39,11 @@ class FishingHook extends Projectile
     public $rod = null;
     public $width = 0.2;
     public $height = 0.2;
-    public $gravity = 0.07;
-    public $drag = 0.03;
+    public $gravity = 0.08;
+    public $drag = 0.05;
+
+    /* @var Entity|null */
+    private $attachedEntity = null;
 
     public function onUpdate(int $currentTick): bool
     {
@@ -53,11 +56,15 @@ class FishingHook extends Projectile
         $update = parent::onUpdate($currentTick);
 
         if (!$this->isCollidedVertically) {
+            $this->motion->x *= 1.13;
+            $this->motion->z *= 1.13;
             $this->motion->y -= $this->gravity * -0.04;
             if($this->isUnderwater()) {
-                $difference = floatval($this->getWaterHeight() - $this->y);
+
                 $this->motion->z = 0;
                 $this->motion->x = 0;
+                $difference = floatval($this->getWaterHeight() - $this->y);
+
                 if($difference > 0.15) $this->motion->y += 0.1;
                 else $this->motion->y += 0.01;
             }
@@ -70,7 +77,9 @@ class FishingHook extends Projectile
             $update = true;
         }
 
-        if($this->isUnderwater()) {
+        if($this->isOnGround()) $this->motion->y = 0;
+
+        /*if($this->isUnderwater()) {
             if(!$this->attracted) {
                 if($this->waitChance > 0) {
                     $this->waitChance--;
@@ -103,6 +112,17 @@ class FishingHook extends Projectile
                     $this->waitChance = self::WAIT_CHANCE * 3;
                 }
             }
+        }*/
+
+        if($this->attachedEntity !== null) {
+
+            $pos = $this->attachedEntity->asPosition();
+
+            if($pos !== $this->getPosition()) {
+                $this->setPosition($pos->add(0, 1));
+            }
+
+            $this->setMotion($this->attachedEntity->getMotion());
         }
 
         $source = $this->getOwningEntity();
@@ -115,7 +135,7 @@ class FishingHook extends Projectile
 
             $kill = false;
 
-            if($source->distance($this) > 33)
+            if($source->distance($this) > 35)
                 $kill = true;
             elseif ($itemInHand->getId() !== Item::FISHING_ROD)
                 $kill = true;
@@ -152,7 +172,7 @@ class FishingHook extends Projectile
         return $result;
     }
 
-    public function fishBites() : void {
+    /*public function fishBites() : void {
         $this->broadcastEntityEvent(EntityEventPacket::FISH_HOOK_HOOK, 0, $this->getLevel()->getPlayers());
         $this->broadcastEntityEvent(EntityEventPacket::FISH_HOOK_BUBBLE, 0, $this->getLevel()->getPlayers());
         $this->broadcastEntityEvent(EntityEventPacket::FISH_HOOK_TEASE, 0, $this->getLevel()->getPlayers());
@@ -180,14 +200,14 @@ class FishingHook extends Projectile
             $result = $dist < 0.15;
         }
         return $result;
-    }
+    }*/
 
     public function reelLine() : void {
 
         $e = $this->getOwningEntity();
 
         if($e instanceof Player and $this->caught === true) {
-            $this->broadcastEntityEvent(EntityEventPacket::FISH_HOOK_TEASE, 0, $this->getLevel()->getPlayers());
+            $this->broadcastEntityEvent(ActorEventPacket::FISH_HOOK_TEASE, 0, $this->getLevel()->getPlayers());
         }
 
         if(!$this->closed) {
@@ -198,14 +218,27 @@ class FishingHook extends Projectile
 
     public function onHitEntity(Entity $entityHit, RayTraceResult $hitResult): void
     {
-        parent::onHitEntity($entityHit, $hitResult);
+        $damage = $this->getResultDamage();
 
-        $playerHandler = PracticeCore::getPlayerHandler();
+        $this->attachedEntity = $entityHit;
 
-        if($entityHit instanceof Player and $playerHandler->isPlayerOnline($entityHit->getPlayer())) {
-            $p = $playerHandler->getPlayer($entityHit->getPlayer());
-            if($p !== null and $p->isOnline())
-                $p->stopFishing(false, false);
+        if($damage >= 0){
+
+            if($this->getOwningEntity() === null){
+                $ev = new EntityDamageByEntityEvent($this, $entityHit, EntityDamageEvent::CAUSE_PROJECTILE, $damage);
+            }else{
+                $ev = new EntityDamageByChildEntityEvent($this->getOwningEntity(), $this, $entityHit, EntityDamageEvent::CAUSE_PROJECTILE, $damage);
+            }
+
+            $entityHit->attack($ev);
+
+            if($this->isOnFire()){
+                $ev = new EntityCombustByEntityEvent($this, $entityHit, 5);
+                $ev->call();
+                if(!$ev->isCancelled()){
+                    $entityHit->setOnFire($ev->getDuration());
+                }
+            }
         }
     }
 

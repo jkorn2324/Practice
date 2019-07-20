@@ -13,14 +13,14 @@ namespace practice;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\entity\Entity;
-use pocketmine\Player;
+//use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
 use practice\arenas\ArenaHandler;
 use practice\commands\advanced\ArenaCommand;
 use practice\commands\advanced\KitCommand;
 use practice\commands\advanced\MuteCommand;
-use practice\commands\advanced\PartyCommand;
+//use practice\commands\advanced\PartyCommand;
 use practice\commands\advanced\RankCommand;
 use practice\commands\advanced\ReportCommand;
 use practice\commands\advanced\StatsCommand;
@@ -45,6 +45,7 @@ use practice\game\items\ItemHandler;
 use practice\game\SetTimeDayTask;
 use practice\kits\KitHandler;
 use practice\manager\MysqlManager;
+use practice\misc\LoadLevelTask;
 use practice\parties\PartyManager;
 use practice\player\gameplay\ChatHandler;
 use practice\player\gameplay\ReportHandler;
@@ -137,19 +138,14 @@ class PracticeCore extends PluginBase
     public function onLoad() { $this->loadLevels(); }
 
     private function loadLevels() : void {
-        $worlds = PracticeUtil::str_indexOf("/plugins", $this->getDataFolder()) . "/worlds";
-        if(!is_dir($worlds)) {
-            return;
-        }
 
-        $files = scandir($worlds);
-        $server = $this->getServer();
-        foreach($files as $folderName) {
-            if(!is_dir($folderName)) {
-                continue;
-            }
+        $worlds = PracticeUtil::getLevelsFromFolder($this);
 
-            $server->loadLevel($folderName);
+        $size = count($worlds);
+
+        if($size > 0) {
+            foreach($worlds as $world)
+                PracticeUtil::loadLevel($world);
         }
     }
 

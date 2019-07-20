@@ -102,6 +102,7 @@ class PracticePlayer
      * @param int $input
      * @param string $deviceID
      * @param int $clientID
+     * @param string $deviceModel
      */
     public function __construct(Player $player, int $deviceOs, int $input, string $deviceID, int $clientID, string $deviceModel) {
 
@@ -560,7 +561,7 @@ class PracticePlayer
 
             $player = $this->getPlayer();
 
-            if($player !== null) {
+            if($player !== null and !$this->isFishing()) {
 
                 $tag = Entity::createBaseNBT($player->add(0.0, $player->getEyeHeight(), 0.0), $player->getDirectionVector(), floatval($player->yaw), floatval($player->pitch));
                 $rod = Entity::createEntity('FishingHook', $player->getLevel(), $tag, $player);
@@ -605,6 +606,7 @@ class PracticePlayer
                 }
             }
         }
+
         $this->fishing = null;
     }
 
@@ -1145,18 +1147,32 @@ class PracticePlayer
             if(!empty($addedContent))
                 $content = array_replace($content, $addedContent);
 
-            //if($isDuelForm === true) $content['ranked'] = $ranked;
-
             $exec = true;
 
             if($form instanceof SimpleForm) {
 
-                if($form->getTitle() === FormUtil::getFFAForm()->getTitle()) {
+                $title = $form->getTitle();
 
+                $ffaTitle = FormUtil::getFFAForm()->getTitle();
+
+                $ranked = null;
+
+                if(isset($addedContent['ranked']))
+                    $ranked = boolval($addedContent['ranked']);
+
+                $duelsTitle = FormUtil::getMatchForm()->getTitle();
+
+                if($ranked !== null)
+                    $duelsTitle = FormUtil::getMatchForm($ranked)->getTitle();
+
+                $size = -1;
+
+                if($title === $ffaTitle)
                     $size = count(PracticeCore::getArenaHandler()->getFFAArenas());
+                elseif ($title === $duelsTitle)
+                    $size = count(PracticeCore::getArenaHandler()->getDuelArenas());
 
-                    $exec = $size > 0;
-                }
+                $exec = $size > 0;
             }
 
             if($exec === true) {
