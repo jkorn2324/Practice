@@ -46,10 +46,10 @@ class ItemHandler
 
     private $buckets;
 
-    public function __construct()
+    public function __construct(PracticeCore $core)
     {
         $this->itemList = [];
-        $this->textures = new ItemTextures();
+        $this->textures = new ItemTextures($core);
 
         $this->potions = [
             'Water Bottle', 'Water Bottle', 'Water Bottle', 'Water Bottle', 'Water Bottle',

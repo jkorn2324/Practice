@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace practice\game\items;
 
+use practice\PracticeCore;
 use practice\PracticeUtil;
 
 class ItemTextures
@@ -17,10 +18,10 @@ class ItemTextures
 
     private $textures;
 
-    public function __construct()
+    public function __construct(PracticeCore $core)
     {
-        $path = substr(__DIR__, 0, strpos(__DIR__, "/src/"));
-        $contents = file($path . "/resources/items.txt");
+        $path = $core->getResourcesFolder();
+        $contents = file($path . "items.txt");
 
         $this->textures = [];
 

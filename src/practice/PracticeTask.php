@@ -38,7 +38,7 @@ class PracticeTask extends Task {
             TextFormat::AQUA . 'Find a bug on the server? Use ' . TextFormat::YELLOW . '/report bug' . TextFormat::AQUA . ' to notify the staff of bugs on the server.',
             TextFormat::AQUA . 'Is a staff abusing or doing any other misconduct? Use ' . TextFormat::YELLOW . '/report staff' . TextFormat::AQUA . ' to notify the owner of abusing staff.'
         ];
-        $this->updateLeaderboardsTime = PracticeUtil::minutesToTicks(20);
+        $this->updateLeaderboardsTime = (PracticeUtil::isMysqlEnabled() ? PracticeUtil::minutesToTicks(20) : PracticeUtil::secondsToTicks(5));
     }
 
     /**
@@ -57,7 +57,7 @@ class PracticeTask extends Task {
 
         if($currentTick % 20 === 0 and $currentTick !== 0) PracticeCore::getPartyManager()->updateInvites();
 
-        if($currentTick % $this->updateLeaderboardsTime === 0 and $currentTick !== 0 and !PracticeUtil::isMysqlEnabled()) PracticeCore::getPlayerHandler()->updateLeaderboards(true);
+        if($currentTick % $this->updateLeaderboardsTime === 0 and $currentTick !== 0 and !PracticeUtil::isMysqlEnabled()) PracticeCore::getPlayerHandler()->updateLeaderboards();
     }
 
     private function broadcastAnnouncement(int $currentTick) : void {

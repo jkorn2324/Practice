@@ -32,6 +32,8 @@ class PlayerHandler
 
     private $leaderboards;
 
+    private $server;
+
     public function __construct(PracticeCore $core)
     {
         $this->players = [];
@@ -39,50 +41,76 @@ class PlayerHandler
         $this->closedInventoryIDs = [];
         $this->leaderboards = [];
         $this->initFiles($core);
+        $this->server = $core->getServer();
     }
 
     private function initFiles(PracticeCore $core): void
     {
 
-        $this->playerFolderPath = $core->getDataFolder() . '/players';
+        $this->playerFolderPath = $core->getDataFolder() . 'players';
 
         if (!is_dir($this->playerFolderPath)) {
             mkdir($this->playerFolderPath);
         }
     }
 
-    public function updateLeaderboards(bool $message = false): void {
+    public function updateLeaderboards(): void {
 
         $result = [];
 
         $duelKits = PracticeCore::getKitHandler()->getDuelKitNames(true);
 
-        foreach ($duelKits as $name) {
+        $size = count($duelKits);
 
-            $uncoloredName = PracticeUtil::getUncoloredString($name);
+        for($i = 0; $i < $size; $i++)
+            $duelKits[$i] = TextFormat::clean($duelKits[$i]);
 
-            $leaderboard = $this->getLeaderboardsFrom($uncoloredName);
+        $mysqlEnabled = PracticeUtil::isMysqlEnabled();
 
-            $result[$uncoloredName] = $leaderboard;
+        if(!$mysqlEnabled) {
+
+            $task = new AsyncUpdateLeaderboards($this->playerFolderPath, PracticeUtil::isMysqlEnabled(), $duelKits);
+            $this->server->getAsyncPool()->submitTask($task);
+
+        } else {
+
+            foreach ($duelKits as $name) {
+
+                $uncoloredName = PracticeUtil::getUncoloredString($name);
+
+                $leaderboard = $this->getLeaderboardsFrom($uncoloredName);
+
+                $result[$uncoloredName] = $leaderboard;
+            }
+
+            $global = $this->getLeaderboardsFrom();
+
+            $result['global'] = $global;
+
+            $this->setLeaderboards($result);
         }
 
-        $global = $this->getLeaderboardsFrom();
+        //$this->leaderboards = $result;
 
-        $result['global'] = $global;
+        //$serverName = PracticeUtil::getName('server-name');
 
-        $this->leaderboards = $result;
-
-        $serverName = PracticeUtil::getName('server-name');
-
-        $msg = TextFormat::BOLD . TextFormat::DARK_GRAY . '[' . TextFormat::WHITE . 'Server' . TextFormat::DARK_GRAY . ']' . TextFormat::RESET . TextFormat::WHITE . ' Leaderboards are now updated.';
+        /*$msg = TextFormat::BOLD . TextFormat::DARK_GRAY . '[' . TextFormat::WHITE . 'Server' . TextFormat::DARK_GRAY . ']' . TextFormat::RESET . TextFormat::WHITE . ' Leaderboards are now updated.';
 
         if(PracticeUtil::str_contains('Operix', $serverName))
             $msg = TextFormat::BOLD . TextFormat::DARK_GRAY . '[' . TextFormat::LIGHT_PURPLE . 'Operix' . TextFormat::DARK_GRAY . ']' . TextFormat::RESET . TextFormat::LIGHT_PURPLE . ' Leaderboards are now updated.';
         elseif (PracticeUtil::str_contains('Mineceit', $serverName))
             $msg = TextFormat::BOLD . TextFormat::DARK_GRAY . '[' . TextFormat::DARK_PURPLE . 'Mineceit' . TextFormat::DARK_GRAY . ']' . TextFormat::RESET . TextFormat::DARK_PURPLE . ' Leaderboards are now updated.';
 
-        if($message === true) PracticeUtil::broadcastMsg($msg);
+        if($message === true) PracticeUtil::broadcastMsg($msg);*/
         //if($message === true) PracticeUtil::broadcastMsg(TextFormat::WHITE . '[' . TextFormat::LIGHT_PURPLE . 'Operix' . TextFormat::WHITE . ']' . TextFormat::BOLD . TextFormat::LIGHT_PURPLE . ' Leaderboards are now up to date.');
+    }
+
+    /**
+     * @param array $leaderboards
+     */
+    public function setLeaderboards(array $leaderboards) : void {
+        $this->leaderboards = $leaderboards;
+
     }
 
     public function getCurrentLeaderboards(): array
@@ -1071,6 +1099,7 @@ class PlayerHandler
                         unset($result[$i]);
                 }
             }
+
         } else {
 
             $leaderboard = PracticeCore::getMysqlHandler()->getLeaderboardsFrom($queue);

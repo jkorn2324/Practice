@@ -41,11 +41,11 @@ use practice\commands\basic\TeleportLevelCommand;
 use practice\duels\DuelHandler;
 use practice\duels\IvsIHandler;
 use practice\game\entity\FishingHook;
+use practice\game\entity\SplashPotion;
 use practice\game\items\ItemHandler;
 use practice\game\SetTimeDayTask;
 use practice\kits\KitHandler;
 use practice\manager\MysqlManager;
-use practice\misc\LoadLevelTask;
 use practice\parties\PartyManager;
 use practice\player\gameplay\ChatHandler;
 use practice\player\gameplay\ReportHandler;
@@ -90,6 +90,8 @@ class PracticeCore extends PluginBase
 
     public function onEnable() {
 
+        $this->loadLevels();
+
         $this->registerEntities();
 
         date_default_timezone_set("America/Los_Angeles");
@@ -113,7 +115,7 @@ class PracticeCore extends PluginBase
         if(!PracticeUtil::isMysqlEnabled())
             self::$playerHandler->updateLeaderboards();
 
-        self::$itemHandler = new ItemHandler();
+        self::$itemHandler = new ItemHandler($this);
         self::$rankHandler = new RankHandler();
         self::$chatHandler = new ChatHandler();
         self::$duelHandler = new DuelHandler();
@@ -303,6 +305,11 @@ class PracticeCore extends PluginBase
     }
 
     private function registerEntities() : void {
+        Entity::registerEntity(SplashPotion::class, false, ['ThrownPotion', 'minecraft:potion', 'thrownpotion']);
         Entity::registerEntity(FishingHook::class, false, ["FishingHook", "minecraft:fishing_hook"]);
+    }
+
+    public function getResourcesFolder() : string {
+        return $this->getFile() . 'resources/';
     }
 }

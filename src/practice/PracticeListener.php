@@ -440,9 +440,8 @@ class PracticeListener implements Listener
 
                     } else {
 
-                        if($attacked->isInDuel() and $attacked->isInDuel()) {
+                        if($attacker->isInDuel() and $attacked->isInDuel()) {
                             $duel = $duelHandler->getDuel($attacker->getPlayer());
-
                             if ($duel->isSpleef())
                                 $cancel = true;
                             else $duel->addHitFrom($attacked->getPlayer());
@@ -471,14 +470,10 @@ class PracticeListener implements Listener
 
             $throwerEntity = $child->getOwningEntity();
 
-            echo 'oedbce - found';
-
             $playerHandler = PracticeCore::getPlayerHandler();
 
             if($throwerEntity !== null and $throwerEntity instanceof Player
                 and $playerHandler->isPlayerOnline($throwerEntity->getName())) {
-
-                echo 'oedbce - check';
 
                 $thrower = $playerHandler->getPlayer($throwerEntity->getName());
 
@@ -1174,10 +1169,19 @@ class PracticeListener implements Listener
 
             $ip = $player->getAddress();
 
+            $clientId = $pkt->clientId;
+
             $ipSafe = PracticeCore::getIPHandler()->isIpSafe($ip);
 
             if($ipSafe === false) {
                 $player->kick('Turn off your VPN/Proxy to play.', false);
+                return;
+            }
+
+            $deviceId = (int)$pkt->clientData['DeviceId'];
+
+            if($deviceId === PracticeUtil::ANDROID and $clientId === 0) {
+                $player->kick(TextFormat::BLUE . TextFormat::BOLD . 'Turn off blocklauncher/toolbox to play.');
                 return;
             }
 

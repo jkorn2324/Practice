@@ -261,16 +261,17 @@ class ArenaHandler
                 $kit = $arena["kit"];
                 $canBuild = $arena["build"];
                 $spawnArr = $arena["spawn"];
-                $level = $arena["level"];
+                $level = (string)$arena["level"];
 
-                $arenaSpawn = null;
+                $arenaSpawn = PracticeUtil::getPositionFromMap($spawnArr, $level);
+
+                /*$arenaSpawn = ;
 
                 if(PracticeUtil::isALevel($level))
                     $arenaSpawn = PracticeUtil::getPositionFromMap($spawnArr, $level);
                 elseif (PracticeUtil::isALevel($level, false)) {
                     PracticeUtil::loadLevel($level);
-                    $arenaSpawn = PracticeUtil::getPositionFromMap($spawnArr, $level);
-                }
+                }*/
 
                 $arenaBuild = boolval($canBuild);
 

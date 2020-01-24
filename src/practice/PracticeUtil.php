@@ -1527,6 +1527,7 @@ class PracticeUtil
             $result['yaw'] = intval(round($pos->yaw));
             $result['pitch'] = intval(round($pos->pitch));
         }
+
         return $result;
     }
 
