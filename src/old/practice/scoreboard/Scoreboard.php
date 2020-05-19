@@ -1,44 +1,47 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: jkorn2324
+ * Date: 2019-05-10
+ * Time: 16:37
+ */
 
 declare(strict_types=1);
 
-
-namespace practice\scoreboard;
-
+namespace old\practice\scoreboard;
 
 use pocketmine\network\mcpe\protocol\RemoveObjectivePacket;
 use pocketmine\network\mcpe\protocol\SetDisplayObjectivePacket;
 use pocketmine\network\mcpe\protocol\SetScorePacket;
 use pocketmine\network\mcpe\protocol\types\ScorePacketEntry;
-use pocketmine\Player;
+use old\practice\player\PracticePlayer;
 
 class Scoreboard
 {
-    const SORT_ASCENDING = 0;
-    const SORT_DESCENDING = 1;
-    const SLOT_SIDEBAR = 'sidebar';
+
+    private const SORT_ASCENDING = 0;
+
+    private const SORT_DESCENDING = 1;
+
+    private const SLOT_SIDEBAR = "sidebar";
 
     /* @var ScorePacketEntry[] */
     private $lines;
 
-    /* @var string */
     private $title;
 
-    /* @var Player */
+    private $deviceOS;
+
     private $player;
 
-
-    public function __construct(Player $player, string $title)
-    {
+    public function __construct(PracticePlayer $player, string $title) {
+        $this->deviceOS = $player->getDevice();
+        $this->player = $player->getPlayer();
         $this->title = $title;
         $this->lines = [];
-        $this->player = $player;
         $this->initScoreboard();
     }
 
-    /**
-     * Initializes the scoreboard to the player.
-     */
     private function initScoreboard() : void {
 
         $pkt = new SetDisplayObjectivePacket();
@@ -46,32 +49,24 @@ class Scoreboard
         $pkt->displayName = $this->title;
         $pkt->sortOrder = self::SORT_ASCENDING;
         $pkt->displaySlot = self::SLOT_SIDEBAR;
-        $pkt->criteriaName = 'dummy';
-        $this->player->sendDataPacket($pkt);
+        $pkt->criteriaName = "dummy";
+
+        $this->player->dataPacket($pkt);
     }
 
-    /**
-     * Clears the scoreboard from the player.
-     */
     public function clearScoreboard() : void {
 
-        $pkt = new SetScorePacket();
+        $packet = new SetScorePacket();
 
-        $pkt->entries = $this->lines;
+        $packet->entries = $this->lines;
 
-        $pkt->type = SetScorePacket::TYPE_REMOVE;
+        $packet->type = SetScorePacket::TYPE_REMOVE;
 
-        $this->player->sendDataPacket($pkt);
+        $this->player->dataPacket($packet);
 
         $this->lines = [];
     }
 
-    /**
-     * @param int $id
-     * @param string $line
-     *
-     * Adds a line to the scoreboard.
-     */
     public function addLine(int $id, string $line) : void {
 
         $entry = new ScorePacketEntry();
@@ -86,7 +81,7 @@ class Scoreboard
 
             $pkt->type = SetScorePacket::TYPE_REMOVE;
 
-            $this->player->sendDataPacket($pkt);
+            $this->player->dataPacket($pkt);
 
             unset($this->lines[$id]);
         }
@@ -109,25 +104,9 @@ class Scoreboard
 
         $pkt->type = SetScorePacket::TYPE_CHANGE;
 
-        $this->player->sendDataPacket($pkt);
+        $this->player->dataPacket($pkt);
     }
 
-
-    /**
-     * @param int $id
-     *
-     * Adds an empty line to the scoreboard.
-     */
-    public function addEmptyLine(int $id): void {
-        $lineData = str_repeat(" ", $id);
-        $this->addLine($id, $lineData);
-    }
-
-    /**
-     * @param int $id
-     *
-     * Removes the line from the scoreboard.
-     */
     public function removeLine(int $id) : void {
 
         if(isset($this->lines[$id])) {
@@ -140,29 +119,22 @@ class Scoreboard
 
             $packet->type = SetScorePacket::TYPE_REMOVE;
 
-            $this->player->sendDataPacket($packet);
-
-            unset($this->lines[$id]);
+            $this->player->dataPacket($packet);
         }
+
+        unset($this->lines[$id]);
     }
 
-    /**
-     * Removes the scoreboard from the player.
-     */
     public function removeScoreboard() : void {
 
-        $packet = new RemoveObjectivePacket();
+        $pkt = new RemoveObjectivePacket();
 
-        $packet->objectiveName = $this->player->getName();
+        $pkt->objectiveName = $this->player->getName();
 
-        $this->player->sendDataPacket($packet);
+        $this->player->dataPacket($pkt);
     }
 
-    /**
-     * Resends the scoreboard to the player.
-     */
-    public function resendScoreboard() : void
-    {
+    public function resendScoreboard() : void {
         $this->initScoreboard();
     }
 }
