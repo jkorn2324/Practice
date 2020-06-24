@@ -9,11 +9,6 @@ use pocketmine\Player;
 
 class DuelScoreboardStatistic extends ScoreboardStatistic
 {
-    public function __construct(string $localizedName, callable $callable)
-    {
-        parent::__construct($localizedName, $callable);
-    }
-
     /**
      * @param Player $player
      * @return mixed

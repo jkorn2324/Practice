@@ -5,14 +5,25 @@ declare(strict_types=1);
 namespace practice\player;
 
 
+use pocketmine\entity\Attribute;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\player\PlayerQuitEvent;
+use pocketmine\level\Position;
+use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
+use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\SourceInterface;
 use pocketmine\Player;
 use pocketmine\utils\UUID;
+use practice\arenas\types\FFAArena;
 use practice\kits\Kit;
+use practice\player\info\ActionsInfo;
+use practice\player\info\ClicksInfo;
 use practice\player\info\ClientInfo;
 use practice\player\info\DisguiseInfo;
 use practice\player\info\SettingsInfo;
+use practice\PracticeUtil;
 use practice\scoreboard\ScoreboardData;
 
 class PracticePlayer extends Player
@@ -34,9 +45,15 @@ class PracticePlayer extends Player
     protected $disguiseInfo = null;
     /** @var SettingsInfo */
     protected $settingsInfo;
+    /** @var ActionsInfo */
+    protected $actionInfo;
+    /** @var ClicksInfo */
+    protected $clicksInfo;
 
     /** @var Kit|null */
     private $equippedKit = null;
+    /** @var FFAArena|null */
+    private $ffaArena = null;
 
     public function __construct(SourceInterface $interface, string $ip, int $port)
     {
@@ -52,6 +69,8 @@ class PracticePlayer extends Player
     private function initializeSettings(): void
     {
         $this->settingsInfo = new SettingsInfo();
+        $this->actionInfo = new ActionsInfo();
+        $this->clicksInfo = new ClicksInfo();
     }
 
     /**
@@ -70,6 +89,62 @@ class PracticePlayer extends Player
 
         $this->clientInfo = new ClientInfo($packet->clientData);
         return true;
+    }
+
+    /**
+     * @param PlayerActionPacket $packet
+     * @return bool
+     *
+     * Called when the player does an action.
+     */
+    public function handlePlayerAction(PlayerActionPacket $packet): bool
+    {
+        if(parent::handlePlayerAction($packet))
+        {
+            if(!$this->isOnline())
+            {
+                return true;
+            }
+
+            $this->actionInfo->setAction(
+                $packet->action,
+                new Position($packet->x, $packet->y, $packet->z, $this->getLevel())
+            );
+
+            if($this->actionInfo->didClickBlock() && $this->clientInfo !== null && !$this->clientInfo->isPE())
+            {
+                $this->onClick(true);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param InventoryTransactionPacket $packet
+     * @return bool
+     *
+     * Called when the player handles an inventory transaction.
+     */
+    public function handleInventoryTransaction(InventoryTransactionPacket $packet): bool
+    {
+        if(parent::handleInventoryTransaction($packet))
+        {
+            if(!$this->isOnline())
+            {
+                return true;
+            }
+
+            if($packet->transactionType === InventoryTransactionPacket::TYPE_USE_ITEM || $packet->transactionType === InventoryTransactionPacket::TYPE_USE_ITEM_ON_ENTITY)
+            {
+                $this->onClick(false);
+            }
+
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -100,6 +175,57 @@ class PracticePlayer extends Player
     }
 
     /**
+     * @param PlayerQuitEvent $event
+     *
+     * Called when the current player leaves the game.
+     */
+    public function onLeave(PlayerQuitEvent &$event): void
+    {
+        // TODO: Remove from queue, leave duel, etc...
+
+        if($this->ffaArena !== null)
+        {
+            $this->ffaArena->removePlayer();
+        }
+    }
+
+    /**
+     * @param int $currentTick
+     * @return bool
+     *
+     * Called to update the player's information.
+     */
+    public function onUpdate(int $currentTick): bool
+    {
+        if(parent::onUpdate($currentTick))
+        {
+            $tickDiff = $currentTick - $this->lastUpdate;
+            if($this->loggedIn && $this->spawned && $this->isAlive() && $tickDiff >= 1)
+            {
+                $this->updateInfo($currentTick);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param int $currentTick
+     *
+     * Updates the information of the player.
+     */
+    protected function updateInfo(int $currentTick): void
+    {
+        // Updates the scoreboard data accordingly.
+        if($currentTick % 2 === 0 && $this->scoreboardData !== null)
+        {
+            $this->scoreboardData->update();
+        }
+    }
+
+    /**
      * @return ScoreboardData|null
      *
      * Gets the player's scoreboard data.
@@ -127,6 +253,26 @@ class PracticePlayer extends Player
     public function getSettingsInfo(): SettingsInfo
     {
         return $this->settingsInfo;
+    }
+
+    /**
+     * @return ClicksInfo
+     *
+     * Gets the clicks info of the player.
+     */
+    public function getClicksInfo(): ClicksInfo
+    {
+        return $this->clicksInfo;
+    }
+
+    /**
+     * @param bool $clickedBlock
+     *
+     * Called when the player clicks.
+     */
+    protected function onClick(bool $clickedBlock): void
+    {
+        $this->clicksInfo->addClick($clickedBlock);
     }
 
     /**
@@ -201,6 +347,8 @@ class PracticePlayer extends Player
         $this->disguiseInfo = null;
     }
 
+
+
     /**
      * @param Kit $kit
      *
@@ -223,11 +371,159 @@ class PracticePlayer extends Player
     }
 
     /**
+     * @return Kit|null
+     *
+     * Gets the equipped kit for the player.
+     */
+    public function getEquippedKit(): ?Kit
+    {
+        return $this->equippedKit;
+    }
+
+    /**
+     * @param FFAArena $arena
+     *
+     * Sets the player in an FFA arena.
+     */
+    public function setInFFA(FFAArena $arena): void
+    {
+        // TODO: Check if player was in a queue and remove them.
+        // TODO: Check if player is in a duel.
+
+        if(!$this->isInLobby())
+        {
+            // TODO: Message saying player isn't in the lobby.
+            return;
+        }
+
+        $this->ffaArena = $arena;
+        $arena->teleportTo($this, true);
+    }
+
+    /**
+     * @return bool
+     *
+     * Sets the player in an FFA arena.
+     */
+    public function isInFFA(): bool
+    {
+        return $this->ffaArena !== null;
+    }
+
+    /**
+     * @return FFAArena|null
+     *
+     * Gets the current ffa arena that the player
+     * is in.
+     */
+    public function getFFAArena(): ?FFAArena
+    {
+        return $this->ffaArena;
+    }
+
+    /**
+     * @return bool
+     *
+     * Determines if the player is in the lobby.
+     */
+    public function isInLobby(): bool
+    {
+        return PracticeUtil::areLevelsEqual(
+            $this->getLevel(),
+            $this->server->getDefaultLevel()
+        );
+    }
+
+    /**
      * Clears the entire inventory of the player.
      */
     public function clearInventory(): void
     {
         $this->getInventory()->clearAll();
         $this->getArmorInventory()->clearAll();
+    }
+
+    /**
+     * @return float - The max saturation.
+     * Returns the maximum saturation of the player.
+     */
+    public function getMaxSaturation(): float
+    {
+        return $this->attributeMap->getAttribute(Attribute::SATURATION)->getMaxValue();
+    }
+
+    /**
+     * @param EntityDamageEvent $event
+     *
+     * Overrides the attack function by checking if the player can actually be damaged.
+     */
+    public function attack(EntityDamageEvent $event): void
+    {
+        if(!$this->canBeDamaged())
+        {
+            $event->setCancelled(true);
+            return;
+        }
+
+        parent::attack($event);
+
+        $this->onPostAttack($event);
+    }
+
+    /**
+     * @return bool
+     *
+     * Determines if the player can be damaged.
+     */
+    public function canBeDamaged(): bool
+    {
+        if($this->isCreative() || $this->isSpectator())
+        {
+            return false;
+        }
+
+        if($this->isInFFA())
+        {
+            return !$this->ffaArena->isWithinSpawn($this);
+        }
+
+        if($this->isInLobby())
+        {
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param EntityDamageEvent $event
+     *
+     * Called after the attack occurred.
+     */
+    protected function onPostAttack(EntityDamageEvent &$event): void
+    {
+        if($event->isCancelled())
+        {
+            return;
+        }
+
+        if(
+            $this->isEquipped()
+            && $event instanceof EntityDamageByEntityEvent
+            && ($damager = $event->getDamager()) !== null
+            && $damager instanceof PracticePlayer)
+        {
+            $speed = $event->getAttackCooldown();
+            if($damager->equippedKit !== null && $damager->equippedKit->equals($this->equippedKit))
+            {
+                $speed = $this->equippedKit->getCombatData()->getSpeed();
+            }
+
+            // Updates the attack speed.
+            $this->attackTime = $speed;
+
+            // TODO: Update combat data in FFA.
+        }
     }
 }

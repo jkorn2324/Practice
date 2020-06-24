@@ -7,7 +7,10 @@ namespace practice\scoreboard\display\statistics;
 
 use pocketmine\Player;
 use pocketmine\Server;
+use pocketmine\utils\TextFormat;
+use practice\arenas\types\FFAArena;
 use practice\player\PracticePlayer;
+use practice\PracticeCore;
 
 class ScoreboardStatistic
 {
@@ -21,7 +24,7 @@ class ScoreboardStatistic
     protected $value;
 
     /** @var Server */
-    private $server;
+    protected $server;
 
     public function __construct(string $localizedName, callable $callable)
     {
@@ -43,12 +46,11 @@ class ScoreboardStatistic
 
     /**
      * @param Player $player - The player input.
-     * @param mixed...$args - The extra arguments.
      * @return mixed
      *
      * Updates and gets the value of the statistic.
      */
-    public function getValue(Player $player, ...$args)
+    public function getValue(Player $player)
     {
         $callable = $this->callable;
         return $callable($player, $this->server);
@@ -62,8 +64,11 @@ class ScoreboardStatistic
     const STATISTIC_ONLINE = "online";
     const STATISTIC_IN_QUEUES = "in.queues";
     const STATISTIC_IN_FIGHTS = "in.fights";
+    const STATISTIC_IN_FFA = "in.ffa";
     const STATISTIC_PING = "ping";
     const STATISTIC_NAME = "name";
+    const STATISTIC_OS = "os";
+    const STATISTIC_RANK = "rank"; // TODO: Rank
     const STATISTIC_FFA_ARENA = "ffa.arena";
     const STATISTIC_FFA_ARENA_PLAYERS = "ffa.arena.players";
     const STATISTIC_OPPONENT = "opponent";
@@ -119,7 +124,7 @@ class ScoreboardStatistic
             {
                 if($player instanceof PracticePlayer)
                 {
-                    // TODO: Clicks per second.
+                    return $player->getClicksInfo()->getCps();
                 }
                 return 0;
             }
@@ -149,10 +154,17 @@ class ScoreboardStatistic
             self::STATISTIC_IN_FIGHTS,
             function(Player $player, Server $server)
             {
-
-
                 // TODO: In-Fights statistic.
                 return 0;
+            }
+        ));
+
+        // Registers the number of players in an FFA arena.
+        self::registerStatistic(new ScoreboardStatistic(
+            self::STATISTIC_IN_FFA,
+            function(Player $player, Server $server)
+            {
+                return PracticeCore::getArenaManager()->getNumPlayersInFFA();
             }
         ));
 
@@ -174,22 +186,47 @@ class ScoreboardStatistic
             }
         ));
 
-        // Registers the arena name to the player.
+        // Registers the statistic.
         self::registerStatistic(new ScoreboardStatistic(
-            self::STATISTIC_FFA_ARENA,
+            self::STATISTIC_OS,
             function(Player $player, Server $server)
             {
-                // TODO: Get the arena name.
-                return "";
+                if($player instanceof PracticePlayer)
+                {
+                    $clientInfo = $player->getClientInfo();
+                    if($clientInfo !== null)
+                    {
+                        return $clientInfo->getDeviceOS(true);
+                    }
+                }
+                return TextFormat::RED . "[Unknown]" . TextFormat::RESET;
             }
         ));
 
         // Registers the arena name to the player.
-        self::registerStatistic(new ScoreboardStatistic(
-            self::STATISTIC_FFA_ARENA_PLAYERS,
-            function(Player $player, Server $server)
+        self::registerStatistic(new FFAScoreboardStatistic(
+            self::STATISTIC_FFA_ARENA,
+            function(Player $player, Server $server, $arena)
             {
-                // TODO: Get the arena players.
+                if($arena instanceof FFAArena)
+                {
+                    return $arena->getName();
+                }
+
+                return "[Unknown]";
+            }
+        ));
+
+        // Registers the arena name to the player.
+        self::registerStatistic(new FFAScoreboardStatistic(
+            self::STATISTIC_FFA_ARENA_PLAYERS,
+            function(Player $player, Server $server, $arena)
+            {
+                if($arena instanceof FFAArena)
+                {
+                    return $arena->getPlayers();
+                }
+
                 return 0;
             }
         ));
@@ -197,8 +234,9 @@ class ScoreboardStatistic
         // Registers the opponent name.
         self::registerStatistic(new DuelScoreboardStatistic(
             self::STATISTIC_OPPONENT,
-            function(Player $player, Server $server)
+            function(Player $player, Server $server, $duel)
             {
+                // TODO
                 return "";
             }
         ));
@@ -206,8 +244,9 @@ class ScoreboardStatistic
         // Registers the opponent cps.
         self::registerStatistic(new DuelScoreboardStatistic(
             self::STATISTIC_OPPONENT_CPS,
-            function(Player $player, Server $server)
+            function(Player $player, Server $server, $duel)
             {
+                // TODO
                 return "";
             }
         ));
@@ -215,8 +254,9 @@ class ScoreboardStatistic
         // Registers the opponent ping.
         self::registerStatistic(new DuelScoreboardStatistic(
             self::STATISTIC_OPPONENT_PING,
-            function(Player $player, Server $server)
+            function(Player $player, Server $server, $duel)
             {
+                // TODO
                 return 0;
             }
         ));
@@ -224,8 +264,9 @@ class ScoreboardStatistic
         // Registers the duel arena name.
         self::registerStatistic(new DuelScoreboardStatistic(
             self::STATISTIC_DUEL_ARENA,
-            function(Player $player, Server $server)
+            function(Player $player, Server $server, $duel)
             {
+                // TODO
                 return "";
             }
         ));
@@ -233,7 +274,7 @@ class ScoreboardStatistic
         // Registers the duration statistic.
         self::registerStatistic(new DuelScoreboardStatistic(
             self::STATISTIC_DURATION,
-            function(Player $player, Server $server)
+            function(Player $player, Server $server, $duel)
             {
                 return "00:00";
             }
@@ -242,7 +283,7 @@ class ScoreboardStatistic
         // Register the spectator statistic.
         self::registerStatistic(new DuelScoreboardStatistic(
             self::STATISTIC_SPECTATORS,
-            function(Player $player, Server $server)
+            function(Player $player, Server $server, $duel)
             {
                 return 0;
             }
@@ -253,8 +294,12 @@ class ScoreboardStatistic
             self::STATISTIC_KIT,
             function(Player $player, Server $server)
             {
-                // TODO: Get kit.
-                return "";
+                if($player instanceof PracticePlayer && $player->isEquipped())
+                {
+                    return $player->getEquippedKit()->getName();
+                }
+
+                return TextFormat::RED . "[Unknown]" . TextFormat::RESET;
             }
         ));
 
@@ -263,7 +308,7 @@ class ScoreboardStatistic
             self::STATISTIC_RANKED,
             function(Player $player, Server $server)
             {
-                // TODO: Get ranked.
+                // TODO: Get ranked queue.
                 return "";
             }
         ));

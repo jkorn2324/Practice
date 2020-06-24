@@ -130,7 +130,6 @@ class Kit implements ISaved
             {
                 continue;
             }
-
             $items[$slot] = PracticeUtil::itemToArr($item);
         }
 
@@ -152,6 +151,22 @@ class Kit implements ISaved
             $this->combatData->getHeader() => $this->combatData->export(),
             "build" => $this->build
         ];
+    }
+
+    /**
+     * @param $kit - The kit variable.
+     * @return bool
+     *
+     * Determines if a kit equals another.
+     */
+    public function equals($kit): bool
+    {
+        if($kit instanceof Kit)
+        {
+            return $kit->getName() === $this->name;
+        }
+
+        return false;
     }
 
     /**

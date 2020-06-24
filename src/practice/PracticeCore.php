@@ -37,10 +37,10 @@ class PracticeCore extends PluginBase
 
         // Initializes the statistics.
         ScoreboardStatistic::init();
-
         self::$scoreboardDisplayManager = new ScoreboardDisplayManager($this);
-        self::$arenaManager = new ArenaManager($this);
+
         self::$kitManager = new KitManager($this);
+        self::$arenaManager = new ArenaManager($this);
 
         new PracticeListener($this);
     }

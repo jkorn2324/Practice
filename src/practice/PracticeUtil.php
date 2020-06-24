@@ -36,7 +36,9 @@ class PracticeUtil
         "{YELLOW}" => TextFormat::YELLOW,
         "{AQUA}" => TextFormat::AQUA,
         "{BOLD}" => TextFormat::BOLD,
-        "{WHITE}" => TextFormat::WHITE
+        "{WHITE}" => TextFormat::WHITE,
+        "{ITALIC}" => TextFormat::ITALIC,
+        "{UNDERLINE}" => TextFormat::UNDERLINE
     ];
 
     /**

@@ -107,11 +107,9 @@ class ScoreboardData
     }
 
     /**
-     * @param int $id
-     *
-     * Updates the line accordingly based on the index.
+     * Updates the scoreboard according to the lines that have been updated.
      */
-    public function updateLine(int $id): void
+    public function update(): void
     {
         if($this->scoreboard !== null && $this->scoreboardType !== self::SCOREBOARD_NONE) {
 
@@ -121,13 +119,29 @@ class ScoreboardData
                 return;
             }
 
-            $line = $scoreboardDisplayInfo->getLine($id);
-            if(!$line instanceof ScoreboardDisplayLine)
+            $index = 0; $length = count($scoreboardDisplayInfo->getLines());
+            while($index < $length)
             {
-                return;
-            }
+                $lineText = $this->scoreboard->getLine($index);
+                if($lineText === null || trim($lineText) === "")
+                {
+                    continue;
+                }
 
-            $this->scoreboard->addLine($id, $line->getText($this->player));
+                $updatedLine = $scoreboardDisplayInfo->getLine($index);
+                if(!$updatedLine instanceof ScoreboardDisplayLine)
+                {
+                    continue;
+                }
+
+                $uLineText = $updatedLine->getText($this->player);
+                if($uLineText !== $lineText)
+                {
+                    $this->scoreboard->addLine($index, $uLineText);
+                }
+
+                $index++;
+            }
         }
     }
 }

@@ -10,12 +10,11 @@ use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 use practice\misc\ISaved;
-use practice\misc\PositionArea;
+use practice\level\PositionArea;
 use practice\PracticeUtil;
 
 abstract class PracticeArena implements ISaved
 {
-
     const TYPE_FFA = 0;
     const TYPE_DUEL = 1;
 

@@ -9,7 +9,7 @@ use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use practice\arenas\PracticeArena;
 use practice\kits\Kit;
-use practice\misc\PositionArea;
+use practice\level\PositionArea;
 
 /**
  * Class DuelArena
@@ -94,7 +94,7 @@ class DuelArena extends PracticeArena
         return [
             "level" => $this->getLevel()->getName(),
             "kits" => $kits,
-            $this->positionArea->getHeader() => $this->positionArea->export()
+            "area" => $this->positionArea->export()
         ];
     }
 }

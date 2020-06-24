@@ -6,10 +6,11 @@ namespace practice\scoreboard\display;
 
 
 use pocketmine\Player;
+use practice\misc\IDisplayText;
 use practice\PracticeUtil;
 use practice\scoreboard\display\statistics\ScoreboardStatistic;
 
-class ScoreboardDisplayLine
+class ScoreboardDisplayLine implements IDisplayText
 {
 
     /** @var string */

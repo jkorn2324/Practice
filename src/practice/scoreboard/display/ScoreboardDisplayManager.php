@@ -22,7 +22,7 @@ class ScoreboardDisplayManager extends AbstractManager
         $this->resourcesScoreboardFolder = $core->getResourcesFolder() . "scoreboards";
         $this->scoreboardsFolder = $core->getDataFolder() . "scoreboards";
 
-        parent::__construct($core);
+        parent::__construct($core, false);
     }
 
     /**

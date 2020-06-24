@@ -118,7 +118,8 @@ class Scoreboard
      *
      * Adds an empty line to the scoreboard.
      */
-    public function addEmptyLine(int $id): void {
+    public function addEmptyLine(int $id): void
+    {
         $lineData = str_repeat(" ", $id);
         $this->addLine($id, $lineData);
     }
@@ -144,6 +145,22 @@ class Scoreboard
 
             unset($this->lines[$id]);
         }
+    }
+
+    /**
+     * @param int $id
+     * @return string|null
+     *
+     * Gets the line from the scoreboard.
+     */
+    public function getLine(int $id): ?string
+    {
+        if(isset($this->lines[$id]))
+        {
+            return $this->lines[$id]->customName;
+        }
+
+        return null;
     }
 
     /**

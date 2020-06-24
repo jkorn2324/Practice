@@ -37,7 +37,41 @@ scoreboard.spawn:
 	line-1: "Line 1"
 	line-2: "Online-Players"
 ```
+
 ---
+You can also add empty lines to the scoreboard by setting the content inside of them as "".
+
+**Example:**
+```yaml
+scoreboard.spawn:
+    line-1: "Line 1"
+    # Empty line on line 2.
+    line-2: ""
+    line-3: "Online-Players"
+```
+
+---
+You can add color to the scoreboard lines by providing the color name based on the list.
+
+**Example:**
+```yaml
+scoreboard.spawn:
+    line-1: "{BLUE}Line 1"
+    line-2: "{RED}Online-Players{RESET}"
+```
+Here is the list of all the colors you can use:
+
+`{BLUE} {GREEN} {RED} {DARK_RED} {DARK_BLUE} 
+{DARK_AQUA} {DARK_GREEN} {GOLD} {GRAY} {DARK_GRAY}
+{DARK_PURPLE} {LIGHT_PURPLE} {YELLOW} {AQUA}
+{BOLD} {WHITE}`
+
+More line effects:
+
+- `{RESET}` - Resets the colors of the text.
+- `{BOLD}` - Makes the text bold.
+- `{ITALIC}` - Makes the text italicized.
+- `{UNDERLINE}` - Underlines the text.
 
 ## Displaying Statistics
 There are certain statistics that you can display on a given line by using a set of curly-braces and defining the type of statistic that you want to display.
@@ -62,12 +96,15 @@ This provides the list of all the types of statistics that the scoreboard can di
 - `{online}` - Displays the current number of players on the server.
 - `{in.queues}` - Displays the current number of players in a queue for a duel.
 - `{in.fights}` - Displays the current number of players in a duel.
+- `{in.ffa}` - Displays the current number of players in all the ffa arenas.
 - `{ping}` - Displays the current player's ping.
 - `{name}` - Displays the current player's name.
+- `{os}` - Displays the device operating system.
 ---
 
 **scoreboard.spawn.queue:**
-- `{queue}` - Displays the current queue the player is in.
+- `{ranked}` - Displays whether or not the queue the player is in is ranked or not.
+- `{kit}` - Displays the kit the player is queued for.
 
 ---
 **scoreboard.ffa:**

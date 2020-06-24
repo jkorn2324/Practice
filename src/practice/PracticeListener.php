@@ -8,6 +8,7 @@ namespace practice;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\event\player\PlayerJoinEvent;
+use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\Server;
 use practice\player\PracticePlayer;
 
@@ -42,8 +43,23 @@ class PracticeListener implements Listener
      *
      * Called when the player first joins the server.
      */
-    public function onJoin(PlayerJoinEvent $event)
+    public function onJoin(PlayerJoinEvent $event): void
     {
         // TODO
+    }
+
+    /**
+     * @param PlayerQuitEvent $event
+     *
+     * Called when the player quits the game.
+     */
+    public function onQuit(PlayerQuitEvent $event): void
+    {
+        $player = $event->getPlayer();
+
+        if($player instanceof PracticePlayer)
+        {
+            $player->onLeave($event);
+        }
     }
 }

@@ -6,6 +6,7 @@ namespace practice\arenas;
 
 
 use pocketmine\Server;
+use practice\arenas\types\FFAArena;
 use practice\misc\PracticeAsyncTask;
 use practice\PracticeCore;
 use practice\misc\AbstractManager;
@@ -24,7 +25,7 @@ class ArenaManager extends AbstractManager
         $this->arenaFolder = $core->getDataFolder() . "arenas/";
         $this->arenas = [];
 
-        parent::__construct($core);
+        parent::__construct($core, false);
     }
 
     /**
@@ -90,5 +91,24 @@ class ArenaManager extends AbstractManager
     {
         // TODO: Implement getArena() method.
         return null;
+    }
+
+    /**
+     * @return int
+     *
+     * Gets the number of players playing in all FFA arenas.
+     */
+    public function getNumPlayersInFFA(): int
+    {
+        $output = 0;
+
+        foreach($this->arenas as $arena)
+        {
+            if($arena instanceof FFAArena)
+            {
+                $output += $arena->getPlayers();
+            }
+        }
+        return $output;
     }
 }

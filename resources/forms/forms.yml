@@ -1,0 +1,34 @@
+
+# The form that contains the text display for
+# the form settings menu.
+form.settings.menu:
+  title: "Settings Form"
+  description: "Form to edit the player settings."
+  buttons:
+    settings.basic: "Basic Settings"
+    settings.builder: "Builder Mode Settings"
+
+# The form that contains the text display for
+# the basic settings menu.
+form.settings.basic:
+  title: "Basic Settings"
+  description: "Form to edit your basic settings."
+  toggles:
+    queues.peOnly:
+      enabled: "Enable PE Only Queues"
+      disabled: "Disable PE Only Queues"
+    player.disguise:
+      enabled: "Enable Disguise"
+      disabled: "Disable Disguise"
+
+# The form that contains the text display for
+# the builder mode menu.
+form.settings.builder:
+  title: "Builder Mode Settings"
+  description: "Form to edit your builder mode settings."
+  toggles:
+    builder.mode:
+      enabled: "Enable Builder Mode"
+      disabled: "Disable Builder Mode"
+  labels:
+    enabled.worlds: "Select the worlds that you want to enable/disable builder mode for:"

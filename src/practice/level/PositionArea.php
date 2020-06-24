@@ -2,24 +2,20 @@
 
 declare(strict_types=1);
 
-namespace practice\misc;
+namespace practice\level;
 
 
 use pocketmine\math\Vector3;
+use practice\misc\ISaved;
 use practice\PracticeUtil;
 
-class PositionArea implements ISavedHeader
+class PositionArea implements ISaved, IArea
 {
-
-    /** @var string */
-    protected $headerName = "area";
-
     /** @var Vector3 */
     public $vertex1, $vertex2;
 
-    public function __construct(Vector3 $vertex1, Vector3 $vertex2, string $name = "area")
+    public function __construct(Vector3 $vertex1, Vector3 $vertex2)
     {
-        $this->headerName = $name;
         $this->vertex1 = $vertex1;
         $this->vertex2 = $vertex2;
     }
@@ -46,7 +42,7 @@ class PositionArea implements ISavedHeader
      */
     public function isWithinArea(Vector3 $position): bool
     {
-        $topVertex = $this->topVertex(); $bottomVertex = $this->bottomEdge();
+        $topVertex = $this->topVertex(); $bottomVertex = $this->bottomVertex();
         return $position->x >= $bottomVertex->x && $position->x <= $topVertex->x
             && $position->y >= $bottomVertex->y && $position->y <= $topVertex->y
             && $position->z >= $bottomVertex->z && $position->z <= $topVertex->z;
@@ -71,7 +67,7 @@ class PositionArea implements ISavedHeader
      *
      * Gets the bottom vertex in the area.
      */
-    public function bottomEdge(): Vector3
+    public function bottomVertex(): Vector3
     {
         $x = $this->vertex1->x < $this->vertex2->x ? $this->vertex1->x : $this->vertex2->x;
         $y = $this->vertex1->y < $this->vertex2->y ? $this->vertex1->y : $this->vertex2->y;
@@ -94,24 +90,30 @@ class PositionArea implements ISavedHeader
     }
 
     /**
-     * Gets the header of the variable being saved.
-     * @return string - The header.
-     */
-    public function getHeader()
-    {
-        return $this->headerName;
-    }
-
-    /**
-     * @param string $name - The area name.
      * @param array $data - The area data.
      * @return PositionArea|null
      *
      * Decodes the position area.
      */
-    public static function decode(string $name, array $data): ?PositionArea
+    public static function decode(array $data): ?PositionArea
     {
-        // TODO: Implement function.
+        if(isset($data["vertex1"], $data["vertex2"]))
+        {
+            $vertex1 = PracticeUtil::arrToVec3($data["vertex1"]);
+            $vertex2 = PracticeUtil::arrToVec3($data["vertex2"]);
+
+            // Checks if the vertexes are null.
+            if($vertex1 === null || $vertex2 === null)
+            {
+                return null;
+            }
+
+            return new PositionArea(
+                $vertex1,
+                $vertex2
+            );
+        }
+
         return null;
     }
 }

@@ -27,7 +27,7 @@ class KitManager extends AbstractManager
         $this->kits = [];
         $this->deletedKits = [];
 
-        parent::__construct($core);
+        parent::__construct($core, true);
     }
 
     /**
