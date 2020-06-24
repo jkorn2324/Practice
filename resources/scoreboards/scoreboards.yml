@@ -1,0 +1,48 @@
+# ----------------------------------------------------------------
+#         This file Contains the Scoreboards Information.
+# ----------------------------------------------------------------
+#
+# IF YOU HAVEN'T READ THE README.MD FILE IN THE SCOREBOARDS FOLDER,
+# READ IT BEFORE YOU MAKE ADDITIONS/DELETIONS IN THIS FILE.
+
+# The spawn scoreboard if player isn't in a queue.
+scoreboard.spawn.default:
+  line-1: " Online: {online} "
+  line-2: ""
+  line-3: " Ping: {ping} "
+  line-4: ""
+  line-5: " Github @jkorn2324 "
+
+# The spawn scoreboard if player is in a queue.
+scoreboard.spawn.queue:
+  line-1: " Online: {online} "
+  line-2: ""
+  line-3: " Ping: {ping} "
+  line-4: ""
+  line-5: " Queue: "
+  line-6: " {ranked} {kit} "
+  line-7: ""
+  line-8: " Github @jkorn2324 "
+
+# The ffa scoreboard.
+scoreboard.ffa:
+  line-1: " Arena: {arena} "
+  line-2: ""
+  line-3: " Ping: {ping} "
+  line-4: " CPS: {cps} "
+  line-5: ""
+  line-6: " Github @jkorn2324 "
+
+# The duel scoreboard.
+scoreboard.duel.player:
+  line-1: " Opponent: {opponent} "
+  line-2: " Duration: {duration} "
+  line-3: ""
+  line-4: " Github @jkorn2324 "
+
+# The duel spectator scoreboard.
+scoreboard.duel.spectator:
+  line-1: " Duration: {duration} "
+  line-2: " Game: {ranked} {kit} "
+  line-3: ""
+  line-4: " Github @jkorn2324 "

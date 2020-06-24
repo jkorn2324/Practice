@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace practice\utils;
+namespace practice\misc;
 
 
 use pocketmine\Server;

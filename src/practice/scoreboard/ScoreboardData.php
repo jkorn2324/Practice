@@ -6,11 +6,17 @@ namespace practice\scoreboard;
 
 
 use pocketmine\Player;
+use practice\PracticeCore;
+use practice\scoreboard\display\ScoreboardDisplayLine;
 
 class ScoreboardData
 {
 
-    const SCOREBOARD_SPAWN = "scoreboard.spawn";
+    const SCOREBOARD_SPAWN_DEFAULT = "scoreboard.spawn.default";
+    const SCOREBOARD_SPAWN_QUEUE = "scoreboard.spawn.queue";
+    const SCOREBOARD_FFA = "scoreboard.ffa";
+    const SCOREBOARD_DUEL_PLAYER = "scoreboard.duel.player";
+    const SCOREBOARD_DUEL_SPECTATOR = "scoreboard.duel.spectator";
     const SCOREBOARD_NONE = "scoreboard.none";
 
     /** @var string */
@@ -38,12 +44,38 @@ class ScoreboardData
      */
     public function setScoreboard(string $type): void {
 
-        switch($type)
+        if($type === self::SCOREBOARD_NONE)
         {
-            case self::SCOREBOARD_SPAWN:
-                // TODO
-                break;
+            $this->removeScoreboard();
+            $this->scoreboardType = $type;
+            return;
         }
+
+        if($this->scoreboard instanceof Scoreboard)
+        {
+            $this->scoreboard->clearScoreboard();
+        }
+        else
+        {
+            // TODO: Get title.
+            $this->scoreboard = new Scoreboard($this->player, "Practice");
+        }
+
+        $displayInfo = PracticeCore::getScoreboardDisplayManager()->getDisplayInfo($type);
+        if(!$displayInfo instanceof ScoreboardDisplayInformation)
+        {
+            $this->removeScoreboard();
+            $this->scoreboardType = self::SCOREBOARD_NONE;
+            return;
+        }
+
+        $lines = $displayInfo->getLines();
+        foreach($lines as $index => $line)
+        {
+            $this->scoreboard->addLine($index, $line->getText($this->player));
+        }
+
+        $this->scoreboardType = $type;
     }
 
     /**
@@ -76,14 +108,26 @@ class ScoreboardData
 
     /**
      * @param int $id
-     * @param string $line
      *
-     * Updates the line accordingly.
+     * Updates the line accordingly based on the index.
      */
-    public function updateLine(int $id, string $line): void
+    public function updateLine(int $id): void
     {
         if($this->scoreboard !== null && $this->scoreboardType !== self::SCOREBOARD_NONE) {
-            $this->scoreboard->addLine($id, $line);
+
+            $scoreboardDisplayInfo = PracticeCore::getScoreboardDisplayManager()->getDisplayInfo($this->scoreboardType);
+            if(!$scoreboardDisplayInfo instanceof ScoreboardDisplayInformation)
+            {
+                return;
+            }
+
+            $line = $scoreboardDisplayInfo->getLine($id);
+            if(!$line instanceof ScoreboardDisplayLine)
+            {
+                return;
+            }
+
+            $this->scoreboard->addLine($id, $line->getText($this->player));
         }
     }
 }
