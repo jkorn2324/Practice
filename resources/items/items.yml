@@ -1,0 +1,19 @@
+# The file that handles the display of the items in the server.
+
+# The item that displays the play menu.
+item.play.menu:
+  item.info:
+    id: 399
+    metadata: 0
+  item.display:
+    name: "Play Games"
+    lore: "Tap on this item to open the play menu!"
+
+# The item that opens the player settings.
+item.player.settings:
+  item.info:
+    id: 345
+    metadata: 0
+  item.display:
+    name: "Player Settings"
+    lore: "Tap on this item to open your settings!"

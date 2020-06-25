@@ -7,9 +7,13 @@ namespace practice;
 
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerCreationEvent;
+use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\Server;
+use practice\items\PracticeItem;
+use practice\player\info\ClicksInfo;
+use practice\player\info\ClientInfo;
 use practice\player\PracticePlayer;
 
 class PracticeListener implements Listener
@@ -57,9 +61,38 @@ class PracticeListener implements Listener
     {
         $player = $event->getPlayer();
 
-        if($player instanceof PracticePlayer)
-        {
+        if ($player instanceof PracticePlayer) {
             $player->onLeave($event);
+        }
+    }
+
+    /**
+     * @param PlayerInteractEvent $event
+     *
+     * Called when the player interacts with an item.
+     */
+    public function onInteract(PlayerInteractEvent $event): void
+    {
+        $player = $event->getPlayer();
+
+        if ($player !== null && $player instanceof PracticePlayer) {
+            $clientInfo = $player->getClientInfo();
+            $item = $event->getItem();
+
+            if (($action = $event->getAction()) === PlayerInteractEvent::RIGHT_CLICK_BLOCK && $clientInfo instanceof ClientInfo && $clientInfo->isPE()) {
+                $player->getClicksInfo()->addClick(true);
+            }
+
+            if (
+                ($actionItem = PracticeCore::getItemManager()->getPracticeItem($item)) !== null
+                && $actionItem instanceof PracticeItem
+            ) {
+                $event->setCancelled($actionItem->execute($player));
+            }
+            else
+            {
+                // TODO: Tap items.
+            }
         }
     }
 }

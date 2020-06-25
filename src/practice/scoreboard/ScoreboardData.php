@@ -107,7 +107,7 @@ class ScoreboardData
     }
 
     /**
-     * Updates the scoreboard according to the lines that have been updated.
+     * Updates the scoreboard according to the lines are different.
      */
     public function update(): void
     {

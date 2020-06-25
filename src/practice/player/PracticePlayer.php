@@ -6,6 +6,7 @@ namespace practice\player;
 
 
 use pocketmine\entity\Attribute;
+use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\player\PlayerQuitEvent;
@@ -23,6 +24,7 @@ use practice\player\info\ClicksInfo;
 use practice\player\info\ClientInfo;
 use practice\player\info\DisguiseInfo;
 use practice\player\info\SettingsInfo;
+use practice\player\info\StatsInfo;
 use practice\PracticeUtil;
 use practice\scoreboard\ScoreboardData;
 
@@ -49,6 +51,8 @@ class PracticePlayer extends Player
     protected $actionInfo;
     /** @var ClicksInfo */
     protected $clicksInfo;
+    /** @var StatsInfo|null */
+    protected $statsInfo = null;
 
     /** @var Kit|null */
     private $equippedKit = null;
@@ -156,6 +160,13 @@ class PracticePlayer extends Player
     {
         // Extracts the information from the data & initializes the settings.
         SettingsInfo::extract($data, $this->settingsInfo);
+        StatsInfo::extract($data, $this->statsInfo);
+
+        // Enables the player's disguise.
+        if(isset($data["disguised"]) && (bool)$data["disguised"])
+        {
+            $this->enableDisguise();
+        }
 
         $this->scoreboardData = new ScoreboardData($this, $this->settingsInfo->isScoreboardEnabled() ? ScoreboardData::SCOREBOARD_SPAWN_DEFAULT : ScoreboardData::SCOREBOARD_NONE);
     }
@@ -263,6 +274,16 @@ class PracticePlayer extends Player
     public function getClicksInfo(): ClicksInfo
     {
         return $this->clicksInfo;
+    }
+
+    /**
+     * @return StatsInfo|null
+     *
+     * Gets the statistics information of the player.
+     */
+    public function getStatsInfo(): ?StatsInfo
+    {
+        return $this->statsInfo;
     }
 
     /**
@@ -524,6 +545,48 @@ class PracticePlayer extends Player
             $this->attackTime = $speed;
 
             // TODO: Update combat data in FFA.
+        }
+    }
+
+    /**
+     * @param Entity $attacker - The attacker.
+     * @param float $damage - The damage accordingly.
+     * @param float $x - The x knockback
+     * @param float $z
+     * @param float $base
+     *
+     * Gives knockback to the player.
+     */
+    public function knockBack(Entity $attacker, float $damage, float $x, float $z, float $base = 0.4): void
+    {
+        $xzKb = $base; $yKb = $base;
+        if($attacker instanceof PracticePlayer && $attacker->isEquipped() && $attacker->getEquippedKit()->equals($this->equippedKit))
+        {
+            $xzKb = ($combatData = $this->equippedKit->getCombatData())->getXZ();
+            $yKb = $combatData->getY();
+        }
+
+        $f = sqrt($x * $x + $z * $z);
+        if($f <= 0){
+            return;
+        }
+        if(mt_rand() / mt_getrandmax() > $this->getAttributeMap()->getAttribute(Attribute::KNOCKBACK_RESISTANCE)->getValue()){
+            $f = 1 / $f;
+
+            $motion = clone $this->motion;
+
+            $motion->x /= 2;
+            $motion->y /= 2;
+            $motion->z /= 2;
+            $motion->x += $x * $f * $xzKb;
+            $motion->y += $yKb;
+            $motion->z += $z * $f * $xzKb;
+
+            if($motion->y > $yKb){
+                $motion->y = $yKb;
+            }
+
+            $this->setMotion($motion);
         }
     }
 }

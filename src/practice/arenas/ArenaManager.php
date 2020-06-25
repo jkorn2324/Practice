@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace practice\arenas;
 
 
-use pocketmine\Server;
+use practice\arenas\types\DuelArena;
 use practice\arenas\types\FFAArena;
-use practice\misc\PracticeAsyncTask;
 use practice\PracticeCore;
 use practice\misc\AbstractManager;
 
@@ -66,7 +65,11 @@ class ArenaManager extends AbstractManager
             $contents = json_decode(file_get_contents($ffaFile, true));
             foreach($contents as $arenaName => $data)
             {
-                // TODO: Decode ffa arenas.
+                $arena = FFAArena::decode($arenaName, $data);
+                if($arena !== null)
+                {
+                    $this->arenas[$arena->getName()] = $arena;
+                }
             }
         }
     }
@@ -78,7 +81,25 @@ class ArenaManager extends AbstractManager
      */
     public function save(bool $async = false): void
     {
-        // TODO: Implement save() method.
+        $ffaFile = $this->arenaFolder . "ffa.json";
+        $duelsFile = $this->arenaFolder . "duels.json";
+
+        $ffaArenas = []; $duelArenas = [];
+
+        foreach($this->arenas as $arena)
+        {
+            if($arena instanceof DuelArena)
+            {
+                $duelArenas[$arena->getName()] = $arena->export();
+            }
+            elseif ($arena instanceof FFAArena)
+            {
+                $ffaArenas[$arena->getName()] = $arena->export();
+            }
+        }
+
+        file_put_contents($ffaFile, json_encode($ffaArenas));
+        file_put_contents($duelsFile, json_encode($duelArenas));
     }
 
     /**
@@ -110,5 +131,23 @@ class ArenaManager extends AbstractManager
             }
         }
         return $output;
+    }
+
+    /**
+     * @return array|FFAArena[]
+     *
+     * Gets the FFA Arenas in the list.
+     */
+    public function getFFAArenas()
+    {
+        $arenas = [];
+        foreach($this->arenas as $arena)
+        {
+            if($arena instanceof FFAArena)
+            {
+                $arenas[] = $arena;
+            }
+        }
+        return $arenas;
     }
 }

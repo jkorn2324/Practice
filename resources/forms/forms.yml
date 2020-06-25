@@ -5,8 +5,12 @@ form.settings.menu:
   title: "Settings Form"
   description: "Form to edit the player settings."
   buttons:
-    settings.basic: "Basic Settings"
-    settings.builder: "Builder Mode Settings"
+    settings.basic:
+      top.text: " Basic Settings "
+      bottom.text: ""
+    settings.builder:
+      top.text: " Builder Mode Settings"
+      bottom.text: ""
 
 # The form that contains the text display for
 # the basic settings menu.
@@ -20,6 +24,12 @@ form.settings.basic:
     player.disguise:
       enabled: "Enable Disguise"
       disabled: "Disable Disguise"
+    scoreboard.display:
+      enabled: "Enable Scoreboard"
+      disabled: "Disable Scoreboard"
+    tap.item:
+      enabled: "Enable Tap-Item"
+      disabled: "Disable Tap-Item"
 
 # The form that contains the text display for
 # the builder mode menu.
@@ -32,3 +42,13 @@ form.settings.builder:
       disabled: "Disable Builder Mode"
   labels:
     enabled.worlds: "Select the worlds that you want to enable/disable builder mode for:"
+
+# The form that contains the text display for
+# the Play ffa form menu.
+form.play.FFA:
+  title: "Play FFA"
+  description: "Select the arena that you want to play."
+  buttons:
+    select.arena.template:
+      top.text: " {ffa.arena} "
+      bottom.text: " Players: {ffa.arena.players} "

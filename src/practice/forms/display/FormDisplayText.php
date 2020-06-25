@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
 
 namespace practice\forms\display;
 
 
 use pocketmine\Player;
+use practice\forms\display\statistics\FormDisplayStatistic;
 use practice\misc\IDisplayText;
 use practice\PracticeUtil;
 
@@ -31,15 +33,16 @@ class FormDisplayText implements IDisplayText
 
     /**
      * @param Player $player
+     * @param mixed|null $args
      * @return string
      *
      * Gets the converted text.
      */
-    public function getText(Player $player): string
+    public function getText(Player $player, $args = null): string
     {
         $text = $this->text;
 
-        // TODO: Convert Form statistics.
+        FormDisplayStatistic::convert($text, $player, $args);
         PracticeUtil::convertMessageColors($text);
 
         return $text;

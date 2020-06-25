@@ -8,7 +8,7 @@ namespace practice\forms\display;
 use practice\misc\AbstractManager;
 use practice\PracticeCore;
 
-class FormsDisplayManager extends AbstractManager
+class FormDisplayManager extends AbstractManager
 {
 
     /** @var FormDisplay[] */
@@ -17,6 +17,7 @@ class FormsDisplayManager extends AbstractManager
     const FORM_SETTINGS_MENU = "form.settings.menu";
     const FORM_SETTINGS_BASIC = "form.settings.basic";
     const FORM_SETTINGS_BUILDER_MODE = "form.settings.builder";
+    const FORM_PLAY_FFA = "form.play.FFA";
 
     /** @var string */
     private $resourcesFolder, $destinationFolder;
@@ -89,9 +90,7 @@ class FormsDisplayManager extends AbstractManager
                     $this->displayForms[$formDisplay->getLocalizedName()] = $formDisplay;
                 }
 
-            } catch (\Exception $e) {
-
-            }
+            } catch (\Exception $e) {}
         }
     }
 

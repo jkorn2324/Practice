@@ -96,7 +96,11 @@ class ScoreboardStatistic
             {
                 if($player instanceof PracticePlayer)
                 {
-                    // TODO: Gets the kills.
+                    $statistics = $player->getStatsInfo();
+                    if($statistics !== null)
+                    {
+                        return $statistics->getKills();
+                    }
                 }
 
                 return 0;
@@ -110,7 +114,11 @@ class ScoreboardStatistic
             {
                 if($player instanceof PracticePlayer)
                 {
-                    // TODO: Gets the deaths.
+                    $statistics = $player->getStatsInfo();
+                    if($statistics !== null)
+                    {
+                        return $statistics->getDeaths();
+                    }
                 }
 
                 return 0;
@@ -298,6 +306,8 @@ class ScoreboardStatistic
                 {
                     return $player->getEquippedKit()->getName();
                 }
+
+                // TODO: If player is in a queue, get the kit the player is queued for.
 
                 return TextFormat::RED . "[Unknown]" . TextFormat::RESET;
             }

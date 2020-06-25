@@ -170,6 +170,16 @@ class Kit implements ISaved
     }
 
     /**
+     * @return string
+     *
+     * Gets the texture of the kit.
+     */
+    public function getTexture(): string
+    {
+        return $this->texture;
+    }
+
+    /**
      * @param string $name
      * @param $data
      * @return Kit|null

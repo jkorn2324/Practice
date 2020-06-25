@@ -12,21 +12,26 @@ class SettingsInfo implements ISavedHeader
 
     const SCOREBOARD_ENABLED = "scoreboardEnabled";
     const PE_ONLY = "peOnly";
+    const TAP_ITEMS_ENABLED = "tapItems";
 
     /** @var bool */
     private $peOnly;
     /** @var bool */
     private $scoreboardEnabled;
+    /** @var bool */
+    private $tapItemsEnabled;
 
     /**
      * SettingsInfo constructor.
      * @param bool $peOnly - Determines whether the settings are pe only.
      * @param bool $scoreboardEnabled - Determines whether the scoreboard is enabled.
+     * @param bool $tapItemsEnabled - Determines whether the tap items are enabled or not (for pe players).
      */
-    public function __construct(bool $peOnly = false, bool $scoreboardEnabled = true)
+    public function __construct(bool $peOnly = false, bool $scoreboardEnabled = true, bool $tapItemsEnabled = true)
     {
         $this->peOnly = $peOnly;
         $this->scoreboardEnabled = $scoreboardEnabled;
+        $this->tapItemsEnabled = $tapItemsEnabled;
     }
 
     /**
@@ -70,6 +75,26 @@ class SettingsInfo implements ISavedHeader
     }
 
     /**
+     * @return bool
+     *
+     * Determines if tap items are enabled for the player.
+     */
+    public function isTapItemsEnabled(): bool
+    {
+        return $this->tapItemsEnabled;
+    }
+
+    /**
+     * @param bool $enabled
+     *
+     * Sets tap items as enabled.
+     */
+    public function setTapItemsEnabled(bool $enabled): void
+    {
+        $this->tapItemsEnabled = $enabled;
+    }
+
+    /**
      * @return array - The exported settings.
      * Exports the settings info to an array.
      */
@@ -77,7 +102,8 @@ class SettingsInfo implements ISavedHeader
     {
         return [
             self::SCOREBOARD_ENABLED => $this->scoreboardEnabled,
-            self::PE_ONLY => ""
+            self::PE_ONLY => $this->peOnly,
+            self::TAP_ITEMS_ENABLED => $this->tapItemsEnabled
         ];
     }
 
@@ -100,7 +126,7 @@ class SettingsInfo implements ISavedHeader
     {
         if(isset($data[$header = "settings"]))
         {
-            $peOnly = false; $scoreboardEnabled = true;
+            $peOnly = false; $scoreboardEnabled = true; $tapItemsEnabled = true;
 
             $settings = $data[$header];
 
@@ -114,14 +140,20 @@ class SettingsInfo implements ISavedHeader
                 $peOnly = (bool)$settings[self::SCOREBOARD_ENABLED];
             }
 
+            if(isset($settings[self::TAP_ITEMS_ENABLED]))
+            {
+                $tapItemsEnabled = (bool)$settings[self::TAP_ITEMS_ENABLED];
+            }
+
             if($playerSettings instanceof SettingsInfo)
             {
                 $playerSettings->scoreboardEnabled = $scoreboardEnabled;
                 $playerSettings->peOnly = $peOnly;
+                $playerSettings->tapItemsEnabled = $tapItemsEnabled;
                 return;
             }
 
-            $playerSettings = new SettingsInfo($scoreboardEnabled, $peOnly);
+            $playerSettings = new SettingsInfo($scoreboardEnabled, $peOnly, $tapItemsEnabled);
             return;
         }
 

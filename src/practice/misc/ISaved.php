@@ -8,5 +8,5 @@ namespace practice\misc;
 interface ISaved
 {
 
-    function export(): array;
+    public function export(): array;
 }

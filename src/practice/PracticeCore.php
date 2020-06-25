@@ -10,6 +10,9 @@ use pocketmine\plugin\PluginBase;
 use practice\arenas\ArenaManager;
 use practice\entities\FishingHook;
 use practice\entities\SplashPotion;
+use practice\forms\display\FormDisplayManager;
+use practice\forms\display\statistics\FormDisplayStatistic;
+use practice\items\ItemManager;
 use practice\kits\KitManager;
 use practice\scoreboard\display\statistics\ScoreboardStatistic;
 use practice\scoreboard\ScoreboardDisplayManager;
@@ -25,6 +28,10 @@ class PracticeCore extends PluginBase
     private static $kitManager;
     /** @var ScoreboardDisplayManager */
     private static $scoreboardDisplayManager;
+    /** @var FormDisplayManager */
+    private static $formDisplayManager;
+    /** @var ItemManager */
+    private static $itemManager;
 
     /**
      * Called when the plugin enables.
@@ -34,15 +41,49 @@ class PracticeCore extends PluginBase
         self::$instance = $this;
 
         $this->initDataFolder();
+        $this->registerEntities();
 
         // Initializes the statistics.
         ScoreboardStatistic::init();
-        self::$scoreboardDisplayManager = new ScoreboardDisplayManager($this);
+        // self::$scoreboardDisplayManager = new ScoreboardDisplayManager($this);
+        PracticeUtil::initManager(
+            self::$scoreboardDisplayManager,
+            ScoreboardDisplayManager::class,
+            $this
+        );
 
-        self::$kitManager = new KitManager($this);
-        self::$arenaManager = new ArenaManager($this);
+        // TODO: Initialize the display stats.
+        // self::$formDisplayManager = new FormDisplayManager($this);
+        FormDisplayStatistic::init();
+        PracticeUtil::initManager(
+            self::$formDisplayManager,
+            FormDisplayManager::class,
+            $this
+        );
 
+        // self::$kitManager = new KitManager($this);
+        PracticeUtil::initManager(
+            self::$kitManager,
+            KitManager::class,
+            $this
+        );
+
+        // self::$arenaManager = new ArenaManager($this);
+        PracticeUtil::initManager(
+            self::$arenaManager,
+            ArenaManager::class,
+            $this
+        );
+
+        PracticeUtil::initManager(
+            self::$itemManager,
+            ItemManager::class,
+            $this
+        );
+
+        // Initializes the practice listener & task.
         new PracticeListener($this);
+        new PracticeTask($this);
     }
 
     /**
@@ -53,6 +94,11 @@ class PracticeCore extends PluginBase
         if(self::$kitManager instanceof KitManager)
         {
             self::$kitManager->save();
+        }
+
+        if(self::$arenaManager instanceof ArenaManager)
+        {
+            self::$arenaManager->save();
         }
     }
 
@@ -105,6 +151,26 @@ class PracticeCore extends PluginBase
     public static function getScoreboardDisplayManager(): ScoreboardDisplayManager
     {
         return self::$scoreboardDisplayManager;
+    }
+
+    /**
+     * @return FormDisplayManager
+     *
+     * Gets the form display manager.
+     */
+    public static function getFormDisplayManager(): FormDisplayManager
+    {
+        return self::$formDisplayManager;
+    }
+
+    /**
+     * @return ItemManager
+     *
+     * Gets the item manager.
+     */
+    public static function getItemManager(): ItemManager
+    {
+        return self::$itemManager;
     }
 
     /**
