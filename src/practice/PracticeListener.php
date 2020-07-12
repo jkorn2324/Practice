@@ -49,7 +49,10 @@ class PracticeListener implements Listener
      */
     public function onJoin(PlayerJoinEvent $event): void
     {
-        // TODO
+        $player = $event->getPlayer();
+        if($player instanceof PracticePlayer) {
+            $player->onJoin($event);
+        }
     }
 
     /**

@@ -10,6 +10,7 @@ use pocketmine\math\Vector3;
 use practice\arenas\PracticeArena;
 use practice\kits\Kit;
 use practice\level\PositionArea;
+use practice\misc\ISaved;
 
 /**
  * Class DuelArena
@@ -17,7 +18,7 @@ use practice\level\PositionArea;
  *
  * Is a post-generated duel arena.
  */
-class DuelArena extends PracticeArena
+class DuelArena extends PracticeArena implements ISaved
 {
 
     /** @var array */
@@ -28,12 +29,17 @@ class DuelArena extends PracticeArena
     /** @var Vector3 */
     protected $p2SpawnPosition;
 
+    /** @var PositionArea */
+    private $arenaArea;
+
     public function __construct(string $name, Level $level, array $kits, Vector3 $p1SpawnPosition, Vector3 $p2SpawnPosition, PositionArea $area)
     {
-        parent::__construct($name, $level, $area);
+        parent::__construct($name, $level);
 
         $this->p1SpawnPosition = $p1SpawnPosition;
         $this->p2SpawnPosition = $p2SpawnPosition;
+
+        $this->arenaArea = $area;
 
         $this->kits = [];
 
@@ -94,7 +100,33 @@ class DuelArena extends PracticeArena
         return [
             "level" => $this->getLevel()->getName(),
             "kits" => $kits,
-            "area" => $this->positionArea->export()
+            "area" => $this->arenaArea->export()
         ];
     }
+
+    /**
+     * @param $object
+     * @return bool
+     *
+     * Determines if the two arenas are equivalent.
+     */
+    public function equals($object): bool
+    {
+        // TODO:
+        return false;
+    }
+
+    /**
+     * @param string $arenaName
+     * @param $data
+     * @return DuelArena|null
+     *
+     * Decodes the arena from the provided data & arena.
+     */
+    public static function decode(string $arenaName, array $data): ?DuelArena
+    {
+        // TODO: Decode the information from the data.
+        return null;
+    }
+
 }

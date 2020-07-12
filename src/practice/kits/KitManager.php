@@ -27,7 +27,7 @@ class KitManager extends AbstractManager
         $this->kits = [];
         $this->deletedKits = [];
 
-        parent::__construct($core, true);
+        parent::__construct($core, false);
     }
 
     /**
@@ -35,7 +35,7 @@ class KitManager extends AbstractManager
      *
      * @param bool $async
      */
-    protected function load(bool $async = true): void
+    protected function load(bool $async = false): void
     {
         if($async)
         {
@@ -102,6 +102,32 @@ class KitManager extends AbstractManager
             });
             return;
         }
+
+        // This section runs when its not async.
+
+        if(!is_dir($this->kitDirectory))
+        {
+            mkdir($this->kitDirectory);
+            return;
+        }
+
+        $files = scandir($this->kitDirectory);
+        if(count($files) <= 0)
+        {
+            return;
+        }
+
+        $kits = [];
+        foreach($files as $file) {
+            if(strpos($file, ".json") === false) {
+                continue;
+            }
+            $contents = json_decode(file_get_contents($this->kitDirectory . "/" . $file), true);
+            $name = str_replace(".json", "", $file);
+            $kits[$name] = $contents;
+        }
+
+        $this->postLoad($kits);
     }
 
     /**
@@ -127,7 +153,6 @@ class KitManager extends AbstractManager
     public function save(bool $async = false): void
     {
         if($async) {
-            // TODO: Async
             return;
         }
 

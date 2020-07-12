@@ -7,16 +7,22 @@ namespace practice\arenas;
 
 use practice\arenas\types\DuelArena;
 use practice\arenas\types\FFAArena;
+use practice\misc\ISaved;
 use practice\PracticeCore;
 use practice\misc\AbstractManager;
 
 class ArenaManager extends AbstractManager
 {
 
+    const ARENA_TYPE_ANY = "any";
+
+    const ARENA_TYPE_FFA = "ffa";
+    const ARENA_TYPE_DUELS = "duels";
+
     /** @var string */
     private $arenaFolder;
 
-    /** @var PracticeArena[] */
+    /** @var array */
     protected $arenas;
 
     public function __construct(PracticeCore $core)
@@ -24,7 +30,17 @@ class ArenaManager extends AbstractManager
         $this->arenaFolder = $core->getDataFolder() . "arenas/";
         $this->arenas = [];
 
+        $this->registerDefaultArenaTypes();
+
         parent::__construct($core, false);
+    }
+
+    /**
+     * Registers the default arena types.
+     */
+    private function registerDefaultArenaTypes(): void
+    {
+        // TODO:
     }
 
     /**
@@ -51,7 +67,11 @@ class ArenaManager extends AbstractManager
             $contents = json_decode(file_get_contents($duelsFile), true);
             foreach($contents as $arenaName => $data)
             {
-                // TODO: Decode duel arenas.
+                $arena = DuelArena::decode($arenaName, $data);
+                if($arena !== null)
+                {
+                    $this->arenas[self::ARENA_TYPE_DUELS][$arena->getLocalizedName()] = $arena;
+                }
             }
         }
 
@@ -68,7 +88,7 @@ class ArenaManager extends AbstractManager
                 $arena = FFAArena::decode($arenaName, $data);
                 if($arena !== null)
                 {
-                    $this->arenas[$arena->getName()] = $arena;
+                    $this->arenas[self::ARENA_TYPE_FFA][$arena->getLocalizedName()] = $arena;
                 }
             }
         }
@@ -84,33 +104,71 @@ class ArenaManager extends AbstractManager
         $ffaFile = $this->arenaFolder . "ffa.json";
         $duelsFile = $this->arenaFolder . "duels.json";
 
-        $ffaArenas = []; $duelArenas = [];
-
-        foreach($this->arenas as $arena)
+        foreach($this->arenas as $type => $data)
         {
-            if($arena instanceof DuelArena)
+            $arenas = $this->exportArenas($data);
+
+            switch($type)
             {
-                $duelArenas[$arena->getName()] = $arena->export();
-            }
-            elseif ($arena instanceof FFAArena)
-            {
-                $ffaArenas[$arena->getName()] = $arena->export();
+                case self::ARENA_TYPE_DUELS:
+                    file_put_contents($duelsFile, json_encode($arenas));
+                    break;
+                case self::ARENA_TYPE_FFA:
+                    file_put_contents($ffaFile, json_encode($arenas));
+                    break;
             }
         }
-
-        file_put_contents($ffaFile, json_encode($ffaArenas));
-        file_put_contents($duelsFile, json_encode($duelArenas));
     }
 
     /**
-     * @param string $name
+     * @param array $data
+     * @return array
+     *
+     * Exports the duel arenas from the data.
+     */
+    private function exportArenas(array $data)
+    {
+        $output = [];
+
+        foreach($data as $arena)
+        {
+            if($arena instanceof ISaved && $arena instanceof PracticeArena)
+            {
+                $output[$arena->getName()] = $arena->export();
+            }
+        }
+
+        return $output;
+    }
+
+    /**
+     * @param string &$name
+     * @param string &$type - Determines the type we are looking for.
      * @return PracticeArena|null
      *
      * Gets the arena from the name.
      */
-    public function getArena(string $name)
+    public function getArena(string $name, string $type = self::ARENA_TYPE_ANY)
     {
-        // TODO: Implement getArena() method.
+        if($type !== self::ARENA_TYPE_ANY) {
+            if (!isset($this->arenas[$type])) {
+                return null;
+            }
+            $arenas = $this->arenas[$type];
+            if (!isset($arenas[$localized = strtolower($name)])) {
+                return null;
+            }
+            return $arenas[$localized];
+        }
+
+        // Runs a for loop to try and get the arena based on type (uses recursion)
+        foreach($this->arenas as $arenaType => $data) {
+            $output = $this->getArena($name, $arenaType);
+            if($output !== null) {
+                return $output;
+            }
+        }
+
         return null;
     }
 
@@ -123,7 +181,8 @@ class ArenaManager extends AbstractManager
     {
         $output = 0;
 
-        foreach($this->arenas as $arena)
+        $ffaArenas = $this->arenas[self::ARENA_TYPE_FFA];
+        foreach($ffaArenas as $arena)
         {
             if($arena instanceof FFAArena)
             {
@@ -131,6 +190,27 @@ class ArenaManager extends AbstractManager
             }
         }
         return $output;
+    }
+
+    /**
+     * @param string $type
+     * @return PracticeArena[]
+     *
+     * Gets the arenas based on type.
+     */
+    public function getArenas(string $type = self::ARENA_TYPE_ANY)
+    {
+        if($type !== self::ARENA_TYPE_ANY)
+        {
+            if(!isset($this->arenas[$type]))
+            {
+                return [];
+            }
+
+            return $this->arenas[$type];
+        }
+
+        return $this->arenas;
     }
 
     /**

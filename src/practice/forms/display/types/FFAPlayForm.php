@@ -7,6 +7,8 @@ namespace practice\forms\display\types;
 
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
+use practice\arenas\ArenaManager;
+use practice\arenas\types\FFAArena;
 use practice\forms\display\FormDisplay;
 use practice\forms\display\FormDisplayText;
 use practice\forms\display\statistics\FormDisplayStatistic;
@@ -51,7 +53,6 @@ class FFAPlayForm extends FormDisplay
      */
     public function display(Player $player): void
     {
-        // TODO: Implement display() method.
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
 
@@ -60,18 +61,27 @@ class FFAPlayForm extends FormDisplay
         $form->setTitle($this->formData["title"]->getText($player));
         $form->setContent($this->formData["description"]->getText($player));
 
-        $arenas = PracticeCore::getArenaManager()->getFFAArenas();
+        $arenas = PracticeCore::getArenaManager()->getArenas(ArenaManager::ARENA_TYPE_FFA);
+        $inputArenas = [];
+
         foreach($arenas as $arena)
         {
-            $kit = $arena->getKit();
-            $texture = $kit instanceof Kit ? $kit->getTexture() : null;
+            if($arena instanceof FFAArena)
+            {
+                $kit = $arena->getKit();
+                $texture = $kit instanceof Kit ? $kit->getTexture() : null;
 
-            $form->addButton(
-                $this->formData["button.select.arena.template"]->getText($player, $arena),
-                $texture !== null ? 0 : -1,
-                $texture
-            );
+                $form->addButton(
+                    $this->formData["button.select.arena.template"]->getText($player, $arena),
+                    $texture !== null ? 0 : -1,
+                    $texture
+                );
+
+                $inputArenas[] = $arena;
+            }
         }
+
+        $form->setExtraData(["arenas" => $inputArenas]);
     }
 
     /**

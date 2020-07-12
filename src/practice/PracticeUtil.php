@@ -13,8 +13,12 @@ use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\level\Location;
 use pocketmine\math\Vector3;
+use pocketmine\Player;
+use pocketmine\Server;
 use pocketmine\utils\TextFormat;
+use pocketmine\utils\UUID;
 use practice\misc\AbstractManager;
+use practice\player\PracticePlayer;
 
 class PracticeUtil
 {
@@ -242,13 +246,18 @@ class PracticeUtil
     }
 
     /**
-     * @param Vector3 $vec3 - The input vector3.
-     * @return array
+     * @param Vector3|null $vec3 - The input vector3.
+     * @return array|null
      *
      * Converts the vector3 to an array.
      */
-    public static function vec3ToArr(Vector3 $vec3): array
+    public static function vec3ToArr(?Vector3 $vec3): ?array
     {
+        if($vec3 == null)
+        {
+            return null;
+        }
+
         $output = [
             "x" => $vec3->x,
             "y" => $vec3->y,
@@ -265,14 +274,14 @@ class PracticeUtil
     }
 
     /**
-     * @param array $input - The input array.
+     * @param $input - The input array.
      * @return Vector3|null
      *
      * Converts an array input to a Vector3.
      */
-    public static function arrToVec3(array $input): ?Vector3
+    public static function arrToVec3($input): ?Vector3
     {
-        if(isset($input["x"], $input["y"], $input["z"]))
+        if(is_array($input) && isset($input["x"], $input["y"], $input["z"]))
         {
             if(isset($input["pitch"], $input["yaw"]))
             {
@@ -304,5 +313,32 @@ class PracticeUtil
             /** @var AbstractManager $manager */
             $manager = new $class($core);
         }
+    }
+
+    /**
+     * @param string $uuid
+     * @return Player|null
+     *
+     * Gets the player from their server id.
+     */
+    public static function getPlayerFromServerID(string $uuid): ?Player
+    {
+        $players = Server::getInstance()->getOnlinePlayers();
+
+        foreach($players as $player)
+        {
+            if(!$player instanceof PracticePlayer)
+            {
+                continue;
+            }
+
+            $pUUID = $player->getServerID();
+            if($pUUID->toString() === $uuid)
+            {
+                return $player;
+            }
+        }
+
+        return null;
     }
 }

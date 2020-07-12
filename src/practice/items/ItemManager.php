@@ -16,6 +16,9 @@ class ItemManager extends AbstractManager
 {
     const ITEM_PLAY_FFA = "item.play.menu";
     const ITEM_PLAYER_SETTINGS = "item.player.settings";
+    const ITEM_QUEUE_LEAVE = "item.queue.leave";
+
+    const TYPE_LOBBY = "type.lobby";
 
     /** @var array|PracticeItem[] */
     private $items;
@@ -112,6 +115,12 @@ class ItemManager extends AbstractManager
                 return true;
             });
         }
+
+        if(isset($this->items[self::ITEM_QUEUE_LEAVE])) {
+            $this->items[self::ITEM_QUEUE_LEAVE]->setCallable(function (Player $player) {
+                // TODO
+            });
+        }
     }
 
     /**
@@ -131,6 +140,47 @@ class ItemManager extends AbstractManager
         }
 
         return null;
+    }
+
+    /**
+     * @param Player $player
+     * @param PracticeItem|null $item
+     *
+     * Sends an item to the player.
+     */
+    public function sendItem(Player $player, ?PracticeItem $item): void
+    {
+        if($item === null)
+        {
+            return;
+        }
+
+        $player->getInventory()->setItem($item->getSlot(), $item->getItem());
+    }
+
+    /**
+     * @param string $type
+     * @param Player $player
+     * @param bool $clearInventory
+     *
+     * Sends the items based on the given type [EX: TYPE_LOBBY]
+     */
+    public function sendItemsFromType(string $type, Player $player, bool $clearInventory = true): void
+    {
+        if($clearInventory)
+        {
+            $player->getInventory()->clearAll();
+            $player->getArmorInventory()->clearAll();
+        }
+
+        // TODO: Implement fully.
+        switch($type)
+        {
+            case self::TYPE_LOBBY:
+                $this->sendItem($player, $this->items[self::ITEM_PLAY_FFA]);
+                $this->sendItem($player, $this->items[self::ITEM_PLAYER_SETTINGS]);
+                break;
+        }
     }
 
     /**

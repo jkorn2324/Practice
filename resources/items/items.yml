@@ -8,6 +8,7 @@ item.play.menu:
   item.display:
     name: "Play Games"
     lore: "Tap on this item to open the play menu!"
+  item.slot: 0
 
 # The item that opens the player settings.
 item.player.settings:
@@ -17,3 +18,14 @@ item.player.settings:
   item.display:
     name: "Player Settings"
     lore: "Tap on this item to open your settings!"
+  item.slot: 1
+
+# The item that allows you to leave the duels queue.
+item.queue.leave:
+  item.info:
+    id: 2
+    metadata: 0
+  item.display:
+    name: "Leave Queue"
+    lore: "Tap on this item to leave your queue!"
+  item.slot: 8

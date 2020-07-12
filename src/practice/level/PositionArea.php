@@ -11,22 +11,31 @@ use practice\PracticeUtil;
 
 class PositionArea implements ISaved, IArea
 {
-    /** @var Vector3 */
-    public $vertex1, $vertex2;
+    /** @var Vector3|null */
+    public $vertex1 = null, $vertex2 = null;
 
-    public function __construct(Vector3 $vertex1, Vector3 $vertex2)
+    /**
+     * @return bool
+     *
+     * Determines if the position area is valid.
+     */
+    public function isValid(): bool
     {
-        $this->vertex1 = $vertex1;
-        $this->vertex2 = $vertex2;
+        return $this->vertex1 !== null && $this->vertex2 !== null;
     }
 
     /**
-     * @return Vector3
+     * @return Vector3|null
      *
      * Returns the very center position of the area.
      */
-    public function getCenter(): Vector3
+    public function getCenter(): ?Vector3
     {
+        if($this->vertex1 === null || $this->vertex2 === null)
+        {
+            return null;
+        }
+
         return new Vector3(
             ($this->vertex1->x + $this->vertex2->x) / 2,
             ($this->vertex1->y + $this->vertex2->y) / 2,
@@ -43,18 +52,28 @@ class PositionArea implements ISaved, IArea
     public function isWithinArea(Vector3 $position): bool
     {
         $topVertex = $this->topVertex(); $bottomVertex = $this->bottomVertex();
+        if(!$this->isValid())
+        {
+            return false;
+        }
+
         return $position->x >= $bottomVertex->x && $position->x <= $topVertex->x
             && $position->y >= $bottomVertex->y && $position->y <= $topVertex->y
             && $position->z >= $bottomVertex->z && $position->z <= $topVertex->z;
     }
 
     /**
-     * @return Vector3
+     * @return Vector3|null
      *
      * Gets the top vertex in the area.
      */
-    public function topVertex(): Vector3
+    public function topVertex(): ?Vector3
     {
+        if(!$this->isValid())
+        {
+            return null;
+        }
+
         $x = $this->vertex1->x > $this->vertex2->x ? $this->vertex1->x : $this->vertex2->x;
         $y = $this->vertex1->y > $this->vertex2->y ? $this->vertex1->y : $this->vertex2->y;
         $z = $this->vertex1->z > $this->vertex2->z ? $this->vertex1->z : $this->vertex2->z;
@@ -63,12 +82,17 @@ class PositionArea implements ISaved, IArea
     }
 
     /**
-     * @return Vector3
+     * @return Vector3|null
      *
      * Gets the bottom vertex in the area.
      */
-    public function bottomVertex(): Vector3
+    public function bottomVertex(): ?Vector3
     {
+        if(!$this->isValid())
+        {
+            return null;
+        }
+
         $x = $this->vertex1->x < $this->vertex2->x ? $this->vertex1->x : $this->vertex2->x;
         $y = $this->vertex1->y < $this->vertex2->y ? $this->vertex1->y : $this->vertex2->y;
         $z = $this->vertex1->z < $this->vertex2->z ? $this->vertex1->z : $this->vertex2->z;
@@ -91,29 +115,23 @@ class PositionArea implements ISaved, IArea
 
     /**
      * @param array $data - The area data.
-     * @return PositionArea|null
+     * @return PositionArea
      *
      * Decodes the position area.
      */
-    public static function decode(array $data): ?PositionArea
+    public static function decode(array $data)
     {
+        $area = new PositionArea();
+
         if(isset($data["vertex1"], $data["vertex2"]))
         {
             $vertex1 = PracticeUtil::arrToVec3($data["vertex1"]);
             $vertex2 = PracticeUtil::arrToVec3($data["vertex2"]);
 
-            // Checks if the vertexes are null.
-            if($vertex1 === null || $vertex2 === null)
-            {
-                return null;
-            }
-
-            return new PositionArea(
-                $vertex1,
-                $vertex2
-            );
+            $area->vertex1 = $vertex1;
+            $area->vertex2 = $vertex2;
         }
 
-        return null;
+        return $area;
     }
 }

@@ -12,27 +12,27 @@ use pocketmine\Player;
 use pocketmine\Server;
 use practice\arenas\PracticeArena;
 use practice\kits\Kit;
-use practice\level\BasicArea;
-use practice\level\PositionArea;
+use practice\level\SpawnArea;
+use practice\misc\ISaved;
 use practice\player\PracticePlayer;
 use practice\PracticeCore;
 use practice\PracticeUtil;
 use practice\scoreboard\ScoreboardData;
 
-class FFAArena extends PracticeArena
+class FFAArena extends PracticeArena implements ISaved
 {
 
     /** @var Kit|null */
     private $kit;
-    /** @var BasicArea */
+    /** @var SpawnArea */
     private $spawnArea;
 
     /** @var int */
     private $players = 0;
 
-    public function __construct(string $name, Level $level, BasicArea $spawnArea, PositionArea $arenaArea, ?Kit $kit = null)
+    public function __construct(string $name, Level $level, SpawnArea $spawnArea, ?Kit $kit = null)
     {
-        parent::__construct($name, $level, $arenaArea);
+        parent::__construct($name, $level);
         $this->kit = $kit;
 
         $this->spawnArea = $spawnArea;
@@ -100,9 +100,9 @@ class FFAArena extends PracticeArena
         }
 
         $spawnPosition = new Position(
-            $this->spawnArea->center->x,
-            $this->spawnArea->center->y,
-            $this->spawnArea->center->z,
+            $this->spawnArea->getSpawn()->x,
+            $this->spawnArea->getSpawn()->y,
+            $this->spawnArea->getSpawn()->z,
             $this->level
         );
 
@@ -156,10 +156,25 @@ class FFAArena extends PracticeArena
     {
         return [
             "kit" => $this->kit instanceof Kit ? $this->kit->getName() : null,
-            "area" => $this->positionArea->export(),
             "spawn" => $this->spawnArea->export(),
             "level" => $this->level->getName()
         ];
+    }
+
+    /**
+     * @param $arena
+     * @return bool
+     *
+     * Determines if two arenas are equivalent.
+     */
+    public function equals($arena): bool
+    {
+        if($arena instanceof FFAArena)
+        {
+            return $arena->getLocalizedName() === $this->localizedName;
+        }
+
+        return false;
     }
 
     /**
@@ -188,13 +203,12 @@ class FFAArena extends PracticeArena
 
             // Make sure kits load before arenas.
             $kit = PracticeCore::getKitManager()->get($data["kit"]);
-            $spawn = BasicArea::decode($data["spawn"]);
+            $spawn = SpawnArea::decode($data["spawn"]);
             $level = $server->getLevelByName($data["level"]);
-            $area = PositionArea::decode($data["area"]);
 
-            if($spawn !== null && $level !== null && $area !== null)
+            if($spawn !== null && $level !== null)
             {
-                return new FFAArena($name, $level, $spawn, $area, $kit);
+                return new FFAArena($name, $level, $spawn, $kit);
             }
         }
 

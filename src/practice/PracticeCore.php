@@ -8,6 +8,8 @@ namespace practice;
 use pocketmine\entity\Entity;
 use pocketmine\plugin\PluginBase;
 use practice\arenas\ArenaManager;
+use practice\data\PracticeDataManager;
+use practice\data\providers\JSONDataProvider;
 use practice\entities\FishingHook;
 use practice\entities\SplashPotion;
 use practice\forms\display\FormDisplayManager;
@@ -42,6 +44,9 @@ class PracticeCore extends PluginBase
 
         $this->initDataFolder();
         $this->registerEntities();
+
+        // Default JSON Data provider is a JSON.
+        PracticeDataManager::setDataProvider(new JSONDataProvider());
 
         // Initializes the statistics.
         ScoreboardStatistic::init();

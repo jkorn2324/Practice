@@ -23,12 +23,16 @@ class PracticeItem
     /** @var callable|null */
     private $callable = null;
 
-    public function __construct(string $localizedName, string $displayName, Item $item, string $lore = "")
+    /** @var int */
+    private $slot;
+
+    public function __construct(string $localizedName, string $displayName, Item $item, int $slot, string $lore = "")
     {
         $this->localizedName = $localizedName;
         $this->displayName = $displayName;
         $this->lore = $lore;
         $this->item = $item;
+        $this->slot = $slot % 9;
     }
 
     /**
@@ -91,6 +95,16 @@ class PracticeItem
     }
 
     /**
+     * @return int
+     *
+     * Gets the slot of the practice item.
+     */
+    public function getSlot(): int
+    {
+        return $this->slot;
+    }
+
+    /**
      * @param Player $player
      * @return bool
      *
@@ -117,7 +131,7 @@ class PracticeItem
      */
     public static function decode(string $localized, array $data): ?PracticeItem
     {
-        if(isset($data["item.info"], $data["item.display"]))
+        if(isset($data["item.info"], $data["item.display"], $data["item.slot"]))
         {
             $info = $data["item.info"];
             if(isset($info["id"], $info["metadata"]))
@@ -132,12 +146,15 @@ class PracticeItem
                 $lore = (string)$display["lore"];
             }
 
+            $slot = (int)$data["item.slot"];
+
             if(isset($item, $name, $lore))
             {
                 return new PracticeItem(
                     $localized,
                     $name,
                     $item,
+                    $slot,
                     $lore
                 );
             }

@@ -9,6 +9,7 @@ use pocketmine\entity\Attribute;
 use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\level\Position;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
@@ -18,10 +19,12 @@ use pocketmine\network\SourceInterface;
 use pocketmine\Player;
 use pocketmine\utils\UUID;
 use practice\arenas\types\FFAArena;
+use practice\data\PracticeDataManager;
 use practice\kits\Kit;
 use practice\player\info\ActionsInfo;
 use practice\player\info\ClicksInfo;
 use practice\player\info\ClientInfo;
+use practice\player\info\CombatInfo;
 use practice\player\info\DisguiseInfo;
 use practice\player\info\SettingsInfo;
 use practice\player\info\StatsInfo;
@@ -53,11 +56,16 @@ class PracticePlayer extends Player
     protected $clicksInfo;
     /** @var StatsInfo|null */
     protected $statsInfo = null;
+    /** @var CombatInfo|null */
+    protected $combatInfo = null;
 
     /** @var Kit|null */
     private $equippedKit = null;
     /** @var FFAArena|null */
     private $ffaArena = null;
+
+    /** @var bool */
+    private $doSave = true;
 
     public function __construct(SourceInterface $interface, string $ip, int $port)
     {
@@ -186,6 +194,38 @@ class PracticePlayer extends Player
     }
 
     /**
+     * @param bool $save
+     *
+     * Determines whether or not the server should save the player's data.
+     */
+    public function setSaveData(bool $save): void
+    {
+        $this->doSave = $save;
+    }
+
+    /**
+     * @return bool
+     *
+     * Determines whether or not the server should save this player's data.
+     */
+    public function doSaveData(): bool
+    {
+        return $this->doSave;
+    }
+
+    /**
+     * @param PlayerJoinEvent $event
+     *
+     * Called when the player first joins.
+     */
+    public function onJoin(PlayerJoinEvent &$event): void
+    {
+        // Starts loading the data for the player.
+        $dataProvider = PracticeDataManager::getDataProvider();
+        $dataProvider->loadPlayer($this);
+    }
+
+    /**
      * @param PlayerQuitEvent $event
      *
      * Called when the current player leaves the game.
@@ -233,6 +273,15 @@ class PracticePlayer extends Player
         if($currentTick % 2 === 0 && $this->scoreboardData !== null)
         {
             $this->scoreboardData->update();
+        }
+
+        if($currentTick % 20 === 0)
+        {
+
+            if($this->combatInfo !== null)
+            {
+                $this->combatInfo->update();
+            }
         }
     }
 
@@ -287,6 +336,26 @@ class PracticePlayer extends Player
     }
 
     /**
+     * @return CombatInfo|null
+     *
+     * Gets the player's combat information.
+     */
+    public function getCombatInfo(): ?CombatInfo
+    {
+        if(!$this->isOnline())
+        {
+            return null;
+        }
+
+        if($this->combatInfo === null)
+        {
+            return $this->combatInfo = new CombatInfo($this);
+        }
+
+        return $this->combatInfo;
+    }
+
+    /**
      * @param bool $clickedBlock
      *
      * Called when the player clicks.
@@ -315,7 +384,7 @@ class PracticePlayer extends Player
     /**
      * @return UUID
      *
-     * Gets the server id of the player.
+     * Gets the server id of the player (only used for disguise)
      */
     public function getServerID(): UUID
     {
@@ -544,7 +613,13 @@ class PracticePlayer extends Player
             // Updates the attack speed.
             $this->attackTime = $speed;
 
-            // TODO: Update combat data in FFA.
+            if($damager->isInFFA() && $damager->getFFAArena()->equals($this->ffaArena) && $event->getCause() !== EntityDamageEvent::CAUSE_SUICIDE)
+            {
+                $damager->getCombatInfo()->setInCombat(true);
+                $this->getCombatInfo()->setInCombat(true);
+            }
+
+            // TODO: Update Duel storage.
         }
     }
 

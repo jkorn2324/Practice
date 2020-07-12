@@ -46,7 +46,7 @@ class StatsInfo implements ISavedHeader
     /**
      * Adds deaths to the statistics information.
      */
-    public function addDeaths(): void
+    public function addDeath(): void
     {
         ++$this->deaths;
     }

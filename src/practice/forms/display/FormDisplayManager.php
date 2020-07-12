@@ -90,7 +90,10 @@ class FormDisplayManager extends AbstractManager
                     $this->displayForms[$formDisplay->getLocalizedName()] = $formDisplay;
                 }
 
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+
+                $this->server->getLogger()->alert($e->getTraceAsString());
+            }
         }
     }
 
