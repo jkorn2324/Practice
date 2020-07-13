@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace practice\player\info;
 
 
-use practice\misc\ISaved;
 use practice\misc\ISavedHeader;
 
 class StatsInfo implements ISavedHeader
@@ -94,7 +93,7 @@ class StatsInfo implements ISavedHeader
     {
         if(!isset($data[$header = "stats"]))
         {
-            $statsInfo = new SettingsInfo();
+            $statsInfo = new StatsInfo();
             return;
         }
 

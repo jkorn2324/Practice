@@ -20,14 +20,16 @@ use pocketmine\Player;
 use pocketmine\utils\UUID;
 use practice\arenas\types\FFAArena;
 use practice\data\PracticeDataManager;
+use practice\items\ItemManager;
 use practice\kits\Kit;
 use practice\player\info\ActionsInfo;
 use practice\player\info\ClicksInfo;
 use practice\player\info\ClientInfo;
 use practice\player\info\CombatInfo;
 use practice\player\info\DisguiseInfo;
-use practice\player\info\SettingsInfo;
+use practice\player\info\settings\SettingsInfo;
 use practice\player\info\StatsInfo;
+use practice\PracticeCore;
 use practice\PracticeUtil;
 use practice\scoreboard\ScoreboardData;
 
@@ -54,8 +56,8 @@ class PracticePlayer extends Player
     protected $actionInfo;
     /** @var ClicksInfo */
     protected $clicksInfo;
-    /** @var StatsInfo|null */
-    protected $statsInfo = null;
+    /** @var StatsInfo */
+    protected $statsInfo;
     /** @var CombatInfo|null */
     protected $combatInfo = null;
 
@@ -67,6 +69,14 @@ class PracticePlayer extends Player
     /** @var bool */
     private $doSave = true;
 
+    /**
+     * PracticePlayer constructor.
+     * @param SourceInterface $interface
+     * @param string $ip
+     * @param int $port
+     *
+     * Overriden practice player constructor.
+     */
     public function __construct(SourceInterface $interface, string $ip, int $port)
     {
         parent::__construct($interface, $ip, $port);
@@ -83,6 +93,7 @@ class PracticePlayer extends Player
         $this->settingsInfo = new SettingsInfo();
         $this->actionInfo = new ActionsInfo();
         $this->clicksInfo = new ClicksInfo();
+        $this->statsInfo = new StatsInfo();
     }
 
     /**
@@ -176,7 +187,8 @@ class PracticePlayer extends Player
             $this->enableDisguise();
         }
 
-        $this->scoreboardData = new ScoreboardData($this, $this->settingsInfo->isScoreboardEnabled() ? ScoreboardData::SCOREBOARD_SPAWN_DEFAULT : ScoreboardData::SCOREBOARD_NONE);
+        $property = $this->settingsInfo->getProperty(SettingsInfo::SCOREBOARD_DISPLAY);
+        $this->scoreboardData = new ScoreboardData($this, $property->getValue() ? ScoreboardData::SCOREBOARD_SPAWN_DEFAULT : ScoreboardData::SCOREBOARD_NONE);
     }
 
     /**
@@ -189,7 +201,9 @@ class PracticePlayer extends Player
         return [
 
             // The player settings.
-            $this->settingsInfo->getHeader() => $this->settingsInfo->export()
+            $this->settingsInfo->getHeader() => $this->settingsInfo->export(),
+            $this->statsInfo->getHeader() => $this->statsInfo->export(),
+            "disguised" => $this->isDisguised()
         ];
     }
 
@@ -223,6 +237,9 @@ class PracticePlayer extends Player
         // Starts loading the data for the player.
         $dataProvider = PracticeDataManager::getDataProvider();
         $dataProvider->loadPlayer($this);
+
+        // Sends the given items to the player.
+        $this->putInLobby(false);
     }
 
     /**
@@ -238,6 +255,10 @@ class PracticePlayer extends Player
         {
             $this->ffaArena->removePlayer();
         }
+
+        $dataProvider = PracticeDataManager::getDataProvider();
+        // Saves the player as non async if server isn't running, etc...
+        $dataProvider->savePlayer($this, !$this->getServer()->isRunning());
     }
 
     /**
@@ -326,11 +347,11 @@ class PracticePlayer extends Player
     }
 
     /**
-     * @return StatsInfo|null
+     * @return StatsInfo
      *
      * Gets the statistics information of the player.
      */
-    public function getStatsInfo(): ?StatsInfo
+    public function getStatsInfo(): StatsInfo
     {
         return $this->statsInfo;
     }
@@ -663,5 +684,20 @@ class PracticePlayer extends Player
 
             $this->setMotion($motion);
         }
+    }
+
+    /**
+     * @param bool $teleport
+     *
+     * Puts the player in the lobby.
+     */
+    public function putInLobby(bool $teleport): void
+    {
+        // TODO: Add more things.
+
+        // Removes all of the effects.
+        $this->removeAllEffects();
+
+        PracticeCore::getItemManager()->sendItemsFromType(ItemManager::TYPE_LOBBY, $this);
     }
 }

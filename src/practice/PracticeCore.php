@@ -16,6 +16,7 @@ use practice\forms\display\FormDisplayManager;
 use practice\forms\display\statistics\FormDisplayStatistic;
 use practice\items\ItemManager;
 use practice\kits\KitManager;
+use practice\player\info\settings\SettingsInfo;
 use practice\scoreboard\display\statistics\ScoreboardStatistic;
 use practice\scoreboard\ScoreboardDisplayManager;
 
@@ -48,7 +49,10 @@ class PracticeCore extends PluginBase
         // Default JSON Data provider is a JSON.
         PracticeDataManager::setDataProvider(new JSONDataProvider());
 
-        // Initializes the statistics.
+        // The settings information to initialize.
+        SettingsInfo::init();
+
+        // Initializes the scoreboard statistics.
         ScoreboardStatistic::init();
         // self::$scoreboardDisplayManager = new ScoreboardDisplayManager($this);
         PracticeUtil::initManager(

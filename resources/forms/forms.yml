@@ -11,6 +11,7 @@ form.settings.menu:
     settings.builder:
       top.text: " Builder Mode Settings"
       bottom.text: ""
+    # TODO: Disguise Settings
 
 # The form that contains the text display for
 # the basic settings menu.
@@ -18,18 +19,18 @@ form.settings.basic:
   title: "Basic Settings"
   description: "Form to edit your basic settings."
   toggles:
-    queues.peOnly:
+    pe.only:
       enabled: "Enable PE Only Queues"
       disabled: "Disable PE Only Queues"
-    player.disguise:
-      enabled: "Enable Disguise"
-      disabled: "Disable Disguise"
     scoreboard.display:
       enabled: "Enable Scoreboard"
       disabled: "Disable Scoreboard"
-    tap.item:
-      enabled: "Enable Tap-Item"
-      disabled: "Disable Tap-Item"
+    tap.items:
+      enabled: "Enable Tap-Items"
+      disabled: "Disable Tap-Items"
+    swish.sounds:
+      enabled: "Enable Swish Sounds"
+      disabled: "Disable Swish Sounds"
 
 # The form that contains the text display for
 # the builder mode menu.
