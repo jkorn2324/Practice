@@ -54,8 +54,8 @@ class ItemManager extends AbstractManager
             fclose($file);
         }
 
-        if (!file_exists($inputFile = $this->itemFolder . "/forms.yml")) {
-            $resource = fopen($inputFile = $this->resourcesFolder . "/items.yml", "rb");
+        if (!file_exists($inputFile = $this->itemFolder . "/items.yml")) {
+            $resource = fopen($this->resourcesFolder . "/items.yml", "rb");
             stream_copy_to_stream($resource, $file = fopen($inputFile, "wb"));
             fclose($resource);
             fclose($file);

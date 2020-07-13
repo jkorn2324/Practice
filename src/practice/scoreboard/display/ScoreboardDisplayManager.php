@@ -50,7 +50,7 @@ class ScoreboardDisplayManager extends AbstractManager
         // Creates a new scoreboards yaml file if it doesn't exist.
         if(!file_exists($inputFile = $this->scoreboardsFolder . "/scoreboards.yml"))
         {
-            $yamlResources = fopen($inputFile = $this->resourcesScoreboardFolder . "/scoreboards.yml", "rb");
+            $yamlResources = fopen($this->resourcesScoreboardFolder . "/scoreboards.yml", "rb");
             stream_copy_to_stream($yamlResources, $file = fopen($yamlResources, "wb"));
             fclose($yamlResources);
             fclose($file);

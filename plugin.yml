@@ -4,7 +4,6 @@ version: "0.0.1"
 main: practice\PracticeCore
 description: Practice - by practice
 website: "https://github.com/jkorn2324"
-depend: ["FormAPI"]
 
 permissions:
   practice.permission.kit:
