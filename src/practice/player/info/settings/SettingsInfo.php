@@ -144,12 +144,10 @@ class SettingsInfo implements ISavedHeader
 
     /**
      * SettingsInfo constructor.
-     *
-     * @param array|null $settingsProperties - The constructor for all the settings.
      */
-    public function __construct(?$settingsProperties = null)
+    public function __construct()
     {
-        $this->settingsProperties = $settingsProperties ?? self::getSettings();
+        $this->settingsProperties = self::getSettings();
     }
 
     /**
