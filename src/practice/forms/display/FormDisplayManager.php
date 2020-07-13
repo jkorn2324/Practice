@@ -49,8 +49,9 @@ class FormDisplayManager extends AbstractManager
         }
 
         if (!file_exists($inputFile = $this->destinationFolder . "/forms.yml")) {
+            $destination = $inputFile;
             $resource = fopen($inputFile = $this->resourcesFolder . "/forms.yml", "rb");
-            stream_copy_to_stream($resource, $file = fopen($inputFile, "wb"));
+            stream_copy_to_stream($resource, $file = fopen($destination, "wb"));
             fclose($resource);
             fclose($file);
         }
