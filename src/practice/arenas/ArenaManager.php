@@ -65,12 +65,15 @@ class ArenaManager extends AbstractManager
         else
         {
             $contents = json_decode(file_get_contents($duelsFile), true);
-            foreach($contents as $arenaName => $data)
+            if(is_array($contents))
             {
-                $arena = DuelArena::decode($arenaName, $data);
-                if($arena !== null)
+                foreach($contents as $arenaName => $data)
                 {
-                    $this->arenas[self::ARENA_TYPE_DUELS][$arena->getLocalizedName()] = $arena;
+                    $arena = DuelArena::decode($arenaName, $data);
+                    if($arena !== null)
+                    {
+                        $this->arenas[self::ARENA_TYPE_DUELS][$arena->getLocalizedName()] = $arena;
+                    }
                 }
             }
         }
@@ -83,12 +86,15 @@ class ArenaManager extends AbstractManager
         else
         {
             $contents = json_decode(file_get_contents($ffaFile, true));
-            foreach($contents as $arenaName => $data)
+            if(is_array($contents))
             {
-                $arena = FFAArena::decode($arenaName, $data);
-                if($arena !== null)
+                foreach($contents as $arenaName => $data)
                 {
-                    $this->arenas[self::ARENA_TYPE_FFA][$arena->getLocalizedName()] = $arena;
+                    $arena = FFAArena::decode($arenaName, $data);
+                    if($arena !== null)
+                    {
+                        $this->arenas[self::ARENA_TYPE_FFA][$arena->getLocalizedName()] = $arena;
+                    }
                 }
             }
         }

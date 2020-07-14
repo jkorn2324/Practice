@@ -177,6 +177,12 @@ class PracticePlayer extends Player
      */
     public function loadData($data): void
     {
+
+        if(!is_array($data))
+        {
+            return;
+        }
+
         // Extracts the information from the data & initializes the settings.
         SettingsInfo::extract($data, $this->settingsInfo);
         StatsInfo::extract($data, $this->statsInfo);

@@ -82,6 +82,7 @@ class FFAPlayForm extends FormDisplay
         }
 
         $form->setExtraData(["arenas" => $inputArenas]);
+        $player->sendForm($form);
     }
 
     /**

@@ -66,11 +66,18 @@ class FormDisplayManager extends AbstractManager
     private function loadFormDisplays(string $inputFile): void
     {
         $fileData = yaml_parse_file($inputFile);
+        if(!is_array($fileData))
+        {
+            return;
+        }
+
+        // Gets the class name based on the types of forms inputted in forms.yml
         foreach ($fileData as $localizedName => $data) {
 
             $class = self::localToClassName($localizedName);
+            $namespacedClass = "practice\\forms\\display\\types\\{$class}";
 
-            if (!class_exists($class) || !is_subclass_of($class, FormDisplay::class))
+            if (!class_exists($namespacedClass) || !is_subclass_of($namespacedClass, FormDisplay::class))
             {
                 continue;
             }
@@ -78,8 +85,10 @@ class FormDisplayManager extends AbstractManager
             // Loads the display forms to the array based on reflection class
             // information.
             try {
-                $reflection = new \ReflectionClass($class);
+
+                $reflection = new \ReflectionClass($namespacedClass);
                 $method = $reflection->getMethod("decode");
+
                 if (!$method instanceof \ReflectionMethod) {
                     continue;
                 }
