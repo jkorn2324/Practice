@@ -45,6 +45,17 @@ form.settings.builder:
     enabled.worlds: "Select the worlds that you want to enable/disable builder mode for:"
 
 # The form that contains the text display for
+# the Play Games form menu.
+form.play.games:
+  title: "Play Games"
+  description: "Select the arena that you want to play."
+  buttons:
+    play.ffa:
+      top.text: "Play FFA"
+      bottom.text: "Players: {ffa.players}"
+    # TODO: Add ffa.players and other buttons
+
+# The form that contains the text display for
 # the Play ffa form menu.
 form.play.FFA:
   title: "Play FFA"

@@ -49,6 +49,11 @@ class JSONDataProvider implements IDataProvider
 
         $this->server->getAsyncPool()->submitTask(new class($player, $this->dataFolder) extends PracticeAsyncTask
         {
+
+            private const DATA_FAILED_ERROR = 0;
+            private const DATA_FAILED_FILE_NOT_FOUND = 1;
+            private const DATA_FAILED_NEW_PLAYER = 2;
+
             /** @var string */
             private $name;
             /** @var string */
@@ -83,7 +88,7 @@ class JSONDataProvider implements IDataProvider
 
                 if(!file_exists($this->jsonFile)) {
 
-                    $reason = $this->firstJoin ? "new" : "Internal Plugin Error.";
+                    $reason = $this->firstJoin ? self::DATA_FAILED_NEW_PLAYER : self::DATA_FAILED_FILE_NOT_FOUND;
                     $file = fopen($this->jsonFile, "w");
                     fclose($file);
                     $this->setResult(["loaded" => false, "reason" => $reason]);
@@ -97,7 +102,7 @@ class JSONDataProvider implements IDataProvider
 
                 } catch (\Exception $e)
                 {
-                    $this->setResult(["loaded" => false, "reason" => "Internal Plugin Error.", "exception" => $e->getTraceAsString()]);
+                    $this->setResult(["loaded" => false, "reason" => self::DATA_FAILED_ERROR, "exception" => $e->getTraceAsString()]);
                 }
             }
 
@@ -126,17 +131,25 @@ class JSONDataProvider implements IDataProvider
 
                 if(!$loaded)
                 {
-                    if(isset($result["reason"]) && $result["reason"] !== "new")
+                    if(isset($result["reason"]))
                     {
-                        // TODO: Send unable to load reason.
-                        $player->sendMessage("Unable to load your data. Reason: " . $result["reason"]);
-                        $player->setSaveData(false);
+                        $reason = (int)$result["reason"];
+                        if($reason !== self::DATA_FAILED_NEW_PLAYER)
+                        {
+                            if($reason === self::DATA_FAILED_ERROR)
+                            {
+                                $player->setSaveData(false);
+                            }
+
+                            $player->sendMessage("Unable to load your data. Reason: Internal Plugin Error.");
+                        }
                     }
 
                     if(isset($result["exception"]))
                     {
                         $server->getLogger()->alert($result["exception"]);
                     }
+                    $player->loadData(null);
                     return;
                 }
 

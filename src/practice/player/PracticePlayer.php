@@ -185,16 +185,14 @@ class PracticePlayer extends Player
         SettingsInfo::extract($data, $this->settingsInfo);
         StatsInfo::extract($data, $this->statsInfo);
 
-        // Used so we don't have to keep checking.
-        if(!is_array($data))
+        // Checks whether the data is an array, gets the information.
+        if(is_array($data))
         {
-            return;
-        }
-
-        // Enables the player's disguise.
-        if(isset($data["disguised"]) && (bool)$data["disguised"])
-        {
-            $this->enableDisguise();
+            // Enables player disguise.
+            if(isset($data["disguised"]) && (bool)$data["disguised"])
+            {
+                $this->enableDisguise();
+            }
         }
 
         $property = $this->settingsInfo->getProperty(SettingsInfo::SCOREBOARD_DISPLAY);
