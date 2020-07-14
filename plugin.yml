@@ -1,6 +1,6 @@
 name: Practice
 api: ["3.0.0"]
-version: "0.0.1"
+version: "2.0.0"
 main: practice\PracticeCore
 description: Practice - by practice
 website: "https://github.com/jkorn2324"

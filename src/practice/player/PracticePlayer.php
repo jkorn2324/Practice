@@ -11,6 +11,7 @@ use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
+use pocketmine\form\Form;
 use pocketmine\level\Position;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
@@ -68,6 +69,8 @@ class PracticePlayer extends Player
 
     /** @var bool */
     private $doSave = true;
+    /** @var bool - Determines if player is viewing form. */
+    private $lookingAtForm = false;
 
     /**
      * PracticePlayer constructor.
@@ -705,5 +708,34 @@ class PracticePlayer extends Player
         $this->removeAllEffects();
 
         PracticeCore::getItemManager()->sendItemsFromType(ItemManager::TYPE_LOBBY, $this);
+    }
+
+    /**
+     * @param Form $form
+     *
+     * Sends the form to the player, overriden so player is bombarded with forms.
+     */
+    public function sendForm(Form $form): void
+    {
+        if($this->lookingAtForm)
+        {
+            return;
+        }
+
+        $this->lookingAtForm = true;
+        parent::sendForm($form);
+    }
+
+    /**
+     * @param int $formId
+     * @param mixed $responseData
+     * @return bool
+     *
+     * Determines which form was submitted, overriden so player can start viewing forms again.
+     */
+    public function onFormSubmit(int $formId, $responseData): bool
+    {
+        $this->lookingAtForm = false;
+        return parent::onFormSubmit($formId, $responseData);
     }
 }
