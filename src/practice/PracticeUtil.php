@@ -338,4 +338,15 @@ class PracticeUtil
             }
         }
     }
+
+    /**
+     * @param $level - The level to be deleted.
+     * @param $async - Determines whether to delete it async or not.
+     *
+     * Deletes the level.
+     */
+    public static function deleteLevel($level, bool $async = false): void
+    {
+        // TODO: Implement function
+    }
 }

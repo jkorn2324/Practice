@@ -593,6 +593,19 @@ class PracticePlayer extends Player
     /**
      * @return bool
      *
+     * Determines if the player is in a game.
+     */
+    public function isInGame(): bool
+    {
+        // TODO: Get the player's game.
+        return false;
+    }
+
+    // TODO: getGame() function
+
+    /**
+     * @return bool
+     *
      * Determines if the player is in the lobby.
      */
     public function isInLobby(): bool
@@ -658,7 +671,6 @@ class PracticePlayer extends Player
 
         if($this->isInLobby())
         {
-
             return false;
         }
 

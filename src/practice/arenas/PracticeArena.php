@@ -61,13 +61,4 @@ abstract class PracticeArena
     }
 
     abstract public function equals($arena): bool;
-
-    /**
-     * @param string $arenaName
-     * @param array $data
-     * @return mixed
-     *
-     * Decodes the Practice arena abstractly.
-     */
-    abstract public static function decode(string $arenaName, array $data);
 }

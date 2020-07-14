@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace practice\arenas;
 
 
-use practice\arenas\types\DuelArena;
+use practice\arenas\types\duels\PreGeneratedArena;
 use practice\arenas\types\FFAArena;
 use practice\misc\ISaved;
 use practice\PracticeCore;
@@ -22,7 +22,7 @@ class ArenaManager extends AbstractManager
     /** @var string */
     private $arenaFolder;
 
-    /** @var array */
+    /** @var PracticeArena[]|ISaved[] */
     protected $arenas;
 
     public function __construct(PracticeCore $core)
@@ -69,7 +69,7 @@ class ArenaManager extends AbstractManager
             {
                 foreach($contents as $arenaName => $data)
                 {
-                    $arena = DuelArena::decode($arenaName, $data);
+                    $arena = PreGeneratedArena::decode($arenaName, $data);
                     if($arena !== null)
                     {
                         $this->arenas[self::ARENA_TYPE_DUELS][$arena->getLocalizedName()] = $arena;
