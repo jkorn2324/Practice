@@ -42,7 +42,7 @@ class BooleanSetting implements ISettingsProperty
         $oldValue = $this->value;
         $this->value = (bool)$value;
 
-        if($oldValue !== $this->value)
+        if($oldValue !== $value)
         {
             return true;
         }

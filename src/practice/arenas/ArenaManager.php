@@ -185,8 +185,12 @@ class ArenaManager extends AbstractManager
      */
     public function getNumPlayersInFFA(): int
     {
-        $output = 0;
+        if(!isset($this->arenas[self::ARENA_TYPE_FFA]))
+        {
+            return 0;
+        }
 
+        $output = 0;
         $ffaArenas = $this->arenas[self::ARENA_TYPE_FFA];
         foreach($ffaArenas as $arena)
         {

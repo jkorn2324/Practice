@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace practice\scoreboard;
+namespace practice\scoreboard\display;
 
 
 use practice\misc\AbstractManager;
@@ -51,7 +51,7 @@ class ScoreboardDisplayManager extends AbstractManager
         if(!file_exists($inputFile = $this->scoreboardsFolder . "/scoreboards.yml"))
         {
             $yamlResources = fopen($this->resourcesScoreboardFolder . "/scoreboards.yml", "rb");
-            stream_copy_to_stream($yamlResources, $file = fopen($yamlResources, "wb"));
+            stream_copy_to_stream($yamlResources, $file = fopen($inputFile, "wb"));
             fclose($yamlResources);
             fclose($file);
         }

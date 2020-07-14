@@ -62,6 +62,16 @@ class FFAPlayForm extends FormDisplay
         $form->setContent($this->formData["description"]->getText($player));
 
         $arenas = PracticeCore::getArenaManager()->getArenas(ArenaManager::ARENA_TYPE_FFA);
+        if(count($arenas) <= 0)
+        {
+            $form->addButton(
+                $this->formData["button.select.arena.none"]->getText($player)
+            );
+            $form->setExtraData(["arenas" => []]);
+            $player->sendForm($form);
+            return;
+        }
+
         $inputArenas = [];
 
         foreach($arenas as $arena)
@@ -96,10 +106,15 @@ class FFAPlayForm extends FormDisplay
     {
         $title = TextFormat::BOLD . "Play FFA";
         $description = "Select the arena that you want to play.";
+
         $buttons = [
             "select.arena.template" => [
                 "top.text" => "{" . FormDisplayStatistic::STATISTIC_FFA_ARENA . "}",
                 "bottom.text" => "Players: {" . FormDisplayStatistic::STATISTIC_FFA_ARENA_PLAYERS . "}"
+            ],
+            "select.arena.none" => [
+                "top.text" => "None",
+                "bottom.text" => ""
             ]
         ];
 

@@ -84,14 +84,14 @@ class StatsInfo implements ISavedHeader
     }
 
     /**
-     * @param array $data - The data.
+     * @param $data - The data.
      * @param $statsInfo - The stats information.
      *
      * Extracts the data from the info & initializes the statistics.
      */
-    public static function extract(array &$data, &$statsInfo): void
+    public static function extract(&$data, &$statsInfo): void
     {
-        if(!isset($data[$header = "stats"]))
+        if(!is_array($data) || !isset($data[$header = "stats"]))
         {
             $statsInfo = new StatsInfo();
             return;

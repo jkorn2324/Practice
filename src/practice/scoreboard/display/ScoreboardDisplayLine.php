@@ -50,4 +50,15 @@ class ScoreboardDisplayLine implements IDisplayText
 
         return $output;
     }
+
+    /**
+     * @return bool
+     *
+     * Determines whether or not to update the line.
+     */
+    public function containsStatistics(): bool
+    {
+        return ScoreboardStatistic::containsStatistics($this->text);
+    }
+
 }

@@ -32,6 +32,7 @@ use practice\player\info\settings\SettingsInfo;
 use practice\player\info\StatsInfo;
 use practice\PracticeCore;
 use practice\PracticeUtil;
+use practice\scoreboard\Scoreboard;
 use practice\scoreboard\ScoreboardData;
 
 class PracticePlayer extends Player
@@ -180,15 +181,15 @@ class PracticePlayer extends Player
      */
     public function loadData($data): void
     {
+        // Extracts the information from the data & initializes the settings.
+        SettingsInfo::extract($data, $this->settingsInfo);
+        StatsInfo::extract($data, $this->statsInfo);
 
+        // Used so we don't have to keep checking.
         if(!is_array($data))
         {
             return;
         }
-
-        // Extracts the information from the data & initializes the settings.
-        SettingsInfo::extract($data, $this->settingsInfo);
-        StatsInfo::extract($data, $this->statsInfo);
 
         // Enables the player's disguise.
         if(isset($data["disguised"]) && (bool)$data["disguised"])
@@ -278,18 +279,13 @@ class PracticePlayer extends Player
      */
     public function onUpdate(int $currentTick): bool
     {
-        if(parent::onUpdate($currentTick))
+        $update = parent::onUpdate($currentTick);
+        if($update)
         {
-            $tickDiff = $currentTick - $this->lastUpdate;
-            if($this->loggedIn && $this->spawned && $this->isAlive() && $tickDiff >= 1)
-            {
-                $this->updateInfo($currentTick);
-            }
-
-            return true;
+            $this->updateInfo($currentTick);
         }
 
-        return false;
+        return $update;
     }
 
     /**
@@ -307,10 +303,45 @@ class PracticePlayer extends Player
 
         if($currentTick % 20 === 0)
         {
-
             if($this->combatInfo !== null)
             {
                 $this->combatInfo->update();
+            }
+        }
+    }
+
+    /**
+     * Updates the scoreboard display, only called after their settings is updated.
+     * This shouldn't be called anywhere else.
+     */
+    public function settingsUpdateScoreboard(): void
+    {
+        $scoreboardDisplay = $this->settingsInfo->getProperty(SettingsInfo::SCOREBOARD_DISPLAY);
+        if($scoreboardDisplay !== null && $this->scoreboardData !== null)
+        {
+            $display = (bool)$scoreboardDisplay->getValue();
+            $scoreboardType = $this->scoreboardData->getScoreboard();
+
+            if($display && $scoreboardType === ScoreboardData::SCOREBOARD_NONE)
+            {
+                // TODO: Check if player is in a queue, if he is in ffa, etc...
+                $inputType = ScoreboardData::SCOREBOARD_SPAWN_DEFAULT;
+                if($this->isInLobby())
+                {
+                } elseif ($this->isInFFA())
+                {
+                    $inputType = ScoreboardData::SCOREBOARD_FFA;
+                }
+            }
+            elseif (!$display && $scoreboardType !== ScoreboardData::SCOREBOARD_NONE)
+            {
+                $inputType = ScoreboardData::SCOREBOARD_NONE;
+            }
+
+            // Checks if input type is set, if so, update the scoreboard.
+            if(isset($inputType))
+            {
+                $this->scoreboardData->setScoreboard($inputType);
             }
         }
     }

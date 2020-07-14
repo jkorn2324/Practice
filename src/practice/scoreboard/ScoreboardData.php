@@ -7,6 +7,7 @@ namespace practice\scoreboard;
 
 use pocketmine\Player;
 use practice\PracticeCore;
+use practice\scoreboard\display\ScoreboardDisplayInformation;
 use practice\scoreboard\display\ScoreboardDisplayLine;
 
 class ScoreboardData
@@ -51,8 +52,13 @@ class ScoreboardData
             return;
         }
 
-        if($this->scoreboard instanceof Scoreboard)
+        if($this->scoreboard !== null)
         {
+            if($this->scoreboard->isRemoved())
+            {
+                $this->scoreboard->resendScoreboard();
+            }
+
             $this->scoreboard->clearScoreboard();
         }
         else
@@ -62,7 +68,7 @@ class ScoreboardData
         }
 
         $displayInfo = PracticeCore::getScoreboardDisplayManager()->getDisplayInfo($type);
-        if(!$displayInfo instanceof ScoreboardDisplayInformation)
+        if($displayInfo === null)
         {
             $this->removeScoreboard();
             $this->scoreboardType = self::SCOREBOARD_NONE;
@@ -114,13 +120,14 @@ class ScoreboardData
         if($this->scoreboard !== null && $this->scoreboardType !== self::SCOREBOARD_NONE) {
 
             $scoreboardDisplayInfo = PracticeCore::getScoreboardDisplayManager()->getDisplayInfo($this->scoreboardType);
-            if(!$scoreboardDisplayInfo instanceof ScoreboardDisplayInformation)
+            if($scoreboardDisplayInfo === null)
             {
                 return;
             }
 
-            $index = 0; $length = count($scoreboardDisplayInfo->getLines());
-            while($index < $length)
+            // Updates the lines instead.
+            $updatedLines = $scoreboardDisplayInfo->getUpdateLines();
+            foreach($updatedLines as $index)
             {
                 $lineText = $this->scoreboard->getLine($index);
                 if($lineText === null || trim($lineText) === "")
@@ -139,8 +146,6 @@ class ScoreboardData
                 {
                     $this->scoreboard->addLine($index, $uLineText);
                 }
-
-                $index++;
             }
         }
     }

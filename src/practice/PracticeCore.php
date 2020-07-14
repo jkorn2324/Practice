@@ -18,7 +18,7 @@ use practice\items\ItemManager;
 use practice\kits\KitManager;
 use practice\player\info\settings\SettingsInfo;
 use practice\scoreboard\display\statistics\ScoreboardStatistic;
-use practice\scoreboard\ScoreboardDisplayManager;
+use practice\scoreboard\display\ScoreboardDisplayManager;
 
 class PracticeCore extends PluginBase
 {
@@ -54,41 +54,15 @@ class PracticeCore extends PluginBase
 
         // Initializes the scoreboard statistics.
         ScoreboardStatistic::init();
-        // self::$scoreboardDisplayManager = new ScoreboardDisplayManager($this);
-        PracticeUtil::initManager(
-            self::$scoreboardDisplayManager,
-            ScoreboardDisplayManager::class,
-            $this
-        );
+        self::$scoreboardDisplayManager = new ScoreboardDisplayManager($this);
 
         // TODO: Initialize the display stats.
-        // self::$formDisplayManager = new FormDisplayManager($this);
         FormDisplayStatistic::init();
-        PracticeUtil::initManager(
-            self::$formDisplayManager,
-            FormDisplayManager::class,
-            $this
-        );
+        self::$formDisplayManager = new FormDisplayManager($this);
 
-        // self::$kitManager = new KitManager($this);
-        PracticeUtil::initManager(
-            self::$kitManager,
-            KitManager::class,
-            $this
-        );
-
-        // self::$arenaManager = new ArenaManager($this);
-        PracticeUtil::initManager(
-            self::$arenaManager,
-            ArenaManager::class,
-            $this
-        );
-
-        PracticeUtil::initManager(
-            self::$itemManager,
-            ItemManager::class,
-            $this
-        );
+        self::$kitManager = new KitManager($this);
+        self::$arenaManager = new ArenaManager($this);
+        self::$itemManager = new ItemManager($this);
 
         // Initializes the practice listener & task.
         new PracticeListener($this);

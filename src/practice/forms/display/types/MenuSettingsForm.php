@@ -60,13 +60,14 @@ class MenuSettingsForm extends FormDisplay
     public function display(Player $player): void
     {
         $form = new SimpleForm(function (Player $player, $data, $extraData) {
+
             if (!$player instanceof PracticePlayer) {
                 return;
             }
 
             if ($data !== null) {
-                $data = (int)$data;
-                switch ($data) {
+
+                switch ((int)$data) {
                     case 0:
                         $form = PracticeCore::getFormDisplayManager()->getForm(FormDisplayManager::FORM_SETTINGS_BASIC);
                         break;

@@ -351,4 +351,23 @@ class ScoreboardStatistic
             }
         }
     }
+
+    /**
+     * @param string $message
+     * @return bool
+     *
+     * Determines if the message contains statistics.
+     */
+    public static function containsStatistics(string &$message): bool
+    {
+        foreach (self::$statistics as $localized => $statistic)
+        {
+            $statisticVariable = "{$localized}";
+            if(strpos($message, $statisticVariable) !== 0)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -125,6 +125,7 @@ class FormDisplayManager extends AbstractManager
         {
             return $this->displayForms[$localized];
         }
+
         return null;
     }
 

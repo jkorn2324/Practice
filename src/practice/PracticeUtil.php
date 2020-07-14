@@ -295,27 +295,6 @@ class PracticeUtil
     }
 
     /**
-     * @param $manager
-     * @param $class
-     * @param PracticeCore $core
-     *
-     * Initializes the manager.
-     */
-    public static function initManager(&$manager, $class, PracticeCore $core): void
-    {
-        if(!is_a($class, AbstractManager::class, true))
-        {
-            return;
-        }
-
-        if(!$manager instanceof $class)
-        {
-            /** @var AbstractManager $manager */
-            $manager = new $class($core);
-        }
-    }
-
-    /**
      * @param string $uuid
      * @return Player|null
      *

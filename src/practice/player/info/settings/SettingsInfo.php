@@ -202,12 +202,12 @@ class SettingsInfo implements ISavedHeader
     }
 
     /**
-     * @param array $data -> Address to the data.
+     * @param $data -> Address to the data.
      * @param $playerSettings -> Address to the settings data.
      *
      * Extracts the settings from the data information.
      */
-    public static function extract(array &$data, &$playerSettings)
+    public static function extract(&$data, &$playerSettings)
     {
         if(!$playerSettings instanceof SettingsInfo)
         {
@@ -217,7 +217,7 @@ class SettingsInfo implements ISavedHeader
         }
 
         // Determines if the data contains the settings header.
-        if(!isset($data[$header = "settings"]))
+        if(!is_array($data) || !isset($data[$header = "settings"]))
         {
             return;
         }

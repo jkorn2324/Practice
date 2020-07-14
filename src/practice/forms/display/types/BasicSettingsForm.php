@@ -32,6 +32,7 @@ class BasicSettingsForm extends FormDisplay
                 $this->formData[$inputKey] = new FormDisplayText($value);
             }
         }
+        // var_dump(array_keys($this->formData));
     }
 
     /**
@@ -56,10 +57,21 @@ class BasicSettingsForm extends FormDisplay
                 $settings = $player->getSettingsInfo();
                 foreach($data as $localized => $result)
                 {
-                    $property = $settings->getProperty($localized);
-                    if($property !== null)
+                    if(!is_string($localized))
                     {
-                        $property->setValue($result);
+                        continue;
+                    }
+
+                    $property = $settings->getProperty($localized);
+                    if($property !== null && $property->setValue($result))
+                    {
+                        // Literally updates the values.
+                        switch($localized)
+                        {
+                            case SettingsInfo::SCOREBOARD_DISPLAY:
+                                $player->settingsUpdateScoreboard();
+                                break;
+                        }
                     }
                 }
             }
@@ -76,9 +88,15 @@ class BasicSettingsForm extends FormDisplay
             if($property instanceof BooleanSetting)
             {
                 $toggleLocalized = "toggle." . $localized . "." . ($property->getValue() ? "disabled" : "enabled");
-                $form->addToggle($this->formData[$toggleLocalized]->getText($player), $property->getValue(), $toggleLocalized);
+                if(isset($this->formData[$toggleLocalized]))
+                {
+                    $text = $this->formData[$toggleLocalized];
+                    $form->addToggle($text->getText($player), $property->getValue(), $localized);
+                }
             }
         }
+
+        $player->sendForm($form);
     }
 
     /**

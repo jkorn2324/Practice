@@ -23,7 +23,29 @@ class BuilderSettingsForm extends FormDisplay
         $this->formData["title"] = new FormDisplayText($data["title"]);
         $this->formData["description"] = new FormDisplayText($data["description"]);
 
-        $toggles = $data["toggles"];
+        if(isset($data["toggles"]))
+        {
+            $toggles = $data["toggles"];
+            foreach($toggles as $key => $data)
+            {
+                foreach($data as $type => $value)
+                {
+                    $inputKey = "toggle.{$key}.{$type}";
+                    $this->formData[$inputKey] = new FormDisplayText((string)$value);
+                }
+            }
+        }
+
+        if(isset($data["labels"]))
+        {
+            $labels = $data["labels"];
+            foreach($labels as $key => $label)
+            {
+                $this->formData["label.{$key}"] = new FormDisplayText((string)$label);
+            }
+        }
+
+        /* $toggles = $data["toggles"];
         foreach($toggles as $key => $data)
         {
             foreach($data as $type => $value)
@@ -36,8 +58,8 @@ class BuilderSettingsForm extends FormDisplay
         $labels = $data["labels"];
         foreach($labels as $key => $label)
         {
-            $this->formData["label.{$key}"] = $label;
-        }
+            $this->formData["label.{$key}"] = new FormDisplayText((string)$label);
+        }*/
     }
 
     /**
@@ -55,6 +77,7 @@ class BuilderSettingsForm extends FormDisplay
         $form->setTitle($this->formData["title"]->getText($player));
         $form->addLabel($this->formData["description"]->getText($player));
 
+        $player->sendForm($form);
         // TODO: Builder mode toggle.
         /* $builderModeToggle = "toggle.builder.mode"
         $form->addToggle($this->formData["toggle.builder.mode"]); */
@@ -63,12 +86,14 @@ class BuilderSettingsForm extends FormDisplay
     /**
      * @param string $localized
      * @param array $data
-     * @return BasicSettingsForm
+     * @return BuilderSettingsForm
      *
      * Decodes the builder settings form based on data.
      */
     public static function decode(string $localized, array $data)
     {
+        // TODO: Edit decoded information.
+
         $title = TextFormat::BOLD . "Builder Mode Settings";
         $description = "Form to edit builder mode settings";
         $toggles = [
@@ -101,7 +126,7 @@ class BuilderSettingsForm extends FormDisplay
             $labels = array_replace($labels, $data["labels"]);
         }
 
-        return new BasicSettingsForm($localized, [
+        return new BuilderSettingsForm($localized, [
             "title" => $title,
             "description" => $description,
             "toggles" => $toggles,

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace practice\scoreboard;
+namespace practice\scoreboard\display;
 
 use practice\scoreboard\display\ScoreboardDisplayLine;
 
@@ -15,10 +15,14 @@ class ScoreboardDisplayInformation
     /** @var string */
     private $localizedName;
 
+    /** @var int[] */
+    private $updatedLines;
+
     public function __construct(string $localized, array &$data)
     {
         $this->localizedName = $localized;
         $this->lines = [];
+        $this->updatedLines = [];
 
         $this->initDisplay($data);
     }
@@ -41,7 +45,12 @@ class ScoreboardDisplayInformation
                 $text = str_repeat(" ", $scoreboardLine);
             }
 
-            $this->lines[$scoreboardLine - 1] = new ScoreboardDisplayLine($text);
+            $this->lines[$lineNumber = $scoreboardLine - 1] = $lineDisplay = new ScoreboardDisplayLine($text);
+
+            if($lineDisplay->containsStatistics())
+            {
+                $this->updatedLines[] = $lineNumber;
+            }
 
             if($scoreboardLine > $length)
             {
@@ -61,6 +70,16 @@ class ScoreboardDisplayInformation
     public function getLines()
     {
         return $this->lines;
+    }
+
+    /**
+     * @return array|int[]
+     *
+     * Gets the lines that should be updated.
+     */
+    public function getUpdateLines()
+    {
+        return $this->updatedLines;
     }
 
     /**

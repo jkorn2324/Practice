@@ -27,6 +27,8 @@ class Scoreboard
     /* @var Player */
     private $player;
 
+    /** @var bool */
+    private $removed = false;
 
     public function __construct(Player $player, string $title)
     {
@@ -48,6 +50,8 @@ class Scoreboard
         $pkt->displaySlot = self::SLOT_SIDEBAR;
         $pkt->criteriaName = 'dummy';
         $this->player->sendDataPacket($pkt);
+
+        $this->removed = false;
     }
 
     /**
@@ -173,6 +177,8 @@ class Scoreboard
         $packet->objectiveName = $this->player->getName();
 
         $this->player->sendDataPacket($packet);
+
+        $this->removed = true;
     }
 
     /**
@@ -181,5 +187,15 @@ class Scoreboard
     public function resendScoreboard() : void
     {
         $this->initScoreboard();
+    }
+
+    /**
+     * @return bool
+     *
+     * Determines if the scoreboard is removed.
+     */
+    public function isRemoved(): bool
+    {
+        return $this->removed;
     }
 }

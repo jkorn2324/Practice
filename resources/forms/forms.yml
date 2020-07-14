@@ -53,3 +53,6 @@ form.play.FFA:
     select.arena.template:
       top.text: " {ffa.arena} "
       bottom.text: " Players: {ffa.arena.players} "
+    select.arena.none:
+      top.text: "None"
+      bottom.text: ""
