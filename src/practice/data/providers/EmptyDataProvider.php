@@ -8,13 +8,13 @@ use pocketmine\Player;
 use practice\data\IDataProvider;
 
 /**
- * Class DefaultDataProvider.
+ * Class EmptyDataProvider.
  *
  * This class doesn't do anything except define the default data provider.
  *
  * @package practice\data\providers
  */
-class DefaultDataProvider implements IDataProvider
+class EmptyDataProvider implements IDataProvider
 {
 
     /**
@@ -31,4 +31,9 @@ class DefaultDataProvider implements IDataProvider
      * Saves the player's data.
      */
     public function savePlayer(Player $player, bool $async): void {}
+
+    /**
+     * Saves the data of all the players, used for when the server shuts down.
+     */
+    public function saveAllPlayers(): void {}
 }

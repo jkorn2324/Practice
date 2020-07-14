@@ -162,10 +162,13 @@ class JSONDataProvider implements IDataProvider
         }
 
         // Determines whether to save the player's data.
-        if(!$player->doSaveData())
+        if(!$player->doSaveData() || $player->isSaved())
         {
             return;
         }
+
+        // Sets the player as saved.
+        $player->setSaved(true);
 
         if($async) {
 
@@ -223,5 +226,17 @@ class JSONDataProvider implements IDataProvider
         }
 
         file_put_contents($jsonFile, $exportedData);
+    }
+
+    /**
+     * Saves all the player's data on the server, used when the server shuts down.
+     */
+    public function saveAllPlayers(): void
+    {
+        $players = $this->server->getOnlinePlayers();
+        foreach($players as $player)
+        {
+            $this->savePlayer($player, false);
+        }
     }
 }

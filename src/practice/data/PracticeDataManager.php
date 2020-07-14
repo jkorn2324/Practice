@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace practice\data;
 
-use practice\data\providers\DefaultDataProvider;
+use practice\data\providers\EmptyDataProvider;
 
 /**
  * Class PracticeDataManager.
@@ -38,7 +38,7 @@ class PracticeDataManager
     {
         if(self::$dataProvider === null)
         {
-            self::$dataProvider = new DefaultDataProvider();
+            self::$dataProvider = new EmptyDataProvider();
         }
 
         return self::$dataProvider;

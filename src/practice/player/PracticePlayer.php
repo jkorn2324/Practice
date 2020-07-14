@@ -69,7 +69,7 @@ class PracticePlayer extends Player
     private $ffaArena = null;
 
     /** @var bool */
-    private $doSave = true;
+    private $doSave = true, $didSave = false;
     /** @var bool - Determines if player is viewing form. */
     private $lookingAtForm = false;
 
@@ -238,6 +238,26 @@ class PracticePlayer extends Player
     }
 
     /**
+     * @param bool $saved
+     *
+     * Determines whether or not the player was saved.
+     */
+    public function setSaved(bool $saved): void
+    {
+        $this->didSave = $saved;
+    }
+
+    /**
+     * @return bool
+     *
+     * Determines whether or not the player has already saved.
+     */
+    public function isSaved(): bool
+    {
+        return $this->didSave;
+    }
+
+    /**
      * @param PlayerJoinEvent $event
      *
      * Called when the player first joins.
@@ -268,7 +288,7 @@ class PracticePlayer extends Player
 
         $dataProvider = PracticeDataManager::getDataProvider();
         // Saves the player as non async if server isn't running, etc...
-        $dataProvider->savePlayer($this, !$this->getServer()->isRunning());
+        $dataProvider->savePlayer($this, true);
     }
 
     /**

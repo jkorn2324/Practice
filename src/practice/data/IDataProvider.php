@@ -24,4 +24,9 @@ interface IDataProvider
      * Saves the player's data.
      */
     public function savePlayer(Player $player, bool $async): void;
+
+    /**
+     * Saves the data of all the players, used for when the server shuts down.
+     */
+    public function saveAllPlayers(): void;
 }

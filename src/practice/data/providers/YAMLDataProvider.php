@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace practice\data\providers;
 
-
-use mysql_xdevapi\Exception;
 use pocketmine\Player;
 use pocketmine\Server;
 use practice\data\IDataProvider;
@@ -98,7 +96,7 @@ class YAMLDataProvider implements IDataProvider
                     $data = yaml_parse_file($this->yamlFile);
                     $this->setResult(["loaded" => true, "contents" => $data]);
 
-                } catch (Exception $e)
+                } catch (\Exception $e)
                 {
                     $this->setResult(["loaded" => false, "reason" => "Internal Plugin Error.", "exception" => $e->getTraceAsString()]);
                 }
@@ -163,10 +161,13 @@ class YAMLDataProvider implements IDataProvider
             return;
         }
 
-        if(!$player->doSaveData())
+        if(!$player->doSaveData() || $player->isSaved())
         {
             return;
         }
+
+        // Sets the player as saved.
+        $player->setSaved(true);
 
         if($async)
         {
@@ -223,5 +224,17 @@ class YAMLDataProvider implements IDataProvider
         }
 
         yaml_emit_file($yamlFile, $exportedData);
+    }
+
+    /**
+     * Saves the data of all the players, used for when the server shuts down.
+     */
+    public function saveAllPlayers(): void
+    {
+        $players = $this->server->getOnlinePlayers();
+        foreach($players as $player)
+        {
+            $this->savePlayer($player, false);
+        }
     }
 }

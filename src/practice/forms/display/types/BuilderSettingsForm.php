@@ -44,22 +44,6 @@ class BuilderSettingsForm extends FormDisplay
                 $this->formData["label.{$key}"] = new FormDisplayText((string)$label);
             }
         }
-
-        /* $toggles = $data["toggles"];
-        foreach($toggles as $key => $data)
-        {
-            foreach($data as $type => $value)
-            {
-                $inputKey = "toggle.{$key}.{$type}";
-                $this->formData[$inputKey] = new FormDisplayText((string)$value);
-            }
-        }
-
-        $labels = $data["labels"];
-        foreach($labels as $key => $label)
-        {
-            $this->formData["label.{$key}"] = new FormDisplayText((string)$label);
-        }*/
     }
 
     /**
@@ -79,8 +63,6 @@ class BuilderSettingsForm extends FormDisplay
 
         $player->sendForm($form);
         // TODO: Builder mode toggle.
-        /* $builderModeToggle = "toggle.builder.mode"
-        $form->addToggle($this->formData["toggle.builder.mode"]); */
     }
 
     /**

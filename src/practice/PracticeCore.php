@@ -46,7 +46,7 @@ class PracticeCore extends PluginBase
         $this->initDataFolder();
         $this->registerEntities();
 
-        // Default JSON Data provider is a JSON.
+        // Default test data provider is a JSON data provider.
         PracticeDataManager::setDataProvider(new JSONDataProvider());
 
         // The settings information to initialize.
@@ -63,6 +63,9 @@ class PracticeCore extends PluginBase
         self::$kitManager = new KitManager($this);
         self::$arenaManager = new ArenaManager($this);
         self::$itemManager = new ItemManager($this);
+
+        // Reloads the players.
+        PracticeUtil::reloadPlayers();
 
         // Initializes the practice listener & task.
         new PracticeListener($this);
@@ -83,6 +86,9 @@ class PracticeCore extends PluginBase
         {
             self::$arenaManager->save();
         }
+
+        // Saves all of the players information.
+        PracticeDataManager::getDataProvider()->saveAllPlayers();
     }
 
     /**

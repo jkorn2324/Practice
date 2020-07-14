@@ -320,4 +320,22 @@ class PracticeUtil
 
         return null;
     }
+
+    /**
+     * Reloads the players, used in case of a reload, restart, etc...
+     */
+    public static function reloadPlayers(): void
+    {
+        $players = Server::getInstance()->getOnlinePlayers();
+        foreach($players as $player)
+        {
+            if($player instanceof PracticePlayer)
+            {
+                // Sets the player as unsaved, used so player can be saved again.
+                $player->setSaved(false);
+
+                // TODO: What other functions could be used here.
+            }
+        }
+    }
 }
