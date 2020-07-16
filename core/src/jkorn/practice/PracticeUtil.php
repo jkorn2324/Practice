@@ -347,4 +347,31 @@ class PracticeUtil
     {
         // TODO: Implement function
     }
+
+    /**
+     * @return int
+     *
+     * Gets the number of players playing in a game.
+     */
+    public static function getPlayersInGames(): int
+    {
+        $players = Server::getInstance()->getOnlinePlayers();
+        if(count($players) <= 0)
+        {
+            return 0;
+        }
+
+        $count = 0;
+        foreach($players as $player)
+        {
+            if(
+                $player instanceof PracticePlayer
+                && $player->isInGame()
+            )
+            {
+                $count++;
+            }
+        }
+        return $count;
+    }
 }

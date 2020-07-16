@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace jkorn\practice\games\duels\types\generic;
 
 
+use jkorn\practice\arenas\types\duels\IDuelArena;
 use pocketmine\Server;
 use jkorn\practice\games\IGameManager;
 use jkorn\practice\PracticeCore;
 
 class GenericDuelsManager implements IGameManager
 {
-
     /** @var Server */
     private $server;
     /** @var PracticeCore */
@@ -41,6 +41,19 @@ class GenericDuelsManager implements IGameManager
     }
 
     /**
+     * @param $game
+     *
+     * Removes the duel from the manager.
+     */
+    public function remove($game): void
+    {
+        if($game instanceof IGenericDuel && isset($this->duels[$game->getID()]))
+        {
+            unset($this->duels[$game->getID()]);
+        }
+    }
+
+    /**
      * @return string
      *
      * Gets the type of game manager.
@@ -58,5 +71,35 @@ class GenericDuelsManager implements IGameManager
     public function getTitle(): string
     {
         return "Generic Duels";
+    }
+
+    /**
+     * Called when the game manager is first registered.
+     */
+    public function onRegistered(): void
+    {
+        // TODO: Register the statistics
+        // TODO: Register the Pre-Duel Generators.
+        // TODO: Register the Post-Duel Arena Manager
+    }
+
+    /**
+     * Called when the game manager is unregistered.
+     */
+    public function onUnregistered(): void
+    {
+        // TODO: Unregister the statistics.
+        // TODO: Unregister the Post-Duel Arena Manager
+    }
+
+    /**
+     * @return IDuelArena
+     *
+     * Generates a random duel arena.
+     */
+    protected function randomArena(): IDuelArena
+    {
+        // TODO: Get a random arena.
+        return null;
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice;
 
 
+use jkorn\practice\games\BaseGameManager;
 use pocketmine\entity\Entity;
 use pocketmine\plugin\PluginBase;
 use jkorn\practice\arenas\BaseArenaManager;
@@ -26,7 +27,7 @@ class PracticeCore extends PluginBase
     private static $instance;
 
     /** @var BaseArenaManager */
-    private static $arenaManager;
+    private static $baseArenaManager;
     /** @var KitManager */
     private static $kitManager;
     /** @var ScoreboardDisplayManager */
@@ -35,6 +36,8 @@ class PracticeCore extends PluginBase
     private static $formDisplayManager;
     /** @var ItemManager */
     private static $itemManager;
+    /** @var BaseGameManager */
+    private static $baseGameManager;
 
     /**
      * Called when the plugin enables.
@@ -61,7 +64,8 @@ class PracticeCore extends PluginBase
         self::$formDisplayManager = new FormDisplayManager($this);
 
         self::$kitManager = new KitManager($this);
-        self::$arenaManager = new BaseArenaManager($this);
+        self::$baseArenaManager = new BaseArenaManager($this);
+        self::$baseGameManager = new BaseGameManager($this);
         self::$itemManager = new ItemManager($this);
 
         // Reloads the players.
@@ -82,9 +86,9 @@ class PracticeCore extends PluginBase
             self::$kitManager->save();
         }
 
-        if(self::$arenaManager instanceof BaseArenaManager)
+        if(self::$baseArenaManager instanceof BaseArenaManager)
         {
-            self::$arenaManager->save();
+            self::$baseArenaManager->save();
         }
 
         // Saves all of the players information.
@@ -117,9 +121,9 @@ class PracticeCore extends PluginBase
      *
      * Gets the arena manager.
      */
-    public static function getArenaManager(): BaseArenaManager
+    public static function getBaseArenaManager(): BaseArenaManager
     {
-        return self::$arenaManager;
+        return self::$baseArenaManager;
     }
 
     /**
@@ -160,6 +164,16 @@ class PracticeCore extends PluginBase
     public static function getItemManager(): ItemManager
     {
         return self::$itemManager;
+    }
+
+    /**
+     * @return BaseGameManager
+     *
+     * Gets the base game manager.
+     */
+    public static function getBaseGameManager(): BaseGameManager
+    {
+        return self::$baseGameManager;
     }
 
     /**

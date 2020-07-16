@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace jkorn\practice\scoreboard\display\statistics;
 
 
+use jkorn\practice\PracticeUtil;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
-use jkorn\practice\arenas\types\ffa\FFAArena;
 use jkorn\practice\player\PracticePlayer;
 
 class ScoreboardStatistic
@@ -57,26 +57,26 @@ class ScoreboardStatistic
 
     // -------------------------------------------------------------------------------
 
-    const STATISTIC_KILLS = "kills";
-    const STATISTIC_DEATHS = "deaths";
-    const STATISTIC_CPS = "cps";
-    const STATISTIC_ONLINE = "online";
-    const STATISTIC_IN_QUEUES = "in.queues";
-    const STATISTIC_IN_FIGHTS = "in.fights";
-    const STATISTIC_PING = "ping";
-    const STATISTIC_NAME = "name";
-    const STATISTIC_OS = "os";
-    const STATISTIC_RANK = "rank"; // TODO: Rank
-    const STATISTIC_FFA_ARENA = "ffa.arena"; // TODO: Move to ffa arena.
-    const STATISTIC_FFA_ARENA_PLAYERS = "ffa.arena.players";
+    const STATISTIC_KILLS = "stat.kills";
+    const STATISTIC_DEATHS = "stat.deaths";
+    const STATISTIC_CPS = "stat.cps";
+    const STATISTIC_ONLINE = "stat.online";
+    const STATISTIC_PING = "stat.ping";
+    const STATISTIC_NAME = "stat.player.name";
+    const STATISTIC_OS = "stat.os";
+    const STATISTIC_EQUIPPED_KIT = "stat.equipped.kit";
+    const STATISTIC_RANK = "stat.rank";
+    const STATISTIC_IN_GAMES = "stat.in.games";
+
+    const STATISTIC_IN_QUEUES = "in.queues"; // TODO: Sync with Duels Manager.
+    const STATISTIC_IN_FIGHTS = "in.fights"; // TODO: Sync with Duels Manager.
+
     const STATISTIC_OPPONENT = "opponent";
     const STATISTIC_OPPONENT_CPS = "opponent.cps";
     const STATISTIC_OPPONENT_PING = "opponent.ping";
     const STATISTIC_DUEL_ARENA = "duel.arena";
-    const STATISTIC_DURATION = "duration";
+    const STATISTIC_DURATION = "duration"; // TODO: Sync with Duels Manager.
     const STATISTIC_SPECTATORS = "spectators";
-    const STATISTIC_KIT = "kit";
-    const STATISTIC_RANKED = "ranked";
 
     /** @var ScoreboardStatistic[] */
     private static $statistics = [];
@@ -145,26 +145,6 @@ class ScoreboardStatistic
             }
         ));
 
-        // Registers the in-queues statistic.
-        self::registerStatistic(new ScoreboardStatistic(
-            self::STATISTIC_IN_QUEUES,
-            function(Player $player, Server $server)
-            {
-                // TODO: In-Queues statistic.
-                return 0;
-            }
-        ));
-
-        // Registers the in-fights statistic.
-        self::registerStatistic(new ScoreboardStatistic(
-            self::STATISTIC_IN_FIGHTS,
-            function(Player $player, Server $server)
-            {
-                // TODO: In-Fights statistic.
-                return 0;
-            }
-        ));
-
         // Registers the ping statistic.
         self::registerStatistic(new ScoreboardStatistic(
             self::STATISTIC_PING,
@@ -200,115 +180,41 @@ class ScoreboardStatistic
             }
         ));
 
-        // Registers the arena name to the player.
-        self::registerStatistic(new FFAScoreboardStatistic(
-            self::STATISTIC_FFA_ARENA,
-            function(Player $player, Server $server, $arena)
-            {
-                if($arena instanceof FFAArena)
-                {
-                    return $arena->getName();
-                }
-
-                return "[Unknown]";
-            }
-        ));
-
-        // Registers the arena name to the player.
-        self::registerStatistic(new FFAScoreboardStatistic(
-            self::STATISTIC_FFA_ARENA_PLAYERS,
-            function(Player $player, Server $server, $arena)
-            {
-                if($arena instanceof FFAArena)
-                {
-                    return $arena->getPlayers();
-                }
-
-                return 0;
-            }
-        ));
-
-        // Registers the opponent name.
-        self::registerStatistic(new DuelScoreboardStatistic(
-            self::STATISTIC_OPPONENT,
-            function(Player $player, Server $server, $duel)
-            {
-                // TODO
-                return "";
-            }
-        ));
-
-        // Registers the opponent cps.
-        self::registerStatistic(new DuelScoreboardStatistic(
-            self::STATISTIC_OPPONENT_CPS,
-            function(Player $player, Server $server, $duel)
-            {
-                // TODO
-                return "";
-            }
-        ));
-
-        // Registers the opponent ping.
-        self::registerStatistic(new DuelScoreboardStatistic(
-            self::STATISTIC_OPPONENT_PING,
-            function(Player $player, Server $server, $duel)
-            {
-                // TODO
-                return 0;
-            }
-        ));
-
-        // Registers the duel arena name.
-        self::registerStatistic(new DuelScoreboardStatistic(
-            self::STATISTIC_DUEL_ARENA,
-            function(Player $player, Server $server, $duel)
-            {
-                // TODO
-                return "";
-            }
-        ));
-
-        // Registers the duration statistic.
-        self::registerStatistic(new DuelScoreboardStatistic(
-            self::STATISTIC_DURATION,
-            function(Player $player, Server $server, $duel)
-            {
-                return "00:00";
-            }
-        ));
-
-        // Register the spectator statistic.
-        self::registerStatistic(new DuelScoreboardStatistic(
-            self::STATISTIC_SPECTATORS,
-            function(Player $player, Server $server, $duel)
-            {
-                return 0;
-            }
-        ));
-
-        // Registers the kit statistic.
+        // Gets the equipped kit statistic.
         self::registerStatistic(new ScoreboardStatistic(
-            self::STATISTIC_KIT,
+            self::STATISTIC_EQUIPPED_KIT,
             function(Player $player, Server $server)
             {
-                if($player instanceof PracticePlayer && $player->isEquipped())
+                if($player instanceof PracticePlayer)
                 {
-                    return $player->getEquippedKit()->getName();
+                    $kit = $player->getEquippedKit();
+                    if($kit !== null)
+                    {
+                        return $kit->getName();
+                    }
+                    return "None";
                 }
 
-                // TODO: If player is in a queue, get the kit the player is queued for.
-
-                return TextFormat::RED . "[Unknown]" . TextFormat::RESET;
+                return TextFormat::RED . "[Unknown]";
             }
         ));
 
-        // Registers the ranked statistic.
+        // Gets the player's rank statistic.
         self::registerStatistic(new ScoreboardStatistic(
-            self::STATISTIC_RANKED,
+            self::STATISTIC_RANK,
             function(Player $player, Server $server)
             {
-                // TODO: Get ranked queue.
-                return "";
+                // TODO: Do the rank statistic.
+                return TextFormat::RED . "[Unknown]";
+            }
+        ));
+
+        // Gets the number of players in games.
+        self::registerStatistic(new ScoreboardStatistic(
+            self::STATISTIC_IN_GAMES,
+            function(Player $player, Server $server)
+            {
+                return PracticeUtil::getPlayersInGames();
             }
         ));
     }

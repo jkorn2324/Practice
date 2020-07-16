@@ -80,49 +80,36 @@ There are certain statistics that you can display on a given line by using a set
 ```yaml
 scoreboard.spawn:
 	# Displays how many online-players there are.
-	line-1: " Online-Players: {online} "
+	line-1: " Online-Players: {stat.online} "
 ```
 
 ** DISCLAIMER: ** Certain statistics only work when the player is in a certain scenario or has a specific scoreboard type.
 
 ## List of Statistics
-This provides the list of all the types of statistics that the scoreboard can display based on the corresponding scoreboards that these statistics work on.
+This provides the list of the scoreboard statistics that this core allows.
 
  ---
-**Any Scoreboard** (These Statistics Work for Any Scoreboard)**:**
-- `{kills}` - Lists the number of kills the player has.
-- `{deaths}` - Lists the number of deaths the player has.
-- `{cps}` - Lists the clicks-per-second of the player.
-- `{online}` - Displays the current number of players on the server.
-- `{in.queues}` - Displays the current number of players in a queue for a duel.
-- `{in.fights}` - Displays the current number of players in a duel.
-- `{ffa.stat.players}` - Displays the current number of players in all the ffa arenas.
-- `{ping}` - Displays the current player's ping.
-- `{name}` - Displays the current player's name.
-- `{os}` - Displays the device operating system.
+#### Default Statistics:
+These are the statistics that work for any scoreboard, regardless of game-modes that are enabled.
+- `{stat.kills}` - Lists the number of kills the player has ever on the server.
+- `{stat.deaths}` - Lists the number of deaths the player has ever on the server.
+- `{stat.cps}` - Lists the clicks-per-second of the player.
+- `{stat.online}` - Displays the current number of players on the server.
+- `{stat.ping}` - Displays the current player's ping.
+- `{stat.player.name}` - Displays the current player's name.
+- `{stat.os}` - Displays the device operating system.
+- `{stat.equipped.kit}` - Displays the current kit equipped by the player, defaults to `None` if they don't have a kit.
+- `{stat.rank}` - Displays the current player's rank.
+- `{stat.games.playing}` - Displays the number of players playing a game.
 ---
+#### FFA Statistics:
+These are the statistics that are added if FFA Arenas are enabled. 
 
-**scoreboard.spawn.queue:**
-- `{ranked}` - Displays whether or not the queue the player is in is ranked or not.
-- `{kit}` - Displays the kit the player is queued for.
+These statistics work for any scoreboard:
+- `{ffa.stat.players}` - Displays the total number of players playing in FFA.
 
----
-**scoreboard.ffa:**
+These statistics ONLY work if the FFA scoreboard is currently displayed:
 - `{ffa.stat.arena}` - Displays the current ffa arena the player is playing.
 - `{ffa.stat.arena.players}` - Displays the current number of players playing in the arena.
----
-**scoreboard.duel:**
-- `{opponent}` - Displays the name of your opponent.
-- `{opponent.cps}` - Displays the CPS of your opponent.
-- `{opponent.ping}` - Displays the Ping of your opponent.
-- `{duel.arena}` - Displays the name of the duel arena.
-- `{duration}` - Displays the current duration of the duel.
-- `{spectators}` - Displays the number of spectators watching the duel.
-- `{kit}` - Displays the current duel kit.
----
-**scoreboard.duel.spectator:**
-- `{duration}` - Displays the current duration of the duel.
-- `{spectators}` - Displays the number of spectators watching the duel.
-- `{kit}` - Displays the current duel kit.
-- `{duel.arena}` - Displays the name of the duel arena.
+- `{ffa.stat.arena.kit}` - Displays the ffa arena kit.
 ---

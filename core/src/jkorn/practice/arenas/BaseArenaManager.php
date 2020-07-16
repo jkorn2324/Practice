@@ -50,9 +50,22 @@ class BaseArenaManager extends AbstractManager
      */
     public function registerArenaManager(IArenaManager $manager, bool $load = false, bool $override = false): void
     {
-        if(!$override && isset($this->arenaManagers[$manager->getType()]))
+        if(isset($this->arenaManagers[$manager->getType()]))
         {
-            return;
+            if(!$override)
+            {
+                return;
+            }
+
+            $previousManager = $this->arenaManagers[$manager->getType()];
+            if($previousManager->isLoaded())
+            {
+                $data = $previousManager->export();
+                $file = $this->arenaFolder . $previousManager->getFile();
+                file_put_contents($file, $data);
+            }
+
+            $previousManager->onUnregistered();
         }
 
         $this->arenaManagers[$manager->getType()] = $manager;
@@ -78,7 +91,8 @@ class BaseArenaManager extends AbstractManager
             if($save && $arenaManager->isLoaded())
             {
                 $data = $arenaManager->export();
-                file_put_contents($this->arenaFolder, json_encode($data));
+                $file = $this->arenaFolder . $arenaManager->getFile();
+                file_put_contents($file, json_encode($data));
             }
 
             $arenaManager->onUnregistered();
@@ -117,7 +131,8 @@ class BaseArenaManager extends AbstractManager
         foreach($this->arenaManagers as $manager)
         {
             $exportedData = $manager->export();
-            file_put_contents($manager->getFile(), json_encode($exportedData));
+            $file = $this->arenaFolder . $manager->getType() . ".json";
+            file_put_contents($file, json_encode($exportedData));
         }
     }
 

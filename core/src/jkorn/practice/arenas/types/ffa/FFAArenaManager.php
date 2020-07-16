@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\arenas\types\ffa;
 
 
+use jkorn\practice\scoreboard\display\statistics\FFAScoreboardStatistic;
 use pocketmine\Player;
 use pocketmine\Server;
 use jkorn\practice\arenas\IArenaManager;
@@ -14,9 +15,10 @@ use jkorn\practice\scoreboard\display\statistics\ScoreboardStatistic;
 class FFAArenaManager implements IArenaManager
 {
 
-    const STATISTIC_IN_FFA = "ffa.stat.players";
+    const STATISTIC_FFA_PLAYERS = "ffa.stat.players";
     const STATISTIC_FFA_ARENA = "ffa.stat.arena";
     const STATISTIC_FFA_ARENA_PLAYERS = "ffa.stat.arena.players";
+    const STATISTIC_FFA_ARENA_KIT = "ffa.stat.arena.kit";
 
     /** @var PracticeCore */
     private $core;
@@ -43,7 +45,7 @@ class FFAArenaManager implements IArenaManager
      */
     public function load(string &$arenaFolder, bool $async): void
     {
-        $filePath = $arenaFolder . $this->getFile();
+        $filePath = $arenaFolder . $this->getType() . ".json";
         if(!file_exists($filePath))
         {
             $file = fopen($filePath, "w");
@@ -132,16 +134,6 @@ class FFAArenaManager implements IArenaManager
     /**
      * @return string
      *
-     * Gets the exported file of the arena manager.
-     */
-    public function getFile(): string
-    {
-        return "ffa.json";
-    }
-
-    /**
-     * @return string
-     *
      * Gets the arena manager type.
      */
     public function getType(): string
@@ -161,17 +153,16 @@ class FFAArenaManager implements IArenaManager
 
     /**
      * Called when the arena manager is first registered.
+     * Used to register statistics that correspond with the manager.
      */
     public function onRegistered(): void
     {
-        // TODO: Register the corresponding statistics.
-
         // Registers the number of players in an FFA arena.
         ScoreboardStatistic::registerStatistic(new ScoreboardStatistic(
-            self::STATISTIC_IN_FFA,
+            self::STATISTIC_FFA_PLAYERS,
             function(Player $player, Server $server)
             {
-                $manager = PracticeCore::getArenaManager()->getArenaManager("ffa");
+                $manager = PracticeCore::getBaseArenaManager()->getArenaManager("ffa");
                 if($manager === null)
                 {
                     return 0;
@@ -194,14 +185,62 @@ class FFAArenaManager implements IArenaManager
                 return $numPlayers;
             }
         ));
+
+        // Registers the arena name to the player.
+        ScoreboardStatistic::registerStatistic(new FFAScoreboardStatistic(
+            self::STATISTIC_FFA_ARENA,
+            function(Player $player, Server $server, $arena)
+            {
+                if($arena instanceof FFAArena)
+                {
+                    return $arena->getName();
+                }
+
+                return "[Unknown]";
+            }
+        ));
+
+        // Registers the arena name to the player.
+        ScoreboardStatistic::registerStatistic(new FFAScoreboardStatistic(
+            self::STATISTIC_FFA_ARENA_PLAYERS,
+            function(Player $player, Server $server, $arena)
+            {
+                if($arena instanceof FFAArena)
+                {
+                    return $arena->getPlayers();
+                }
+
+                return 0;
+            }
+        ));
+
+        // Registers the FFA Arena kit statistic.
+        ScoreboardStatistic::registerStatistic(new FFAScoreboardStatistic(
+            self::STATISTIC_FFA_ARENA_KIT,
+            function(Player $player, Server $server, $arena)
+            {
+                if($arena instanceof FFAArena)
+                {
+                    $kit = $arena->getKit();
+                    if($kit !== null)
+                    {
+                        return $kit->getName();
+                    }
+                }
+                return "Unknown";
+            }
+        ));
     }
 
     /**
      * Called when the arena manager is unregistered.
+     * Called to unregister statistics.
      */
     public function onUnregistered(): void
     {
-        // TODO: Implement onUnregistered() method.
         ScoreboardStatistic::unregisterStatistic(self::STATISTIC_FFA_ARENA_PLAYERS);
+        ScoreboardStatistic::unregisterStatistic(self::STATISTIC_FFA_PLAYERS);
+        ScoreboardStatistic::unregisterStatistic(self::STATISTIC_FFA_ARENA);
+        ScoreboardStatistic::unregisterStatistic(self::STATISTIC_FFA_ARENA_KIT);
     }
 }

@@ -52,7 +52,7 @@ class FFAPlayForm extends FormDisplay
      */
     public function display(Player $player): void
     {
-        $arenaManager = PracticeCore::getArenaManager()->getArenaManager("ffa");
+        $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager("ffa");
         if($arenaManager === null)
         {
             return;

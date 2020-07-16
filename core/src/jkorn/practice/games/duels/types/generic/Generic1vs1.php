@@ -5,6 +5,12 @@ declare(strict_types=1);
 namespace jkorn\practice\games\duels\types\generic;
 
 
+use jkorn\practice\arenas\types\duels\DuelArenaManager;
+use jkorn\practice\arenas\types\duels\PostGeneratedDuelArena;
+use jkorn\practice\arenas\types\duels\PreGeneratedDuelArena;
+use jkorn\practice\games\IGameManager;
+use jkorn\practice\PracticeCore;
+use jkorn\practice\PracticeUtil;
 use pocketmine\Player;
 use jkorn\practice\games\duels\player\DuelPlayer;
 use jkorn\practice\games\duels\types\Duel1vs1;
@@ -76,7 +82,25 @@ class Generic1vs1 extends Duel1vs1 implements IGenericDuel
      */
     public function die(): void
     {
-        // TODO: Implement die() method.
+        if($this->arena instanceof PostGeneratedDuelArena)
+        {
+            PracticeUtil::deleteLevel($this->arena->getLevel(), true);
+        }
+        elseif ($this->arena instanceof PreGeneratedDuelArena)
+        {
+            // Opens the duel arena again for future use.
+            $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager("duels");
+            if($arenaManager instanceof DuelArenaManager)
+            {
+                $arenaManager->open($this->arena);
+            }
+        }
+
+        $genericDuelManager = PracticeCore::getBaseGameManager()->getGameManager(IGameManager::MANAGER_GENERIC_DUELS);
+        if($genericDuelManager instanceof GenericDuelsManager)
+        {
+            $genericDuelManager->remove($this);
+        }
     }
 
     /**
@@ -87,7 +111,11 @@ class Generic1vs1 extends Duel1vs1 implements IGenericDuel
      */
     public function isSpectator(Player $player): bool
     {
-        // TODO: Implement isSpectator() method.
+        if($player instanceof PracticePlayer)
+        {
+            return isset($this->spectators[$player->getServerID()->toString()]);
+        }
+        return false;
     }
 
     /**

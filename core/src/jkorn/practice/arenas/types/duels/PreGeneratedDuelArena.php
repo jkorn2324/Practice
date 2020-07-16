@@ -15,12 +15,12 @@ use jkorn\practice\PracticeCore;
 use jkorn\practice\PracticeUtil;
 
 /**
- * Class PreGeneratedArena
+ * Class PreGeneratedDuelArena
  * @package jkorn\practice\arenas\types\duels
  *
  * An arena that is pre-generated.
  */
-class PreGeneratedArena extends PracticeArena implements IDuelArena, ISaved
+class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
 {
 
     /** @var Vector3 */
@@ -32,7 +32,7 @@ class PreGeneratedArena extends PracticeArena implements IDuelArena, ISaved
     private $arenaKits = [];
 
     /**
-     * PreGeneratedArena constructor.
+     * PreGeneratedDuelArena constructor.
      * @param string $name
      * @param $kits
      * @param Vector3 $firstPosition
@@ -92,7 +92,7 @@ class PreGeneratedArena extends PracticeArena implements IDuelArena, ISaved
      */
     public function equals($arena): bool
     {
-        if($arena instanceof PreGeneratedArena)
+        if($arena instanceof PreGeneratedDuelArena)
         {
             return $arena->getLocalizedName() === $this->getLocalizedName();
         }
@@ -174,8 +174,7 @@ class PreGeneratedArena extends PracticeArena implements IDuelArena, ISaved
      */
     public function isWithinArena(Vector3 $position): bool
     {
-        // TODO: fix.
-        return false;
+        return true;
     }
 
     /**
@@ -197,11 +196,11 @@ class PreGeneratedArena extends PracticeArena implements IDuelArena, ISaved
     /**
      * @param string $arenaName
      * @param $data
-     * @return PreGeneratedArena|null
+     * @return PreGeneratedDuelArena|null
      *
      * Decodes the arena from the provided data & arena.
      */
-    public static function decode(string $arenaName, array $data): ?PreGeneratedArena
+    public static function decode(string $arenaName, array $data): ?PreGeneratedDuelArena
     {
         // TODO: Decode the information from the data.
         return null;

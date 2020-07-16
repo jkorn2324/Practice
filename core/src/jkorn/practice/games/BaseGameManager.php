@@ -53,11 +53,36 @@ class BaseGameManager
     public function registerGameManager(IGameManager $manager, bool $override = false): void
     {
         $gameType = $manager->getType();
-        if(isset($this->gameTypes[$gameType]) && !$override)
+
+        if(isset($this->gameTypes[$gameType]))
         {
-            return;
+            if(!$override)
+            {
+                return;
+            }
+
+            $oldGameManager = $this->gameTypes[$gameType];
+            $oldGameManager->onUnregistered();
         }
+
         $this->gameTypes[$gameType] = $manager;
+        $manager->onRegistered();
+    }
+
+    /**
+     * @param string $type
+     * @return IGameManager|null
+     *
+     * Gets the game manager based on its type.
+     */
+    public function getGameManager(string $type): ?IGameManager
+    {
+        if(isset($this->gameTypes[$type]))
+        {
+            return $this->gameTypes[$type];
+        }
+
+        return null;
     }
 
     /**

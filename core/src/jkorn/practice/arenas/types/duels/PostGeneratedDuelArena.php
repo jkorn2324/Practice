@@ -8,12 +8,12 @@ use pocketmine\math\Vector3;
 use jkorn\practice\arenas\PracticeArena;
 
 /**
- * Class PostGeneratedArena
+ * Class PostGeneratedDuelArena
  * @package jkorn\practice\arenas\types\duels
  *
  * A duel arena that is post generated.
  */
-class PostGeneratedArena extends PracticeArena implements IDuelArena
+class PostGeneratedDuelArena extends PracticeArena implements IDuelArena
 {
 
     /**

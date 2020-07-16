@@ -49,13 +49,6 @@ interface IArenaManager
     /**
      * @return string
      *
-     * Gets the exported file of the arena manager.
-     */
-    public function getFile(): string;
-
-    /**
-     * @return string
-     *
      * Gets the arena manager type.
      */
     public function getType(): string;
