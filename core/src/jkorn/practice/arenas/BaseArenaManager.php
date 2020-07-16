@@ -58,6 +58,11 @@ class BaseArenaManager extends AbstractManager
             }
 
             $previousManager = $this->arenaManagers[$manager->getType()];
+            if($previousManager->equals($manager))
+            {
+                return;
+            }
+
             if($previousManager->isLoaded())
             {
                 $data = $previousManager->export();
@@ -71,7 +76,7 @@ class BaseArenaManager extends AbstractManager
         $this->arenaManagers[$manager->getType()] = $manager;
         $manager->onRegistered();
 
-        if($load)
+        if($load && !$manager->isLoaded())
         {
             $manager->load($this->arenaFolder, true);
         }

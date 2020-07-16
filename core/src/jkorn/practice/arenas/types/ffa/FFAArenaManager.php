@@ -243,4 +243,16 @@ class FFAArenaManager implements IArenaManager
         ScoreboardStatistic::unregisterStatistic(self::STATISTIC_FFA_ARENA);
         ScoreboardStatistic::unregisterStatistic(self::STATISTIC_FFA_ARENA_KIT);
     }
+
+    /**
+     * @param $manager
+     * @return bool
+     *
+     * Determines if one manager is equivalent to another.
+     */
+    public function equals($manager): bool
+    {
+        return is_a($manager, __NAMESPACE__ . "\\" . self::class)
+            && get_class($manager) === self::class;
+    }
 }

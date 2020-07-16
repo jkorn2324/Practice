@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\games\duels\types\generic;
 
 
+use jkorn\practice\arenas\types\duels\DuelArenaManager;
 use jkorn\practice\arenas\types\duels\IDuelArena;
 use pocketmine\Server;
 use jkorn\practice\games\IGameManager;
@@ -79,8 +80,10 @@ class GenericDuelsManager implements IGameManager
     public function onRegistered(): void
     {
         // TODO: Register the statistics
-        // TODO: Register the Pre-Duel Generators.
-        // TODO: Register the Post-Duel Arena Manager
+        PracticeCore::getBaseArenaManager()->registerArenaManager(
+            new DuelArenaManager($this->core),
+            true
+        );
     }
 
     /**
@@ -101,5 +104,17 @@ class GenericDuelsManager implements IGameManager
     {
         // TODO: Get a random arena.
         return null;
+    }
+
+    /**
+     * @param $manager
+     * @return bool
+     *
+     * Determines if one manager is equivalent to another.
+     */
+    public function equals($manager): bool
+    {
+        // TODO: Implement equals() method.
+        return false;
     }
 }

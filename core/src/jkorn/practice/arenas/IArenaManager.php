@@ -74,4 +74,12 @@ interface IArenaManager
      * Exports the contents of the file.
      */
     public function export(): array;
+
+    /**
+     * @param $manager
+     * @return bool
+     *
+     * Determines if one manager is equivalent to another.
+     */
+    public function equals($manager): bool;
 }

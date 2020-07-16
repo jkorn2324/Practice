@@ -46,4 +46,12 @@ interface IGameManager
      * Gets the title of the type of game.
      */
     public function getTitle(): string;
+
+    /**
+     * @param $manager
+     * @return bool
+     *
+     * Determines if one manager is equivalent to another.
+     */
+    public function equals($manager): bool;
 }

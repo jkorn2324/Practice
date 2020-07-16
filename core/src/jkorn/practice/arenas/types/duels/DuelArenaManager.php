@@ -194,4 +194,16 @@ class DuelArenaManager implements IArenaManager
         }
         return $exported;
     }
+
+    /**
+     * @param $manager
+     * @return bool
+     *
+     * Determines if one manager is equivalent to another.
+     */
+    public function equals($manager): bool
+    {
+        return is_a($manager, __NAMESPACE__ . "\\" . self::class, true)
+            && get_class($manager) === self::class;
+    }
 }
