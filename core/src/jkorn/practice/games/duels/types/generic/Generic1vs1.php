@@ -11,6 +11,7 @@ use jkorn\practice\arenas\types\duels\PreGeneratedDuelArena;
 use jkorn\practice\games\IGameManager;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\PracticeUtil;
+use jkorn\practice\scoreboard\ScoreboardData;
 use pocketmine\Player;
 use jkorn\practice\games\duels\player\DuelPlayer;
 use jkorn\practice\games\duels\types\Duel1vs1;
@@ -19,6 +20,9 @@ use jkorn\practice\player\PracticePlayer;
 
 class Generic1vs1 extends Duel1vs1 implements IGenericDuel
 {
+
+    // The maximum duration seconds.
+    const MAX_DURATION_SECONDS = 60 * 30;
 
     /** @var PracticePlayer[] */
     private $spectators;
@@ -62,11 +66,14 @@ class Generic1vs1 extends Duel1vs1 implements IGenericDuel
     /**
      * @param bool $checkSeconds
      *
-     * Called when the duel is in progress.
+     * Called when the duel is in progress, do nothing for a generic duel.
      */
     protected function inProgressTick(bool $checkSeconds): void
     {
-        // TODO: Implement inProgressTick() method.
+        if($checkSeconds && $this->durationSeconds >= self::MAX_DURATION_SECONDS)
+        {
+            $this->setEnded();
+        }
     }
 
     /**
@@ -74,7 +81,40 @@ class Generic1vs1 extends Duel1vs1 implements IGenericDuel
      */
     protected function onEnd(): void
     {
-        // TODO: Implement onEnd() method.
+        // Updates the first player.
+        if($this->player1->isOnline())
+        {
+            // TODO: Sends the final message to player1.
+            $player = $this->player1->getPlayer();
+            if(!$this->player1->isDead())
+            {
+                $player->putInLobby(true);
+            }
+        }
+
+        // Updates the second player.
+        if($this->player2->isOnline())
+        {
+            // TODO: Sends the final message to player2.
+            $player = $this->player2->getPlayer();
+            if(!$this->player2->isDead())
+            {
+                $player->putInLobby(true);
+            }
+        }
+
+        // Broadcasts everything to the spectators & resets them.
+        $this->broadcastSpectators(function(Player $player)
+        {
+            if($player instanceof PracticePlayer)
+            {
+                // TODO: Send messages to the player.
+                $player->putInLobby(true);
+            }
+        });
+
+        // Resets the spectators.
+        $this->spectators = [];
     }
 
     /**
@@ -120,12 +160,28 @@ class Generic1vs1 extends Duel1vs1 implements IGenericDuel
 
     /**
      * @param Player $player
+     * @param $broadcast
      *
      * Adds the spectator to the game.
      */
-    public function addSpectator(Player $player): void
+    public function addSpectator(Player $player, bool $broadcast = true): void
     {
         // TODO: Implement addSpectator() method.
+        if(!$player instanceof PracticePlayer)
+        {
+            return;
+        }
+
+        $serverID = $player->getServerID()->toString();
+        $this->spectators[$serverID] = $player;
+        // TODO: Set the player as spectating.
+        $player->teleport($this->getCenterPosition());
+
+        $scoreboardData = $player->getScoreboardData();
+        if($scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_DUEL_SPECTATOR)
+        {
+            $scoreboardData->setScoreboard(ScoreboardData::SCOREBOARD_DUEL_SPECTATOR);
+        }
     }
 
     /**
@@ -137,7 +193,60 @@ class Generic1vs1 extends Duel1vs1 implements IGenericDuel
      */
     public function removeSpectator(Player $player, bool $broadcastMessage = true, bool $teleportToSpawn = true): void
     {
-        // TODO: Implement removeSpectator() method.
+        if(!$player instanceof PracticePlayer)
+        {
+            return;
+        }
+
+        $serverID = $player->getServerID()->toString();
+        if(isset($this->spectators[$serverID]))
+        {
+            unset($this->spectators[$serverID]);
+            if($player->isOnline())
+            {
+                // TODO: Unset the player as spectator.
+                $displayName = $player->getDisplayName();
+                if($teleportToSpawn)
+                {
+                    // TODO: Put player in lobby.
+                }
+            }
+
+            if($broadcastMessage)
+            {
+                // TODO: Broadcast the message.
+            }
+        }
+    }
+
+
+    /**
+     * @param callable $callback - The callback used, requires a player parameter.
+     *      Ex: broadcast(function(Player $player) {});
+     *
+     * Broadcasts something to everyone in the game based on a callback.
+     */
+    public function broadcastGlobal(callable $callback): void
+    {
+        $this->broadcastPlayers($callback);
+        $this->broadcastSpectators($callback);
+    }
+
+    /**
+     * @param callable $callable - Requires a player parameter.
+     *      EX: function(Player $player) {}
+     *
+     * Broadcasts something to the spectators.
+     */
+    public function broadcastSpectators(callable $callable): void
+    {
+        foreach($this->spectators as $spectator)
+        {
+            if($spectator->isOnline())
+            {
+                $callable($spectator);
+            }
+        }
     }
 
     /**
@@ -148,5 +257,20 @@ class Generic1vs1 extends Duel1vs1 implements IGenericDuel
     public function getID(): int
     {
         return $this->id;
+    }
+
+    /**
+     * @param $game
+     * @return bool
+     *
+     * Determines if the game is equivalent.
+     */
+    public function equals($game): bool
+    {
+        if($game instanceof Generic1vs1)
+        {
+            return $this->getID() === $game->getID();
+        }
+        return false;
     }
 }

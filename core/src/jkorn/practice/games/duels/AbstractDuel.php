@@ -157,13 +157,6 @@ abstract class AbstractDuel implements IGame
      * Gets the center position of the duel.
      */
     abstract protected function getCenterPosition(): Position;
-
-    /**
-     * @param callable $callback
-     *
-     * Broadcasts something to everyone in the duel.
-     */
-    abstract protected function broadcast(callable $callback): void;
     
     /**
      * @return string

@@ -81,9 +81,9 @@ abstract class Duel1vs1 extends AbstractDuel
             $countdownMessage = $this->getCountdownMessage();
             $showDuration = $this->countdownSeconds === 0 ? 10 : 20;
 
-            $this->broadcast(function(Player $player) use($countdownMessage, $showDuration)
+            $this->broadcastPlayers(function(Player $player) use($countdownMessage, $showDuration)
             {
-                $player->sendTitle($countdownMessage, "", $showDuration, 5);
+                $player->sendTitle($countdownMessage, "", 5, $showDuration, 5);
             });
 
             if($this->countdownSeconds === 0)
@@ -120,7 +120,7 @@ abstract class Duel1vs1 extends AbstractDuel
      *
      * Broadcasts something to everyone in the duel based on a callback.
      */
-    protected function broadcast(callable $callback): void
+    public function broadcastPlayers(callable $callback): void
     {
         if($this->player1->isOnline())
         {
@@ -232,22 +232,6 @@ abstract class Duel1vs1 extends AbstractDuel
     {
         $this->results["winner"] = $winner;
         $this->results["loser"] = $loser;
-    }
-
-    /**
-     * @param $game
-     * @return bool
-     *
-     * Determines if the game is equivalent.
-     */
-    public function equals($game): bool
-    {
-        if($game instanceof Duel1vs1)
-        {
-            return $game->player1->equals($this->player1)
-                && $game->player2->equals($this->player2);
-        }
-        return false;
     }
 
     /**

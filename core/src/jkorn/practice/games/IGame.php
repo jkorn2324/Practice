@@ -40,17 +40,18 @@ interface IGame
     public function removeFromGame(Player $player, int $reason): void;
 
     /**
+     * @param callable $callback - The callback used, requires a player parameter.
+     *      Ex: broadcast(function(Player $player) {});
+     *
+     * Broadcasts something to everyone playing in the game based on a callback.
+     */
+    public function broadcastPlayers(callable $callback): void;
+
+    /**
      * @param $game
      * @return bool
      *
      * Determines if the game is equivalent.
      */
     public function equals($game): bool;
-
-    /**
-     * @return int
-     *
-     * Gets the game's id.
-     */
-    public function getID(): int;
 }

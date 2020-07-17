@@ -10,5 +10,18 @@ use jkorn\practice\games\misc\ISpectatorGame;
 
 interface IGenericDuel extends IGame, ISpectatorGame
 {
+    /**
+     * @return int
+     *
+     * Gets the game's id.
+     */
+    public function getID(): int;
 
+    /**
+     * @param callable $callback - The callback used, requires a player parameter.
+     *      Ex: broadcast(function(Player $player) {});
+     *
+     * Broadcasts something to everyone in the game based on a callback.
+     */
+    public function broadcastGlobal(callable $callback): void;
 }
