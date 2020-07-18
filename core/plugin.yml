@@ -1,7 +1,7 @@
 name: Practice
 api: ["3.0.0"]
 version: "2.0.0"
-main: "jkorn\practice\PracticeCore"
+main: jkorn\practice\PracticeCore
 description: "Practice - by jkorn2324"
 website: "https://github.com/jkorn2324"
 

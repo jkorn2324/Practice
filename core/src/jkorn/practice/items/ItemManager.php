@@ -100,7 +100,7 @@ class ItemManager extends AbstractManager
                 if ($theForm !== null) {
                     $theForm->display($player);
                 } else {
-                    $player->sendMessage(TextFormat::RED . "[ERROR-PRACTICE] Internal plugin error, unable to show the play form.");
+                    $player->sendMessage(TextFormat::RED . "[ERROR-PRACTICE] Internal plugin error, unable to show the play ffa form.");
                 }
                 return true;
             });
@@ -137,6 +137,16 @@ class ItemManager extends AbstractManager
         {
             $this->items[self::ITEM_PLAY_GAMES]->setOnUseCallback(function(Player $player) {
                 // TODO
+                $theForm = PracticeCore::getFormDisplayManager()->getForm(FormDisplayManager::FORM_PLAY_GAMES);
+                if($theForm !== null)
+                {
+                    $theForm->display($player);
+                }
+                else
+                {
+                    $player->sendMessage(TextFormat::RED . "[ERROR-PRACTICE] Internal plugin error, unable to show the play games form.");
+                }
+
                 return true;
             });
         }

@@ -28,17 +28,20 @@ class BaseArenaManager extends AbstractManager
 
         $this->arenas = [];
 
-        $this->registerDefaultManagers();
+        $this->registerDefaultManagers($core);
 
         parent::__construct($core, false);
     }
 
     /**
+     *
+     * @param PracticeCore $core
+     *
      * Registers the specific arena types.
      */
-    private function registerDefaultManagers(): void
+    private function registerDefaultManagers(PracticeCore &$core): void
     {
-        $this->registerArenaManager(new FFAArenaManager($this->core));
+        $this->registerArenaManager(new FFAArenaManager($core));
     }
 
     /**

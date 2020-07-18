@@ -46,7 +46,7 @@ form.settings.builder:
 
 # The form that contains the text display for
 # the Play FFA form menu.
-form.ffa.play:
+form.FFA.play:
   title: "Play FFA"
   description: "Select the ffa arena that you want to play."
   buttons:
