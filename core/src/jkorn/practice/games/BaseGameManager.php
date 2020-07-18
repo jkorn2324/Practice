@@ -6,7 +6,6 @@ namespace jkorn\practice\games;
 
 
 use jkorn\practice\forms\display\statistics\FormDisplayStatistic;
-use jkorn\practice\PracticeUtil;
 use jkorn\practice\scoreboard\display\statistics\ScoreboardStatistic;
 use pocketmine\Player;
 use pocketmine\Server;
