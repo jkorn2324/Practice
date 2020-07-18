@@ -5,9 +5,14 @@ declare(strict_types=1);
 namespace jkorn\practice\games;
 
 
+use jkorn\practice\forms\display\statistics\FormDisplayStatistic;
+use jkorn\practice\PracticeUtil;
+use jkorn\practice\scoreboard\display\statistics\ScoreboardStatistic;
+use pocketmine\Player;
 use pocketmine\Server;
 use jkorn\practice\games\duels\types\generic\GenericDuelsManager;
 use jkorn\practice\PracticeCore;
+use pocketmine\utils\TextFormat;
 
 /**
  * Class BaseGameManager
@@ -17,6 +22,10 @@ use jkorn\practice\PracticeCore;
  */
 class BaseGameManager
 {
+
+    const STATISTIC_GAMES_TYPE = "games.stat.type";
+    const STATISTIC_GAMES_TYPE_PLAYERS = "games.stat.type.players";
+    const STATISTIC_GAMES_PLAYERS = "games.stat.players";
 
     /** @var IGameManager[] */
     private $gameTypes = [];
@@ -34,10 +43,89 @@ class BaseGameManager
         $this->server = $core->getServer();
 
         $this->initDefaultGames();
+        $this->initStatistics();
     }
 
     /**
-     * Initializes the default games.
+     * Initializes the Game Statistics.
+     */
+    protected function initStatistics(): void
+    {
+        $this->registerFormStatistics();
+        $this->registerScoreboardStatistics();
+    }
+
+    /**
+     * Registers the form statistics, etc...
+     */
+    private function registerFormStatistics(): void
+    {
+        // Registers the total game players.
+        FormDisplayStatistic::registerStatistic(
+            new FormDisplayStatistic(self::STATISTIC_GAMES_PLAYERS,
+                function(Player $player, Server $server, $data)
+                {
+                    $playersCount = 0;
+                    $games = PracticeCore::getBaseGameManager()->getGameTypes();
+                    foreach($games as $game)
+                    {
+                        $playersCount += $game->getPlayersPlaying();
+                    }
+
+                    return $playersCount;
+                })
+        );
+
+        // Registers the total game players based on type.
+        FormDisplayStatistic::registerStatistic(
+            new FormDisplayStatistic(self::STATISTIC_GAMES_TYPE_PLAYERS,
+                function(Player $player, Server $server, $data)
+                {
+                    if($data instanceof IGameManager)
+                    {
+                        return $data->getPlayersPlaying();
+                    }
+                    return 0;
+                })
+        );
+
+        FormDisplayStatistic::registerStatistic(
+            new FormDisplayStatistic(self::STATISTIC_GAMES_TYPE,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof IGameManager)
+                {
+                    return $data->getTitle();
+                }
+                return TextFormat::RED . "Unknown";
+            })
+        );
+    }
+
+    /**
+     * Register the scoreboard statistics.
+     */
+    private function registerScoreboardStatistics(): void
+    {
+        // Gets the number of players in games.
+        ScoreboardStatistic::registerStatistic(new ScoreboardStatistic(
+            self::STATISTIC_GAMES_PLAYERS,
+            function(Player $player, Server $server)
+            {
+                $playersCount = 0;
+                $games = PracticeCore::getBaseGameManager()->getGameTypes();
+                foreach($games as $game)
+                {
+                    $playersCount += $game->getPlayersPlaying();
+                }
+
+                return $playersCount;
+            }
+        ));
+    }
+
+    /**
+     * Initializes the specific games.
      */
     protected function initDefaultGames(): void
     {

@@ -25,12 +25,26 @@ class ScoreboardStatistic
     /** @var Server */
     protected $server;
 
-    public function __construct(string $localizedName, callable $callable)
+    /** @var bool */
+    protected $update;
+
+    public function __construct(string $localizedName, callable $callable, bool $update = true)
     {
         $this->localizedName = $localizedName;
         $this->callable = $callable;
 
+        $this->update = $update;
         $this->server = Server::getInstance();
+    }
+
+    /**
+     * @return bool
+     *
+     * Determines whether the statistic should update.
+     */
+    public function doUpdate(): bool
+    {
+        return $this->update;
     }
 
     /**
@@ -66,10 +80,6 @@ class ScoreboardStatistic
     const STATISTIC_OS = "stat.os";
     const STATISTIC_EQUIPPED_KIT = "stat.equipped.kit";
     const STATISTIC_RANK = "stat.rank";
-    const STATISTIC_IN_GAMES = "stat.in.games";
-
-    const STATISTIC_IN_QUEUES = "in.queues"; // TODO: Sync with Duels Manager.
-    const STATISTIC_IN_FIGHTS = "in.fights"; // TODO: Sync with Duels Manager.
 
     const STATISTIC_OPPONENT = "opponent";
     const STATISTIC_OPPONENT_CPS = "opponent.cps";
@@ -82,7 +92,7 @@ class ScoreboardStatistic
     private static $statistics = [];
 
     /**
-     * Initializes the default statistics.
+     * Initializes the specific statistics.
      */
     public static function init(): void
     {
@@ -178,7 +188,7 @@ class ScoreboardStatistic
                 }
                 return TextFormat::RED . "[Unknown]" . TextFormat::RESET;
             }
-        ));
+        , false));
 
         // Gets the equipped kit statistic.
         self::registerStatistic(new ScoreboardStatistic(
@@ -197,7 +207,7 @@ class ScoreboardStatistic
 
                 return TextFormat::RED . "[Unknown]";
             }
-        ));
+        , false));
 
         // Gets the player's rank statistic.
         self::registerStatistic(new ScoreboardStatistic(
@@ -206,15 +216,6 @@ class ScoreboardStatistic
             {
                 // TODO: Do the rank statistic.
                 return TextFormat::RED . "[Unknown]";
-            }
-        ));
-
-        // Gets the number of players in games.
-        self::registerStatistic(new ScoreboardStatistic(
-            self::STATISTIC_IN_GAMES,
-            function(Player $player, Server $server)
-            {
-                return PracticeUtil::getPlayersInGames();
             }
         ));
     }
@@ -277,7 +278,7 @@ class ScoreboardStatistic
         foreach (self::$statistics as $localized => $statistic)
         {
             $statisticVariable = "{$localized}";
-            if(strpos($message, $statisticVariable) !== 0)
+            if(strpos($message, $statisticVariable) !== 0 && $statistic->doUpdate())
             {
                 return true;
             }

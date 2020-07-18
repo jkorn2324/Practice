@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace jkorn\practice\forms\display\statistics;
 
-
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
@@ -55,13 +54,6 @@ class FormDisplayStatistic
 
     // ----------------------------------------------------------------------------------
 
-    // TODO: Display the information
-    const STATISTIC_FFA_ARENA = "ffa.arena";
-    const STATISTIC_FFA_ARENA_PLAYERS = "ffa.arena.players";
-
-    const STATISTIC_PLAYERS_QUEUED_DUEL = "kit.players.queued";
-    const STATISTIC_PLAYERS_FIGHTING_DUEL = "kit.players.fighting";
-
     const STATISTIC_KIT_NAME = "kit";
 
     /** @var FormDisplayStatistic[] */
@@ -83,15 +75,15 @@ class FormDisplayStatistic
     }
 
     /**
-     * @param FormDisplayStatistic $stat
+     * @param string $stat
      *
      * Unregisters the statistics.
      */
-    public static function unregisterStatistic(FormDisplayStatistic $stat): void
+    public static function unregisterStatistic(string $stat): void
     {
-        if(isset(self::$statistics[$stat->getLocalizedName()]))
+        if(isset(self::$statistics[$stat]))
         {
-            unset(self::$statistics[$stat->getLocalizedName()]);
+            unset(self::$statistics[$stat]);
         }
     }
 
@@ -100,19 +92,6 @@ class FormDisplayStatistic
      */
     public static function init(): void
     {
-
-        // Registers the ffa arena for display on the form window.
-        self::registerStatistic(new FormDisplayStatistic(
-            self::STATISTIC_FFA_ARENA,
-            function (Player $player, Server $server, $data) {
-                if ($data instanceof FFAArena) {
-                    return $data->getName();
-                }
-
-                return TextFormat::RED . "Unknown" . TextFormat::RESET;
-            }
-        ));
-
         // Registers the kit name statistic to the form display.
         self::registerStatistic(new FormDisplayStatistic(
             self::STATISTIC_KIT_NAME,
@@ -129,41 +108,6 @@ class FormDisplayStatistic
                 }
 
                 return TextFormat::RED . "Unknown" . TextFormat::RESET;
-            }
-        ));
-
-        // Registers the ffa arena players to the form display.
-        self::registerStatistic(new FormDisplayStatistic(
-            self::STATISTIC_FFA_ARENA_PLAYERS,
-            function (Player $player, Server $server, $data) {
-                if ($data instanceof FFAArena) {
-                    return $data->getPlayers();
-                }
-
-                return TextFormat::RED . "Unknown" . TextFormat::RESET;
-            }
-        ));
-
-        // Registers the players who are fighting.
-        self::registerStatistic(new FormDisplayStatistic(
-            self::STATISTIC_PLAYERS_FIGHTING_DUEL,
-            function (Player $player, Server $server, $data) {
-                // TODO: Get the number of players in duels with the kit.
-                if ($data instanceof Kit) {
-                    // TODO: find number of players in duel.
-                }
-
-                return 0;
-            }
-        ));
-
-        // Registers the statistic that tracks the number of players
-        // who are queued for a particular kit.
-        self::registerStatistic(new FormDisplayStatistic(
-            self::STATISTIC_PLAYERS_QUEUED_DUEL,
-            function (Player $player, Server $server, $data) {
-                // TODO
-                return 0;
             }
         ));
     }

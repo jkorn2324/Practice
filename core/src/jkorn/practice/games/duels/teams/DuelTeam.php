@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace jkorn\practice\games\duels\teams;
 
 
+use jkorn\practice\games\misc\ITeam;
 use jkorn\practice\player\PracticePlayer;
-use pocketmine\level\Position;
 use pocketmine\Player;
 
-abstract class DuelTeam
+abstract class DuelTeam implements ITeam
 {
 
     /** @var int */
@@ -32,13 +32,6 @@ abstract class DuelTeam
         $this->players = [];
         $this->eliminated = [];
     }
-
-    /**
-     * @param mixed ...$extraData
-     *
-     * Puts the player in the game.
-     */
-    abstract public function putPlayersInGame(...$extraData): void;
 
     /**
      * @param Player $player
@@ -152,23 +145,6 @@ abstract class DuelTeam
     }
 
     /**
-     * @param Player $player
-     * @param mixed ...$extraData - The extraData containing the reason why the player was eliminated.
-     * @return bool - Returns true if all members are eliminated.
-     *
-     * Eliminates the player.
-     */
-    abstract public function eliminate(Player $player, ...$extraData): bool;
-
-    /**
-     * @param $object
-     * @return bool
-     *
-     * Determines if the team is equivalent to another.
-     */
-    abstract public function equals($object): bool;
-
-    /**
      * @param $player
      * @return DuelTeamPlayer|null
      */
@@ -189,5 +165,15 @@ abstract class DuelTeam
             return $this->players[$player->getServerID()->toString()];
         }
         return null;
+    }
+
+    /**
+     * @return int
+     *
+     * Gets the duel team size.
+     */
+    public function getTeamSize(): int
+    {
+        return $this->teamSize;
     }
 }

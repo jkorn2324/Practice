@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace jkorn\practice\arenas\types\ffa;
 
 
+use jkorn\practice\forms\display\statistics\FormDisplayStatistic;
+use jkorn\practice\kits\Kit;
 use jkorn\practice\scoreboard\display\statistics\FFAScoreboardStatistic;
 use pocketmine\Player;
 use pocketmine\Server;
 use jkorn\practice\arenas\IArenaManager;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\scoreboard\display\statistics\ScoreboardStatistic;
+use pocketmine\utils\TextFormat;
 
 class FFAArenaManager implements IArenaManager
 {
@@ -157,6 +160,15 @@ class FFAArenaManager implements IArenaManager
      */
     public function onRegistered(): void
     {
+        $this->registerScoreboardStatistics();
+        $this->registerFormStatistics();
+    }
+
+    /**
+     * Registers the scoreboard statistics to the form display.
+     */
+    protected function registerScoreboardStatistics(): void
+    {
         // Registers the number of players in an FFA arena.
         ScoreboardStatistic::registerStatistic(new ScoreboardStatistic(
             self::STATISTIC_FFA_PLAYERS,
@@ -198,7 +210,7 @@ class FFAArenaManager implements IArenaManager
 
                 return "[Unknown]";
             }
-        ));
+        , false));
 
         // Registers the arena name to the player.
         ScoreboardStatistic::registerStatistic(new FFAScoreboardStatistic(
@@ -229,6 +241,56 @@ class FFAArenaManager implements IArenaManager
                 }
                 return "Unknown";
             }
+        , false));
+    }
+
+    /**
+     * Register the form statistics.
+     */
+    protected function registerFormStatistics(): void
+    {
+        // Registers the ffa arena for display on the form window.
+        FormDisplayStatistic::registerStatistic(new FormDisplayStatistic(
+            self::STATISTIC_FFA_ARENA,
+            function (Player $player, Server $server, $data) {
+                if ($data instanceof FFAArena) {
+                    return $data->getName();
+                }
+
+                return TextFormat::RED . "Unknown" . TextFormat::RESET;
+            }
+        ));
+
+        // Registers the ffa arena players to the form display.
+        FormDisplayStatistic::registerStatistic(new FormDisplayStatistic(
+            self::STATISTIC_FFA_ARENA_PLAYERS,
+            function (Player $player, Server $server, $data) {
+                if ($data instanceof FFAArena) {
+                    return $data->getPlayers();
+                }
+
+                return TextFormat::RED . "Unknown" . TextFormat::RESET;
+            }
+        ));
+
+        // Registers the statistic of all players in ffa.
+        FormDisplayStatistic::registerStatistic(new FormDisplayStatistic(
+            self::STATISTIC_FFA_PLAYERS,
+            function(Player $player, Server $server, $data)
+            {
+                $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager("ffa");
+                if($arenaManager instanceof FFAArenaManager)
+                {
+                    $playerCount = 0;
+                    $arenas = $arenaManager->getArenas();
+                    foreach($arenas as $arena)
+                    {
+                        $playerCount += $arena->getPlayers();
+                    }
+                    return $playerCount;
+                }
+                return 0;
+            }
         ));
     }
 
@@ -242,6 +304,10 @@ class FFAArenaManager implements IArenaManager
         ScoreboardStatistic::unregisterStatistic(self::STATISTIC_FFA_PLAYERS);
         ScoreboardStatistic::unregisterStatistic(self::STATISTIC_FFA_ARENA);
         ScoreboardStatistic::unregisterStatistic(self::STATISTIC_FFA_ARENA_KIT);
+
+        FormDisplayStatistic::unregisterStatistic(self::STATISTIC_FFA_PLAYERS);
+        FormDisplayStatistic::unregisterStatistic(self::STATISTIC_FFA_ARENA);
+        FormDisplayStatistic::unregisterStatistic(self::STATISTIC_FFA_ARENA_PLAYERS);
     }
 
     /**

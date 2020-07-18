@@ -10,7 +10,7 @@ use pocketmine\utils\TextFormat;
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\display\FormDisplayText;
 use jkorn\practice\forms\types\CustomForm;
-use jkorn\practice\player\info\settings\properties\BooleanSetting;
+use jkorn\practice\player\info\settings\properties\BooleanSettingProperty;
 use jkorn\practice\player\info\settings\SettingsInfo;
 use jkorn\practice\player\PracticePlayer;
 
@@ -85,7 +85,7 @@ class BasicSettingsForm extends FormDisplay
         $properties = $settingsInfo->getProperties();
         foreach($properties as $localized => $property)
         {
-            if($property instanceof BooleanSetting)
+            if($property instanceof BooleanSettingProperty)
             {
                 $toggleLocalized = "toggle." . $localized . "." . ($property->getValue() ? "disabled" : "enabled");
                 if(isset($this->formData[$toggleLocalized]))

@@ -14,7 +14,8 @@ use jkorn\practice\PracticeCore;
 
 class ItemManager extends AbstractManager
 {
-    const ITEM_PLAY_FFA = "item.play.menu";
+    const ITEM_PLAY_GAMES = "item.play.games";
+    const ITEM_PLAY_FFA = "item.play.ffa";
     const ITEM_PLAYER_SETTINGS = "item.player.settings";
     const ITEM_QUEUE_LEAVE = "item.queue.leave";
 
@@ -89,7 +90,10 @@ class ItemManager extends AbstractManager
     {
         // This edits the callable of the ffa item.
         if (isset($this->items[self::ITEM_PLAY_FFA])) {
-            $this->items[self::ITEM_PLAY_FFA]->setCallable(function (Player $player) {
+
+            $ffaItem = $this->items[self::ITEM_PLAY_FFA];
+
+            $ffaItem->setOnUseCallback(function (Player $player) {
 
                 // Sends the play form to the player.
                 $theForm = PracticeCore::getFormDisplayManager()->getForm(FormDisplayManager::FORM_PLAY_FFA);
@@ -100,11 +104,17 @@ class ItemManager extends AbstractManager
                 }
                 return true;
             });
+
+            $ffaItem->setOnSendCallback(function(Player $player)
+            {
+                $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager("ffa");
+                return $arenaManager !== null;
+            });
         }
 
         // This edits the callback of the settings item.
         if (isset($this->items[self::ITEM_PLAYER_SETTINGS])) {
-            $this->items[self::ITEM_PLAYER_SETTINGS]->setCallable(function (Player $player) {
+            $this->items[self::ITEM_PLAYER_SETTINGS]->setOnUseCallback(function (Player $player) {
 
                 $theForm = PracticeCore::getFormDisplayManager()->getForm(FormDisplayManager::FORM_SETTINGS_MENU);
                 if ($theForm !== null) {
@@ -117,8 +127,17 @@ class ItemManager extends AbstractManager
         }
 
         if(isset($this->items[self::ITEM_QUEUE_LEAVE])) {
-            $this->items[self::ITEM_QUEUE_LEAVE]->setCallable(function (Player $player) {
+            $this->items[self::ITEM_QUEUE_LEAVE]->setOnUseCallback(function (Player $player) {
                 // TODO
+                return true;
+            });
+        }
+
+        if(isset($this->items[self::ITEM_PLAY_GAMES]))
+        {
+            $this->items[self::ITEM_PLAY_GAMES]->setOnUseCallback(function(Player $player) {
+                // TODO
+                return true;
             });
         }
     }
@@ -155,6 +174,11 @@ class ItemManager extends AbstractManager
             return;
         }
 
+        if(!$item->doSend($player))
+        {
+            return;
+        }
+
         $player->getInventory()->setItem($item->getSlot(), $item->getItem());
     }
 
@@ -177,6 +201,8 @@ class ItemManager extends AbstractManager
         switch($type)
         {
             case self::TYPE_LOBBY:
+
+                $this->sendItem($player, $this->items[self::ITEM_PLAY_GAMES]);
                 $this->sendItem($player, $this->items[self::ITEM_PLAY_FFA]);
                 $this->sendItem($player, $this->items[self::ITEM_PLAYER_SETTINGS]);
                 break;

@@ -14,10 +14,11 @@ class FormDisplayManager extends AbstractManager
     /** @var FormDisplay[] */
     private $displayForms = [];
 
+    const FORM_PLAY_GAMES = "form.games.play";
     const FORM_SETTINGS_MENU = "form.settings.menu";
     const FORM_SETTINGS_BASIC = "form.settings.basic";
     const FORM_SETTINGS_BUILDER_MODE = "form.settings.builder";
-    const FORM_PLAY_FFA = "form.play.FFA";
+    const FORM_PLAY_FFA = "form.FFA.play";
 
     /** @var string */
     private $resourcesFolder, $destinationFolder;

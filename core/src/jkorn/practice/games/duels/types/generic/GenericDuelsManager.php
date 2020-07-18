@@ -75,6 +75,16 @@ class GenericDuelsManager implements IGameManager
     }
 
     /**
+     * @return string
+     *
+     * Gets the texture of the game type, used for forms.
+     */
+    public function getTexture(): string
+    {
+        return "textures/ui/fire_resistance_effect.png";
+    }
+
+    /**
      * Called when the game manager is first registered.
      */
     public function onRegistered(): void
@@ -116,5 +126,17 @@ class GenericDuelsManager implements IGameManager
     {
         // TODO: Implement equals() method.
         return false;
+    }
+
+
+    /**
+     * @return int
+     *
+     * Gets the number of players playing.
+     */
+    public function getPlayersPlaying(): int
+    {
+        // TODO: Implement getPlayersPlaying() method.
+        return 0;
     }
 }

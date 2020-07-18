@@ -13,7 +13,6 @@ use jkorn\practice\PracticeCore;
 use jkorn\practice\PracticeUtil;
 use jkorn\practice\scoreboard\ScoreboardData;
 use pocketmine\Player;
-use jkorn\practice\games\duels\player\DuelPlayer;
 use jkorn\practice\games\duels\types\Duel1vs1;
 use jkorn\practice\kits\Kit;
 use jkorn\practice\player\PracticePlayer;
@@ -42,7 +41,7 @@ class Generic1vs1 extends Duel1vs1 implements IGenericDuel
      */
     public function __construct(int $id, Kit $kit, $arena, Player $player1, Player $player2)
     {
-        parent::__construct($kit, $arena, $player1, $player2, DuelPlayer::class);
+        parent::__construct($kit, $arena, $player1, $player2, GenericDuelPlayer::class);
 
         $this->id = $id;
         $this->spectators = [];

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace jkorn\practice\games\duels\teams;
 
 
-use jkorn\practice\games\duels\player\DuelPlayer;
+use jkorn\practice\games\player\TeamPlayer;
 
-class DuelTeamPlayer extends DuelPlayer
+abstract class DuelTeamPlayer extends TeamPlayer
 {
 
     /** @var bool */

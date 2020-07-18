@@ -10,7 +10,7 @@ use jkorn\practice\data\IDataProvider;
 /**
  * Class EmptyDataProvider.
  *
- * This class doesn't do anything except define the default data provider.
+ * This class doesn't do anything except define the specific data provider.
  *
  * @package jkorn\practice\data\providers
  */

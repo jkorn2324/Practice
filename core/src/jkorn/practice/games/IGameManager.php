@@ -48,10 +48,24 @@ interface IGameManager
     public function getTitle(): string;
 
     /**
+     * @return string
+     *
+     * Gets the texture of the game type, used for forms.
+     */
+    public function getTexture(): string;
+
+    /**
      * @param $manager
      * @return bool
      *
      * Determines if one manager is equivalent to another.
      */
     public function equals($manager): bool;
+
+    /**
+     * @return int
+     *
+     * Gets the number of players playing.
+     */
+    public function getPlayersPlaying(): int;
 }

@@ -6,7 +6,7 @@ namespace jkorn\practice\player\info\settings;
 
 
 use jkorn\practice\misc\ISavedHeader;
-use jkorn\practice\player\info\settings\properties\BooleanSetting;
+use jkorn\practice\player\info\settings\properties\BooleanSettingProperty;
 
 /**
  * Class SettingsInfo
@@ -32,8 +32,8 @@ class SettingsInfo implements ISavedHeader
     /**
      * @param string $localized - The localized name of the property.
      * @param $propertyType - The property type of the setting, should be a class.
-     * @param ?$defaultValue - The default value of the property, determines the type of property.
-     * @param array|null $displayInfo - The default form display information.
+     * @param ?$defaultValue - The specific value of the property, determines the type of property.
+     * @param array|null $displayInfo - The specific form display information.
      * @param bool $override - Overrides the setting.
      *
      * Registers the settings to the settings list.
@@ -60,25 +60,25 @@ class SettingsInfo implements ISavedHeader
     {
         // Registers the settings to the information.
 
-        self::registerSetting(self::SCOREBOARD_DISPLAY, BooleanSetting::class,
+        self::registerSetting(self::SCOREBOARD_DISPLAY, BooleanSettingProperty::class,
             true, [
                 "enabled" => "Enable Scoreboard",
                 "disabled" => "Disable Scoreboard"
             ]);
 
-        self::registerSetting(self::PE_ONLY, BooleanSetting::class,
+        self::registerSetting(self::PE_ONLY, BooleanSettingProperty::class,
             false, [
                 "enabled" => "Enable PE Only Queues",
                 "disabled" => "Disable PE Only Queues"
             ]);
 
-        self::registerSetting(self::SWISH_SOUNDS_ENABLED, BooleanSetting::class,
+        self::registerSetting(self::SWISH_SOUNDS_ENABLED, BooleanSettingProperty::class,
             true, [
                 "enabled" => "Enable Swish Sounds",
                 "disabled" => "Disable Swish Sounds"
             ]);
 
-        self::registerSetting(self::TAP_ITEMS, BooleanSetting::class,
+        self::registerSetting(self::TAP_ITEMS, BooleanSettingProperty::class,
             true, [
                 "enabled" => "Enable Tap Items",
                 "disabled" => "Disable Tap Items"
@@ -185,7 +185,7 @@ class SettingsInfo implements ISavedHeader
     /**
      * @return array|ISettingsProperty[]|null
      *
-     * Gets the settings properties.
+     * Gets the settings misc.
      */
     public function getProperties()
     {

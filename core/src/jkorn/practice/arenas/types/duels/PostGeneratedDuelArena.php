@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace jkorn\practice\arenas\types\duels;
 
+use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use jkorn\practice\arenas\PracticeArena;
+use pocketmine\Server;
 
 /**
  * Class PostGeneratedDuelArena
@@ -15,6 +17,11 @@ use jkorn\practice\arenas\PracticeArena;
  */
 class PostGeneratedDuelArena extends PracticeArena implements IDuelArena
 {
+
+    public function __construct(string $levelName)
+    {
+        parent::__construct(strtolower($levelName), Server::getInstance()->getLevelByName($levelName));
+    }
 
     /**
      * @return Vector3
@@ -44,7 +51,12 @@ class PostGeneratedDuelArena extends PracticeArena implements IDuelArena
      */
     public function equals($arena): bool
     {
-        // TODO: Implement equals() method.
+        if($arena instanceof PostGeneratedDuelArena)
+        {
+            return $arena->getLocalizedName() === $this->localizedName;
+        }
+
+        return false;
     }
 
     /**

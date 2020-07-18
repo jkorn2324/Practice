@@ -8,7 +8,7 @@ namespace jkorn\practice\games\duels\types;
 use pocketmine\level\Position;
 use pocketmine\Player;
 use jkorn\practice\games\duels\AbstractDuel;
-use jkorn\practice\games\duels\player\DuelPlayer;
+use jkorn\practice\games\duels\DuelPlayer;
 use jkorn\practice\kits\Kit;
 use jkorn\practice\player\PracticePlayer;
 

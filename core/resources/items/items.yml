@@ -1,14 +1,24 @@
 # The file that handles the display of the items in the server.
 
 # The item that displays the play menu.
-item.play.menu:
+item.play.games:
   item.info:
     id: 399
     metadata: 0
   item.display:
     name: "Play Games"
-    lore: "Tap on this item to open the play menu!"
+    lore: "Tap on this item to open the play ffa menu!"
   item.slot: 0
+
+# The item that displays the play games menu.
+item.play.ffa:
+  item.info:
+    id: 399
+    metadata: 1
+  item.display:
+    name: "Play FFA"
+    lore: "Tap on this item to open the play games menu!"
+  item.slot: 1
 
 # The item that opens the player settings.
 item.player.settings:
@@ -18,7 +28,7 @@ item.player.settings:
   item.display:
     name: "Player Settings"
     lore: "Tap on this item to open your settings!"
-  item.slot: 1
+  item.slot: 2
 
 # The item that allows you to leave the duels queue.
 item.queue.leave:

@@ -31,7 +31,7 @@ class GenericTeam extends TeamDuel implements IGenericDuel
 
     public function __construct(int $id, int $teamSize, Kit $kit, $arena)
     {
-        parent::__construct($teamSize, $kit, $arena, GenericDuelTeam::class, DuelTeamPlayer::class);
+        parent::__construct($teamSize, $kit, $arena, GenericDuelTeam::class, GenericDuelTeamPlayer::class);
 
         $this->id = $id;
     }
@@ -90,8 +90,8 @@ class GenericTeam extends TeamDuel implements IGenericDuel
      */
     protected function putPlayersInDuel(): void
     {
-        $this->team1->putPlayersInGame($this->arena, $this->kit);
-        $this->team2->putPlayersInGame($this->arena, $this->kit);
+        $this->team1->putPlayersInGame(GenericDuelTeam::TEAM_1, $this->arena, $this->kit, $this->level);
+        $this->team2->putPlayersInGame(GenericDuelTeam::TEAM_2, $this->arena, $this->kit, $this->level);
     }
 
     /**

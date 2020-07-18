@@ -23,6 +23,9 @@ class PracticeItem
     /** @var callable|null */
     private $callable = null;
 
+    /** @var callable|null */
+    private $onSend = null;
+
     /** @var int */
     private $slot;
 
@@ -36,11 +39,39 @@ class PracticeItem
     }
 
     /**
+     * @param Player $player
+     *
+     * @return bool - Returns true if the item should send based on the callable.
+     *
+     * Determines whether or not to send the item.
+     */
+    public function doSend(Player $player): bool
+    {
+        if($this->onSend !== null)
+        {
+            $onSend = $this->onSend;
+            return $onSend($player);
+        }
+
+        return true;
+    }
+
+    /**
      * @param callable $callable
      *
-     * Sets the callable of the item.
+     * Sets the callback that is called when the item is sent.
      */
-    public function setCallable(callable $callable): void
+    public function setOnSendCallback(callable $callable): void
+    {
+        $this->onSend = $callable;
+    }
+
+    /**
+     * @param callable $callable
+     *
+     * Sets the callable of the item when the item is used.
+     */
+    public function setOnUseCallback(callable $callable): void
     {
         $this->callable = $callable;
     }

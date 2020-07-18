@@ -34,7 +34,7 @@ class BaseArenaManager extends AbstractManager
     }
 
     /**
-     * Registers the default arena types.
+     * Registers the specific arena types.
      */
     private function registerDefaultManagers(): void
     {
