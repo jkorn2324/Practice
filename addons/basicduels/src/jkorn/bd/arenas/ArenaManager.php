@@ -2,15 +2,18 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\arenas\types\duels;
+namespace jkorn\bd\arenas;
 
 
 use jkorn\practice\arenas\IArenaManager;
 use jkorn\practice\PracticeCore;
 use pocketmine\Server;
 
-class DuelArenaManager implements IArenaManager
+class ArenaManager implements IArenaManager
 {
+
+    const TYPE = "basic_duels";
+
     /** @var PracticeCore */
     private $core;
     /** @var Server */
@@ -23,10 +26,10 @@ class DuelArenaManager implements IArenaManager
     /** @var bool */
     private $loaded = false;
 
-    public function __construct(PracticeCore $core)
+    public function __construct()
     {
-        $this->core = $core;
-        $this->server = $core->getServer();
+        $this->core = PracticeCore::getInstance();
+        $this->server = $this->core->getServer();
 
         $this->arenas = [];
         $this->openArenas = [];
@@ -157,7 +160,7 @@ class DuelArenaManager implements IArenaManager
      */
     public function getType(): string
     {
-        return "duels";
+        return self::TYPE;
     }
 
     /**

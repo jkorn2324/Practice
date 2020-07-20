@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\games\duels\types\generic;
+namespace jkorn\bd\duels;
 
 
-use jkorn\practice\arenas\types\duels\DuelArenaManager;
-use jkorn\practice\arenas\types\duels\PostGeneratedDuelArena;
-use jkorn\practice\arenas\types\duels\PreGeneratedDuelArena;
+use jkorn\bd\arenas\ArenaManager;
+use jkorn\bd\arenas\PostGeneratedDuelArena;
+use jkorn\bd\arenas\PreGeneratedDuelArena;
+use jkorn\bd\BasicDuelsManager;
+use jkorn\bd\player\team\BasicDuelTeam;
+use jkorn\bd\player\team\BasicDuelTeamPlayer;
 use jkorn\practice\games\duels\types\TeamDuel;
 use jkorn\practice\games\IGameManager;
 use jkorn\practice\kits\IKit;
@@ -17,7 +20,7 @@ use jkorn\practice\PracticeUtil;
 use jkorn\practice\scoreboard\ScoreboardData;
 use pocketmine\Player;
 
-class GenericTeamDuel extends TeamDuel implements IGenericDuel
+class BasicTeamDuel extends TeamDuel implements IBasicDuel
 {
     // The maximum duration seconds.
     const MAX_DURATION_SECONDS = 60 * 30;
@@ -29,7 +32,7 @@ class GenericTeamDuel extends TeamDuel implements IGenericDuel
     private $spectators = [];
 
     /**
-     * GenericTeamDuel constructor.
+     * BasicTeamDuel constructor.
      * @param int $id
      * @param IKit $kit
      * @param $arena
@@ -37,7 +40,7 @@ class GenericTeamDuel extends TeamDuel implements IGenericDuel
      */
     public function __construct(int $id, IKit $kit, $arena, ...$players)
     {
-        parent::__construct(count($players), $kit, $arena, GenericDuelTeam::class, GenericDuelTeamPlayer::class);
+        parent::__construct(count($players), $kit, $arena, BasicDuelTeam::class, BasicDuelTeamPlayer::class);
         $this->id = $id;
         $this->generateTeams($players);
     }
@@ -101,8 +104,8 @@ class GenericTeamDuel extends TeamDuel implements IGenericDuel
      */
     protected function putPlayersInDuel(): void
     {
-        $this->team1->putPlayersInGame(GenericDuelTeam::TEAM_1, $this->arena, $this->kit, $this->level);
-        $this->team2->putPlayersInGame(GenericDuelTeam::TEAM_2, $this->arena, $this->kit, $this->level);
+        $this->team1->putPlayersInGame(BasicDuelTeam::TEAM_1, $this->arena, $this->kit, $this->level);
+        $this->team2->putPlayersInGame(BasicDuelTeam::TEAM_2, $this->arena, $this->kit, $this->level);
     }
 
     /**
@@ -141,15 +144,15 @@ class GenericTeamDuel extends TeamDuel implements IGenericDuel
         elseif ($this->arena instanceof PreGeneratedDuelArena)
         {
             // Opens the duel arena again for future use.
-            $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager("duels");
-            if($arenaManager instanceof DuelArenaManager)
+            $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager(ArenaManager::TYPE);
+            if($arenaManager instanceof ArenaManager)
             {
                 $arenaManager->open($this->arena);
             }
         }
 
-        $genericDuelManager = PracticeCore::getBaseGameManager()->getGameManager(IGameManager::MANAGER_GENERIC_DUELS);
-        if($genericDuelManager instanceof GenericDuelsManager)
+        $genericDuelManager = PracticeCore::getBaseGameManager()->getGameManager(BasicDuelsManager::NAME);
+        if($genericDuelManager instanceof BasicDuelsManager)
         {
             $genericDuelManager->remove($this);
         }
@@ -163,7 +166,7 @@ class GenericTeamDuel extends TeamDuel implements IGenericDuel
      */
     public function equals($game): bool
     {
-        if($game instanceof GenericTeamDuel)
+        if($game instanceof BasicTeamDuel)
         {
             return $game->getID() === $this->getID();
         }

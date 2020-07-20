@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\level\gen\arenas\duels\types;
+namespace jkorn\bd\gen\types;
 
 
 use jkorn\practice\level\gen\arenas\ArenaGenerator;
@@ -97,6 +97,6 @@ class YellowDefault extends ArenaGenerator implements ColorIDs
      */
     protected static function getGeneratorName(): string
     {
-        return "yellow.default.duel";
+        return "basic.duels.yellow.default";
     }
 }

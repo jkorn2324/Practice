@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\level\gen\arenas\duels;
+namespace jkorn\bd\duels\gen;
 
 
 use jkorn\practice\level\gen\PracticeGeneratorInfo;
 
-class DuelGeneratorInfo extends PracticeGeneratorInfo
+class BasicDuelsGeneratorInfo extends PracticeGeneratorInfo
 {
 
     const TYPE_ANY = "any";
@@ -18,7 +18,7 @@ class DuelGeneratorInfo extends PracticeGeneratorInfo
     protected $type;
 
     /**
-     * DuelGeneratorInfo constructor.
+     * BasicDuelsGeneratorInfo constructor.
      * @param string $type
      * @param $class
      */

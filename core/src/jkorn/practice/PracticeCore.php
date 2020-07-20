@@ -42,14 +42,13 @@ class PracticeCore extends PluginBase
     private static $baseGameManager;
 
     /**
-     * Called when the plugin enables.
+     * Called when the plugin loads.
      */
-    public function onEnable()
+    public function onLoad()
     {
         self::$instance = $this;
 
         $this->initDataFolder();
-        $this->registerEntities();
 
         // Default test data provider is a JSON data provider.
         PracticeDataManager::setDataProvider(new JSONDataProvider());
@@ -73,6 +72,15 @@ class PracticeCore extends PluginBase
         self::$baseArenaManager = new BaseArenaManager($this);
         self::$baseGameManager = new BaseGameManager($this);
         self::$itemManager = new ItemManager($this);
+
+    }
+
+    /**
+     * Called when the plugin enables.
+     */
+    public function onEnable()
+    {
+        $this->registerEntities();
 
         // Reloads the players.
         PracticeUtil::reloadPlayers();

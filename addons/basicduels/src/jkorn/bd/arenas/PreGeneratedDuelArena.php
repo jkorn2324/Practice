@@ -2,24 +2,18 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\arenas\types\duels;
+namespace jkorn\bd\arenas;
 
 
-use pocketmine\level\Level;
-use pocketmine\math\Vector3;
 use jkorn\practice\arenas\PracticeArena;
-use jkorn\practice\kits\SavedKit;
+use jkorn\practice\kits\IKit;
 use jkorn\practice\level\PositionArea;
 use jkorn\practice\misc\ISaved;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\PracticeUtil;
+use pocketmine\level\Level;
+use pocketmine\math\Vector3;
 
-/**
- * Class PreGeneratedDuelArena
- * @package jkorn\practice\arenas\types\duels
- *
- * An arena that is pre-generated.
- */
 class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
 {
 
@@ -107,7 +101,7 @@ class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
      */
     public function isValidKit($kit): bool
     {
-        if($kit instanceof SavedKit)
+        if($kit instanceof IKit)
         {
             return isset($this->arenaKits[strtolower($kit->getName())]);
         }
@@ -129,7 +123,7 @@ class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
      */
     public function addKit($kit): void
     {
-        if($kit instanceof SavedKit)
+        if($kit instanceof IKit)
         {
             $this->arenaKits[strtolower($kit->getName())] = true;
         }
@@ -150,7 +144,7 @@ class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
      */
     public function removeKit($kit): void
     {
-        if($kit instanceof SavedKit)
+        if($kit instanceof IKit)
         {
             if(isset($this->arenaKits[$localized = strtolower($kit->getName())]))
             {

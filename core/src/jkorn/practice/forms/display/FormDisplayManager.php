@@ -16,7 +16,7 @@ class FormDisplayManager extends AbstractManager
 
     const FORM_PLAY_GAMES = "form.games.play";
     const FORM_SETTINGS_MENU = "form.settings.menu";
-    const FORM_SETTINGS_BASIC = "form.settings.basic";
+    const FORM_SETTINGS_BASIC = "form.settings.duels";
     const FORM_SETTINGS_BUILDER_MODE = "form.settings.builder";
     const FORM_PLAY_FFA = "form.FFA.play";
 

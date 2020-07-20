@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\games\duels\types\generic;
+namespace jkorn\bd\player\team;
 
 
 use jkorn\practice\arenas\types\duels\IDuelArena;
@@ -12,7 +12,7 @@ use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Player;
 
-class GenericDuelTeam extends DuelTeam
+class BasicDuelTeam extends DuelTeam
 {
     // Used for generic duels.
     const TEAM_1 = 0;

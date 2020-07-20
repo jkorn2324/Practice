@@ -2,17 +2,21 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\games\duels\types\generic;
+namespace jkorn\bd;
 
 
-use jkorn\practice\arenas\types\duels\DuelArenaManager;
-use jkorn\practice\arenas\types\duels\IDuelArena;
-use jkorn\practice\arenas\types\duels\PostGeneratedDuelArena;
+use jkorn\bd\arenas\ArenaManager;
+use jkorn\bd\arenas\IDuelArena;
+use jkorn\bd\arenas\PostGeneratedDuelArena;
+use jkorn\bd\duels\Basic1vs1;
+use jkorn\bd\duels\BasicTeamDuel;
+use jkorn\bd\duels\gen\BasicDuelsGeneratorInfo;
+use jkorn\bd\duels\IBasicDuel;
+use jkorn\bd\queues\BasicQueuesManager;
 use jkorn\practice\games\IGame;
 use jkorn\practice\games\misc\IAwaitingGameManager;
 use jkorn\practice\games\misc\IAwaitingManager;
 use jkorn\practice\kits\IKit;
-use jkorn\practice\level\gen\arenas\duels\DuelGeneratorInfo;
 use jkorn\practice\level\gen\PracticeGeneratorInfo;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
 use jkorn\practice\player\info\settings\properties\BooleanSettingProperty;
@@ -22,8 +26,10 @@ use pocketmine\Player;
 use pocketmine\Server;
 use jkorn\practice\PracticeCore;
 
-class GenericDuelsManager implements IAwaitingGameManager
+class BasicDuelsManager implements IAwaitingGameManager
 {
+
+    const NAME = "basic.duels";
 
     // Constant for PE Only Queues.
     const SETTING_PE_ONLY = "pe.only";
@@ -33,21 +39,18 @@ class GenericDuelsManager implements IAwaitingGameManager
 
     /** @var Server */
     private $server;
-    /** @var PracticeCore */
-    private $core;
 
-    /** @var IGenericDuel[] */
+    /** @var IBasicDuel[] */
     private $duels;
-    /** @var GenericQueuesManager */
+    /** @var BasicQueuesManager */
     private $queuesManager;
 
-    public function __construct(PracticeCore $core)
+    public function __construct()
     {
-        $this->core = $core;
-        $this->server = $core->getServer();
+        $this->server = PracticeCore::getInstance()->getServer();
         $this->duels = [];
 
-        $this->queuesManager = new GenericQueuesManager($this);
+        $this->queuesManager = new BasicQueuesManager($this);
     }
 
     /**
@@ -85,9 +88,9 @@ class GenericDuelsManager implements IAwaitingGameManager
         $randomArena = $this->randomArena($duelID, count($players));
 
         if (count($players) !== 2) {
-            $duel = new GenericTeamDuel($duelID, $kit, $randomArena, ...$players);
+            $duel = new BasicTeamDuel($duelID, $kit, $randomArena, ...$players);
         } else {
-            $duel = new Generic1vs1($duelID, $kit, $randomArena, $players[0], $players[1]);
+            $duel = new Basic1vs1($duelID, $kit, $randomArena, $players[0], $players[1]);
         }
 
         $this->duels[$duel->getID()] = $duel;
@@ -106,7 +109,7 @@ class GenericDuelsManager implements IAwaitingGameManager
      */
     public function remove($game): void
     {
-        if ($game instanceof IGenericDuel && isset($this->duels[$game->getID()])) {
+        if ($game instanceof IBasicDuel && isset($this->duels[$game->getID()])) {
             unset($this->duels[$game->getID()]);
         }
     }
@@ -154,11 +157,6 @@ class GenericDuelsManager implements IAwaitingGameManager
                 "enabled" => "Enable PE-Only Duels",
                 "disabled" => "Disable PE-Only Duels"
             ]);
-
-        PracticeCore::getBaseArenaManager()->registerArenaManager(
-            new DuelArenaManager($this->core),
-            true
-        );
     }
 
     /**
@@ -185,8 +183,8 @@ class GenericDuelsManager implements IAwaitingGameManager
      */
     protected function randomArena(int $duelID, int $numPlayers): IDuelArena
     {
-        $duelArenaManager = PracticeCore::getBaseArenaManager()->getArenaManager("duels");
-        if($duelArenaManager instanceof DuelArenaManager)
+        $duelArenaManager = PracticeCore::getBaseArenaManager()->getArenaManager(ArenaManager::TYPE);
+        if($duelArenaManager instanceof ArenaManager)
         {
             $duelArena = $duelArenaManager->randomArena();
         }
@@ -194,13 +192,13 @@ class GenericDuelsManager implements IAwaitingGameManager
         if(!isset($duelArena) || $duelArena === null)
         {
             $levelName = "game.duels.generic.{$duelID}";
-            /** @var DuelGeneratorInfo $randomGenerator */
+            /** @var BasicDuelsGeneratorInfo $randomGenerator */
             $randomGenerator = PracticeGeneratorManager::randomGenerator(
                 function(PracticeGeneratorInfo $info) use($numPlayers)
                 {
-                    $type = $numPlayers === 2 ? DuelGeneratorInfo::TYPE_1VS1 : DuelGeneratorInfo::TYPE_TEAM;
-                    return $info instanceof DuelGeneratorInfo
-                        && ($info->getType() === DuelGeneratorInfo::TYPE_ANY
+                    $type = $numPlayers === 2 ? BasicDuelsGeneratorInfo::TYPE_1VS1 : BasicDuelsGeneratorInfo::TYPE_TEAM;
+                    return $info instanceof BasicDuelsGeneratorInfo
+                        && ($info->getType() === BasicDuelsGeneratorInfo::TYPE_ANY
                             || $info->getType() === $type);
                 }
             );
@@ -263,5 +261,19 @@ class GenericDuelsManager implements IAwaitingGameManager
     public function getAwaitingManager(): IAwaitingManager
     {
         return $this->queuesManager;
+    }
+
+    /**
+     * @return string[]
+     *
+     * Gets the game types of the manager.
+     */
+    public function getGameTypes()
+    {
+        return [
+            "1vs1",
+            "2vs2",
+            "3vs3"
+        ];
     }
 }

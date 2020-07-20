@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\arenas\types\duels;
+namespace jkorn\bd\arenas;
 
 
 use pocketmine\math\Vector3;
 
 interface IDuelArena
 {
-
     /**
      * @return Vector3
      *

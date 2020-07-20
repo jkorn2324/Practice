@@ -32,7 +32,7 @@ abstract class GamePlayer
 
         /*
         self::registerProperty(
-            new GenericDPPropertyInfo(
+            new BasicDPPropertyInfo(
                 "property.generic.num.hits"
             )
         );

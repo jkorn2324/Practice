@@ -2,29 +2,30 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\games\duels\types\generic;
+namespace jkorn\bd\queues;
 
+use jkorn\bd\BasicDuelsManager;
 use jkorn\practice\games\misc\IAwaitingManager;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 
-class GenericQueuesManager implements IAwaitingManager
+class BasicQueuesManager implements IAwaitingManager
 {
 
-    /** @var GenericQueue[] */
+    /** @var BasicQueue[] */
     private $queues = [];
-    /** @var GenericDuelsManager */
+    /** @var BasicDuelsManager */
     private $parent;
 
     /**
-     * GenericQueuesManager constructor.
-     * @param GenericDuelsManager $parent - The parent of the queues.
+     * BasicQueuesManager constructor.
+     * @param BasicDuelsManager $parent - The parent of the queues.
      *
      * Gets the constructor for the queues manager.
      */
-    public function __construct(GenericDuelsManager $parent)
+    public function __construct(BasicDuelsManager $parent)
     {
         $this->parent = $parent;
     }
@@ -69,7 +70,7 @@ class GenericQueuesManager implements IAwaitingManager
             $kit = $data->kit;
         }
 
-        $queue = new GenericQueue($player, $kit, $data->numberOfPlayers);
+        $queue = new BasicQueue($player, $kit, $data->numberOfPlayers);
         // Determines if the queue is validated.
         if (!$queue->validate()) {
             return;
@@ -91,12 +92,12 @@ class GenericQueuesManager implements IAwaitingManager
     }
 
     /**
-     * @param GenericQueue $input
-     * @return GenericQueue[]|null
+     * @param BasicQueue $input
+     * @return BasicQueue[]|null
      *
      * Finds a match based on the input queue.
      */
-    private function findAwaitingMatches(GenericQueue &$input)
+    private function findAwaitingMatches(BasicQueue &$input)
     {
         if (count($this->queues) <= 0) {
             return null;
@@ -119,13 +120,13 @@ class GenericQueuesManager implements IAwaitingManager
     }
 
     /**
-     * @param GenericQueue[] $players
-     * @param GenericQueue $input
+     * @param BasicQueue[] $players
+     * @param BasicQueue $input
      * @return PracticePlayer[]
      *
      * Removes the awaiting players from the list.
      */
-    private function removeAwaitingPlayers(&$players, GenericQueue &$input)
+    private function removeAwaitingPlayers(&$players, BasicQueue &$input)
     {
         $matchedPlayers = [];
 

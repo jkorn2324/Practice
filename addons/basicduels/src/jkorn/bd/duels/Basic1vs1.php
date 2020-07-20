@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\games\duels\types\generic;
+namespace jkorn\bd\duels;
 
 
-use jkorn\practice\arenas\types\duels\DuelArenaManager;
-use jkorn\practice\arenas\types\duels\PostGeneratedDuelArena;
-use jkorn\practice\arenas\types\duels\PreGeneratedDuelArena;
+use jkorn\bd\arenas\ArenaManager;
+use jkorn\bd\arenas\PostGeneratedDuelArena;
+use jkorn\bd\arenas\PreGeneratedDuelArena;
+use jkorn\bd\BasicDuelsManager;
+use jkorn\bd\player\BasicDuelPlayer;
 use jkorn\practice\games\IGameManager;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\PracticeCore;
@@ -15,10 +17,9 @@ use jkorn\practice\PracticeUtil;
 use jkorn\practice\scoreboard\ScoreboardData;
 use pocketmine\Player;
 use jkorn\practice\games\duels\types\Duel1vs1;
-use jkorn\practice\kits\SavedKit;
 use jkorn\practice\player\PracticePlayer;
 
-class Generic1vs1 extends Duel1vs1 implements IGenericDuel
+class Basic1vs1 extends Duel1vs1 implements IBasicDuel
 {
 
     // The maximum duration seconds.
@@ -31,7 +32,7 @@ class Generic1vs1 extends Duel1vs1 implements IGenericDuel
     private $id;
 
     /**
-     * Generic1vs1 constructor.
+     * Basic1Vs1 constructor.
      * @param int $id - The id of the duel.
      * @param IKit $kit - The kit of the 1vs1.
      * @param $arena - The arena of the 1vs1.
@@ -42,7 +43,7 @@ class Generic1vs1 extends Duel1vs1 implements IGenericDuel
      */
     public function __construct(int $id, IKit $kit, $arena, Player $player1, Player $player2)
     {
-        parent::__construct($kit, $arena, $player1, $player2, GenericDuelPlayer::class);
+        parent::__construct($kit, $arena, $player1, $player2, BasicDuelPlayer::class);
 
         $this->id = $id;
         $this->spectators = [];
@@ -129,15 +130,15 @@ class Generic1vs1 extends Duel1vs1 implements IGenericDuel
         elseif ($this->arena instanceof PreGeneratedDuelArena)
         {
             // Opens the duel arena again for future use.
-            $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager("duels");
-            if($arenaManager instanceof DuelArenaManager)
+            $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager(ArenaManager::TYPE);
+            if($arenaManager instanceof ArenaManager)
             {
                 $arenaManager->open($this->arena);
             }
         }
 
         $genericDuelManager = PracticeCore::getBaseGameManager()->getGameManager(IGameManager::MANAGER_GENERIC_DUELS);
-        if($genericDuelManager instanceof GenericDuelsManager)
+        if($genericDuelManager instanceof BasicDuelsManager)
         {
             $genericDuelManager->remove($this);
         }
@@ -267,7 +268,7 @@ class Generic1vs1 extends Duel1vs1 implements IGenericDuel
      */
     public function equals($game): bool
     {
-        if($game instanceof Generic1vs1)
+        if($game instanceof Basic1vs1)
         {
             return $this->getID() === $game->getID();
         }

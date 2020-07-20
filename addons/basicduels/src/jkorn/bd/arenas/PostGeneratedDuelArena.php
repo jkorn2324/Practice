@@ -2,32 +2,26 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\arenas\types\duels;
+namespace jkorn\bd\arenas;
 
-use jkorn\practice\level\gen\arenas\duels\DuelGeneratorInfo;
-use pocketmine\level\Level;
-use pocketmine\math\Vector3;
+
+use jkorn\bd\duels\gen\BasicDuelsGeneratorInfo;
 use jkorn\practice\arenas\PracticeArena;
+use pocketmine\math\Vector3;
 use pocketmine\Server;
 
-/**
- * Class PostGeneratedDuelArena
- * @package jkorn\practice\arenas\types\duels
- *
- * A duel arena that is post generated.
- */
 class PostGeneratedDuelArena extends PracticeArena implements IDuelArena
 {
 
-    /** @var DuelGeneratorInfo */
+    /** @var BasicDuelsGeneratorInfo */
     private $generatorInfo;
 
     /**
      * PostGeneratedDuelArena constructor.
      * @param string $levelName
-     * @param DuelGeneratorInfo $info
+     * @param BasicDuelsGeneratorInfo $info
      */
-    public function __construct(string $levelName, DuelGeneratorInfo $info)
+    public function __construct(string $levelName, BasicDuelsGeneratorInfo $info)
     {
         parent::__construct(strtolower($levelName), Server::getInstance()->getLevelByName($levelName));
         $this->generatorInfo = $info;
@@ -87,7 +81,7 @@ class PostGeneratedDuelArena extends PracticeArena implements IDuelArena
      */
     public function equals($arena): bool
     {
-        if($arena instanceof PostGeneratedDuelArena)
+        if($arena instanceof \jkorn\practice\arenas\types\duels\PostGeneratedDuelArena)
         {
             return $arena->getLocalizedName() === $this->localizedName;
         }

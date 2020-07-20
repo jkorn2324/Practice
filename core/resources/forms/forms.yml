@@ -14,10 +14,10 @@ form.settings.menu:
     # TODO: Disguise Settings
 
 # The form that contains the text display for
-# the basic settings menu.
+# the duels settings menu.
 form.settings.basic:
   title: "Basic Settings"
-  description: "Form to edit your basic settings."
+  description: "Form to edit your duels settings."
   toggles:
     pe.only:
       enabled: "Enable PE-Only Duels"

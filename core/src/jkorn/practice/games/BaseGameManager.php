@@ -10,7 +10,7 @@ use jkorn\practice\games\misc\IAwaitingGameManager;
 use jkorn\practice\scoreboard\display\statistics\ScoreboardStatistic;
 use pocketmine\Player;
 use pocketmine\Server;
-use jkorn\practice\games\duels\types\generic\GenericDuelsManager;
+use jkorn\practice\games\duels\types\generic\BasicDuelsManager;
 use jkorn\practice\PracticeCore;
 use pocketmine\utils\TextFormat;
 
@@ -42,7 +42,6 @@ class BaseGameManager
         $this->core = $core;
         $this->server = $core->getServer();
 
-        $this->initDefaultGames();
         $this->initStatistics();
     }
 
@@ -122,14 +121,6 @@ class BaseGameManager
                 return $playersCount;
             }
         ));
-    }
-
-    /**
-     * Initializes the specific games.
-     */
-    protected function initDefaultGames(): void
-    {
-        $this->registerGameManager(new GenericDuelsManager($this->core));
     }
 
     /**

@@ -17,7 +17,6 @@ class ItemManager extends AbstractManager
     const ITEM_PLAY_GAMES = "item.play.games";
     const ITEM_PLAY_FFA = "item.play.ffa";
     const ITEM_PLAYER_SETTINGS = "item.player.settings";
-    const ITEM_QUEUE_LEAVE = "item.queue.leave";
 
     const TYPE_LOBBY = "type.lobby";
 
@@ -126,12 +125,12 @@ class ItemManager extends AbstractManager
             });
         }
 
-        if(isset($this->items[self::ITEM_QUEUE_LEAVE])) {
+        /* if(isset($this->items[self::ITEM_QUEUE_LEAVE])) {
             $this->items[self::ITEM_QUEUE_LEAVE]->setOnUseCallback(function (Player $player) {
                 // TODO
                 return true;
             });
-        }
+        } */
 
         if(isset($this->items[self::ITEM_PLAY_GAMES]))
         {

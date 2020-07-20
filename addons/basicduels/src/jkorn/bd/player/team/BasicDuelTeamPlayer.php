@@ -2,21 +2,19 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\games\duels\types\generic;
+namespace jkorn\bd\player\team;
 
 
-use jkorn\practice\games\duels\DuelPlayer;
+use jkorn\practice\games\duels\teams\DuelTeamPlayer;
 use jkorn\practice\player\PracticePlayer;
 
-class GenericDuelPlayer extends DuelPlayer
+class BasicDuelTeamPlayer extends DuelTeamPlayer
 {
+
     /**
      * Initializes the misc to the player.
      */
-    protected function initProperties(): void
-    {
-        // TODO: Implement initProperties() method.
-    }
+    protected function initProperties(): void {}
 
     /**
      * @param $player
@@ -26,7 +24,10 @@ class GenericDuelPlayer extends DuelPlayer
      */
     public function equals($player): bool
     {
-        if($player instanceof PracticePlayer || $player instanceof GenericDuelPlayer)
+        if(
+            $player instanceof PracticePlayer
+            || $player instanceof BasicDuelTeamPlayer
+        )
         {
             return $player->getServerID()->equals($this->getServerID());
         }

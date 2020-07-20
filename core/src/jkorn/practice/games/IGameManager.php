@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace jkorn\practice\games;
 
-
-use jkorn\practice\player\PracticePlayer;
 use pocketmine\Player;
 
 interface IGameManager
@@ -71,6 +69,13 @@ interface IGameManager
      * Gets the texture of the game type, used for forms.
      */
     public function getTexture(): string;
+
+    /**
+     * @return string[]
+     *
+     * Gets the game types of the manager.
+     */
+    public function getGameTypes();
 
     /**
      * @param $manager

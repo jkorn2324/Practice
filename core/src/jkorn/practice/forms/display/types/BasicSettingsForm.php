@@ -110,7 +110,7 @@ class BasicSettingsForm extends FormDisplay
     {
         // TODO: Edit so it corresponds with the SettingsInfo class
         $title = TextFormat::BOLD . "Basic Settings";
-        $description = "Form to edit your basic settings.";
+        $description = "Form to edit your duels settings.";
 
         $toggles = SettingsInfo::getSettingsFormDisplay();
 

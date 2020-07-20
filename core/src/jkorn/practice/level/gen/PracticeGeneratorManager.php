@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace jkorn\practice\level\gen;
 
-
-use jkorn\practice\level\gen\arenas\duels\DuelGeneratorInfo;
-use jkorn\practice\level\gen\arenas\duels\types\RedDefault;
-use jkorn\practice\level\gen\arenas\duels\types\YellowDefault;
 use pocketmine\level\generator\GeneratorManager;
 
 class PracticeGeneratorManager
@@ -16,13 +12,9 @@ class PracticeGeneratorManager
     private static $generators = [];
 
     /**
-     * Initializes the generators.
+     * Initializes the default generators.
      */
-    public static function init(): void
-    {
-        self::registerGenerator(new DuelGeneratorInfo(RedDefault::class));
-        self::registerGenerator(new DuelGeneratorInfo(YellowDefault::class));
-    }
+    public static function init(): void {}
 
     /**
      * @param PracticeGeneratorInfo $info -> The information of the generator.

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\games\duels\types\generic;
+namespace jkorn\bd\player;
 
 
 use jkorn\practice\games\player\properties\GPPropertyInfo;
 use jkorn\practice\games\player\properties\IGamePlayerProperty;
 use pocketmine\item\Item;
 
-class GenericDPPropertyInfo extends GPPropertyInfo
+class BasicDPPropertyInfo extends GPPropertyInfo
 {
     /**
      * @param Item $item - the input item.
