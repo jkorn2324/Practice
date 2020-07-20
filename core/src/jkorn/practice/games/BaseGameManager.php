@@ -6,6 +6,7 @@ namespace jkorn\practice\games;
 
 
 use jkorn\practice\forms\display\statistics\FormDisplayStatistic;
+use jkorn\practice\games\misc\IAwaitingGameManager;
 use jkorn\practice\scoreboard\display\statistics\ScoreboardStatistic;
 use pocketmine\Player;
 use pocketmine\Server;
@@ -167,6 +168,52 @@ class BaseGameManager
         if(isset($this->gameTypes[$type]))
         {
             return $this->gameTypes[$type];
+        }
+
+        return null;
+    }
+
+    /**
+     * @param Player $player
+     * @return IGame|null
+     *
+     * Gets the game from the player.
+     */
+    public function getGame(Player $player): ?IGame
+    {
+        foreach($this->gameTypes as $gameType)
+        {
+            $game = $gameType->getFromPlayer($player);
+            if($game !== null)
+            {
+                return $game;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param Player $player - The input player.
+     * @return IAwaitingGameManager|null - Returns the game manager if player is
+     *                   awaiting in a game.
+     *
+     * Gets the player's current awaiting game type.
+     */
+    public function getAwaitingGameType(Player $player): ?IAwaitingGameManager
+    {
+        foreach($this->gameTypes as $gameType)
+        {
+            if(
+                $gameType instanceof IAwaitingGameManager
+            )
+            {
+                $awaitingManager = $gameType->getAwaitingManager();
+                if($awaitingManager->isAwaiting($player))
+                {
+                    return $gameType;
+                }
+            }
         }
 
         return null;

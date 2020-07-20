@@ -12,7 +12,7 @@ use jkorn\practice\arenas\types\ffa\FFAArena;
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\display\FormDisplayText;
 use jkorn\practice\forms\types\SimpleForm;
-use jkorn\practice\kits\Kit;
+use jkorn\practice\kits\SavedKit;
 use jkorn\practice\PracticeCore;
 
 class PlayFFAForm extends FormDisplay
@@ -84,7 +84,7 @@ class PlayFFAForm extends FormDisplay
             if($arena instanceof FFAArena)
             {
                 $kit = $arena->getKit();
-                $texture = $kit instanceof Kit ? $kit->getTexture() : null;
+                $texture = $kit instanceof SavedKit ? $kit->getTexture() : null;
 
                 $form->addButton(
                     $this->formData["button.select.arena.template"]->getText($player, $arena),

@@ -9,12 +9,13 @@ use jkorn\practice\arenas\types\duels\DuelArenaManager;
 use jkorn\practice\arenas\types\duels\PostGeneratedDuelArena;
 use jkorn\practice\arenas\types\duels\PreGeneratedDuelArena;
 use jkorn\practice\games\IGameManager;
+use jkorn\practice\kits\IKit;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\PracticeUtil;
 use jkorn\practice\scoreboard\ScoreboardData;
 use pocketmine\Player;
 use jkorn\practice\games\duels\types\Duel1vs1;
-use jkorn\practice\kits\Kit;
+use jkorn\practice\kits\SavedKit;
 use jkorn\practice\player\PracticePlayer;
 
 class Generic1vs1 extends Duel1vs1 implements IGenericDuel
@@ -32,14 +33,14 @@ class Generic1vs1 extends Duel1vs1 implements IGenericDuel
     /**
      * Generic1vs1 constructor.
      * @param int $id - The id of the duel.
-     * @param Kit $kit - The kit of the 1vs1.
+     * @param IKit $kit - The kit of the 1vs1.
      * @param $arena - The arena of the 1vs1.
      * @param Player $player1 - The first player of the 1vs1.
      * @param Player $player2 - The second player of the 1vs1.
      *
      * The generic 1vs1 constructor.
      */
-    public function __construct(int $id, Kit $kit, $arena, Player $player1, Player $player2)
+    public function __construct(int $id, IKit $kit, $arena, Player $player1, Player $player2)
     {
         parent::__construct($kit, $arena, $player1, $player2, GenericDuelPlayer::class);
 
@@ -271,5 +272,15 @@ class Generic1vs1 extends Duel1vs1 implements IGenericDuel
             return $this->getID() === $game->getID();
         }
         return false;
+    }
+
+    /**
+     * @return int
+     *
+     * Gets the number of players playing the duel in total.
+     */
+    public function getNumberOfPlayers(): int
+    {
+        return 2;
     }
 }

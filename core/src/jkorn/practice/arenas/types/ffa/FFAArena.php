@@ -11,7 +11,7 @@ use pocketmine\math\Vector3;
 use pocketmine\Player;
 use pocketmine\Server;
 use jkorn\practice\arenas\PracticeArena;
-use jkorn\practice\kits\Kit;
+use jkorn\practice\kits\SavedKit;
 use jkorn\practice\level\SpawnArea;
 use jkorn\practice\misc\ISaved;
 use jkorn\practice\player\PracticePlayer;
@@ -22,7 +22,7 @@ use jkorn\practice\scoreboard\ScoreboardData;
 class FFAArena extends PracticeArena implements ISaved
 {
 
-    /** @var Kit|null */
+    /** @var SavedKit|null */
     private $kit;
     /** @var SpawnArea */
     private $spawnArea;
@@ -30,7 +30,7 @@ class FFAArena extends PracticeArena implements ISaved
     /** @var int */
     private $players = 0;
 
-    public function __construct(string $name, Level $level, SpawnArea $spawnArea, ?Kit $kit = null)
+    public function __construct(string $name, Level $level, SpawnArea $spawnArea, ?SavedKit $kit = null)
     {
         parent::__construct($name, $level);
         $this->kit = $kit;
@@ -39,21 +39,21 @@ class FFAArena extends PracticeArena implements ISaved
     }
 
     /**
-     * @param Kit|null $kit
+     * @param SavedKit|null $kit
      *
      * Sets the kit of the ffa arena.
      */
-    public function setKit(?Kit $kit): void
+    public function setKit(?SavedKit $kit): void
     {
         $this->kit = $kit;
     }
 
     /**
-     * @return Kit|null
+     * @return SavedKit|null
      *
      * Gets the kit.
      */
-    public function getKit(): ?Kit
+    public function getKit(): ?SavedKit
     {
         return $this->kit;
     }
@@ -155,7 +155,7 @@ class FFAArena extends PracticeArena implements ISaved
     public function export(): array
     {
         return [
-            "kit" => $this->kit instanceof Kit ? $this->kit->getName() : null,
+            "kit" => $this->kit instanceof SavedKit ? $this->kit->getName() : null,
             "spawn" => $this->spawnArea->export(),
             "level" => $this->level->getName()
         ];

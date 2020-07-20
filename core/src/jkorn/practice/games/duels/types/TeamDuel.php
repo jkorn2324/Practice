@@ -8,7 +8,7 @@ namespace jkorn\practice\games\duels\types;
 use jkorn\practice\games\duels\AbstractDuel;
 use jkorn\practice\games\duels\teams\DuelTeam;
 use jkorn\practice\games\misc\ITeamGame;
-use jkorn\practice\kits\Kit;
+use jkorn\practice\kits\IKit;
 use jkorn\practice\player\PracticePlayer;
 use pocketmine\level\Position;
 use pocketmine\Player;
@@ -25,7 +25,7 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
     /** @var DuelTeam */
     protected $team1, $team2;
 
-    public function __construct(int $teamSize, Kit $kit, $arena, $teamClass, $playerClass)
+    public function __construct(int $teamSize, IKit $kit, $arena, $teamClass, $playerClass)
     {
         parent::__construct($kit, $arena);
 
@@ -152,7 +152,7 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
 
         if($reason === self::STATUS_STARTING)
         {
-            $teamPlayer->setDead();
+            $teamPlayer->setSpectator();
             $this->setEnded(null, self::STATUS_ENDED);
 
             if($reason === self::REASON_LEFT_SERVER)
@@ -166,6 +166,7 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
 
         if($team1->eliminate($player, $reason))
         {
+            $teamPlayer->setEliminated();
             $this->setEnded($team2, self::STATUS_ENDING);
             return;
         }
@@ -173,6 +174,7 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
         if($reason !== self::REASON_LEFT_SERVER)
         {
             $teamPlayer->setSpectator();
+            $teamPlayer->setEliminated();
         }
     }
 

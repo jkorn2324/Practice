@@ -130,6 +130,27 @@ class DuelArenaManager implements IArenaManager
     }
 
     /**
+     * @return PreGeneratedDuelArena|null
+     *
+     * Gets a random open pre generated arena.
+     */
+    public function getRandomOpenArena(): ?PreGeneratedDuelArena
+    {
+        if(count($this->openArenas) <= 0)
+        {
+            return null;
+        }
+
+        $keys = array_keys($this->openArenas);
+        $randomKey = $keys[mt_rand(0, count($keys) - 1)];
+        if(isset($this->arenas[$randomKey]))
+        {
+            return $this->arenas[$randomKey];
+        }
+        return null;
+    }
+
+    /**
      * @return string
      *
      * Gets the arena manager type.

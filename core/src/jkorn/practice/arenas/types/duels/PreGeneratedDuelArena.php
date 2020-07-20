@@ -8,7 +8,7 @@ namespace jkorn\practice\arenas\types\duels;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use jkorn\practice\arenas\PracticeArena;
-use jkorn\practice\kits\Kit;
+use jkorn\practice\kits\SavedKit;
 use jkorn\practice\level\PositionArea;
 use jkorn\practice\misc\ISaved;
 use jkorn\practice\PracticeCore;
@@ -107,7 +107,7 @@ class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
      */
     public function isValidKit($kit): bool
     {
-        if($kit instanceof Kit)
+        if($kit instanceof SavedKit)
         {
             return isset($this->arenaKits[strtolower($kit->getName())]);
         }
@@ -129,7 +129,7 @@ class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
      */
     public function addKit($kit): void
     {
-        if($kit instanceof Kit)
+        if($kit instanceof SavedKit)
         {
             $this->arenaKits[strtolower($kit->getName())] = true;
         }
@@ -150,7 +150,7 @@ class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
      */
     public function removeKit($kit): void
     {
-        if($kit instanceof Kit)
+        if($kit instanceof SavedKit)
         {
             if(isset($this->arenaKits[$localized = strtolower($kit->getName())]))
             {

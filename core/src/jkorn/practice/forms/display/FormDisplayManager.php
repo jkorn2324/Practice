@@ -78,6 +78,11 @@ class FormDisplayManager extends AbstractManager
             $class = self::localToClassName($localizedName);
             $namespacedClass = "jkorn\\practice\\forms\\display\\types\\{$class}";
 
+            if(isset($data["class"]))
+            {
+                $namespacedClass = $data["class"];
+            }
+
             if (!class_exists($namespacedClass) || !is_subclass_of($namespacedClass, FormDisplay::class))
             {
                 continue;
@@ -89,11 +94,6 @@ class FormDisplayManager extends AbstractManager
 
                 $reflection = new \ReflectionClass($namespacedClass);
                 $method = $reflection->getMethod("decode");
-
-                if (!$method instanceof \ReflectionMethod) {
-                    continue;
-                }
-
                 $formDisplay = $method->invokeArgs(null, [$localizedName, $data]);
                 if($formDisplay instanceof FormDisplay)
                 {

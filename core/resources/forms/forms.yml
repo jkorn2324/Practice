@@ -20,8 +20,8 @@ form.settings.basic:
   description: "Form to edit your basic settings."
   toggles:
     pe.only:
-      enabled: "Enable PE Only Queues"
-      disabled: "Disable PE Only Queues"
+      enabled: "Enable PE-Only Duels"
+      disabled: "Disable PE-Only Duels"
     scoreboard.display:
       enabled: "Enable Scoreboard"
       disabled: "Disable Scoreboard"

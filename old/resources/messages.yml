@@ -22,7 +22,7 @@ general:
     personal: "You have been extinguished!"
     # Message when you have extinguished another player. -> Must have %player% in the message.
     player: "%player% has been successfully extinguished!"
-  # Kit Messages -> All must have %kit% within the message.
+  # SavedKit Messages -> All must have %kit% within the message.
   kits:
     # Message for listing all the kits within the kits.yml file.
     list: "Kits: %kit%"
@@ -166,7 +166,7 @@ formwindow:
   # Duel Form-Window Message -> must have %ranked% in the message.
   duel:
     # Duel Title Form-Window Message.
-    title: "Select %ranked% Duel Kit."
+    title: "Select %ranked% Duel SavedKit."
     # Duel Subtitle Form-Window Message
     content: "Which kit do you want to duel with."
   # Report Form-Window Message -> must have %player% in the message.

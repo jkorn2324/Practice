@@ -24,4 +24,11 @@ interface IGenericDuel extends IGame, ISpectatorGame
      * Broadcasts something to everyone in the game based on a callback.
      */
     public function broadcastGlobal(callable $callback): void;
+
+    /**
+     * @return int
+     *
+     * Gets the number of players playing the duel in total.
+     */
+    public function getNumberOfPlayers(): int;
 }

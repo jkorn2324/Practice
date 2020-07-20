@@ -25,14 +25,6 @@ interface IDuelArena
     public function getP2StartPosition(): Vector3;
 
     /**
-     * @param $kit
-     * @return bool
-     *
-     * Determines if the kit is valid.
-     */
-    public function isValidKit($kit): bool;
-
-    /**
      * @param Vector3 $position
      * @return bool
      *

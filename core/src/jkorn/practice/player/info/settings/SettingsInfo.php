@@ -18,7 +18,6 @@ class SettingsInfo implements ISavedHeader
 {
 
     const SCOREBOARD_DISPLAY = "scoreboard.display";
-    const PE_ONLY = "pe.only";
     const TAP_ITEMS = "tap.items";
     const SWISH_SOUNDS_ENABLED = "swish.sounds";
 
@@ -54,6 +53,19 @@ class SettingsInfo implements ISavedHeader
     }
 
     /**
+     * @param string $localized
+     *
+     * Unregisters the setting from the settings list.
+     */
+    public static function unregisterSetting(string $localized): void
+    {
+        if(isset(self::$settingsList[$localized]))
+        {
+            unset(self::$settingsList[$localized]);
+        }
+    }
+
+    /**
      * Initializes the settings.
      */
     public static function init(): void
@@ -64,12 +76,6 @@ class SettingsInfo implements ISavedHeader
             true, [
                 "enabled" => "Enable Scoreboard",
                 "disabled" => "Disable Scoreboard"
-            ]);
-
-        self::registerSetting(self::PE_ONLY, BooleanSettingProperty::class,
-            false, [
-                "enabled" => "Enable PE Only Queues",
-                "disabled" => "Disable PE Only Queues"
             ]);
 
         self::registerSetting(self::SWISH_SOUNDS_ENABLED, BooleanSettingProperty::class,

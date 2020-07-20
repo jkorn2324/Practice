@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\kits;
 
 
+use jkorn\practice\misc\ISaved;
 use pocketmine\Server;
 use jkorn\practice\misc\AbstractManager;
 use jkorn\practice\misc\PracticeAsyncTask;
@@ -15,10 +16,10 @@ class KitManager extends AbstractManager
 
     /** @var string */
     private $kitDirectory;
-    /** @var Kit[] */
+    /** @var SavedKit[] */
     private $kits;
 
-    /** @var Kit[] */
+    /** @var SavedKit[] */
     private $deletedKits;
 
     public function __construct(PracticeCore $core)
@@ -138,8 +139,8 @@ class KitManager extends AbstractManager
     public function postLoad($data): void
     {
         foreach($data as $kitName => $kitData) {
-            $kit = Kit::decode((string)$kitName, $kitData);
-            if($kit instanceof Kit) {
+            $kit = SavedKit::decode((string)$kitName, $kitData);
+            if($kit instanceof SavedKit) {
                 $this->kits[strtolower($kit->getName())] = $kit;
             }
         }
@@ -157,6 +158,11 @@ class KitManager extends AbstractManager
         }
 
         foreach($this->kits as $localized => $kit) {
+
+            if(!$kit instanceof ISaved)
+            {
+                continue;
+            }
 
             $file = $this->kitDirectory . "{$kit->getName()}.json";
 
@@ -184,11 +190,11 @@ class KitManager extends AbstractManager
      */
     public function delete($kit): void
     {
-        if(!$kit instanceof Kit && !is_string($kit)) {
+        if(!$kit instanceof SavedKit && !is_string($kit)) {
             return;
         }
 
-        $name = $kit instanceof Kit ? $kit->getName() : $kit;
+        $name = $kit instanceof SavedKit ? $kit->getName() : $kit;
         $lowercase = strtolower($name);
         if(isset($this->kits[$lowercase])) {
             $this->deletedKits[$lowercase] = $this->kits[$lowercase];
@@ -196,12 +202,12 @@ class KitManager extends AbstractManager
     }
 
     /**
-     * @param Kit $kit
+     * @param SavedKit $kit
      * @return bool
      *
      * Adds the kit to the list.
      */
-    public function add(Kit $kit): bool
+    public function add(SavedKit $kit): bool
     {
         if(isset($this->kits[$localized = strtolower($kit->getName())])) {
 
@@ -233,11 +239,11 @@ class KitManager extends AbstractManager
     /**
      * @param string $kit
      * @param bool $deleted - If true, the function then checks if kit is deleted & returns null if it is.
-     * @return Kit|null
+     * @return SavedKit|null
      *
      * Gets the kit from the list.
      */
-    public function get(string $kit, bool $deleted = false): ?Kit
+    public function get(string $kit, bool $deleted = false): ?SavedKit
     {
         $localized = strtolower($kit);
         if(isset($this->kits[$localized])) {
@@ -251,10 +257,10 @@ class KitManager extends AbstractManager
     }
 
     /**
-     * @var bool $deleted - If true, it includes the kits that are deleted.
-     * @return array|Kit[]
+     * @return array|SavedKit[]
      *
      * Lists all kits.
+     *@var bool $deleted - If true, it includes the kits that are deleted.
      */
     public function getAll(bool $deleted = false)
     {
@@ -276,12 +282,12 @@ class KitManager extends AbstractManager
 
     /**
      * @param string $file
-     * @param Kit $kit
+     * @param SavedKit $kit
      *
      * Called when the kit manager deletes a kit via the save
      * function non async.
      */
-    private function handleDelete(string $file, Kit $kit): void
+    private function handleDelete(string $file, SavedKit $kit): void
     {
         if(file_exists($file)) {
             unlink($file);

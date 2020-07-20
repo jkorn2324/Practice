@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace jkorn\practice\games\duels\types;
 
 
+use jkorn\practice\kits\IKit;
 use pocketmine\level\Position;
 use pocketmine\Player;
 use jkorn\practice\games\duels\AbstractDuel;
 use jkorn\practice\games\duels\DuelPlayer;
-use jkorn\practice\kits\Kit;
 use jkorn\practice\player\PracticePlayer;
 
 abstract class Duel1vs1 extends AbstractDuel
@@ -20,13 +20,13 @@ abstract class Duel1vs1 extends AbstractDuel
 
     /**
      * Duel1vs1 constructor.
-     * @param Kit $kit
+     * @param IKit $kit
      * @param $arena - The input arena.
      * @param Player $player1 - The first player.
      * @param Player $player2 - The second player.
      * @param $playerTypeClass - The duel player type class.
      */
-    public function __construct(Kit $kit, $arena, Player $player1, Player $player2, $playerTypeClass)
+    public function __construct(IKit $kit, $arena, Player $player1, Player $player2, $playerTypeClass)
     {
         parent::__construct($kit, $arena);
 

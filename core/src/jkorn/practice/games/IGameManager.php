@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace jkorn\practice\games;
 
 
+use jkorn\practice\player\PracticePlayer;
+use pocketmine\Player;
+
 interface IGameManager
 {
 
@@ -19,6 +22,21 @@ interface IGameManager
      * Called when the game manager is unregistered.
      */
     public function onUnregistered(): void;
+
+    /**
+     * @param mixed ...$args - The arguments needed to create a new game.
+     *
+     * The arguments needed to create a new
+     */
+    public function create(...$args): void;
+
+    /**
+     * @param Player $player
+     * @return IGame|null - Returns the game the player is playing, false otherwise.
+     *
+     * Gets the game from the player.
+     */
+    public function getFromPlayer(Player $player): ?IGame;
 
     /**
      * @param $game

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace jkorn\practice\arenas\types\duels;
 
+use jkorn\practice\level\gen\arenas\duels\DuelGeneratorInfo;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use jkorn\practice\arenas\PracticeArena;
@@ -18,9 +19,18 @@ use pocketmine\Server;
 class PostGeneratedDuelArena extends PracticeArena implements IDuelArena
 {
 
-    public function __construct(string $levelName)
+    /** @var DuelGeneratorInfo */
+    private $generatorInfo;
+
+    /**
+     * PostGeneratedDuelArena constructor.
+     * @param string $levelName
+     * @param DuelGeneratorInfo $info
+     */
+    public function __construct(string $levelName, DuelGeneratorInfo $info)
     {
         parent::__construct(strtolower($levelName), Server::getInstance()->getLevelByName($levelName));
+        $this->generatorInfo = $info;
     }
 
     /**
@@ -30,7 +40,20 @@ class PostGeneratedDuelArena extends PracticeArena implements IDuelArena
      */
     public function getP1StartPosition(): Vector3
     {
-        // TODO: Implement getPlayer1Position() method.
+        $extraData = $this->generatorInfo->getExtraData();
+        $sizeX = $extraData->arenaSizeX;
+        $sizeZ = $extraData->arenaSizeZ;
+        /** @var Vector3 $center */
+        $center = $extraData->center;
+        if($sizeX >= $sizeZ)
+        {
+            $center->z = $sizeZ - 4;
+        }
+        else
+        {
+            $center->x = $sizeX - 4;
+        }
+        return $center;
     }
 
     /**
@@ -40,7 +63,20 @@ class PostGeneratedDuelArena extends PracticeArena implements IDuelArena
      */
     public function getP2StartPosition(): Vector3
     {
-        // TODO: Implement getPlayer2Position() method.
+        $extraData = $this->generatorInfo->getExtraData();
+        $sizeX = $extraData->arenaSizeX;
+        $sizeZ = $extraData->arenaSizeZ;
+        /** @var Vector3 $center */
+        $center = $extraData->center;
+        if($sizeX >= $sizeZ)
+        {
+            $center->z = 4;
+        }
+        else
+        {
+            $center->x = 4;
+        }
+        return $center;
     }
 
     /**
@@ -60,17 +96,6 @@ class PostGeneratedDuelArena extends PracticeArena implements IDuelArena
     }
 
     /**
-     * @param $kit
-     * @return bool
-     *
-     * Determines if the kit is valid.
-     */
-    public function isValidKit($kit): bool
-    {
-        // TODO: Implement isValidKit() method.
-    }
-
-    /**
      * @param Vector3 $position
      * @return bool
      *
@@ -78,6 +103,6 @@ class PostGeneratedDuelArena extends PracticeArena implements IDuelArena
      */
     public function isWithinArena(Vector3 $position): bool
     {
-        // TODO: Implement isWithinArena() method.
+        return true;
     }
 }

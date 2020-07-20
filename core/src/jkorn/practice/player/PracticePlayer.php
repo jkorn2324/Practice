@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace jkorn\practice\player;
 
 
+use jkorn\practice\games\IGame;
+use jkorn\practice\games\misc\IAwaitingGameManager;
 use pocketmine\entity\Attribute;
 use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
@@ -22,7 +24,7 @@ use pocketmine\utils\UUID;
 use jkorn\practice\arenas\types\ffa\FFAArena;
 use jkorn\practice\data\PracticeDataManager;
 use jkorn\practice\items\ItemManager;
-use jkorn\practice\kits\Kit;
+use jkorn\practice\kits\SavedKit;
 use jkorn\practice\player\info\ActionsInfo;
 use jkorn\practice\player\info\ClicksInfo;
 use jkorn\practice\player\info\ClientInfo;
@@ -62,7 +64,7 @@ class PracticePlayer extends Player
     /** @var CombatInfo|null */
     protected $combatInfo = null;
 
-    /** @var Kit|null */
+    /** @var SavedKit|null */
     private $equippedKit = null;
     /** @var FFAArena|null */
     private $ffaArena = null;
@@ -276,8 +278,22 @@ class PracticePlayer extends Player
      */
     public function onLeave(PlayerQuitEvent &$event): void
     {
-        // TODO: Remove from queue, leave duel, etc...
+        // Removes the player from the game queue.
+        $awaitingGame = $this->getAwaitingGameType();
+        if($awaitingGame !== null)
+        {
+            $awaitingGame->getAwaitingManager()->removeAwaiting($this, false);
+        }
 
+        // Gets the current game the player is playing in and
+        // removes the player from it.
+        $game = $this->getCurrentGame();
+        if($game !== null)
+        {
+            $game->removeFromGame($this, IGame::REASON_LEFT_SERVER);
+        }
+
+        // Removes the player from the ffa arena.
         if($this->ffaArena !== null)
         {
             $this->ffaArena->removePlayer();
@@ -518,11 +534,11 @@ class PracticePlayer extends Player
 
 
     /**
-     * @param Kit $kit
+     * @param SavedKit $kit
      *
      * Sets the player as equipped with a kit.
      */
-    public function setEquipped(Kit $kit): void
+    public function setEquipped(SavedKit $kit): void
     {
         $this->equippedKit = $kit;
     }
@@ -539,11 +555,11 @@ class PracticePlayer extends Player
     }
 
     /**
-     * @return Kit|null
+     * @return SavedKit|null
      *
      * Gets the equipped kit for the player.
      */
-    public function getEquippedKit(): ?Kit
+    public function getEquippedKit(): ?SavedKit
     {
         return $this->equippedKit;
     }
@@ -590,17 +606,26 @@ class PracticePlayer extends Player
     }
 
     /**
-     * @return bool
+     * @return IGame|null
      *
-     * Determines if the player is in a game.
+     * Gets the current game of the player.
      */
-    public function isInGame(): bool
+    public function getCurrentGame(): ?IGame
     {
-        // TODO: Get the player's game.
-        return false;
+        return PracticeCore::getBaseGameManager()->getGame($this);
     }
 
-    // TODO: getGame() function
+    /**
+     * @return IAwaitingGameManager|null - Returns the game manager if player
+     *                   is awaiting a game, null otherwise.
+     *
+     *
+     * Determines if this player is awaiting a game.
+     */
+    public function getAwaitingGameType(): ?IAwaitingGameManager
+    {
+        return PracticeCore::getBaseGameManager()->getAwaitingGameType($this);
+    }
 
     /**
      * @return bool

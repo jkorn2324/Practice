@@ -7,6 +7,7 @@ namespace jkorn\practice;
 
 use jkorn\practice\games\BaseGameManager;
 use jkorn\practice\games\player\GamePlayer;
+use jkorn\practice\level\gen\PracticeGeneratorManager;
 use pocketmine\entity\Entity;
 use pocketmine\plugin\PluginBase;
 use jkorn\practice\arenas\BaseArenaManager;
@@ -53,6 +54,8 @@ class PracticeCore extends PluginBase
         // Default test data provider is a JSON data provider.
         PracticeDataManager::setDataProvider(new JSONDataProvider());
 
+        // Initializes the practice generator manager.
+        PracticeGeneratorManager::init();
         // Initializes the game player properties.
         GamePlayer::init();
         // The settings information to initialize.

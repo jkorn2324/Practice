@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace jkorn\practice\games\duels;
 
 
+use jkorn\practice\kits\IKit;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Server;
 use jkorn\practice\arenas\PracticeArena;
 use jkorn\practice\arenas\types\duels\IDuelArena;
 use jkorn\practice\games\IGame;
-use jkorn\practice\kits\Kit;
 
 abstract class AbstractDuel implements IGame
 {
@@ -41,7 +41,7 @@ abstract class AbstractDuel implements IGame
     /** @var Server */
     protected $server;
 
-    /** @var Kit */
+    /** @var IKit */
     protected $kit;
     /** @var Level */
     protected $level;
@@ -51,10 +51,10 @@ abstract class AbstractDuel implements IGame
 
     /**
      * AbstractDuel constructor.
-     * @param Kit $kit
+     * @param IKit $kit
      * @param IDuelArena|PracticeArena $arena
      */
-    public function __construct(Kit $kit, $arena)
+    public function __construct(IKit $kit, $arena)
     {
         $this->arena = $arena;
         $this->server = Server::getInstance();

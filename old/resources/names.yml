@@ -87,7 +87,7 @@ scoreboard:
     # Shows the number of spectators in the duel -> Must have %num% in the message.
     spectators: "Spectators: %num%"
     # Displays the kit for the match -> Must have %kit% in the message.
-    kit: "Kit: %kit%"
+    kit: "SavedKit: %kit%"
   # Player -> mainly for cps and ping.
   player:
     # CPS Message -> Must have %player% and %clicks%.

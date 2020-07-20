@@ -8,17 +8,16 @@ namespace jkorn\practice\games\duels\types\generic;
 use jkorn\practice\arenas\types\duels\DuelArenaManager;
 use jkorn\practice\arenas\types\duels\PostGeneratedDuelArena;
 use jkorn\practice\arenas\types\duels\PreGeneratedDuelArena;
-use jkorn\practice\games\duels\teams\DuelTeamPlayer;
 use jkorn\practice\games\duels\types\TeamDuel;
 use jkorn\practice\games\IGameManager;
-use jkorn\practice\kits\Kit;
+use jkorn\practice\kits\IKit;
 use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\PracticeUtil;
 use jkorn\practice\scoreboard\ScoreboardData;
 use pocketmine\Player;
 
-class GenericTeam extends TeamDuel implements IGenericDuel
+class GenericTeamDuel extends TeamDuel implements IGenericDuel
 {
     // The maximum duration seconds.
     const MAX_DURATION_SECONDS = 60 * 30;
@@ -29,11 +28,18 @@ class GenericTeam extends TeamDuel implements IGenericDuel
     /** @var PracticePlayer[] */
     private $spectators = [];
 
-    public function __construct(int $id, int $teamSize, Kit $kit, $arena)
+    /**
+     * GenericTeamDuel constructor.
+     * @param int $id
+     * @param IKit $kit
+     * @param $arena
+     * @param PracticePlayer...$players
+     */
+    public function __construct(int $id, IKit $kit, $arena, ...$players)
     {
-        parent::__construct($teamSize, $kit, $arena, GenericDuelTeam::class, GenericDuelTeamPlayer::class);
-
+        parent::__construct(count($players), $kit, $arena, GenericDuelTeam::class, GenericDuelTeamPlayer::class);
         $this->id = $id;
+        $this->generateTeams($players);
     }
 
     /**
@@ -43,6 +49,11 @@ class GenericTeam extends TeamDuel implements IGenericDuel
      */
     public function generateTeams(Player ...$players): void
     {
+        if($this->generated)
+        {
+            return;
+        }
+
         $this->randomTeam($players);
         $this->generated = true;
     }
@@ -152,7 +163,7 @@ class GenericTeam extends TeamDuel implements IGenericDuel
      */
     public function equals($game): bool
     {
-        if($game instanceof GenericTeam)
+        if($game instanceof GenericTeamDuel)
         {
             return $game->getID() === $this->getID();
         }
@@ -264,5 +275,15 @@ class GenericTeam extends TeamDuel implements IGenericDuel
                 $callable($spectator);
             }
         }
+    }
+
+    /**
+     * @return int
+     *
+     * Gets the number of players playing the duel in total.
+     */
+    public function getNumberOfPlayers(): int
+    {
+        return $this->getTeamSize() * 2;
     }
 }

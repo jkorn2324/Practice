@@ -12,7 +12,7 @@ use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\misc\ISaved;
 use jkorn\practice\PracticeUtil;
 
-class Kit implements ISaved
+class SavedKit implements ISaved, IKit
 {
     /** @var Item[] */
     private $items;
@@ -161,7 +161,7 @@ class Kit implements ISaved
      */
     public function equals($kit): bool
     {
-        if($kit instanceof Kit)
+        if($kit instanceof SavedKit)
         {
             return $kit->getName() === $this->name;
         }
@@ -182,11 +182,11 @@ class Kit implements ISaved
     /**
      * @param string $name
      * @param $data
-     * @return Kit|null
+     * @return SavedKit|null
      *
      * Decodes the kit from a data set.
      */
-    public static function decode(string $name, $data): ?Kit
+    public static function decode(string $name, $data)
     {
         if(!isset($data["items"], $data["armor"], $data["effects"], $data[KitCombatData::KIT_HEADER], $data["texture"]))
         {
@@ -226,7 +226,7 @@ class Kit implements ISaved
             }
         }
 
-        return new Kit(
+        return new SavedKit(
             $name,
             $outputItems,
             $outputArmor,
