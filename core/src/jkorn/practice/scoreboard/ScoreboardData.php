@@ -14,10 +14,8 @@ class ScoreboardData
 
     // Default scoreboard information.
     const SCOREBOARD_SPAWN_DEFAULT = "scoreboard.spawn.default";
-    const SCOREBOARD_SPAWN_QUEUE = "scoreboard.spawn.queue";
     const SCOREBOARD_FFA = "scoreboard.ffa";
-    const SCOREBOARD_DUEL_PLAYER = "scoreboard.duel.player";
-    const SCOREBOARD_DUEL_SPECTATOR = "scoreboard.duel.spectator";
+    // const SCOREBOARD_DUEL_PLAYER = "scoreboard.duel.player";
     const SCOREBOARD_NONE = "scoreboard.none";
 
     /** @var string */

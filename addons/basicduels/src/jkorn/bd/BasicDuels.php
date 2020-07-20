@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace jkorn\bd;
 
 
-use jkorn\bd\duels\gen\BasicDuelsGeneratorInfo;
+use jkorn\bd\gen\BasicDuelsGeneratorInfo;
 use jkorn\bd\gen\types\RedDefault;
 use jkorn\bd\gen\types\YellowDefault;
 use jkorn\practice\level\gen\PracticeGeneratorManager;

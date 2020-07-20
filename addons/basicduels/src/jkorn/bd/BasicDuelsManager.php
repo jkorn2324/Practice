@@ -131,7 +131,7 @@ class BasicDuelsManager implements IAwaitingGameManager
      */
     public function getTitle(): string
     {
-        return "Generic Duels";
+        return "Basic Duels";
     }
 
     /**

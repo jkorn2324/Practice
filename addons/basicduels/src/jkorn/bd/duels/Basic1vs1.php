@@ -179,10 +179,10 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
         $player->teleport($this->getCenterPosition());
 
         $scoreboardData = $player->getScoreboardData();
-        if($scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_DUEL_SPECTATOR)
+        /* if($scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_DUEL_SPECTATOR)
         {
             $scoreboardData->setScoreboard(ScoreboardData::SCOREBOARD_DUEL_SPECTATOR);
-        }
+        } */
     }
 
     /**

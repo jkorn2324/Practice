@@ -229,9 +229,10 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
         $player->teleport($this->getCenterPosition());
 
         $scoreboardData = $player->getScoreboardData();
-        if ($scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_DUEL_SPECTATOR) {
+        // TODO: Re Add Spectator Scoreboards.
+        /* if ($scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_DUEL_SPECTATOR) {
             $scoreboardData->setScoreboard(ScoreboardData::SCOREBOARD_DUEL_SPECTATOR);
-        }
+        } */
     }
 
     /**

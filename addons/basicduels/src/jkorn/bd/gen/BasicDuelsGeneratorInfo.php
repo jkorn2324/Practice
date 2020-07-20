@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace jkorn\bd\duels\gen;
+namespace jkorn\bd\gen;
 
 
 use jkorn\practice\level\gen\PracticeGeneratorInfo;
