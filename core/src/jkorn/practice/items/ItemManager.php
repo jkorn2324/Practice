@@ -8,7 +8,7 @@ namespace jkorn\practice\items;
 use pocketmine\item\Item;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
-use jkorn\practice\forms\display\FormDisplayManager;
+use jkorn\practice\forms\display\PracticeFormManager;
 use jkorn\practice\misc\AbstractManager;
 use jkorn\practice\PracticeCore;
 
@@ -95,7 +95,7 @@ class ItemManager extends AbstractManager
             $ffaItem->setOnUseCallback(function (Player $player) {
 
                 // Sends the play form to the player.
-                $theForm = PracticeCore::getFormDisplayManager()->getForm(FormDisplayManager::FORM_PLAY_FFA);
+                $theForm = PracticeCore::getBaseFormDisplayManager()->getForm(PracticeFormManager::FORM_PLAY_FFA);
                 if ($theForm !== null) {
                     $theForm->display($player);
                 } else {
@@ -115,7 +115,7 @@ class ItemManager extends AbstractManager
         if (isset($this->items[self::ITEM_PLAYER_SETTINGS])) {
             $this->items[self::ITEM_PLAYER_SETTINGS]->setOnUseCallback(function (Player $player) {
 
-                $theForm = PracticeCore::getFormDisplayManager()->getForm(FormDisplayManager::FORM_SETTINGS_MENU);
+                $theForm = PracticeCore::getBaseFormDisplayManager()->getForm(PracticeFormManager::FORM_SETTINGS_MENU);
                 if ($theForm !== null) {
                     $theForm->display($player);
                 } else {
@@ -136,7 +136,7 @@ class ItemManager extends AbstractManager
         {
             $this->items[self::ITEM_PLAY_GAMES]->setOnUseCallback(function(Player $player) {
                 // TODO
-                $theForm = PracticeCore::getFormDisplayManager()->getForm(FormDisplayManager::FORM_PLAY_GAMES);
+                $theForm = PracticeCore::getBaseFormDisplayManager()->getForm(PracticeFormManager::FORM_PLAY_GAMES);
                 if($theForm !== null)
                 {
                     $theForm->display($player);

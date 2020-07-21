@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace jkorn\practice\games;
 
 
-use jkorn\practice\forms\display\statistics\FormDisplayStatistic;
 use jkorn\practice\games\misc\IAwaitingGameManager;
 use jkorn\practice\scoreboard\display\statistics\ScoreboardStatistic;
 use pocketmine\Player;
 use pocketmine\Server;
-use jkorn\practice\games\duels\types\generic\BasicDuelsManager;
 use jkorn\practice\PracticeCore;
 use pocketmine\utils\TextFormat;
 

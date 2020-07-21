@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace jkorn\practice\games;
 
+use jkorn\practice\forms\display\FormDisplay;
 use pocketmine\Player;
 
 interface IGameManager
 {
-
-    const MANAGER_GENERIC_DUELS = "generic.duels";
-
     /**
      * Called when the game manager is first registered.
      */
@@ -71,13 +69,6 @@ interface IGameManager
     public function getTexture(): string;
 
     /**
-     * @return string[]
-     *
-     * Gets the game types of the manager.
-     */
-    public function getGameTypes();
-
-    /**
      * @param $manager
      * @return bool
      *
@@ -91,4 +82,11 @@ interface IGameManager
      * Gets the number of players playing.
      */
     public function getPlayersPlaying(): int;
+
+    /**
+     * @return FormDisplay|null
+     *
+     * Gets the corresponding form used to put the player in the game.
+     */
+    public function getGameSelector(): ?FormDisplay;
 }

@@ -2,6 +2,7 @@
 # The form that contains the text display for
 # the form settings menu.
 form.settings.menu:
+  class: jkorn\practice\forms\display\types\MenuSettingsForm
   title: "Settings Form"
   description: "Form to edit the player settings."
   buttons:
@@ -16,25 +17,14 @@ form.settings.menu:
 # The form that contains the text display for
 # the duels settings menu.
 form.settings.basic:
+  class: jkorn\practice\forms\display\types\BasicSettingsForm
   title: "Basic Settings"
-  description: "Form to edit your duels settings."
-  toggles:
-    pe.only:
-      enabled: "Enable PE-Only Duels"
-      disabled: "Disable PE-Only Duels"
-    scoreboard.display:
-      enabled: "Enable Scoreboard"
-      disabled: "Disable Scoreboard"
-    tap.items:
-      enabled: "Enable Tap-Items"
-      disabled: "Disable Tap-Items"
-    swish.sounds:
-      enabled: "Enable Swish Sounds"
-      disabled: "Disable Swish Sounds"
+  description: "Form to edit your basic settings."
 
 # The form that contains the text display for
 # the builder mode menu.
 form.settings.builder:
+  class: jkorn\practice\forms\display\types\BuilderSettingsForm
   title: "Builder Mode Settings"
   description: "Form to edit your builder mode settings."
   toggles:
@@ -47,6 +37,7 @@ form.settings.builder:
 # The form that contains the text display for
 # the Play FFA form menu.
 form.FFA.play:
+  class: jkorn\practice\forms\display\types\PlayFFAForm
   title: "Play FFA"
   description: "Select the ffa arena that you want to play."
   buttons:
@@ -60,6 +51,7 @@ form.FFA.play:
 # The form that contains the text display for
 # the Play Games form menu.
 form.games.play:
+  class: jkorn\practice\forms\display\types\PlayGamesForm
   title: "Play Games"
   description: "Select the games that you want to play."
   buttons:
@@ -67,18 +59,5 @@ form.games.play:
       top.text: "Play {games.stat.type}"
       bottom.text: "Players: {games.stat.type.players}"
     select.game.none:
-      top.text: "None"
-      bottom.text: ""
-
-# The form that contains the text display for
-# the Play ffa form menu.
-form.play.FFA:
-  title: "Play FFA"
-  description: "Select the arena that you want to play."
-  buttons:
-    select.arena.template:
-      top.text: " {ffa.arena} "
-      bottom.text: " Players: {ffa.arena.players} "
-    select.arena.none:
       top.text: "None"
       bottom.text: ""

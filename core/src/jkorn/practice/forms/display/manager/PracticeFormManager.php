@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace jkorn\practice\forms\display;
 
 
-use jkorn\practice\misc\AbstractManager;
+use jkorn\practice\forms\display\manager\IFormDisplayManager;
 use jkorn\practice\PracticeCore;
+use pocketmine\Server;
 
-class FormDisplayManager extends AbstractManager
+class PracticeFormManager implements IFormDisplayManager
 {
+
+    const NAME = "practice.form.display";
 
     /** @var FormDisplay[] */
     private $displayForms = [];
@@ -23,12 +26,18 @@ class FormDisplayManager extends AbstractManager
     /** @var string */
     private $resourcesFolder, $destinationFolder;
 
+    /** @var Server */
+    private $server;
+
+    /** @var bool */
+    private $loaded = false;
+
     public function __construct(PracticeCore $core)
     {
         $this->resourcesFolder = $core->getResourcesFolder() . "forms";
         $this->destinationFolder = $core->getDataFolder() . "forms";
 
-        parent::__construct($core, false);
+        $this->server = $core->getServer();
     }
 
     /**
@@ -36,7 +45,7 @@ class FormDisplayManager extends AbstractManager
      *
      * @param bool $async
      */
-    protected function load(bool $async = false): void
+    public function load(bool $async): void
     {
         if (!is_dir($this->destinationFolder)) {
             mkdir($this->destinationFolder);
@@ -57,6 +66,8 @@ class FormDisplayManager extends AbstractManager
         }
 
         $this->loadFormDisplays($inputFile);
+
+        $this->loaded = true;
     }
 
     /**
@@ -75,7 +86,7 @@ class FormDisplayManager extends AbstractManager
         // Gets the class name based on the types of forms inputted in forms.yml
         foreach ($fileData as $localizedName => $data) {
 
-            $class = self::localToClassName($localizedName);
+            $class = self::formLocalToClassName($localizedName);
             $namespacedClass = "jkorn\\practice\\forms\\display\\types\\{$class}";
 
             if(isset($data["class"]))
@@ -136,12 +147,32 @@ class FormDisplayManager extends AbstractManager
      *
      * Converts the localized name to a class name.
      */
-    private static function localToClassName(string $name): string
+    private static function formLocalToClassName(string $name): string
     {
         $exploded = array_reverse(explode(".", $name));
         for ($i = 0; $i < count($exploded); $i++) {
             $exploded[$i] = ucfirst($exploded[$i]);
         }
         return implode($exploded, "");
+    }
+
+    /**
+     * @return bool
+     *
+     * Determines if the form display manager has been loaded.
+     */
+    public function didLoad(): bool
+    {
+        return $this->loaded;
+    }
+
+    /**
+     * @return string
+     *
+     * Gets the localized name of the form display manager.
+     */
+    public function getLocalizedName(): string
+    {
+        return self::NAME;
     }
 }

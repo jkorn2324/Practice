@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace jkorn\bd\queues;
 
 
-use jkorn\bd\BasicDuelsManager;
+use jkorn\bd\BasicDuelsUtils;
 use jkorn\practice\games\duels\AbstractQueue;
 use jkorn\practice\player\PracticePlayer;
 
@@ -29,7 +29,7 @@ class BasicQueue extends AbstractQueue
         $this->numberOfPlayers = $numberOfPlayers;
 
         $isPe = $player->getClientInfo()->isPE();
-        $property = $player->getSettingsInfo()->getProperty(BasicDuelsManager::SETTING_PE_ONLY);
+        $property = $player->getSettingsInfo()->getProperty(BasicDuelsUtils::SETTING_PE_ONLY);
         if($property !== null && $isPe)
         {
             $this->peOnly = (bool)$property->getValue();

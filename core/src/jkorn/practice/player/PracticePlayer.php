@@ -31,7 +31,7 @@ use jkorn\practice\player\info\ClientInfo;
 use jkorn\practice\player\info\CombatInfo;
 use jkorn\practice\player\info\DisguiseInfo;
 use jkorn\practice\player\info\settings\SettingsInfo;
-use jkorn\practice\player\info\StatsInfo;
+use jkorn\practice\player\info\stats\StatsInfo;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\PracticeUtil;
 use jkorn\practice\scoreboard\ScoreboardData;

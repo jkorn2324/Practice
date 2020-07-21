@@ -4,14 +4,7 @@ declare(strict_types=1);
 
 namespace jkorn\bd;
 
-
-use jkorn\bd\gen\BasicDuelsGeneratorInfo;
-use jkorn\bd\gen\types\RedDefault;
-use jkorn\bd\gen\types\YellowDefault;
-use jkorn\practice\level\gen\PracticeGeneratorManager;
-use jkorn\practice\player\info\StatsInfo;
 use jkorn\practice\PracticeCore;
-use jkorn\practice\scoreboard\display\statistics\ScoreboardStatistic;
 use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
 
@@ -27,9 +20,6 @@ class BasicDuels extends PluginBase
         {
             return;
         }
-
-        // Initializes the generators.
-        self::initGenerators();
 
         // Register the game manager to the practice core game manager.
         PracticeCore::getBaseGameManager()->registerGameManager(
@@ -56,28 +46,12 @@ class BasicDuels extends PluginBase
     }
 
     /**
-     * Initializes the generators.
+     * @return string
+     *
+     * Gets the resources folder.
      */
-    private static function initGenerators(): void
+    public function getResourcesFolder(): string
     {
-        PracticeGeneratorManager::registerGenerator(new BasicDuelsGeneratorInfo(RedDefault::class));
-        PracticeGeneratorManager::registerGenerator(new BasicDuelsGeneratorInfo(YellowDefault::class));
-    }
-
-    /**
-     * Initializes the player statistics.
-     */
-    private static function initPlayerStatistics(): void
-    {
-        // TODO: Add statistic information.
-
-        ScoreboardStatistic::registerStatistic(new ScoreboardStatistic(
-            "duels.basic.stat.wins",
-            function(Player $player, Server $server)
-            {
-                // TODO: Get the statistics.
-                return 0;
-            })
-        );
+        return $this->getFile() . "resources/";
     }
 }

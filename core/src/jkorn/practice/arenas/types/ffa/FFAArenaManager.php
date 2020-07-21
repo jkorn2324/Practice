@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\arenas\types\ffa;
 
 
-use jkorn\practice\forms\display\statistics\FormDisplayStatistic;
-use jkorn\practice\kits\SavedKit;
+use jkorn\practice\forms\display\properties\FormDisplayStatistic;
 use jkorn\practice\scoreboard\display\statistics\FFAScoreboardStatistic;
 use pocketmine\Player;
 use pocketmine\Server;

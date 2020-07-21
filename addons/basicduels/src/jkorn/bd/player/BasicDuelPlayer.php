@@ -11,12 +11,10 @@ use jkorn\practice\player\PracticePlayer;
 class BasicDuelPlayer extends DuelPlayer
 {
     /**
-     * Initializes the misc to the player.
+     * Initializes the properties to the player.
+     * Unused in Basic Duel Player.
      */
-    protected function initProperties(): void
-    {
-        // TODO: Implement initProperties() method.
-    }
+    protected function initProperties(): void {}
 
     /**
      * @param $player

@@ -6,8 +6,9 @@ namespace jkorn\practice\forms\display\types;
 
 
 use jkorn\practice\forms\display\FormDisplay;
-use jkorn\practice\forms\display\FormDisplayText;
+use jkorn\practice\forms\display\properties\FormDisplayText;
 use jkorn\practice\forms\types\SimpleForm;
+use jkorn\practice\games\IGameManager;
 use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
@@ -50,7 +51,22 @@ class PlayGamesForm extends FormDisplay
     {
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
-            // TODO: Get Output
+            /** @var IGameManager[] $games */
+            $games = $extraData["games"];
+            if(count($games) <= 0)
+            {
+                return;
+            }
+
+            if($data !== null)
+            {
+                $gameManager = $games[(int)$data];
+                $form = $gameManager->getGameSelector();
+                if($form !== null)
+                {
+                    $form->display($player);
+                }
+            }
         });
 
         $gameTypes = PracticeCore::getBaseGameManager()->getGameTypes();
@@ -86,7 +102,7 @@ class PlayGamesForm extends FormDisplay
                     $this->formData["button.select.game.template"]->getText($player, $gameType)
                 );
             }
-            $inputGameTypes = $gameType;
+            $inputGameTypes[] = $gameType;
         }
 
         $form->setExtraData(["games" => $inputGameTypes]);

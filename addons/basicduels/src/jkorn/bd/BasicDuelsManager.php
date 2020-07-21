@@ -10,17 +10,17 @@ use jkorn\bd\arenas\IDuelArena;
 use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\duels\Basic1vs1;
 use jkorn\bd\duels\BasicTeamDuel;
-use jkorn\bd\duels\gen\BasicDuelsGeneratorInfo;
+use jkorn\bd\forms\BasicDuelsFormManager;
+use jkorn\bd\gen\BasicDuelsGeneratorInfo;
 use jkorn\bd\duels\IBasicDuel;
 use jkorn\bd\queues\BasicQueuesManager;
+use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\games\IGame;
 use jkorn\practice\games\misc\IAwaitingGameManager;
 use jkorn\practice\games\misc\IAwaitingManager;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\level\gen\PracticeGeneratorInfo;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
-use jkorn\practice\player\info\settings\properties\BooleanSettingProperty;
-use jkorn\practice\player\info\settings\SettingsInfo;
 use jkorn\practice\player\PracticePlayer;
 use pocketmine\Player;
 use pocketmine\Server;
@@ -30,9 +30,6 @@ class BasicDuelsManager implements IAwaitingGameManager
 {
 
     const NAME = "basic.duels";
-
-    // Constant for PE Only Queues.
-    const SETTING_PE_ONLY = "pe.only";
 
     /** @var int - The ids of the generic duels. */
     private static $genericDuelIDs = 0;
@@ -121,7 +118,7 @@ class BasicDuelsManager implements IAwaitingGameManager
      */
     public function getType(): string
     {
-        return self::MANAGER_GENERIC_DUELS;
+        return self::NAME;
     }
 
     /**
@@ -149,14 +146,15 @@ class BasicDuelsManager implements IAwaitingGameManager
      */
     public function onRegistered(): void
     {
-        // TODO: Register the statistics
+        // Registers the arena manager generator.
+        PracticeCore::getBaseArenaManager()->registerArenaManager(new ArenaManager(), true);
 
-        // Registers the PE Only Queues Setting.
-        SettingsInfo::registerSetting(self::SETTING_PE_ONLY, BooleanSettingProperty::class,
-            false, [
-                "enabled" => "Enable PE-Only Duels",
-                "disabled" => "Disable PE-Only Duels"
-            ]);
+        // Initializes the generators.
+        BasicDuelsUtils::initGenerators();
+
+        BasicDuelsUtils::registerPlayerSettings();
+        BasicDuelsUtils::registerPlayerStatistics();
+        BasicDuelsUtils::registerScoreboardStatistics();
     }
 
     /**
@@ -164,11 +162,12 @@ class BasicDuelsManager implements IAwaitingGameManager
      */
     public function onUnregistered(): void
     {
-        // TODO: Unregister the statistics.
-        // TODO: Unregister the Post-Duel Arena Manager
+        PracticeCore::getBaseArenaManager()->unregisterArenaManager(ArenaManager::TYPE);
 
         // Unregisters the PE Only Queues Setting.
-        SettingsInfo::unregisterSetting(self::SETTING_PE_ONLY);
+        BasicDuelsUtils::unregisterPlayerSettings();
+        BasicDuelsUtils::unregisterPlayerStatistics();
+        BasicDuelsUtils::unregisterScoreboardStatistics();
     }
 
     /**
@@ -191,7 +190,7 @@ class BasicDuelsManager implements IAwaitingGameManager
 
         if(!isset($duelArena) || $duelArena === null)
         {
-            $levelName = "game.duels.generic.{$duelID}";
+            $levelName = "game.duels.basic.{$duelID}";
             /** @var BasicDuelsGeneratorInfo $randomGenerator */
             $randomGenerator = PracticeGeneratorManager::randomGenerator(
                 function(PracticeGeneratorInfo $info) use($numPlayers)
@@ -266,14 +265,30 @@ class BasicDuelsManager implements IAwaitingGameManager
     /**
      * @return string[]
      *
-     * Gets the game types of the manager.
+     * Gets the duels game types.
      */
     public function getGameTypes()
     {
         return [
-            "1vs1",
-            "2vs2",
-            "3vs3"
+            "1vs1" => "textures/ui/dressing_room_customization.png",
+            "2vs2" => "textures/ui/FriendsDiversity.png",
+            "3vs3" => "textures/ui/dressing_room_skins.png"
         ];
+    }
+
+    /**
+     * @return FormDisplay|null
+     *
+     * Gets the corresponding form used to put the player in the game.
+     */
+    public function getGameSelector(): ?FormDisplay
+    {
+        $manager = PracticeCore::getBaseFormDisplayManager()->getFormManager(BasicDuelsFormManager::NAME);
+        if($manager !== null)
+        {
+            return $manager->getForm(BasicDuelsFormManager::SELECTOR_FORM);
+        }
+
+        return null;
     }
 }

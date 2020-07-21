@@ -1,0 +1,13 @@
+# The form that handles when the player
+form.selector.type.duel:
+  # The class that handles the form information.
+  class: jkorn\bd\forms\types\DuelTypeSelectorForm
+  title: "Basic Duel Selector"
+  description: "Select the type of duel you want to play."
+  buttons:
+    duel.button.template:
+      top.text: "Play {duels.basic.stat.type} "
+      bottom.text: "Queued: {duels.basic.stat.type.awaiting} "
+    duel.button.none:
+      top.text: "None"
+      bottom.text: ""

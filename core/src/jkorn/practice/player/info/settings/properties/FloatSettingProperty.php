@@ -51,11 +51,6 @@ class FloatSettingProperty implements ISettingsProperty
     {
         $oldValue = $this->value;
         $this->value = $value;
-
-        if($oldValue !== $value)
-        {
-            return true;
-        }
-        return false;
+        return $oldValue !== $value;
     }
 }

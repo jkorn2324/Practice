@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\forms\display;
 
 
+use jkorn\practice\forms\display\properties\FormDisplayText;
 use pocketmine\Player;
 
 abstract class FormDisplay

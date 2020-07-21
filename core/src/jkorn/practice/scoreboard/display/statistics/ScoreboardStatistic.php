@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\scoreboard\display\statistics;
 
 
+use jkorn\practice\player\info\stats\StatsInfo;
 use jkorn\practice\PracticeUtil;
 use pocketmine\Player;
 use pocketmine\Server;
@@ -73,6 +74,7 @@ class ScoreboardStatistic
 
     const STATISTIC_KILLS = "stat.kills";
     const STATISTIC_DEATHS = "stat.deaths";
+    const STATISTIC_KDR = "stat.kdr";
     const STATISTIC_CPS = "stat.cps";
     const STATISTIC_ONLINE = "stat.online";
     const STATISTIC_PING = "stat.ping";
@@ -107,7 +109,11 @@ class ScoreboardStatistic
                     $statistics = $player->getStatsInfo();
                     if($statistics !== null)
                     {
-                        return $statistics->getKills();
+                        $killsStat = $statistics->getStatistic(StatsInfo::STAT_KILLS);
+                        if($killsStat !== null)
+                        {
+                            return $killsStat->getValue();
+                        }
                     }
                 }
 
@@ -125,10 +131,42 @@ class ScoreboardStatistic
                     $statistics = $player->getStatsInfo();
                     if($statistics !== null)
                     {
-                        return $statistics->getDeaths();
+                        $killsStat = $statistics->getStatistic(StatsInfo::STAT_DEATHS);
+                        if($killsStat !== null)
+                        {
+                            return $killsStat->getValue();
+                        }
                     }
                 }
 
+                return 0;
+            }
+        ));
+
+        // Initializes the kdr statistic.
+        self::registerStatistic(new ScoreboardStatistic(
+            self::STATISTIC_KDR,
+            function(Player $player, Server $server)
+            {
+                if($player instanceof PracticePlayer)
+                {
+                    $statistics = $player->getStatsInfo();
+                    if($statistics !== null)
+                    {
+                        $kills = $statistics->getStatistic(StatsInfo::STAT_KILLS);
+                        $deaths = $statistics->getStatistic(StatsInfo::STAT_DEATHS);
+                        if($kills !== null && $deaths !== null)
+                        {
+                            $deaths = $deaths->getValue();
+                            if($deaths === 0)
+                            {
+                                $deaths = 1;
+                            }
+
+                            return (float)$kills->getValue() / (float)$deaths;
+                        }
+                    }
+                }
                 return 0;
             }
         ));

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace jkorn\practice\forms\display\types;
 
 
+use jkorn\practice\forms\display\properties\FormDisplayText;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 use jkorn\practice\forms\display\FormDisplay;
-use jkorn\practice\forms\display\FormDisplayManager;
-use jkorn\practice\forms\display\FormDisplayText;
+use jkorn\practice\forms\display\PracticeFormManager;
 use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\PracticeCore;
@@ -69,11 +69,11 @@ class MenuSettingsForm extends FormDisplay
 
                 switch ((int)$data) {
                     case 0:
-                        $form = PracticeCore::getFormDisplayManager()->getForm(FormDisplayManager::FORM_SETTINGS_BASIC);
+                        $form = PracticeCore::getBaseFormDisplayManager()->getForm(PracticeFormManager::FORM_SETTINGS_BASIC);
                         break;
                     case 1:
                         // TODO: Check for builder mode permissions first.
-                        $form = PracticeCore::getFormDisplayManager()->getForm(FormDisplayManager::FORM_SETTINGS_BUILDER_MODE);
+                        $form = PracticeCore::getBaseFormDisplayManager()->getForm(PracticeFormManager::FORM_SETTINGS_BUILDER_MODE);
                         break;
                 }
 

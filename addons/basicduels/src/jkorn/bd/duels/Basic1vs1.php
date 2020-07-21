@@ -137,7 +137,7 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
             }
         }
 
-        $genericDuelManager = PracticeCore::getBaseGameManager()->getGameManager(IGameManager::MANAGER_GENERIC_DUELS);
+        $genericDuelManager = PracticeCore::getBaseGameManager()->getGameManager(BasicDuelsManager::NAME);
         if($genericDuelManager instanceof BasicDuelsManager)
         {
             $genericDuelManager->remove($this);

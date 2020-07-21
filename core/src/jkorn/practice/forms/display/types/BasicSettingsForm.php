@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace jkorn\practice\forms\display\types;
 
 
+use jkorn\practice\forms\display\properties\FormDisplayText;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 use jkorn\practice\forms\display\FormDisplay;
-use jkorn\practice\forms\display\FormDisplayText;
 use jkorn\practice\forms\types\CustomForm;
 use jkorn\practice\player\info\settings\properties\BooleanSettingProperty;
 use jkorn\practice\player\info\settings\SettingsInfo;

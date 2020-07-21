@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\forms\display\statistics;
+namespace jkorn\practice\forms\display\properties;
 
 use pocketmine\Player;
 use pocketmine\Server;

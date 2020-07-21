@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace jkorn\bd\arenas;
 
 
-use jkorn\bd\duels\gen\BasicDuelsGeneratorInfo;
+use jkorn\bd\gen\BasicDuelsGeneratorInfo;
 use jkorn\practice\arenas\PracticeArena;
 use pocketmine\math\Vector3;
 use pocketmine\Server;
@@ -81,7 +81,7 @@ class PostGeneratedDuelArena extends PracticeArena implements IDuelArena
      */
     public function equals($arena): bool
     {
-        if($arena instanceof \jkorn\practice\arenas\types\duels\PostGeneratedDuelArena)
+        if($arena instanceof PostGeneratedDuelArena)
         {
             return $arena->getLocalizedName() === $this->localizedName;
         }

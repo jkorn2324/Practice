@@ -6,11 +6,11 @@ namespace jkorn\practice\forms\display\types;
 
 
 use jkorn\practice\arenas\types\ffa\FFAArenaManager;
+use jkorn\practice\forms\display\properties\FormDisplayText;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 use jkorn\practice\arenas\types\ffa\FFAArena;
 use jkorn\practice\forms\display\FormDisplay;
-use jkorn\practice\forms\display\FormDisplayText;
 use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\kits\SavedKit;
 use jkorn\practice\PracticeCore;

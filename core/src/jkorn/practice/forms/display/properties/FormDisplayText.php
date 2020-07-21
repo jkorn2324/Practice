@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\forms\display;
+namespace jkorn\practice\forms\display\properties;
 
 
 use pocketmine\Player;
-use jkorn\practice\forms\display\statistics\FormDisplayStatistic;
 use jkorn\practice\misc\IDisplayText;
 use jkorn\practice\PracticeUtil;
 

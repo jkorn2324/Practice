@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace jkorn\practice;
 
 
+use jkorn\practice\forms\display\BaseFormDisplayManager;
+use jkorn\practice\forms\display\properties\FormDisplayStatistic;
 use jkorn\practice\games\BaseGameManager;
 use jkorn\practice\games\player\GamePlayer;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
+use jkorn\practice\player\info\stats\StatsInfo;
 use pocketmine\entity\Entity;
 use pocketmine\plugin\PluginBase;
 use jkorn\practice\arenas\BaseArenaManager;
@@ -15,8 +18,6 @@ use jkorn\practice\data\PracticeDataManager;
 use jkorn\practice\data\providers\JSONDataProvider;
 use jkorn\practice\entities\FishingHook;
 use jkorn\practice\entities\SplashPotion;
-use jkorn\practice\forms\display\FormDisplayManager;
-use jkorn\practice\forms\display\statistics\FormDisplayStatistic;
 use jkorn\practice\items\ItemManager;
 use jkorn\practice\kits\KitManager;
 use jkorn\practice\player\info\settings\SettingsInfo;
@@ -34,8 +35,8 @@ class PracticeCore extends PluginBase
     private static $kitManager;
     /** @var ScoreboardDisplayManager */
     private static $scoreboardDisplayManager;
-    /** @var FormDisplayManager */
-    private static $formDisplayManager;
+    /** @var BaseFormDisplayManager */
+    private static $baseFormDisplayManager;
     /** @var ItemManager */
     private static $itemManager;
     /** @var BaseGameManager */
@@ -60,13 +61,15 @@ class PracticeCore extends PluginBase
         // The settings information to initialize.
         SettingsInfo::init();
 
+        // Initializes the default statistics.
+        StatsInfo::initDefaultStats();
+
         // Initializes the scoreboard statistics.
         ScoreboardStatistic::init();
         self::$scoreboardDisplayManager = new ScoreboardDisplayManager($this);
 
-        // TODO: Initialize the display stats.
         FormDisplayStatistic::init();
-        self::$formDisplayManager = new FormDisplayManager($this);
+        self::$baseFormDisplayManager = new BaseFormDisplayManager($this);
 
         self::$kitManager = new KitManager($this);
         self::$baseArenaManager = new BaseArenaManager($this);
@@ -161,13 +164,13 @@ class PracticeCore extends PluginBase
     }
 
     /**
-     * @return FormDisplayManager
+     * @return BaseFormDisplayManager
      *
-     * Gets the form display manager.
+     * Gets the base form display manager.
      */
-    public static function getFormDisplayManager(): FormDisplayManager
+    public static function getBaseFormDisplayManager(): BaseFormDisplayManager
     {
-        return self::$formDisplayManager;
+        return self::$baseFormDisplayManager;
     }
 
     /**

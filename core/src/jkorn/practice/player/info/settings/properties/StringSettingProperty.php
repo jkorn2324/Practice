@@ -51,12 +51,6 @@ class StringSettingProperty implements ISettingsProperty
     {
         $oldValue = $this->value;
         $this->value = $oldValue;
-
-        if($oldValue !== $value)
-        {
-            return true;
-        }
-
-        return false;
+        return $oldValue !== $value;
     }
 }

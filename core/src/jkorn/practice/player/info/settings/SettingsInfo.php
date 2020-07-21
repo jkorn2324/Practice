@@ -104,8 +104,11 @@ class SettingsInfo implements ISavedHeader
 
         foreach(self::$settingsList as $localized => $data)
         {
-            $formDisplay = $data["display"];
-            $displayInfo[$localized] = $formDisplay;
+            if(isset($data["display"]))
+            {
+                $formDisplay = $data["display"];
+                $displayInfo[$localized] = $formDisplay;
+            }
         }
 
         return $displayInfo;
