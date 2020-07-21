@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\bd\queues;
 
 use jkorn\bd\BasicDuelsManager;
+use jkorn\bd\duels\types\BasicDuelGameType;
 use jkorn\practice\games\misc\IAwaitingManager;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\player\PracticePlayer;
@@ -41,6 +42,26 @@ class BasicQueuesManager implements IAwaitingManager
     }
 
     /**
+     * @param BasicDuelGameType $type
+     * @return int
+     *
+     * Gets the number of players awaiting for a specific game type.
+     */
+    public function getPlayersAwaitingFor(BasicDuelGameType $type): int
+    {
+        $players = 0;
+        foreach($this->queues as $queue)
+        {
+            $gameType = $queue->getGameType();
+            if($gameType->equals($type))
+            {
+                $players++;
+            }
+        }
+        return $players;
+    }
+
+    /**
      * @param Player $player - The player to set as awaiting.
      * @param \stdClass $data - The data of the duel.
      * @param bool $sendMessage - Determines whether or not to send a message to a player.
@@ -59,6 +80,7 @@ class BasicQueuesManager implements IAwaitingManager
         if (
             !is_string($data->kit)
             || !$data->kit instanceof IKit
+            || !$data->gameType instanceof BasicDuelGameType
         ) {
             return;
         }
@@ -70,7 +92,7 @@ class BasicQueuesManager implements IAwaitingManager
             $kit = $data->kit;
         }
 
-        $queue = new BasicQueue($player, $kit, $data->numberOfPlayers);
+        $queue = new BasicQueue($player, $kit, $data->gameType);
         // Determines if the queue is validated.
         if (!$queue->validate()) {
             return;
@@ -82,9 +104,10 @@ class BasicQueuesManager implements IAwaitingManager
 
         $matched = $this->findAwaitingMatches($queue);
         if ($matched !== null) {
+            $gameType = $queue->getGameType();
             $matched = $this->removeAwaitingPlayers($matched, $queue);
             $kit = $queue->getKit();
-            $this->parent->create($matched, $kit, true);
+            $this->parent->create($matched, $kit, $gameType, true);
             return;
         }
 

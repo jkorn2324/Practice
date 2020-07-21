@@ -10,6 +10,7 @@ use jkorn\bd\arenas\IDuelArena;
 use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\duels\Basic1vs1;
 use jkorn\bd\duels\BasicTeamDuel;
+use jkorn\bd\duels\types\BasicDuelGameType;
 use jkorn\bd\forms\BasicDuelsFormManager;
 use jkorn\bd\gen\BasicDuelsGeneratorInfo;
 use jkorn\bd\duels\IBasicDuel;
@@ -18,6 +19,7 @@ use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\games\IGame;
 use jkorn\practice\games\misc\IAwaitingGameManager;
 use jkorn\practice\games\misc\IAwaitingManager;
+use jkorn\practice\games\misc\IGameType;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\level\gen\PracticeGeneratorInfo;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
@@ -37,6 +39,9 @@ class BasicDuelsManager implements IAwaitingGameManager
     /** @var Server */
     private $server;
 
+    /** @var [] */
+    private $gameTypes = [];
+
     /** @var IBasicDuel[] */
     private $duels;
     /** @var BasicQueuesManager */
@@ -47,7 +52,31 @@ class BasicDuelsManager implements IAwaitingGameManager
         $this->server = PracticeCore::getInstance()->getServer();
         $this->duels = [];
 
+        $this->initGameTypes();
         $this->queuesManager = new BasicQueuesManager($this);
+    }
+
+    /**
+     * Initializes the game types.
+     */
+    private function initGameTypes(): void
+    {
+        $this->registerGameType(new BasicDuelGameType(2,
+            "1vs1", "textures/ui/dressing_room_customization.png"));
+        $this->registerGameType(new BasicDuelGameType(4,
+            "2vs2", "textures/ui/FriendsDiversity.png"));
+        $this->registerGameType(new BasicDuelGameType(6,
+            "3vs3", "textures/ui/dressing_room_skins.png"));
+    }
+
+    /**
+     * @param BasicDuelGameType $gameType
+     *
+     * Registers the game type.
+     */
+    private function registerGameType(BasicDuelGameType $gameType): void
+    {
+        $this->gameTypes[$gameType->getLocalizedName()] = $gameType;
     }
 
     /**
@@ -68,7 +97,7 @@ class BasicDuelsManager implements IAwaitingGameManager
      */
     public function create(...$args): void
     {
-        if (count($args) !== 3) {
+        if (count($args) !== 4) {
             return;
         }
 
@@ -78,14 +107,16 @@ class BasicDuelsManager implements IAwaitingGameManager
         $players = $args[0];
         /** @var IKit $kit */
         $kit = $args[1];
+        /** @var BasicDuelGameType $gameType */
+        $gameType = $args[2];
         /** @var bool $found */
-        $found = $args[2];
+        $found = $args[3];
 
         // Generates a random arena.
         $randomArena = $this->randomArena($duelID, count($players));
 
         if (count($players) !== 2) {
-            $duel = new BasicTeamDuel($duelID, $kit, $randomArena, ...$players);
+            $duel = new BasicTeamDuel($duelID, $kit, $randomArena, $gameType, ...$players);
         } else {
             $duel = new Basic1vs1($duelID, $kit, $randomArena, $players[0], $players[1]);
         }
@@ -152,6 +183,7 @@ class BasicDuelsManager implements IAwaitingGameManager
         // Initializes the generators.
         BasicDuelsUtils::initGenerators();
 
+        BasicDuelsUtils::registerFormDisplayStats();
         BasicDuelsUtils::registerPlayerSettings();
         BasicDuelsUtils::registerPlayerStatistics();
         BasicDuelsUtils::registerScoreboardStatistics();
@@ -164,7 +196,7 @@ class BasicDuelsManager implements IAwaitingGameManager
     {
         PracticeCore::getBaseArenaManager()->unregisterArenaManager(ArenaManager::TYPE);
 
-        // Unregisters the PE Only Queues Setting.
+        BasicDuelsUtils::unregisterFormDisplayStats();
         BasicDuelsUtils::unregisterPlayerSettings();
         BasicDuelsUtils::unregisterPlayerStatistics();
         BasicDuelsUtils::unregisterScoreboardStatistics();
@@ -263,17 +295,13 @@ class BasicDuelsManager implements IAwaitingGameManager
     }
 
     /**
-     * @return string[]
+     * @return BasicDuelGameType[]
      *
      * Gets the duels game types.
      */
     public function getGameTypes()
     {
-        return [
-            "1vs1" => "textures/ui/dressing_room_customization.png",
-            "2vs2" => "textures/ui/FriendsDiversity.png",
-            "3vs3" => "textures/ui/dressing_room_skins.png"
-        ];
+        return $this->gameTypes;
     }
 
     /**

@@ -6,27 +6,23 @@ namespace jkorn\bd\queues;
 
 
 use jkorn\bd\BasicDuelsUtils;
+use jkorn\bd\duels\types\BasicDuelGameType;
 use jkorn\practice\games\duels\AbstractQueue;
 use jkorn\practice\player\PracticePlayer;
 
 class BasicQueue extends AbstractQueue
 {
 
-    // The number of players constants.
-    const NUM_PLAYERS_1VS1 = 2;
-    const NUM_PLAYERS_2VS2 = 4;
-    const NUM_PLAYERS_3VS3 = 6;
-
-    /** @var int */
-    private $numberOfPlayers;
+    /** @var BasicDuelGameType */
+    private $gameType;
 
     /** @var bool */
     private $peOnly = false;
 
-    public function __construct(PracticePlayer $player, $kit, int $numberOfPlayers)
+    public function __construct(PracticePlayer $player, $kit, BasicDuelGameType $gameType)
     {
         parent::__construct($player, $kit);
-        $this->numberOfPlayers = $numberOfPlayers;
+        $this->gameType = $gameType;
 
         $isPe = $player->getClientInfo()->isPE();
         $property = $player->getSettingsInfo()->getProperty(BasicDuelsUtils::SETTING_PE_ONLY);
@@ -56,7 +52,17 @@ class BasicQueue extends AbstractQueue
      */
     public function getNumPlayers(): int
     {
-        return $this->numberOfPlayers;
+        return $this->gameType->getNumberOfPlayers();
+    }
+
+    /**
+     * @return BasicDuelGameType
+     *
+     * Gets the game type.
+     */
+    public function getGameType(): BasicDuelGameType
+    {
+        return $this->gameType;
     }
 
     /**
@@ -80,15 +86,16 @@ class BasicQueue extends AbstractQueue
         )
         {
             // Only checks for pe only queues only for a generic 1vs1.
-            if($this->peOnly && $this->numberOfPlayers === 1)
+            $numPlayers = $this->getNumPlayers();
+            if($this->peOnly && $numPlayers === 2)
             {
                 return $queue->peOnly === $this->peOnly
                     && $queue->kit->equals($this->kit)
-                    && $this->numberOfPlayers === $queue->numberOfPlayers;
+                    && $this->gameType->equals($queue->gameType);
             }
 
             return $queue->kit->equals($this->kit)
-                && $this->numberOfPlayers === $queue->numberOfPlayers;
+                && $this->gameType->equals($queue->gameType);
         }
 
         return false;

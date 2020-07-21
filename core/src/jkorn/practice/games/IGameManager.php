@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\games;
 
 use jkorn\practice\forms\display\FormDisplay;
+use jkorn\practice\games\misc\IGameType;
 use pocketmine\Player;
 
 interface IGameManager

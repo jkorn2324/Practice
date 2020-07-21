@@ -9,6 +9,7 @@ use jkorn\bd\arenas\ArenaManager;
 use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\arenas\PreGeneratedDuelArena;
 use jkorn\bd\BasicDuelsManager;
+use jkorn\bd\duels\types\BasicDuelGameType;
 use jkorn\bd\player\team\BasicDuelTeam;
 use jkorn\bd\player\team\BasicDuelTeamPlayer;
 use jkorn\practice\games\duels\types\TeamDuel;
@@ -31,17 +32,22 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
     /** @var PracticePlayer[] */
     private $spectators = [];
 
+    /** @var BasicDuelGameType */
+    private $gameType;
+
     /**
      * BasicTeamDuel constructor.
      * @param int $id
      * @param IKit $kit
      * @param $arena
+     * @param BasicDuelGameType $gameType
      * @param PracticePlayer...$players
      */
-    public function __construct(int $id, IKit $kit, $arena, ...$players)
+    public function __construct(int $id, IKit $kit, $arena, BasicDuelGameType $gameType, ...$players)
     {
         parent::__construct(count($players), $kit, $arena, BasicDuelTeam::class, BasicDuelTeamPlayer::class);
         $this->id = $id;
+        $this->gameType = $gameType;
         $this->generateTeams($players);
     }
 

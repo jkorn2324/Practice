@@ -78,9 +78,10 @@ class DuelTypeSelectorForm extends FormDisplay
         }
 
         $inGameTypes = [];
-        foreach($gameTypes as $gameType => $texture)
+        foreach($gameTypes as $localized => $gameType)
         {
             $button = $this->formData["button.duel.button.template"];
+            $texture = $gameType->getTexture();
             if($texture !== "")
             {
                 $form->addButton(

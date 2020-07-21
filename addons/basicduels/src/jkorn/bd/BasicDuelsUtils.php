@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace jkorn\bd;
 
 
+use jkorn\bd\duels\types\BasicDuelGameType;
 use jkorn\bd\gen\BasicDuelsGeneratorInfo;
 use jkorn\bd\gen\types\RedDefault;
 use jkorn\bd\gen\types\YellowDefault;
+use jkorn\bd\queues\BasicQueue;
+use jkorn\bd\queues\BasicQueuesManager;
+use jkorn\practice\forms\display\properties\FormDisplayStatistic;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
 use jkorn\practice\player\info\settings\properties\BooleanSettingProperty;
 use jkorn\practice\player\info\settings\SettingsInfo;
@@ -15,9 +19,11 @@ use jkorn\practice\player\info\stats\properties\IntegerStatProperty;
 use jkorn\practice\player\info\stats\StatPropertyInfo;
 use jkorn\practice\player\info\stats\StatsInfo;
 use jkorn\practice\player\PracticePlayer;
+use jkorn\practice\PracticeCore;
 use jkorn\practice\scoreboard\display\statistics\ScoreboardStatistic;
 use pocketmine\Player;
 use pocketmine\Server;
+use pocketmine\utils\TextFormat;
 
 class BasicDuelsUtils
 {
@@ -37,6 +43,57 @@ class BasicDuelsUtils
     {
         PracticeGeneratorManager::registerGenerator(new BasicDuelsGeneratorInfo(RedDefault::class));
         PracticeGeneratorManager::registerGenerator(new BasicDuelsGeneratorInfo(YellowDefault::class));
+    }
+
+    /**
+     * Registers the form display statistics.
+     */
+    public static function registerFormDisplayStats(): void
+    {
+        // Registers the duel type statistic.
+        FormDisplayStatistic::registerStatistic(new FormDisplayStatistic(
+            self::STATISTIC_DUEL_TYPE,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof BasicDuelGameType)
+                {
+                    return $data->getDisplayName();
+                }
+
+                return "Unknown";
+            }
+        ));
+
+        // Registers the awaiting players for duel type statistic.
+        FormDisplayStatistic::registerStatistic(new FormDisplayStatistic(
+            self::STATISTIC_DUEL_TYPE_AWAITING,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof BasicDuelGameType)
+                {
+                    $manager = PracticeCore::getBaseGameManager()->getGameManager(BasicDuelsManager::NAME);
+                    if($manager instanceof BasicDuelsManager)
+                    {
+                        $queues = $manager->getAwaitingManager();
+                        if($queues instanceof BasicQueuesManager)
+                        {
+                            return $queues->getPlayersAwaitingFor($data);
+                        }
+                    }
+                }
+
+                return 0;
+            }
+        ));
+    }
+
+    /**
+     * Unregisters the form display statistics.
+     */
+    public static function unregisterFormDisplayStats(): void
+    {
+        FormDisplayStatistic::unregisterStatistic(self::STATISTIC_DUEL_TYPE_AWAITING);
+        FormDisplayStatistic::unregisterStatistic(self::STATISTIC_DUEL_TYPE);
     }
 
     /**
