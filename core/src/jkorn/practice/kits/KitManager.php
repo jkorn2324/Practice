@@ -237,14 +237,19 @@ class KitManager extends AbstractManager
     }
 
     /**
-     * @param string $kit
+     * @param string|null $kit
      * @param bool $deleted - If true, the function then checks if kit is deleted & returns null if it is.
      * @return SavedKit|null
      *
      * Gets the kit from the list.
      */
-    public function get(string $kit, bool $deleted = false): ?SavedKit
+    public function get(?string $kit, bool $deleted = false): ?SavedKit
     {
+        if($kit === null)
+        {
+            return null;
+        }
+
         $localized = strtolower($kit);
         if(isset($this->kits[$localized])) {
             $kit = $this->kits[$localized];

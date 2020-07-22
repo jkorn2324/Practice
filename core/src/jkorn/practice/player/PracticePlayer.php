@@ -7,6 +7,7 @@ namespace jkorn\practice\player;
 
 use jkorn\practice\games\IGame;
 use jkorn\practice\games\misc\IAwaitingGameManager;
+use jkorn\practice\kits\IKit;
 use pocketmine\entity\Attribute;
 use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
@@ -24,7 +25,6 @@ use pocketmine\utils\UUID;
 use jkorn\practice\arenas\types\ffa\FFAArena;
 use jkorn\practice\data\PracticeDataManager;
 use jkorn\practice\items\ItemManager;
-use jkorn\practice\kits\SavedKit;
 use jkorn\practice\player\info\ActionsInfo;
 use jkorn\practice\player\info\ClicksInfo;
 use jkorn\practice\player\info\ClientInfo;
@@ -36,6 +36,12 @@ use jkorn\practice\PracticeCore;
 use jkorn\practice\PracticeUtil;
 use jkorn\practice\scoreboard\ScoreboardData;
 
+/**
+ * Class PracticePlayer
+ * @package jkorn\practice\player
+ *
+ * The default Practice player class.
+ */
 class PracticePlayer extends Player
 {
 
@@ -64,7 +70,7 @@ class PracticePlayer extends Player
     /** @var CombatInfo|null */
     protected $combatInfo = null;
 
-    /** @var SavedKit|null */
+    /** @var IKit|null */
     private $equippedKit = null;
     /** @var FFAArena|null */
     private $ffaArena = null;
@@ -534,11 +540,11 @@ class PracticePlayer extends Player
 
 
     /**
-     * @param SavedKit $kit
+     * @param IKit $kit
      *
      * Sets the player as equipped with a kit.
      */
-    public function setEquipped(SavedKit $kit): void
+    public function setEquipped(IKit $kit): void
     {
         $this->equippedKit = $kit;
     }
@@ -555,11 +561,11 @@ class PracticePlayer extends Player
     }
 
     /**
-     * @return SavedKit|null
+     * @return IKit|null
      *
      * Gets the equipped kit for the player.
      */
-    public function getEquippedKit(): ?SavedKit
+    public function getEquippedKit(): ?IKit
     {
         return $this->equippedKit;
     }

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace jkorn\practice\forms\display\properties;
 
+use jkorn\practice\kits\IKit;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use jkorn\practice\arenas\types\ffa\FFAArena;
-use jkorn\practice\kits\SavedKit;
 
 class FormDisplayStatistic
 {
@@ -98,7 +98,7 @@ class FormDisplayStatistic
             function (Player $player, Server $server, $data) {
                 if ($data instanceof FFAArena) {
                     $kit = $data->getKit();
-                } elseif ($data instanceof SavedKit) {
+                } elseif ($data instanceof IKit) {
                     $kit = $data;
                 }
 

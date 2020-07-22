@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace jkorn\bd\player\team;
 
 
-use jkorn\practice\arenas\types\duels\IDuelArena;
+use jkorn\bd\arenas\IDuelArena;
 use jkorn\practice\games\duels\teams\DuelTeam;
-use jkorn\practice\kits\SavedKit;
+use jkorn\practice\kits\IKit;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Player;
@@ -36,7 +36,7 @@ class BasicDuelTeam extends DuelTeam
         $teamNumber = $extraData[0];
         /** @var IDuelArena $arena */
         $arena = $extraData[1];
-        /** @var SavedKit $kit */
+        /** @var IKit $kit */
         $kit = $extraData[2];
         /** @var Level $level */
         $level = $extraData[3];

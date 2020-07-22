@@ -6,7 +6,6 @@ namespace jkorn\practice\scoreboard\display\statistics;
 
 
 use jkorn\practice\player\info\stats\StatsInfo;
-use jkorn\practice\PracticeUtil;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;

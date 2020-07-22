@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\arenas\types\ffa;
 
 
+use jkorn\practice\kits\IKit;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
@@ -22,7 +23,7 @@ use jkorn\practice\scoreboard\ScoreboardData;
 class FFAArena extends PracticeArena implements ISaved
 {
 
-    /** @var SavedKit|null */
+    /** @var IKit|null */
     private $kit;
     /** @var SpawnArea */
     private $spawnArea;
@@ -30,7 +31,7 @@ class FFAArena extends PracticeArena implements ISaved
     /** @var int */
     private $players = 0;
 
-    public function __construct(string $name, Level $level, SpawnArea $spawnArea, ?SavedKit $kit = null)
+    public function __construct(string $name, Level $level, SpawnArea $spawnArea, ?IKit $kit = null)
     {
         parent::__construct($name, $level);
         $this->kit = $kit;
@@ -39,21 +40,21 @@ class FFAArena extends PracticeArena implements ISaved
     }
 
     /**
-     * @param SavedKit|null $kit
+     * @param IKit|null $kit
      *
      * Sets the kit of the ffa arena.
      */
-    public function setKit(?SavedKit $kit): void
+    public function setKit(?IKit $kit): void
     {
         $this->kit = $kit;
     }
 
     /**
-     * @return SavedKit|null
+     * @return IKit|null
      *
      * Gets the kit.
      */
-    public function getKit(): ?SavedKit
+    public function getKit(): ?IKit
     {
         return $this->kit;
     }
@@ -154,8 +155,17 @@ class FFAArena extends PracticeArena implements ISaved
      */
     public function export(): array
     {
+        if($this->kit instanceof SavedKit)
+        {
+            $kitInfo = $this->kit->getName();
+        }
+        else
+        {
+            $kitInfo = null;
+        }
+
         return [
-            "kit" => $this->kit instanceof SavedKit ? $this->kit->getName() : null,
+            "kit" => $kitInfo,
             "spawn" => $this->spawnArea->export(),
             "level" => $this->level->getName()
         ];
