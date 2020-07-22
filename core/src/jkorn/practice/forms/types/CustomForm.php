@@ -81,7 +81,7 @@ class CustomForm extends Form
     {
         $content = ["type" => "toggle", "text" => $text];
         if($default !== null) {
-            $content["specific"] = $default;
+            $content["default"] = $default;
         }
         $this->addContent($content);
         $this->labelMap[] = $label ?? count($this->labelMap);
@@ -102,7 +102,7 @@ class CustomForm extends Form
             $content["step"] = $step;
         }
         if($default !== -1) {
-            $content["specific"] = $default;
+            $content["default"] = $default;
         }
         $this->addContent($content);
         $this->labelMap[] = $label ?? count($this->labelMap);
@@ -118,7 +118,7 @@ class CustomForm extends Form
     {
         $content = ["type" => "step_slider", "text" => $text, "steps" => $steps];
         if($defaultIndex !== -1) {
-            $content["specific"] = $defaultIndex;
+            $content["default"] = $defaultIndex;
         }
         $this->addContent($content);
         $this->labelMap[] = $label ?? count($this->labelMap);
@@ -132,7 +132,7 @@ class CustomForm extends Form
      */
     public function addDropdown(string $text, array $options, int $default = null, ?string $label = null): void
     {
-        $this->addContent(["type" => "dropdown", "text" => $text, "options" => $options, "specific" => $default]);
+        $this->addContent(["type" => "dropdown", "text" => $text, "options" => $options, "default" => $default]);
         $this->labelMap[] = $label ?? count($this->labelMap);
     }
 
@@ -144,7 +144,7 @@ class CustomForm extends Form
      */
     public function addInput(string $text, string $placeholder = "", string $default = null, ?string $label = null): void
     {
-        $this->addContent(["type" => "input", "text" => $text, "placeholder" => $placeholder, "specific" => $default]);
+        $this->addContent(["type" => "input", "text" => $text, "placeholder" => $placeholder, "default" => $default]);
         $this->labelMap[] = $label ?? count($this->labelMap);
     }
 

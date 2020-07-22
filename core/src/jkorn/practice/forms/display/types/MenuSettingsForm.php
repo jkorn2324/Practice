@@ -9,7 +9,7 @@ use jkorn\practice\forms\display\properties\FormDisplayText;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 use jkorn\practice\forms\display\FormDisplay;
-use jkorn\practice\forms\display\PracticeFormManager;
+use jkorn\practice\forms\display\manager\PracticeFormManager;
 use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\PracticeCore;

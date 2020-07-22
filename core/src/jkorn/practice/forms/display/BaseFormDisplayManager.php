@@ -8,6 +8,7 @@ namespace jkorn\practice\forms\display;
 use jkorn\practice\forms\display\manager\IFormDisplayManager;
 use jkorn\practice\misc\AbstractManager;
 use jkorn\practice\PracticeCore;
+use jkorn\practice\forms\display\manager\PracticeFormManager;
 
 class BaseFormDisplayManager extends AbstractManager
 {

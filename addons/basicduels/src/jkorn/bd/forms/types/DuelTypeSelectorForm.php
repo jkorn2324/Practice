@@ -67,6 +67,9 @@ class DuelTypeSelectorForm extends FormDisplay
             return;
         }
 
+        $form->setTitle($this->formData["title"]->getText($player));
+        $form->setContent($this->formData["description"]->getText($player));
+
         $gameTypes = $duelsManager->getGameTypes();
         if(count($gameTypes) <= 0)
         {

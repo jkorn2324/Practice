@@ -14,11 +14,14 @@ class BooleanSettingProperty implements ISettingsProperty
     private $value;
     /** @var string */
     private $localized;
+    /** @var string[] */
+    private $display;
 
-    public function __construct(string $settingLocalized, bool $value = true)
+    public function __construct(string $settingLocalized, array $display, bool $value = true)
     {
         $this->localized = $settingLocalized;
         $this->value = $value;
+        $this->display = $display;
     }
 
     /**
@@ -52,5 +55,19 @@ class BooleanSettingProperty implements ISettingsProperty
     public function getLocalized(): string
     {
         return $this->localized;
+    }
+
+    /**
+     * @return string
+     *
+     * Gets the display from the option.
+     */
+    public function getDisplay(): string
+    {
+        if($this->value)
+        {
+            return $this->display["disabled"];
+        }
+        return $this->display["enabled"];
     }
 }

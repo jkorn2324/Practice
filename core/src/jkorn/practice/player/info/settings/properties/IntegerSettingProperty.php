@@ -14,11 +14,14 @@ class IntegerSettingProperty implements ISettingsProperty
     private $value;
     /** @var string */
     private $localized;
+    /** @var array */
+    private $display;
 
-    public function __construct(string $localized, int $value = 0)
+    public function __construct(string $localized, array $display, int $value = 0)
     {
         $this->localized = $localized;
         $this->value = $value;
+        $this->display = $display;
     }
 
     /**
@@ -52,5 +55,16 @@ class IntegerSettingProperty implements ISettingsProperty
         $oldValue = $this->value;
         $this->value = $value;
         return $oldValue !== $value;
+    }
+
+    /**
+     * @return string
+     *
+     * Gets the display from the option.
+     */
+    public function getDisplay(): string
+    {
+        // TODO: Implement getDisplay() method.
+        return "";
     }
 }

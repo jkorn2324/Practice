@@ -25,11 +25,14 @@ class BasicSettingsForm extends FormDisplay
         $this->formData["title"] = new FormDisplayText($data["title"]);
         $this->formData["description"] = new FormDisplayText($data["description"]);
 
-        $toggles = $data["toggles"];
-        foreach ($toggles as $key => $data) {
-            foreach ($data as $type => $value) {
-                $inputKey = "toggle.{$key}.{$type}";
-                $this->formData[$inputKey] = new FormDisplayText($value);
+        if(isset($data["toggles"]))
+        {
+            $toggles = $data["toggles"];
+            foreach ($toggles as $key => $data) {
+                foreach ($data as $type => $value) {
+                    $inputKey = "toggle.{$key}.{$type}";
+                    $this->formData[$inputKey] = new FormDisplayText($value);
+                }
             }
         }
         // var_dump(array_keys($this->formData));
@@ -65,7 +68,7 @@ class BasicSettingsForm extends FormDisplay
                     $property = $settings->getProperty($localized);
                     if($property !== null && $property->setValue($result))
                     {
-                        // Literally updates the values.
+                        // Updates the values.
                         switch($localized)
                         {
                             case SettingsInfo::SCOREBOARD_DISPLAY:
@@ -83,16 +86,12 @@ class BasicSettingsForm extends FormDisplay
         $form->addLabel($this->formData["description"]->getText($player));
 
         $properties = $settingsInfo->getProperties();
-        foreach($properties as $localized => $property)
+        foreach($properties as $property)
         {
+            $display = $property->getDisplay();
             if($property instanceof BooleanSettingProperty)
             {
-                $toggleLocalized = "toggle." . $localized . "." . ($property->getValue() ? "disabled" : "enabled");
-                if(isset($this->formData[$toggleLocalized]))
-                {
-                    $text = $this->formData[$toggleLocalized];
-                    $form->addToggle($text->getText($player), $property->getValue(), $localized);
-                }
+                $form->addToggle($display, (bool)$property->getValue(), $property->getLocalized());
             }
         }
 
@@ -110,9 +109,7 @@ class BasicSettingsForm extends FormDisplay
     {
         // TODO: Edit so it corresponds with the SettingsInfo class
         $title = TextFormat::BOLD . "Basic Settings";
-        $description = "Form to edit your duels settings.";
-
-        $toggles = SettingsInfo::getSettingsFormDisplay();
+        $description = "Form to edit your basic settings.";
 
         if (isset($data["title"])) {
             $title = (string)$data["title"];
@@ -122,14 +119,9 @@ class BasicSettingsForm extends FormDisplay
             $description = (string)$data["description"];
         }
 
-        if (isset($data["toggles"])) {
-            $toggles = array_replace($toggles, $data["toggles"]);
-        }
-
         return new BasicSettingsForm($localized, [
             "title" => $title,
             "description" => $description,
-            "toggles" => $toggles
         ]);
     }
 }

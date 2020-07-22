@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\forms\display;
+namespace jkorn\practice\forms\display\manager;
 
 
-use jkorn\practice\forms\display\manager\IFormDisplayManager;
+use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\PracticeCore;
 use pocketmine\Server;
 
@@ -19,7 +19,7 @@ class PracticeFormManager implements IFormDisplayManager
 
     const FORM_PLAY_GAMES = "form.games.play";
     const FORM_SETTINGS_MENU = "form.settings.menu";
-    const FORM_SETTINGS_BASIC = "form.settings.duels";
+    const FORM_SETTINGS_BASIC = "form.settings.basic";
     const FORM_SETTINGS_BUILDER_MODE = "form.settings.builder";
     const FORM_PLAY_FFA = "form.FFA.play";
 

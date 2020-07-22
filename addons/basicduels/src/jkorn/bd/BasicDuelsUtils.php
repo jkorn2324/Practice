@@ -104,11 +104,10 @@ class BasicDuelsUtils
         SettingsInfo::registerSetting(
             self::SETTING_PE_ONLY,
             BooleanSettingProperty::class,
-            false,
             [
                 "enabled" => "Enable PE-Only Basic Duels",
                 "disabled" => "Disable PE-Only Basic Duels"
-            ]
+            ], false
         );
     }
 

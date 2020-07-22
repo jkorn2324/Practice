@@ -47,9 +47,14 @@ class BasicDuelsManager implements IAwaitingGameManager
     /** @var BasicQueuesManager */
     private $queuesManager;
 
-    public function __construct()
+    /** @var BasicDuels */
+    private $core;
+
+    public function __construct(BasicDuels $core)
     {
         $this->server = PracticeCore::getInstance()->getServer();
+        $this->core = $core;
+
         $this->duels = [];
 
         $this->initGameTypes();
@@ -179,6 +184,9 @@ class BasicDuelsManager implements IAwaitingGameManager
     {
         // Registers the arena manager generator.
         PracticeCore::getBaseArenaManager()->registerArenaManager(new ArenaManager(), true);
+        PracticeCore::getBaseFormDisplayManager()->registerFormDisplayManager(
+            new BasicDuelsFormManager($this->core), true
+        );
 
         // Initializes the generators.
         BasicDuelsUtils::initGenerators();

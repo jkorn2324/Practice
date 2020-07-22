@@ -8,7 +8,7 @@ namespace jkorn\practice\items;
 use pocketmine\item\Item;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
-use jkorn\practice\forms\display\PracticeFormManager;
+use jkorn\practice\forms\display\manager\PracticeFormManager;
 use jkorn\practice\misc\AbstractManager;
 use jkorn\practice\PracticeCore;
 

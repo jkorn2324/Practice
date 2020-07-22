@@ -31,21 +31,19 @@ class SettingsInfo implements ISavedHeader
     /**
      * @param string $localized - The localized name of the property.
      * @param $propertyType - The property type of the setting, should be a class.
+     * @param array $displayInfo - The specific form display information.
      * @param ?$defaultValue - The specific value of the property, determines the type of property.
-     * @param array|null $displayInfo - The specific form display information.
      * @param bool $override - Overrides the setting.
      *
      * Registers the settings to the settings list.
      */
-    public static function registerSetting(string $localized, $propertyType, $defaultValue = null, ?array $displayInfo = null, bool $override = false): void
+    public static function registerSetting(string $localized, $propertyType, array $displayInfo, $defaultValue = null, bool $override = false): void
     {
-        if(!$override && isset(self::$settingsList[$localized]))
-        {
+        if (!$override && isset(self::$settingsList[$localized])) {
             return;
         }
 
-        if(!is_subclass_of($propertyType, ISettingsProperty::class))
-        {
+        if (!is_subclass_of($propertyType, ISettingsProperty::class)) {
             return;
         }
 
@@ -59,8 +57,7 @@ class SettingsInfo implements ISavedHeader
      */
     public static function unregisterSetting(string $localized): void
     {
-        if(isset(self::$settingsList[$localized]))
-        {
+        if (isset(self::$settingsList[$localized])) {
             unset(self::$settingsList[$localized]);
         }
     }
@@ -73,22 +70,22 @@ class SettingsInfo implements ISavedHeader
         // Registers the settings to the information.
 
         self::registerSetting(self::SCOREBOARD_DISPLAY, BooleanSettingProperty::class,
-            true, [
+            [
                 "enabled" => "Enable Scoreboard",
                 "disabled" => "Disable Scoreboard"
-            ]);
+            ], true);
 
         self::registerSetting(self::SWISH_SOUNDS_ENABLED, BooleanSettingProperty::class,
-            true, [
+            [
                 "enabled" => "Enable Swish Sounds",
                 "disabled" => "Disable Swish Sounds"
-            ]);
+            ], true);
 
         self::registerSetting(self::TAP_ITEMS, BooleanSettingProperty::class,
-            true, [
+            [
                 "enabled" => "Enable Tap Items",
                 "disabled" => "Disable Tap Items"
-            ]);
+            ], true);
 
         self::$initialized = true;
     }
@@ -102,10 +99,8 @@ class SettingsInfo implements ISavedHeader
     {
         $displayInfo = [];
 
-        foreach(self::$settingsList as $localized => $data)
-        {
-            if(isset($data["display"]))
-            {
+        foreach (self::$settingsList as $localized => $data) {
+            if (isset($data["display"])) {
                 $formDisplay = $data["display"];
                 $displayInfo[$localized] = $formDisplay;
             }
@@ -123,20 +118,17 @@ class SettingsInfo implements ISavedHeader
     {
         $settings = [];
 
-        foreach(self::$settingsList as $localizedName => $data)
-        {
+        foreach (self::$settingsList as $localizedName => $data) {
             $defaultValue = $data["value"];
             $typeClass = $data["class"];
+            $display = $data["display"];
 
-            if($defaultValue !== null)
-            {
+            if ($defaultValue !== null) {
                 /** @var ISettingsProperty $setting */
-                $setting = new $typeClass($localizedName, $defaultValue);
-            }
-            else
-            {
+                $setting = new $typeClass($localizedName, $display, $defaultValue);
+            } else {
                 /** @var ISettingsProperty $setting */
-                $setting = new $typeClass($localizedName);
+                $setting = new $typeClass($localizedName, $display);
             }
 
             $settings[$setting->getLocalized()] = $setting;
@@ -149,7 +141,7 @@ class SettingsInfo implements ISavedHeader
     // ----------------------------------- Settings Information Instance ----------------------------------
 
     /** @var ISettingsProperty[] */
-    private $settingsProperties;
+    private $settingsProperties = [];
 
     /**
      * SettingsInfo constructor.
@@ -167,8 +159,7 @@ class SettingsInfo implements ISavedHeader
     {
         $exported = [];
 
-        foreach($this->settingsProperties as $localized => $property)
-        {
+        foreach ($this->settingsProperties as $localized => $property) {
             $exported[$property->getLocalized()] = $property->getValue();
         }
 
@@ -183,9 +174,8 @@ class SettingsInfo implements ISavedHeader
      */
     public function getProperty(string $localized): ?ISettingsProperty
     {
-        if(isset($this->settingsProperties[$localized]))
-        {
-           return $this->settingsProperties[$localized];
+        if (isset($this->settingsProperties[$localized])) {
+            return $this->settingsProperties[$localized];
         }
 
         return null;
@@ -218,25 +208,21 @@ class SettingsInfo implements ISavedHeader
      */
     public static function extract(&$data, &$playerSettings)
     {
-        if(!$playerSettings instanceof SettingsInfo)
-        {
+        if (!$playerSettings instanceof SettingsInfo) {
             $playerSettings = new SettingsInfo();
             self::extract($data, $playerSettings);
             return;
         }
 
         // Determines if the data contains the settings header.
-        if(!is_array($data) || !isset($data[$header = "settings"]))
-        {
+        if (!is_array($data) || !isset($data[$header = "settings"])) {
             return;
         }
 
         // Extracts the settings from the data.
         $dataSettings = $data[$header];
-        foreach($playerSettings->settingsProperties as $localizedName => $property)
-        {
-            if(isset($dataSettings[$localizedName]))
-            {
+        foreach ($playerSettings->settingsProperties as $localizedName => $property) {
+            if (isset($dataSettings[$localizedName])) {
                 $property->setValue($dataSettings[$localizedName]);
             }
         }

@@ -23,7 +23,7 @@ class BasicDuels extends PluginBase
 
         // Register the game manager to the practice core game manager.
         PracticeCore::getBaseGameManager()->registerGameManager(
-            new BasicDuelsManager()
+            new BasicDuelsManager($this)
         );
     }
 

@@ -14,11 +14,14 @@ class FloatSettingProperty implements ISettingsProperty
     private $value;
     /** @var string */
     private $localized;
+    /** @var string[] */
+    private $display;
 
-    public function __construct(string $localized, float $value = 0.0)
+    public function __construct(string $localized, array $display, float $value = 0.0)
     {
         $this->localized = $localized;
         $this->value = $value;
+        $this->display = $display;
     }
 
     /**
@@ -52,5 +55,16 @@ class FloatSettingProperty implements ISettingsProperty
         $oldValue = $this->value;
         $this->value = $value;
         return $oldValue !== $value;
+    }
+
+    /**
+     * @return string
+     *
+     * Gets the display from the option.
+     */
+    public function getDisplay(): string
+    {
+        // TODO: Implement getDisplay() method.
+        return "";
     }
 }

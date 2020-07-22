@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\games;
 
 
+use jkorn\practice\forms\display\properties\FormDisplayStatistic;
 use jkorn\practice\games\misc\IAwaitingGameManager;
 use jkorn\practice\scoreboard\display\statistics\ScoreboardStatistic;
 use pocketmine\Player;

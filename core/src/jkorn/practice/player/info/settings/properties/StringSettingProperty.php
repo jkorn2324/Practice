@@ -14,11 +14,14 @@ class StringSettingProperty implements ISettingsProperty
     private $localized;
     /** @var string */
     private $value;
+    /** @var array */
+    private $display;
 
-    public function __construct(string $localized, string $value = "")
+    public function __construct(string $localized, array $display, string $value = "")
     {
         $this->localized = $localized;
         $this->value = $value;
+        $this->display = $display;
     }
 
     /**
@@ -52,5 +55,16 @@ class StringSettingProperty implements ISettingsProperty
         $oldValue = $this->value;
         $this->value = $oldValue;
         return $oldValue !== $value;
+    }
+
+    /**
+     * @return string
+     *
+     * Gets the display from the option.
+     */
+    public function getDisplay(): string
+    {
+        // TODO: Implement getDisplay() method.
+        return "";
     }
 }
