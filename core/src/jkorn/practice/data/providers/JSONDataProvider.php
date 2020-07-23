@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace jkorn\practice\data\providers;
 
 
+use jkorn\practice\games\IGameManager;
+use jkorn\practice\games\misc\leaderboards\LeaderboardGroup;
 use pocketmine\Player;
 use pocketmine\Server;
 use jkorn\practice\data\IDataProvider;
@@ -251,5 +253,176 @@ class JSONDataProvider implements IDataProvider
         {
             $this->savePlayer($player, false);
         }
+    }
+
+    /**
+     * @param IGameManager $gameType - The game type.
+     * @param LeaderboardGroup[] $leaderboardGroups
+     *
+     * Updates the leaderboards based on the input leaderboard groups and the game type,
+     * is always run under async tasks.
+     */
+    public function updateLeaderboards(IGameManager $gameType, $leaderboardGroups): void
+    {
+        if(!self::ENABLED)
+        {
+            return;
+        }
+
+        $players = $this->server->getOnlinePlayers();
+        $leaderboardGroups = array_filter($leaderboardGroups, function(LeaderboardGroup $group)
+        {
+            return $group->doLoad();
+        });
+
+        // Initializes the leaderboard groups.
+        $inputLeaderboardGroups = [];
+        foreach($leaderboardGroups as $group)
+        {
+            $inputStatistics = [];
+            foreach($players as $player)
+            {
+                if($player instanceof PracticePlayer)
+                {
+                    $statistic = $player->getStatsInfo()->getStatistic($group->getStatistic());
+                    if($statistic !== null)
+                    {
+                        $inputStatistics[$player->getName()] = $statistic->getValue();
+                    }
+                    else
+                    {
+                        $inputStatistics[$player->getName()] = 0;
+                    }
+                }
+            }
+            $inputLeaderboardGroups[$group->getStatistic()] = $inputStatistics;
+        }
+
+
+        $this->server->getAsyncPool()->submitTask(new class($leaderboardGroups, $this->dataFolder, $gameType->getType()) extends PracticeAsyncTask
+        {
+
+            /** @var string */
+            private $leaderboardGroups;
+            /** @var string */
+            private $gameType;
+            /** @var string */
+            private $playersFolder;
+
+            /**
+             * The async class constructor.
+             * @param array $inputStatistics
+             * @param string $gameType
+             * @param LeaderboardGroup[] $leaderboardGroups
+             */
+            public function __construct(array $inputStatistics, string $dataFolder, string $gameType)
+            {
+                $this->gameType = $gameType;
+                $this->leaderboardGroups = json_encode($inputStatistics);
+                $this->playersFolder = $dataFolder . "players/";
+            }
+
+
+            /**
+             * Actions to execute when run.
+             *
+             * @return void
+             */
+            public function onRun()
+            {
+                $leaderboardGroups = json_decode($this->leaderboardGroups, true);
+                if(!is_dir($this->playersFolder))
+                {
+                    mkdir($this->playersFolder);
+                    $this->setResult(["leaderboards" => $leaderboardGroups]);
+                    return;
+                }
+
+                $players = scandir($this->playersFolder);
+
+                foreach($players as $file)
+                {
+                    if(strpos($file, ".json") !== false)
+                    {
+                        $filePath = $this->playersFolder . $file;
+                        $decodedData = json_decode(file_get_contents($filePath), true);
+                        if(isset($decodedData["stats"]))
+                        {
+                            $stats = $decodedData["stats"];
+                            $player = str_replace(".json", "", $file);
+                            $this->addStatsToGroups($player, $stats, $leaderboardGroups);
+                        }
+                    }
+                }
+
+                $this->reorganize($leaderboardGroups);
+                $this->setResult(["leaderboards" => $leaderboardGroups]);
+            }
+
+            /**
+             * @param string $player - The player name.
+             * @param $stats - The player's statistics.
+             * @param $leaderboardGroups - The leaderboard groups containing the statistics.
+             *
+             * Adds the statistic to a given leaderboard group.
+             */
+            private function addStatsToGroups(string &$player, &$stats, &$leaderboardGroups): void
+            {
+                $statistics = array_keys($leaderboardGroups);
+
+                for($i = 0; $i < count($leaderboardGroups); $i++) {
+                    // The statistic.
+                    $statistic = $statistics[$i];
+                    // The data of the leaderboards containing the players.
+                    $data = $leaderboardGroups[$statistic];
+
+                    if (isset($data[$player])) {
+                        continue;
+                    }
+
+                    if (isset($stats[$statistic])) {
+                        $playerStat = $stats[$statistic];
+                        $data[$player] = $playerStat;
+                    }
+                    $leaderboardGroups[$statistic] = $data;
+                }
+            }
+
+            /**
+             * @param array $groups
+             *
+             * Reorganizes the leaderboard groups and orders them.
+             */
+            private function reorganize(array &$groups): void
+            {
+                $statistics = array_keys($groups);
+
+                for($i = 0; $i < count($groups); $i++) {
+                    $statistic = $statistics[$i];
+                    asort($groups[$statistic]);
+                }
+            }
+
+
+            /**
+             * Called in the onCompletion function
+             * & used for tasks running in there.
+             *
+             * @param Server $server
+             */
+            protected function doComplete(Server $server): void
+            {
+                $gameManager = PracticeCore::getBaseGameManager()->getGameManager($this->gameType);
+                if($gameManager !== null)
+                {
+                    $leaderboard = $gameManager->getLeaderboard();
+                    if($leaderboard !== null)
+                    {
+                        $leaderboards = $this->getResult()["leaderboards"];
+                        $leaderboard->finishUpdate($leaderboards);
+                    }
+                }
+            }
+        });
     }
 }

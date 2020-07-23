@@ -16,6 +16,9 @@ class PracticeTask extends Task
     /** @var Server */
     private $server;
 
+    /** @var int - The current tick of the task. */
+    private $currentTick = 0;
+
     public function __construct(PracticeCore $core)
     {
         $this->core = $core;
@@ -32,6 +35,21 @@ class PracticeTask extends Task
      */
     public function onRun(int $currentTick)
     {
-        // TODO: Implement onRun() method.
+        $this->updateGames();
+
+        $this->currentTick++;
+    }
+
+    /**
+     * Updates all of the games.
+     */
+    private function updateGames(): void
+    {
+        $games = PracticeCore::getBaseGameManager()->getGameTypes();
+
+        foreach($games as $game)
+        {
+            $game->update($this->currentTick);
+        }
     }
 }

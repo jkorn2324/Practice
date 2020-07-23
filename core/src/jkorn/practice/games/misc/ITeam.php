@@ -7,6 +7,7 @@ namespace jkorn\practice\games\misc;
 
 use pocketmine\Player;
 
+
 interface ITeam
 {
 

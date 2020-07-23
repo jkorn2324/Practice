@@ -88,7 +88,7 @@ class MenuSettingsForm extends FormDisplay
 
         $form->setTitle($this->formData["title"]->getText($player));
         $form->setContent($this->formData["description"]->getText($player));
-        $form->addButton($this->formData["button.settings.duels"]->getText($player));
+        $form->addButton($this->formData["button.settings.basic"]->getText($player));
 
         $form->addButton($this->formData["button.settings.builder"]->getText($player));
 
@@ -115,7 +115,7 @@ class MenuSettingsForm extends FormDisplay
         }
 
         $buttons = [
-            "settings.duels" => TextFormat::BLUE . TextFormat::BOLD . "Basic Settings",
+            "settings.basic" => TextFormat::BLUE . TextFormat::BOLD . "Basic Settings",
             "settings.builder" => TextFormat::BLUE . TextFormat::BOLD . "Builder Settings"
         ];
 

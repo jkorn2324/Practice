@@ -16,7 +16,8 @@ class BasicDuelsFormManager implements IFormDisplayManager
     const NAME = "basic.duels.display";
 
     // Form constants.
-    const SELECTOR_FORM = "form.selector.type.duel";
+    const TYPE_SELECTOR_FORM = "form.selector.type.duel";
+    const KIT_SELECTOR_FORM = "form.selector.type.kit";
 
     /** @var string */
     private $resourcesFolder, $destinationFolder;

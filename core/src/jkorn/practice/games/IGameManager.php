@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\games;
 
 use jkorn\practice\forms\display\FormDisplay;
-use jkorn\practice\games\misc\IGameType;
+use jkorn\practice\games\misc\leaderboards\IGameLeaderboard;
 use pocketmine\Player;
 
 interface IGameManager
@@ -90,4 +90,12 @@ interface IGameManager
      * Gets the corresponding form used to put the player in the game.
      */
     public function getGameSelector(): ?FormDisplay;
+
+    /**
+     * @return IGameLeaderboard|null
+     *
+     * Gets the leaderboard of the game manager. Return null
+     * if the game doesn't have a leaderboard.
+     */
+    public function getLeaderboard(): ?IGameLeaderboard;
 }

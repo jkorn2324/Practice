@@ -1,4 +1,5 @@
 # The form that handles when the player
+# selects the type of duel (1vs1, 2vs2, 3vs3)
 form.selector.type.duel:
   # The class that handles the form information.
   class: jkorn\bd\forms\types\DuelTypeSelectorForm
@@ -8,6 +9,21 @@ form.selector.type.duel:
     duel.button.template:
       top.text: "Play {duels.basic.stat.type} "
       bottom.text: "Queued: {duels.basic.stat.type.awaiting} "
+    duel.button.none:
+      top.text: "None"
+      bottom.text: ""
+
+# The form that handles when the player
+# selects the type of kit for the duel.
+form.selector.type.kit:
+  # The class that handles the form information.
+  class: jkorn\bd\forms\types\DuelKitSelectorForm
+  title: "Select Duel Kit"
+  description: "Select the type of kit you want to play."
+  buttons:
+    duel.button.template:
+      top.text: "{duels.basic.stat.kit}"
+      bottom.text: "Queued: {duels.basic.stat.type.kit.awaiting}"
     duel.button.none:
       top.text: "None"
       bottom.text: ""

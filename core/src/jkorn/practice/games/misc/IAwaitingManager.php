@@ -18,11 +18,12 @@ interface IAwaitingManager
 {
 
     /**
+     * @param callable|null $callable - The callable function.
      * @return int
      *
      * Gets the players waiting for a game.
      */
-    public function getPlayersAwaiting(): int;
+    public function getPlayersAwaiting(?callable $callable = null): int;
 
     /**
      * @param Player $player - The player to set as awaiting.

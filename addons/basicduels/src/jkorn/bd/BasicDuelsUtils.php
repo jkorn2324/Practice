@@ -12,6 +12,7 @@ use jkorn\bd\gen\types\YellowDefault;
 use jkorn\bd\queues\BasicQueue;
 use jkorn\bd\queues\BasicQueuesManager;
 use jkorn\practice\forms\display\properties\FormDisplayStatistic;
+use jkorn\practice\kits\IKit;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
 use jkorn\practice\player\info\settings\properties\BooleanSettingProperty;
 use jkorn\practice\player\info\settings\SettingsInfo;
@@ -21,6 +22,7 @@ use jkorn\practice\player\info\stats\StatsInfo;
 use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\scoreboard\display\statistics\ScoreboardStatistic;
+use old\practice\duels\groups\QueuedPlayer;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
@@ -33,6 +35,7 @@ class BasicDuelsUtils
     const STATISTIC_DUELS_LOSSES = "duels.basic.stat.losses";
     const STATISTIC_DUELS_WL_RATIO = "duels.basic.stat.wl.ratio";
 
+    const STATISTIC_DUEL_TYPE_AWAITING_KIT = "duels.basic.stat.type.kit.awaiting";
     const STATISTIC_DUEL_TYPE_AWAITING = "duels.basic.stat.type.awaiting";
     const STATISTIC_DUEL_TYPE = "duels.basic.stat.type";
 
@@ -77,7 +80,40 @@ class BasicDuelsUtils
                         $queues = $manager->getAwaitingManager();
                         if($queues instanceof BasicQueuesManager)
                         {
-                            return $queues->getPlayersAwaitingFor($data);
+                            return $queues->getPlayersAwaiting(
+                                function(BasicQueue $queue) use($data) {
+                                    return $queue->getGameType()->equals($data);
+                                });
+                        }
+                    }
+                }
+
+                return 0;
+            }
+        ));
+
+        // Adds the duel kit type statistic.
+        FormDisplayStatistic::registerStatistic(new FormDisplayStatistic(
+            self::STATISTIC_DUEL_TYPE_AWAITING_KIT,
+            function(Player $player, Server $server, $data)
+            {
+                if(is_array($data) && isset($data["type"], $data["kit"]))
+                {
+                    /** @var IKit $kit */
+                    $kit = $data["kit"];
+                    /** @var BasicDuelGameType $type */
+                    $type = $data["type"];
+
+                    $manager = PracticeCore::getBaseGameManager()->getGameManager(BasicDuelsManager::NAME);
+                    if($manager instanceof BasicDuelsManager)
+                    {
+                        $queues = $manager->getAwaitingManager();
+                        if($queues instanceof BasicQueuesManager)
+                        {
+                            return $queues->getPlayersAwaiting(function(BasicQueue $queue) use($kit, $type)
+                            {
+                                return $kit->equals($queue->getKit()) && $type->equals($queue->getGameType());
+                            });
                         }
                     }
                 }
@@ -94,6 +130,7 @@ class BasicDuelsUtils
     {
         FormDisplayStatistic::unregisterStatistic(self::STATISTIC_DUEL_TYPE_AWAITING);
         FormDisplayStatistic::unregisterStatistic(self::STATISTIC_DUEL_TYPE);
+        FormDisplayStatistic::unregisterStatistic(self::STATISTIC_DUEL_TYPE_AWAITING_KIT);
     }
 
     /**

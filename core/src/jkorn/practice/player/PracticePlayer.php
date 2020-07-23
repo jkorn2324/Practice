@@ -622,6 +622,17 @@ class PracticePlayer extends Player
     }
 
     /**
+     * @return bool
+     *
+     * Determines whether or not the player is in a game.
+     */
+    public function isInGame(): bool
+    {
+        $game = $this->getCurrentGame();
+        return $game !== null;
+    }
+
+    /**
      * @return IAwaitingGameManager|null - Returns the game manager if player
      *                   is awaiting a game, null otherwise.
      *

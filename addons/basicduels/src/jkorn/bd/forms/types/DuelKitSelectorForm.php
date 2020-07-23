@@ -1,4 +1,10 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: jkorn2324
+ * Date: 2020-07-22
+ * Time: 14:52
+ */
 
 declare(strict_types=1);
 
@@ -7,15 +13,13 @@ namespace jkorn\bd\forms\types;
 
 use jkorn\bd\BasicDuelsManager;
 use jkorn\bd\duels\types\BasicDuelGameType;
-use jkorn\bd\forms\BasicDuelsFormManager;
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\display\properties\FormDisplayText;
 use jkorn\practice\forms\types\SimpleForm;
-use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 
-class DuelTypeSelectorForm extends FormDisplay
+class DuelKitSelectorForm extends FormDisplay
 {
 
     /**
@@ -24,6 +28,9 @@ class DuelTypeSelectorForm extends FormDisplay
      */
     protected function initData(array &$data): void
     {
+        $this->formData["title"] = new FormDisplayText($data["title"]);
+        $this->formData["description"] = new FormDisplayText($data["description"]);
+
         $this->formData["title"] = new FormDisplayText($data["title"]);
         $this->formData["description"] = new FormDisplayText($data["description"]);
 
@@ -52,42 +59,14 @@ class DuelTypeSelectorForm extends FormDisplay
     }
 
     /**
-     * @param Player $player - The player we are sending the form to.
+     * @param Player $player - The player we are sending the form to
+     * @param mixed...$args - The arguments of the duel kit selector form.
      *
      * Displays the form to the given player.
      */
-    public function display(Player $player): void
+    public function display(Player $player, ...$args): void
     {
-        $form = new SimpleForm(function(Player $player, $data, $extraData)
-        {
-            /** @var BasicDuelGameType[] $gameTypes */
-            $gameTypes = $extraData["gameTypes"];
-            if(count($gameTypes) <= 0)
-            {
-                return;
-            }
-
-            if($data !== null)
-            {
-                $gameType = $gameTypes[(int)$data];
-                if(
-                    $player instanceof PracticePlayer
-                    && !$player->isInGame()
-                )
-                {
-                    $formDisplayManager = PracticeCore::getBaseFormDisplayManager()->getFormManager(BasicDuelsFormManager::NAME);
-                    if($formDisplayManager !== null)
-                    {
-                        $form = $formDisplayManager->getForm(BasicDuelsFormManager::KIT_SELECTOR_FORM);
-                        if($form !== null)
-                        {
-                            $form->display($player, $gameType);
-                        }
-                    }
-                }
-            }
-        });
-
+        // TODO: Implement display() method.
         /** @var BasicDuelsManager|null $duelsManager */
         $duelsManager = PracticeCore::getBaseGameManager()->getGameManager(BasicDuelsManager::NAME);
         if($duelsManager === null)
@@ -95,70 +74,86 @@ class DuelTypeSelectorForm extends FormDisplay
             return;
         }
 
+        // Gets the input game type.
+        $gameType = $duelsManager->getGameType("1vs1");
+        if(
+            isset($args[0])
+            && ($type = $args[0]) !== null
+            && $type instanceof BasicDuelGameType)
+        {
+            $gameType = $type;
+        }
+
+        $form = new SimpleForm(function(Player $player, $data, $extraData)
+        {
+            // TODO: The form input.
+        });
+
         $form->setTitle($this->formData["title"]->getText($player));
         $form->setContent($this->formData["description"]->getText($player));
 
-        $gameTypes = $duelsManager->getGameTypes();
-        if(count($gameTypes) <= 0)
+        // TODO: Get duel kit.
+        $kits = PracticeCore::getKitManager()->getAll();
+        if(count($kits) <= 0)
         {
             $button = $this->formData["button.duel.button.none"]->getText($player);
             $form->addButton($button);
-            $form->setExtraData(["gameTypes" => []]);
+            $form->setExtraData(["kits" => []]);
             $player->sendForm($form);
             return;
         }
 
-        $inGameTypes = [];
-        foreach($gameTypes as $localized => $gameType)
+        $inKits = [];
+        foreach($kits as $kit)
         {
-            $button = $this->formData["button.duel.button.template"];
-            $texture = $gameType->getTexture();
+            $texture = $kit->getTexture();
+            $formData = $this->formData["button.duel.button.template"];
             if($texture !== "")
             {
                 $form->addButton(
-                    $button->getText($player, $gameType),
+                    $formData->getText($player, ["type" => $gameType, "kit" => $kit]),
                     0,
                     $texture
                 );
             }
             else
             {
-                $form->addButton($button->getText($player, $gameType));
+                $form->addButton(
+                    $formData->getText($player, ["type" => $gameType, "kit" => $kit])
+                );
             }
-
-            $inGameTypes[] = $gameType;
+            $inKits[] = $kit;
         }
 
-        $form->setExtraData(["gameTypes" => $inGameTypes]);
+        $form->setExtraData(["kits" => $kits]);
         $player->sendForm($form);
     }
 
     /**
      * @param string $localized
      * @param array $data
+     * @return DuelKitSelectorForm
      *
-     * @return DuelTypeSelectorForm
-     *
-     * Decodes the form from the localized name and the data.
+     * Decodes the form from the data.
      */
     public static function decode(string $localized, array $data)
     {
-        $title = "Basic Duel Selector";
-        $description = "Select the type of duel you want to play.";
+        $title = "Select Duel Kit";
+        $description = "Select the type of kit you want to play.";
         $buttons = [
             "duel.button.template" => [
-                "top.text" => "",
-                "bottom.text" => ""
+                "top.text" => "{duels.basic.stat.kit}",
+                "bottom.text" => "Queued: {duels.basic.stat.type.kit.awaiting}"
             ],
             "duel.button.none" => [
-                "top.text" => "",
+                "top.text" => "None",
                 "bottom.text" => ""
             ]
         ];
 
         if(isset($data["title"]))
         {
-            $title = $data["title"];
+            $title = (string)$data["title"];
         }
 
         if(isset($data["description"]))
@@ -171,7 +166,7 @@ class DuelTypeSelectorForm extends FormDisplay
             $buttons = array_replace($buttons, $data["buttons"]);
         }
 
-        return new DuelTypeSelectorForm($localized, [
+        return new DuelKitSelectorForm($localized, [
             "title" => $title,
             "description" => $description,
             "buttons" => $buttons

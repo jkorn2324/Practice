@@ -32,28 +32,22 @@ class BasicQueuesManager implements IAwaitingManager
     }
 
     /**
+     * @param callable|null $callable - The callback function, requires a parameter.
      * @return int
      *
      * Gets the players waiting for a game.
      */
-    public function getPlayersAwaiting(): int
+    public function getPlayersAwaiting(?callable $callable = null): int
     {
-        return count($this->queues);
-    }
+        if($callable === null)
+        {
+            return count($this->queues);
+        }
 
-    /**
-     * @param BasicDuelGameType $type
-     * @return int
-     *
-     * Gets the number of players awaiting for a specific game type.
-     */
-    public function getPlayersAwaitingFor(BasicDuelGameType $type): int
-    {
         $players = 0;
         foreach($this->queues as $queue)
         {
-            $gameType = $queue->getGameType();
-            if($gameType->equals($type))
+            if($callable($queue))
             {
                 $players++;
             }

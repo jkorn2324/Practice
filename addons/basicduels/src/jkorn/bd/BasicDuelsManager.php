@@ -9,6 +9,7 @@ use jkorn\bd\arenas\ArenaManager;
 use jkorn\bd\arenas\IDuelArena;
 use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\duels\Basic1vs1;
+use jkorn\bd\duels\leaderboard\BasicDuelsLeaderboards;
 use jkorn\bd\duels\BasicTeamDuel;
 use jkorn\bd\duels\types\BasicDuelGameType;
 use jkorn\bd\forms\BasicDuelsFormManager;
@@ -19,7 +20,7 @@ use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\games\IGame;
 use jkorn\practice\games\misc\IAwaitingGameManager;
 use jkorn\practice\games\misc\IAwaitingManager;
-use jkorn\practice\games\misc\IGameType;
+use jkorn\practice\games\misc\leaderboards\IGameLeaderboard;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\level\gen\PracticeGeneratorInfo;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
@@ -46,6 +47,8 @@ class BasicDuelsManager implements IAwaitingGameManager
     private $duels;
     /** @var BasicQueuesManager */
     private $queuesManager;
+    /** @var BasicDuelsLeaderboards */
+    private $leaderboards;
 
     /** @var BasicDuels */
     private $core;
@@ -58,7 +61,9 @@ class BasicDuelsManager implements IAwaitingGameManager
         $this->duels = [];
 
         $this->initGameTypes();
+
         $this->queuesManager = new BasicQueuesManager($this);
+        $this->leaderboards = new BasicDuelsLeaderboards($this);
     }
 
     /**
@@ -85,6 +90,23 @@ class BasicDuelsManager implements IAwaitingGameManager
     }
 
     /**
+     * @param string $gameType
+     * @return BasicDuelGameType|null
+     *
+     * Gets the game type based on the localized name.
+     */
+    public function getGameType(string $gameType): ?BasicDuelGameType
+    {
+        if(isset($this->gameTypes[$gameType]))
+        {
+            return $this->gameTypes[$gameType];
+        }
+
+        return null;
+    }
+
+
+    /**
      * Updates the games in the game manager.
      * @param int $currentTick
      */
@@ -92,6 +114,11 @@ class BasicDuelsManager implements IAwaitingGameManager
     {
         foreach ($this->duels as $duel) {
             $duel->update();
+        }
+
+        if($currentTick % (BasicDuelsLeaderboards::LEADERBOARD_UPDATE_SECONDS * 20) === 0)
+        {
+            $this->leaderboards->update();
         }
     }
 
@@ -322,9 +349,20 @@ class BasicDuelsManager implements IAwaitingGameManager
         $manager = PracticeCore::getBaseFormDisplayManager()->getFormManager(BasicDuelsFormManager::NAME);
         if($manager !== null)
         {
-            return $manager->getForm(BasicDuelsFormManager::SELECTOR_FORM);
+            return $manager->getForm(BasicDuelsFormManager::TYPE_SELECTOR_FORM);
         }
 
         return null;
+    }
+
+    /**
+     * @return IGameLeaderboard|null
+     *
+     * Gets the leaderboard of the game manager. Return null
+     * if the game doesn't have a leaderboard.
+     */
+    public function getLeaderboard(): ?IGameLeaderboard
+    {
+        return $this->leaderboards;
     }
 }
