@@ -13,13 +13,10 @@ abstract class AbstractManager
 
     /** @var Server */
     protected $server;
-    /** @var PracticeCore */
-    protected $core;
 
-    public function __construct(PracticeCore $core, bool $loadAsync)
+    public function __construct(bool $loadAsync)
     {
-        $this->core = $core;
-        $this->server = $core->getServer();
+        $this->server = PracticeCore::getInstance()->getServer();
 
         $this->load($loadAsync);
     }

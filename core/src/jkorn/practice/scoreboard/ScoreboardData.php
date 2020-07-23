@@ -65,7 +65,7 @@ class ScoreboardData
             $this->scoreboard = new Scoreboard($this->player, "Practice");
         }
 
-        $displayInfo = PracticeCore::getScoreboardDisplayManager()->getDisplayInfo($type);
+        $displayInfo = PracticeCore::getBaseScoreboardDisplayManager()->getDisplayInfo($type);
         if($displayInfo === null)
         {
             $this->removeScoreboard();
@@ -117,7 +117,7 @@ class ScoreboardData
     {
         if($this->scoreboard !== null && $this->scoreboardType !== self::SCOREBOARD_NONE) {
 
-            $scoreboardDisplayInfo = PracticeCore::getScoreboardDisplayManager()->getDisplayInfo($this->scoreboardType);
+            $scoreboardDisplayInfo = PracticeCore::getBaseScoreboardDisplayManager()->getDisplayInfo($this->scoreboardType);
             if($scoreboardDisplayInfo === null)
             {
                 return;

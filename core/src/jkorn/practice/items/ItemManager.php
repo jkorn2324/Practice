@@ -33,7 +33,7 @@ class ItemManager extends AbstractManager
 
         $this->items = [];
 
-        parent::__construct($core, false);
+        parent::__construct(false);
     }
 
     /**

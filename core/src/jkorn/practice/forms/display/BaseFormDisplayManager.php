@@ -19,7 +19,7 @@ class BaseFormDisplayManager extends AbstractManager
     public function __construct(PracticeCore $core)
     {
         $this->initDefaultFormManagers($core);
-        parent::__construct($core, false);
+        parent::__construct(false);
     }
 
     /**

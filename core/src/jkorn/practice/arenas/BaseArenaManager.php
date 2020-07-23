@@ -21,16 +21,21 @@ class BaseArenaManager extends AbstractManager
     /** @var IArenaManager[] */
     private $arenaManagers;
 
+    /** @var PracticeCore */
+    private $core;
+
     public function __construct(PracticeCore $core)
     {
         $this->arenaFolder = $core->getDataFolder() . "arenas/";
         $this->arenaManagers = [];
 
+        $this->core = $core;
+
         $this->arenas = [];
 
         $this->registerDefaultManagers($core);
 
-        parent::__construct($core, false);
+        parent::__construct(false);
     }
 
     /**

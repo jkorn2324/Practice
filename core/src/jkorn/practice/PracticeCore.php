@@ -11,6 +11,7 @@ use jkorn\practice\games\BaseGameManager;
 use jkorn\practice\games\player\GamePlayer;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
 use jkorn\practice\player\info\stats\StatsInfo;
+use jkorn\practice\scoreboard\display\BaseScoreboardDisplayManager;
 use pocketmine\entity\Entity;
 use pocketmine\plugin\PluginBase;
 use jkorn\practice\arenas\BaseArenaManager;
@@ -21,7 +22,6 @@ use jkorn\practice\entities\SplashPotion;
 use jkorn\practice\items\ItemManager;
 use jkorn\practice\kits\KitManager;
 use jkorn\practice\player\info\settings\SettingsInfo;
-use jkorn\practice\scoreboard\display\ScoreboardDisplayManager;
 use jkorn\practice\scoreboard\display\statistics\ScoreboardStatistic;
 
 class PracticeCore extends PluginBase
@@ -33,8 +33,8 @@ class PracticeCore extends PluginBase
     private static $baseArenaManager;
     /** @var KitManager */
     private static $kitManager;
-    /** @var ScoreboardDisplayManager */
-    private static $scoreboardDisplayManager;
+    /** @var BaseScoreboardDisplayManager */
+    private static $baseScoreboardDisplayManager;
     /** @var BaseFormDisplayManager */
     private static $baseFormDisplayManager;
     /** @var ItemManager */
@@ -66,7 +66,7 @@ class PracticeCore extends PluginBase
 
         // Initializes the scoreboard statistics.
         ScoreboardStatistic::init();
-        self::$scoreboardDisplayManager = new ScoreboardDisplayManager($this);
+        self::$baseScoreboardDisplayManager = new BaseScoreboardDisplayManager($this);
 
         FormDisplayStatistic::init();
         self::$baseFormDisplayManager = new BaseFormDisplayManager($this);
@@ -154,13 +154,13 @@ class PracticeCore extends PluginBase
     }
 
     /**
-     * @return ScoreboardDisplayManager
+     * @return BaseScoreboardDisplayManager
      *
-     * Gets the scoreboard display manager.
+     * Gets the base scoreboard display manager.
      */
-    public static function getScoreboardDisplayManager(): ScoreboardDisplayManager
+    public static function getBaseScoreboardDisplayManager(): BaseScoreboardDisplayManager
     {
-        return self::$scoreboardDisplayManager;
+        return self::$baseScoreboardDisplayManager;
     }
 
     /**

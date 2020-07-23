@@ -25,6 +25,8 @@ class BasicDuels extends PluginBase
         PracticeCore::getBaseGameManager()->registerGameManager(
             new BasicDuelsManager($this)
         );
+
+        // TODO: Register the scoreboard.
     }
 
     /**

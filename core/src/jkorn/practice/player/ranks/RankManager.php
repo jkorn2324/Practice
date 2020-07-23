@@ -18,7 +18,7 @@ class RankManager extends AbstractManager
     {
         $this->ranksDirectory = $core->getDataFolder() . "ranks/";
 
-        parent::__construct($core, $loadAsync);
+        parent::__construct($loadAsync);
     }
 
     /**
