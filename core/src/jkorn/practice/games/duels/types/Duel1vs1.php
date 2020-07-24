@@ -6,7 +6,6 @@ namespace jkorn\practice\games\duels\types;
 
 
 use jkorn\practice\kits\IKit;
-use pocketmine\level\Position;
 use pocketmine\Player;
 use jkorn\practice\games\duels\AbstractDuel;
 use jkorn\practice\games\duels\DuelPlayer;

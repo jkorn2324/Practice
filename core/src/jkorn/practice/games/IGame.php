@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\games;
 
 
+use pocketmine\event\Event;
 use pocketmine\Player;
 
 interface IGame
@@ -54,4 +55,13 @@ interface IGame
      * Determines if the game is equivalent.
      */
     public function equals($game): bool;
+
+    /**
+     * @param Event $event - The input event, here are the list
+     * of event that this calls.
+     * - PlayerDeathEvent
+     *
+     * Handles an event when the player is in the game.
+     */
+    public function handleEvent(Event &$event): void;
 }

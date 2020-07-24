@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace jkorn\practice;
 
 
+use jkorn\practice\games\IGame;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerCreationEvent;
+use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
@@ -95,6 +97,25 @@ class PracticeListener implements Listener
             {
                 // TODO: Tap items.
             }
+        }
+    }
+
+    /**
+     * @param PlayerDeathEvent $event
+     *
+     * Called when the player dies.
+     */
+    public function onDeath(PlayerDeathEvent $event): void
+    {
+        $player = $event->getPlayer();
+        if
+        (
+            $player instanceof PracticePlayer
+            && ($game = $player->getCurrentGame()) !== null
+            && $game instanceof IGame
+        )
+        {
+            $game->handleEvent($event);
         }
     }
 }

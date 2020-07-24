@@ -6,8 +6,13 @@ namespace jkorn\practice\games\duels;
 
 
 use jkorn\practice\kits\IKit;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\Event;
+use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
+use pocketmine\Player;
 use pocketmine\Server;
 use jkorn\practice\games\IGame;
 
@@ -165,4 +170,46 @@ abstract class AbstractDuel implements IGame
      * Gets the level of the duel.
      */
     abstract protected function getLevel(): Level;
+
+    /**
+     * @param Event $event - The input event, here are the list
+     * of events that this calls.
+     * - PlayerDeathEvent
+     *
+     * Handles an event when the player is in the game.
+     */
+    public function handleEvent(Event &$event): void
+    {
+        if($event instanceof PlayerDeathEvent)
+        {
+            $this->handlePlayerDeath($event);
+        }
+    }
+
+    /**
+     * @param PlayerDeathEvent $event
+     *
+     * Handles when the player dies.
+     */
+    protected function handlePlayerDeath(PlayerDeathEvent &$event): void
+    {
+        $reason = self::REASON_DIED;
+        $player = $event->getPlayer();
+
+        $damageCause = $player->getLastDamageCause();
+        if($damageCause !== null)
+        {
+            $damageCauseType = $damageCause->getCause();
+
+            if(
+                $damageCause instanceof EntityDamageByEntityEvent
+                && $damageCauseType === EntityDamageEvent::CAUSE_SUICIDE
+            )
+            {
+                $reason = self::REASON_UNFAIR_RESULT;
+            }
+        }
+
+        $this->removeFromGame($player, $reason);
+    }
 }
