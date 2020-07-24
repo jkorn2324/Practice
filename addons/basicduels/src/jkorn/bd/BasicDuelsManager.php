@@ -145,9 +145,9 @@ class BasicDuelsManager implements IAwaitingGameManager
         $found = $args[3];
 
         // Generates a random arena.
-        $randomArena = $this->randomArena($duelID, count($players));
+        $randomArena = $this->randomArena($duelID, $numPlayers = count($players));
 
-        if (count($players) !== 2) {
+        if ($numPlayers !== 2) {
             $duel = new BasicTeamDuel($duelID, $kit, $randomArena, $gameType, ...$players);
         } else {
             $duel = new Basic1vs1($duelID, $kit, $randomArena, $players[0], $players[1]);

@@ -7,10 +7,10 @@ namespace jkorn\bd\forms;
 
 use jkorn\bd\BasicDuels;
 use jkorn\practice\forms\display\FormDisplay;
-use jkorn\practice\forms\display\manager\IFormDisplayManager;
-use pocketmine\Server;
+use jkorn\practice\forms\display\manager\AbstractFormDisplayManager;
 
-class BasicDuelsFormManager implements IFormDisplayManager
+
+class BasicDuelsFormManager extends AbstractFormDisplayManager
 {
 
     const NAME = "basic.duels.display";
@@ -19,76 +19,32 @@ class BasicDuelsFormManager implements IFormDisplayManager
     const TYPE_SELECTOR_FORM = "form.selector.type.duel";
     const KIT_SELECTOR_FORM = "form.selector.type.kit";
 
-    /** @var string */
-    private $resourcesFolder, $destinationFolder;
-
     /** @var BasicDuels */
     private $core;
 
-    /** @var Server */
-    private $server;
-
-    /** @var bool */
-    private $loaded = false;
-
-    /** @var FormDisplay[] */
-    private $forms = [];
-
     public function __construct(BasicDuels $core)
     {
-        $this->destinationFolder = $core->getDataFolder() . "forms";
-        $this->resourcesFolder = $core->getResourcesFolder(). "forms";
-
         $this->core = $core;
-        $this->server = $core->getServer();
+
+        parent::__construct($core->getResourcesFolder() . "forms", $core->getDataFolder() . "forms");
     }
 
     /**
-     * @param string $name
-     * @return FormDisplay|null
+     * @return string
      *
-     * Gets the form from the display.
+     * Gets the localized name of the form display manager.
      */
-    public function getForm(string $name): ?FormDisplay
+    public function getLocalizedName(): string
     {
-        if(isset($this->forms[$name]))
-        {
-            return $this->forms[$name];
-        }
-        return null;
-    }
-
-    /**
-     * Loads the forms to the forms list.
-     *
-     * @param bool $async
-     */
-    public function load(bool $async): void
-    {
-        if(!is_dir($this->destinationFolder))
-        {
-            mkdir($this->destinationFolder);
-        }
-
-        if(!file_exists($inputFile = $this->destinationFolder . "/forms.yml"))
-        {
-            $resource = fopen($this->resourcesFolder . "/forms.yml", "rb");
-            stream_copy_to_stream($resource, $file = fopen($inputFile, "wb"));
-            fclose($resource);
-            fclose($file);
-        }
-
-        $this->loadForms($inputFile);
-
-        $this->loaded = true;
+        return self::NAME;
     }
 
     /**
      * @param string $inputFile
      *
-     * Loads the forms based on the input file.
+     * Loads the form displays from the input file.
      */
-    private function loadForms(string $inputFile): void
+    protected function loadFormDisplays(string &$inputFile): void
     {
         $fileData = yaml_parse_file($inputFile);
         if(!is_array($fileData))
@@ -126,25 +82,5 @@ class BasicDuelsFormManager implements IFormDisplayManager
                 $this->server->getLogger()->alert($e->getTraceAsString());
             }
         }
-    }
-
-    /**
-     * @return bool
-     *
-     * Determines if the form display manager has been loaded.
-     */
-    public function didLoad(): bool
-    {
-        return $this->loaded;
-    }
-
-    /**
-     * @return string
-     *
-     * Gets the localized name of the form display manager.
-     */
-    public function getLocalizedName(): string
-    {
-        return self::NAME;
     }
 }

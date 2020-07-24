@@ -805,6 +805,10 @@ class PracticePlayer extends Player
     public function putInLobby(bool $teleport): void
     {
         // TODO: Add more things.
+        if($teleport)
+        {
+            $this->teleport(PracticeUtil::getLobbySpawn());
+        }
 
         // Removes all of the effects.
         $this->removeAllEffects();

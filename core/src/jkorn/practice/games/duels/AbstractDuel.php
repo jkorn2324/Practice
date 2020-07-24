@@ -81,7 +81,7 @@ abstract class AbstractDuel implements IGame
         if($this->status === self::STATUS_STARTING)
         {
             // After 5 ticks, put players in duel.
-            if($this->status === self::PUT_PLAYER_TICKS)
+            if($this->currentTicks === self::PUT_PLAYER_TICKS)
             {
                 $this->putPlayersInDuel();
                 $this->currentTicks++;

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\forms\display;
 
 
-use jkorn\practice\forms\display\manager\IFormDisplayManager;
+use jkorn\practice\forms\display\manager\AbstractFormDisplayManager;
 use jkorn\practice\misc\AbstractManager;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\forms\display\manager\PracticeFormManager;
@@ -13,7 +13,7 @@ use jkorn\practice\forms\display\manager\PracticeFormManager;
 class BaseFormDisplayManager extends AbstractManager
 {
 
-    /** @var IFormDisplayManager[] */
+    /** @var AbstractFormDisplayManager[] */
     private $formManagers = [];
 
     public function __construct(PracticeCore $core)
@@ -33,12 +33,12 @@ class BaseFormDisplayManager extends AbstractManager
     }
 
     /**
-     * @param IFormDisplayManager $manager
+     * @param AbstractFormDisplayManager $manager
      * @param bool $load
      *
      * Registers the form display manager to the list of display managers.
      */
-    public function registerFormDisplayManager(IFormDisplayManager $manager, bool $load = false): void
+    public function registerFormDisplayManager(AbstractFormDisplayManager $manager, bool $load = false): void
     {
         if(!isset($this->formManagers[$manager->getLocalizedName()]))
         {
@@ -46,7 +46,7 @@ class BaseFormDisplayManager extends AbstractManager
 
             if($load)
             {
-                $manager->load(false);
+                $manager->load();
             }
         }
     }
@@ -74,11 +74,11 @@ class BaseFormDisplayManager extends AbstractManager
 
     /**
      * @param string $name
-     * @return IFormDisplayManager|null
+     * @return AbstractFormDisplayManager|null
      *
      * Gets the form manager from the name.
      */
-    public function getFormManager(string $name): ?IFormDisplayManager
+    public function getFormManager(string $name): ?AbstractFormDisplayManager
     {
         if(isset($this->formManagers[$name]))
         {
@@ -98,7 +98,7 @@ class BaseFormDisplayManager extends AbstractManager
         {
             if(!$manager->didLoad())
             {
-                $manager->load($async);
+                $manager->load();
             }
         }
     }

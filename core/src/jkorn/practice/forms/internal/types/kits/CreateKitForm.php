@@ -49,11 +49,12 @@ class CreateKitForm implements IInternalForm
             if($data !== null)
             {
                 /** @var string $kitName */
-                $kitName = TextFormat::clean($data[1]);
+                $kitName = trim(TextFormat::clean($data[1]));
 
-                if(strpos($kitName, " ") !== 0)
+                if(strpos($kitName, ' ') !== false)
                 {
                     // TODO: Send message that the name can't have spaces.
+                    var_dump("spaces in name {$kitName}");
                     return;
                 }
 

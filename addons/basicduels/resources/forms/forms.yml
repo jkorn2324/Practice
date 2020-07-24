@@ -22,7 +22,7 @@ form.selector.type.kit:
   description: "Select the type of kit you want to play."
   buttons:
     duel.button.template:
-      top.text: "{duels.basic.stat.kit}"
+      top.text: "{duels.basic.stat.type.kit}"
       bottom.text: "Queued: {duels.basic.stat.type.kit.awaiting}"
     duel.button.none:
       top.text: "None"

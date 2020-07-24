@@ -41,30 +41,37 @@ abstract class Duel1vs1 extends AbstractDuel
      */
     protected function putPlayersInDuel(): void
     {
-        $player1 = $this->player1->getPlayer();
-        $player2 = $this->player2->getPlayer();
+        try
+        {
+            $player1 = $this->player1->getPlayer();
+            $player2 = $this->player2->getPlayer();
 
-        $player1->setGamemode(0);
-        $player2->setGamemode(0);
+            $player1->setGamemode(0);
+            $player2->setGamemode(0);
 
-        // TODO Disable flight
+            // TODO Disable flight
 
-        $player1->setImmobile(true);
-        $player2->setImmobile(true);
+            $player1->setImmobile(true);
+            $player2->setImmobile(true);
 
-        $player1->clearInventory();
-        $player2->clearInventory();
+            $player1->clearInventory();
+            $player2->clearInventory();
 
-        $p1Pos = $this->arena->getP1StartPosition();
-        $position = new Position($p1Pos->x, $p1Pos->y, $p1Pos->z, $this->level);
-        $player1->teleport($position);
+            $p1Pos = $this->arena->getP1StartPosition();
+            $position = new Position($p1Pos->x, $p1Pos->y, $p1Pos->z, $this->level);
+            $player1->teleport($position);
 
-        $p2Pos = $this->arena->getP2StartPosition();
-        $position = new Position($p2Pos->x, $p2Pos->y, $p2Pos->z, $this->level);
-        $player2->teleport($position);
+            $p2Pos = $this->arena->getP2StartPosition();
+            $position = new Position($p2Pos->x, $p2Pos->y, $p2Pos->z, $this->level);
+            $player2->teleport($position);
 
-        $this->kit->sendTo($player1, false);
-        $this->kit->sendTo($player2, false);
+            $this->kit->sendTo($player1, false);
+            $this->kit->sendTo($player2, false);
+
+        } catch (\Exception $e)
+        {
+            var_dump($e->getTraceAsString());
+        }
     }
 
     /**

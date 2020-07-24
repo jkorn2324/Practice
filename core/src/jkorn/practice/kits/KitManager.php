@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace jkorn\practice\kits;
 
 
-use jkorn\practice\misc\ISaved;
 use pocketmine\Server;
 use jkorn\practice\misc\AbstractManager;
 use jkorn\practice\misc\PracticeAsyncTask;
@@ -149,25 +148,21 @@ class KitManager extends AbstractManager
      */
     public function save(bool $async = false): void
     {
-        if($async) {
-            return;
-        }
-
         foreach($this->kits as $localized => $kit) {
 
-            if(!$kit instanceof ISaved)
+            if(!$kit instanceof SavedKit)
             {
                 continue;
             }
 
-            $file = $this->kitDirectory . "{$kit->getName()}.json";
-            if(!file_exists($file)) {
-                $file = fopen($file, "w");
+            $filePath = $this->kitDirectory . "{$kit->getName()}.json";
+            if(!file_exists($filePath)) {
+                $file = fopen($filePath, "w");
                 fclose($file);
             }
 
             file_put_contents(
-                $file,
+                $filePath,
                 json_encode($kit->export())
             );
         }

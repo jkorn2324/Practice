@@ -23,6 +23,8 @@ abstract class ArenaGenerator extends PracticeGenerator
     protected static $arenaChunkWidth = 3;
     /** @var int - Gets the arena height. */
     protected static $arenaHeight = 10;
+    /** @var int - Gets ths start y of the arena. */
+    protected static $arenaStartY = 100;
 
     /** @var Block[] */
     protected $blocks = [];
@@ -44,12 +46,6 @@ abstract class ArenaGenerator extends PracticeGenerator
      */
     abstract protected function initBlocks(): void;
 
-    /**
-     * @return Vector3
-     *
-     * Gets the center of the arena.
-     */
-    abstract protected static function getCenter(): Vector3;
 
     /**
      * @param int $chunkX
@@ -126,6 +122,13 @@ abstract class ArenaGenerator extends PracticeGenerator
     }
 
     /**
+     * @return Vector3
+     *
+     * Gets the center position.
+     */
+    abstract protected static function getCenter(): Vector3;
+
+    /**
      * @param Chunk $chunk
      * @param int $chunkXCoord
      * @param int $chunkZCoord
@@ -149,10 +152,11 @@ abstract class ArenaGenerator extends PracticeGenerator
     /**
      * @return Vector3
      *
-     * Gets the spawn position of the arena.
+     * Gets the spawn position of the arena, mainly used
+     * so that we get the y start position.
      */
     public function getSpawn(): Vector3
     {
-        return self::getCenter();
+        return new Vector3(0, self::$arenaStartY, 0);
     }
 }

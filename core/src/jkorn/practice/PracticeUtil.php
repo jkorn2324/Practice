@@ -13,6 +13,7 @@ use pocketmine\item\enchantment\EnchantmentInstance;
 use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\level\Location;
+use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 use pocketmine\Server;
@@ -357,5 +358,16 @@ class PracticeUtil
     public static function registerCommand(PracticeCommand $command): void
     {
         Server::getInstance()->getCommandMap()->register($command->getName(), $command);
+    }
+
+    /**
+     * @return Position
+     *
+     * Gets the lobby spawn position.
+     */
+    public static function getLobbySpawn(): Position
+    {
+        $level = Server::getInstance()->getDefaultLevel();
+        return $level->getSpawnLocation();
     }
 }

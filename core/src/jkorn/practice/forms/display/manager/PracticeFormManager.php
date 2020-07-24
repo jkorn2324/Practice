@@ -9,13 +9,10 @@ use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\PracticeCore;
 use pocketmine\Server;
 
-class PracticeFormManager implements IFormDisplayManager
+class PracticeFormManager extends AbstractFormDisplayManager
 {
 
     const NAME = "practice.form.display";
-
-    /** @var FormDisplay[] */
-    private $displayForms = [];
 
     const FORM_PLAY_GAMES = "form.games.play";
     const FORM_SETTINGS_MENU = "form.settings.menu";
@@ -23,51 +20,14 @@ class PracticeFormManager implements IFormDisplayManager
     const FORM_SETTINGS_BUILDER_MODE = "form.settings.builder";
     const FORM_PLAY_FFA = "form.FFA.play";
 
-    /** @var string */
-    private $resourcesFolder, $destinationFolder;
-
-    /** @var Server */
-    private $server;
-
-    /** @var bool */
-    private $loaded = false;
+    /** @var PracticeCore */
+    private $core;
 
     public function __construct(PracticeCore $core)
     {
-        $this->resourcesFolder = $core->getResourcesFolder() . "forms";
-        $this->destinationFolder = $core->getDataFolder() . "forms";
+        $this->core = $core;
 
-        $this->server = $core->getServer();
-    }
-
-    /**
-     * Loads the data needed for the manager.
-     *
-     * @param bool $async
-     */
-    public function load(bool $async): void
-    {
-        if (!is_dir($this->destinationFolder)) {
-            mkdir($this->destinationFolder);
-        }
-
-        if (!file_exists($mdFile = $this->destinationFolder . "/README.md")) {
-            $mdResource = fopen($this->resourcesFolder . "/README.md", "rb");
-            stream_copy_to_stream($mdResource, $file = fopen($mdFile, "wb"));
-            fclose($mdResource);
-            fclose($file);
-        }
-
-        if (!file_exists($inputFile = $this->destinationFolder . "/forms.yml")) {
-            $resource = fopen($this->resourcesFolder . "/forms.yml", "rb");
-            stream_copy_to_stream($resource, $file = fopen($inputFile, "wb"));
-            fclose($resource);
-            fclose($file);
-        }
-
-        $this->loadFormDisplays($inputFile);
-
-        $this->loaded = true;
+        parent::__construct($core->getResourcesFolder() . "forms", $core->getDataFolder() . "forms");
     }
 
     /**
@@ -75,7 +35,7 @@ class PracticeFormManager implements IFormDisplayManager
      *
      * Loads the displays for all the forms.
      */
-    private function loadFormDisplays(string $inputFile): void
+    protected function loadFormDisplays(string &$inputFile): void
     {
         $fileData = yaml_parse_file($inputFile);
         if(!is_array($fileData))
@@ -108,7 +68,7 @@ class PracticeFormManager implements IFormDisplayManager
                 $formDisplay = $method->invokeArgs(null, [$localizedName, $data]);
                 if($formDisplay instanceof FormDisplay)
                 {
-                    $this->displayForms[$formDisplay->getLocalizedName()] = $formDisplay;
+                    $this->forms[$formDisplay->getLocalizedName()] = $formDisplay;
                 }
 
             } catch (\Exception $e) {
@@ -116,29 +76,6 @@ class PracticeFormManager implements IFormDisplayManager
                 $this->server->getLogger()->alert($e->getTraceAsString());
             }
         }
-    }
-
-    /**
-     * Saves the data from the manager, not needed here.
-     *
-     * @param bool $async
-     */
-    public function save(bool $async = false): void {}
-
-    /**
-     * @param string $localized
-     * @return FormDisplay|null
-     *
-     * Gets the form display from its localized name.
-     */
-    public function getForm(string $localized): ?FormDisplay
-    {
-        if(isset($this->displayForms[$localized]))
-        {
-            return $this->displayForms[$localized];
-        }
-
-        return null;
     }
 
     /**
@@ -154,16 +91,6 @@ class PracticeFormManager implements IFormDisplayManager
             $exploded[$i] = ucfirst($exploded[$i]);
         }
         return implode($exploded, "");
-    }
-
-    /**
-     * @return bool
-     *
-     * Determines if the form display manager has been loaded.
-     */
-    public function didLoad(): bool
-    {
-        return $this->loaded;
     }
 
     /**

@@ -33,7 +33,7 @@ class KitSelectorMenu implements IInternalForm
         }
 
         // Gets the form type.
-        $formType = isset($args[0]) ? $args[1] : self::VIEW_KIT_FORM;
+        $formType = isset($args[0]) ? $args[0] : self::VIEW_KIT_FORM;
 
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {

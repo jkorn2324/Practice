@@ -66,14 +66,13 @@ class BasicQueuesManager implements IAwaitingManager
     {
         if (
             !$player instanceof PracticePlayer
-            || !isset($data->kit, $data->numberOfPlayers)
+            || !isset($data->kit, $data->gameType)
         ) {
             return;
         }
 
         if (
-            !is_string($data->kit)
-            || !$data->kit instanceof IKit
+            !(is_string($data->kit) || $data->kit instanceof IKit)
             || !$data->gameType instanceof BasicDuelGameType
         ) {
             return;
@@ -151,7 +150,7 @@ class BasicQueuesManager implements IAwaitingManager
             if (isset($this->queues[$serverID])) {
                 unset($this->queues[$serverID]);
             }
-            $matchedPlayers[] = $player;
+            $matchedPlayers[] = $player->getPlayer();
         }
 
         $matchedPlayers[] = $input->getPlayer();

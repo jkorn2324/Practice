@@ -13,6 +13,7 @@ use jkorn\bd\queues\BasicQueue;
 use jkorn\bd\queues\BasicQueuesManager;
 use jkorn\practice\forms\display\properties\FormDisplayStatistic;
 use jkorn\practice\kits\IKit;
+use jkorn\practice\kits\SavedKit;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
 use jkorn\practice\player\info\settings\properties\BooleanSettingProperty;
 use jkorn\practice\player\info\settings\SettingsInfo;
@@ -38,6 +39,7 @@ class BasicDuelsUtils
     const STATISTIC_DUEL_TYPE_AWAITING_KIT = "duels.basic.stat.type.kit.awaiting";
     const STATISTIC_DUEL_TYPE_AWAITING = "duels.basic.stat.type.awaiting";
     const STATISTIC_DUEL_TYPE = "duels.basic.stat.type";
+    const STATISTIC_DUEL_TYPE_KIT = "duels.basic.stat.type.kit";
 
     /**
      * Initializes the generators.
@@ -65,6 +67,32 @@ class BasicDuelsUtils
 
                 return "Unknown";
             }
+        ));
+
+        // Registers the duel type statistic.
+        FormDisplayStatistic::registerStatistic(new FormDisplayStatistic(
+           self::STATISTIC_DUEL_TYPE_KIT,
+           function(Player $player, Server $server, $data)
+           {
+               if($data instanceof IKit)
+               {
+                   return $data->getName();
+               }
+               elseif (is_array($data) && isset($data["kit"]))
+               {
+                   $kit = $data["kit"];
+                   if($kit instanceof IKit)
+                   {
+                       return $kit->getName();
+                   }
+                   elseif (is_string($kit))
+                   {
+                       return $kit;
+                   }
+               }
+
+               return "Unknown";
+           }
         ));
 
         // Registers the awaiting players for duel type statistic.

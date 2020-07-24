@@ -297,7 +297,7 @@ class ScoreboardStatistic
         foreach(self::$statistics as $localized => $statistic)
         {
             $statisticVariable = "{{$localized}}";
-            if(strpos($message, $statisticVariable) !== 0)
+            if(strpos($message, $statisticVariable) !== false)
             {
                 $message = str_replace($statisticVariable, $statistic->getValue($player), $message);
             }
@@ -315,7 +315,7 @@ class ScoreboardStatistic
         foreach (self::$statistics as $localized => $statistic)
         {
             $statisticVariable = "{$localized}";
-            if(strpos($message, $statisticVariable) !== 0 && $statistic->doUpdate())
+            if(strpos($message, $statisticVariable) !== false && $statistic->doUpdate())
             {
                 return true;
             }

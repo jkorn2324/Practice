@@ -150,7 +150,7 @@ class DuelKitSelectorForm extends FormDisplay
             $inKits[] = $kit;
         }
 
-        $form->setExtraData(["kits" => $kits, "type" => $gameType]);
+        $form->setExtraData(["kits" => $inKits, "type" => $gameType]);
         $player->sendForm($form);
     }
 

@@ -20,6 +20,7 @@ class RedDefault extends ArenaGenerator implements ColorIDs
     protected static $arenaChunkLength = 4;
     protected static $arenaChunkWidth = 3;
 
+
     /**
      * Initializes the blocks.
      */
@@ -87,7 +88,7 @@ class RedDefault extends ArenaGenerator implements ColorIDs
     {
         $centerX = (self::$arenaChunkWidth * 16) / 2;
         $centerZ = (self::$arenaChunkLength * 16) / 2;
-        return new Vector3($centerX, 0, $centerZ);
+        return new Vector3($centerX, self::$arenaStartY, $centerZ);
     }
 
     /**
