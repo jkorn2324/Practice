@@ -47,10 +47,11 @@ class PlayFFAForm extends FormDisplay
 
     /**
      * @param Player $player - The player we are sending the form to.
+     * @param mixed ...$args
      *
      * Displays the form to the given player.
      */
-    public function display(Player $player): void
+    public function display(Player $player, ...$args): void
     {
         $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager("ffa");
         if($arenaManager === null)

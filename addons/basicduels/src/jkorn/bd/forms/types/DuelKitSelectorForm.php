@@ -16,6 +16,7 @@ use jkorn\bd\duels\types\BasicDuelGameType;
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\display\properties\FormDisplayText;
 use jkorn\practice\forms\types\SimpleForm;
+use jkorn\practice\kits\IKit;
 use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 
@@ -86,19 +87,43 @@ class DuelKitSelectorForm extends FormDisplay
 
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
-            // TODO: The form input.
+            /** @var IKit[] $kits */
+            $kits = $extraData["kits"];
+            if(count($kits) <= 0)
+            {
+                return;
+            }
+
+            if($data !== null)
+            {
+                $kit = $kits[(int)$data];
+                /** @var BasicDuelGameType $gameType */
+                $gameType = $extraData["type"];
+
+                /** @var BasicDuelsManager|null $gameManager */
+                $gameManager = PracticeCore::getBaseGameManager()->getGameManager(BasicDuelsManager::NAME);
+                if($gameManager !== null)
+                {
+                    $awaitingManager = $gameManager->getAwaitingManager();
+
+                    $classData = new \stdClass();
+                    $classData->kit = $kit;
+                    $classData->gameType = $gameType;
+
+                    $awaitingManager->setAwaiting($player, $classData, true);
+                }
+            }
         });
 
         $form->setTitle($this->formData["title"]->getText($player));
         $form->setContent($this->formData["description"]->getText($player));
 
-        // TODO: Get duel kit.
         $kits = PracticeCore::getKitManager()->getAll();
         if(count($kits) <= 0)
         {
             $button = $this->formData["button.duel.button.none"]->getText($player);
             $form->addButton($button);
-            $form->setExtraData(["kits" => []]);
+            $form->setExtraData(["kits" => [], "type" => $gameType]);
             $player->sendForm($form);
             return;
         }
@@ -125,7 +150,7 @@ class DuelKitSelectorForm extends FormDisplay
             $inKits[] = $kit;
         }
 
-        $form->setExtraData(["kits" => $kits]);
+        $form->setExtraData(["kits" => $kits, "type" => $gameType]);
         $player->sendForm($form);
     }
 

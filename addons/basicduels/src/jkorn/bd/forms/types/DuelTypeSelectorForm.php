@@ -53,10 +53,11 @@ class DuelTypeSelectorForm extends FormDisplay
 
     /**
      * @param Player $player - The player we are sending the form to.
+     * @param mixed...$args
      *
      * Displays the form to the given player.
      */
-    public function display(Player $player): void
+    public function display(Player $player, ...$args): void
     {
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {

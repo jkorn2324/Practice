@@ -58,6 +58,17 @@ abstract class Form implements IForm
     }
 
     /**
+     * @param string $key
+     * @param $value
+     *
+     * Adds an extra data to the form.
+     */
+    public function addExtraData(string $key, $value): void
+    {
+        $this->extraData[$key] = $value;
+    }
+
+    /**
      * @param Player $player
      * @param mixed $data
      *

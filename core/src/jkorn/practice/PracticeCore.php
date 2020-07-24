@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace jkorn\practice;
 
 
+use jkorn\practice\commands\ManageKitsCommand;
 use jkorn\practice\forms\display\BaseFormDisplayManager;
 use jkorn\practice\forms\display\properties\FormDisplayStatistic;
+use jkorn\practice\forms\internal\InternalForms;
 use jkorn\practice\games\BaseGameManager;
 use jkorn\practice\games\player\GamePlayer;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
 use jkorn\practice\player\info\stats\StatsInfo;
 use jkorn\practice\scoreboard\display\BaseScoreboardDisplayManager;
+use pocketmine\command\SimpleCommandMap;
 use pocketmine\entity\Entity;
 use pocketmine\plugin\PluginBase;
 use jkorn\practice\arenas\BaseArenaManager;
@@ -49,6 +52,7 @@ class PracticeCore extends PluginBase
     {
         self::$instance = $this;
 
+        // Initializes the data folder.
         $this->initDataFolder();
 
         // Default test data provider is a JSON data provider.
@@ -60,6 +64,8 @@ class PracticeCore extends PluginBase
         GamePlayer::init();
         // The settings information to initialize.
         SettingsInfo::init();
+        // Initializes the default internal forms.
+        InternalForms::initDefaults();
 
         // Initializes the default statistics.
         StatsInfo::initDefaultStats();
@@ -84,6 +90,7 @@ class PracticeCore extends PluginBase
     public function onEnable()
     {
         $this->registerEntities();
+        $this->registerCommands();
 
         // Reloads the players.
         PracticeUtil::reloadPlayers();
@@ -210,6 +217,15 @@ class PracticeCore extends PluginBase
     {
         Entity::registerEntity(SplashPotion::class, false, ['ThrownPotion', 'minecraft:potion', 'thrownpotion']);
         Entity::registerEntity(FishingHook::class, false, ["FishingHook", "minecraft:fishing_hook"]);
+    }
+
+    /**
+     * Registers the commands to the practice core.
+     */
+    private function registerCommands(): void
+    {
+        // Registers the kit manager command.
+        PracticeUtil::registerCommand(new ManageKitsCommand());
     }
 
 }

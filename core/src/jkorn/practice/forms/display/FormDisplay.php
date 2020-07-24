@@ -6,9 +6,9 @@ namespace jkorn\practice\forms\display;
 
 
 use jkorn\practice\forms\display\properties\FormDisplayText;
-use pocketmine\Player;
+use jkorn\practice\forms\IPracticeForm;
 
-abstract class FormDisplay
+abstract class FormDisplay implements IPracticeForm
 {
 
     /** @var string */
@@ -28,13 +28,6 @@ abstract class FormDisplay
      * Initializes the form data.
      */
     abstract protected function initData(array &$data): void;
-
-    /**
-     * @param Player $player - The player we are sending the form to.
-     *
-     * Displays the form to the given player.
-     */
-    abstract public function display(Player $player): void;
 
     /**
      * @return string

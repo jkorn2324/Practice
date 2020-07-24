@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice;
 
 
+use jkorn\practice\commands\PracticeCommand;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
 use pocketmine\item\enchantment\Enchantment;
@@ -346,5 +347,15 @@ class PracticeUtil
     public static function deleteLevel($level, bool $async = false): void
     {
         // TODO: Implement function
+    }
+
+    /**
+     * @param PracticeCommand $command
+     *
+     * Registers the command to the command map.
+     */
+    public static function registerCommand(PracticeCommand $command): void
+    {
+        Server::getInstance()->getCommandMap()->register($command->getName(), $command);
     }
 }

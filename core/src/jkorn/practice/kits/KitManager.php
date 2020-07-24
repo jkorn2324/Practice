@@ -19,14 +19,10 @@ class KitManager extends AbstractManager
     /** @var SavedKit[] */
     private $kits;
 
-    /** @var SavedKit[] */
-    private $deletedKits;
-
     public function __construct(PracticeCore $core)
     {
         $this->kitDirectory = $core->getDataFolder() . "kits/";
         $this->kits = [];
-        $this->deletedKits = [];
 
         parent::__construct(false);
     }
@@ -165,21 +161,15 @@ class KitManager extends AbstractManager
             }
 
             $file = $this->kitDirectory . "{$kit->getName()}.json";
-
-            if(isset($this->deletedKits[$localized])) {
-                $this->handleDelete($file, $kit);
-            } else {
-
-                if(!file_exists($file)) {
-                    $file = fopen($file, "w");
-                    fclose($file);
-                }
-
-                file_put_contents(
-                    $file,
-                    json_encode($kit->export())
-                );
+            if(!file_exists($file)) {
+                $file = fopen($file, "w");
+                fclose($file);
             }
+
+            file_put_contents(
+                $file,
+                json_encode($kit->export())
+            );
         }
     }
 
@@ -197,7 +187,7 @@ class KitManager extends AbstractManager
         $name = $kit instanceof SavedKit ? $kit->getName() : $kit;
         $lowercase = strtolower($name);
         if(isset($this->kits[$lowercase])) {
-            $this->deletedKits[$lowercase] = $this->kits[$lowercase];
+            $this->handleDelete($lowercase);
         }
     }
 
@@ -209,41 +199,22 @@ class KitManager extends AbstractManager
      */
     public function add(SavedKit $kit): bool
     {
-        if(isset($this->kits[$localized = strtolower($kit->getName())])) {
-
-            if(!isset($this->deletedKits[$localized])) {
-                return false;
-            }
-
-            unset($this->deletedKits[$localized]);
+        if(isset($this->kits[$localized = strtolower($kit->getName())]))
+        {
+            return false;
         }
 
         $this->kits[$localized] = $kit;
-
-        // TODO: Add the kit to all arenas.
-
         return true;
     }
 
     /**
-     * @param string $kit
-     * @return bool
-     *
-     * Determines if the kit is deleted or not.
-     */
-    public function isDeleted(string $kit): bool
-    {
-        return isset($this->deletedKits[strtolower($kit)]);
-    }
-
-    /**
      * @param string|null $kit
-     * @param bool $deleted - If true, the function then checks if kit is deleted & returns null if it is.
      * @return SavedKit|null
      *
      * Gets the kit from the list.
      */
-    public function get(?string $kit, bool $deleted = false): ?SavedKit
+    public function get(?string $kit): ?SavedKit
     {
         if($kit === null)
         {
@@ -252,11 +223,7 @@ class KitManager extends AbstractManager
 
         $localized = strtolower($kit);
         if(isset($this->kits[$localized])) {
-            $kit = $this->kits[$localized];
-            if($deleted && isset($this->deletedKits[$localized])) {
-                return null;
-            }
-            return $kit;
+            return $this->kits[$localized];
         }
         return null;
     }
@@ -265,39 +232,34 @@ class KitManager extends AbstractManager
      * @return array|SavedKit[]
      *
      * Lists all kits.
-     *@var bool $deleted - If true, it includes the kits that are deleted.
      */
-    public function getAll(bool $deleted = false)
+    public function getAll()
     {
-        if($deleted) {
-            return $this->kits;
-        }
-
-        $output = [];
-        foreach($this->kits as $localizedName => $kit)
-        {
-            if(isset($this->deletedKits[$localizedName])) {
-                continue;
-            }
-            $output[$localizedName] = $kit;
-        }
-
-        return $output;
+        return $this->kits;
     }
 
     /**
-     * @param string $file
-     * @param SavedKit $kit
+     * @param string $localized
      *
      * Called when the kit manager deletes a kit via the save
      * function non async.
      */
-    private function handleDelete(string $file, SavedKit $kit): void
+    private function handleDelete(string &$localized): void
     {
+        if(!isset($this->kits[$localized]))
+        {
+            return;
+        }
+
+        $kit = $this->kits[$localized];
+        $file = $this->kitDirectory . "{$kit->getName()}.json";
+
         if(file_exists($file)) {
             unlink($file);
         }
 
         // TODO: Remove kit from all arenas.
+
+        unset($this->kits[$localized]);
     }
 }
