@@ -16,6 +16,7 @@ use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\form\Form;
 use pocketmine\level\Position;
+use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
@@ -164,12 +165,30 @@ class PracticePlayer extends Player
      */
     public function handleLevelSoundEvent(LevelSoundEventPacket $packet): bool
     {
-        if(isset(PracticeUtil::SWISH_SOUNDS[$packet->sound])) {
-
+        if(isset(PracticeUtil::SWISH_SOUNDS[$packet->sound]))
+        {
             $this->onClick(false);
         }
 
-        return parent::handleLevelSoundEvent($packet);
+        // Broadcasts the packet to the viewers based on their information.
+        PracticeUtil::broadcastPacketToViewers($this, $packet,
+            function(Player $player, DataPacket $packet) {
+                if ($player instanceof PracticePlayer && $packet instanceof LevelSoundEventPacket) {
+                    // Isolates swish sounds.
+                    if (!isset(PracticeUtil::SWISH_SOUNDS[$packet->sound])) {
+                        return true;
+                    }
+
+                    $settings = $player->getSettingsInfo();
+                    $property = $settings->getProperty(SettingsInfo::SWISH_SOUNDS_ENABLED);
+                    if ($property !== null) {
+                        return $property->getValue();
+                    }
+                }
+                return true;
+            });
+
+        return true;
     }
 
     /**
@@ -866,15 +885,4 @@ class PracticePlayer extends Player
             $this->teleport($position);
         }
     }
-
-    /**
-     * Called when the player respawns.
-     */
-    public function respawn(): void
-    {
-        parent::respawn();
-
-        $this->putInLobby(false);
-    }
-
 }

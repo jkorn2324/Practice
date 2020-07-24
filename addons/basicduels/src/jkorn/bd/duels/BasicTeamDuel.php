@@ -13,7 +13,10 @@ use jkorn\bd\BasicDuelsManager;
 use jkorn\bd\duels\types\BasicDuelGameType;
 use jkorn\bd\player\team\BasicDuelTeam;
 use jkorn\bd\player\team\BasicDuelTeamPlayer;
+use jkorn\bd\scoreboards\BasicDuelsScoreboardManager;
 use jkorn\practice\arenas\PracticeArena;
+use jkorn\practice\games\duels\teams\DuelTeam;
+use jkorn\practice\games\duels\teams\DuelTeamPlayer;
 use jkorn\practice\games\duels\types\TeamDuel;
 use jkorn\practice\games\IGameManager;
 use jkorn\practice\kits\IKit;
@@ -144,7 +147,48 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
      */
     protected function onEnd(): void
     {
-        // TODO: Implement onEnd() method.
+        // TODO: Get the winning team & losing team & broadcast the message.
+
+        // Broadcasts the callable to the players.
+        $this->broadcastPlayers(function(Player $player)
+        {
+            $team = $this->getTeam($player);
+            if
+            (
+                $player instanceof PracticePlayer
+                && $team !== null
+                && ($teamPlayer = $team->getPlayer($player)) !== null
+                && $teamPlayer instanceof DuelTeamPlayer
+            )
+            {
+
+                // Checks if player is eliminated, puts the player in lobby.
+                if(!$teamPlayer->isEliminated())
+                {
+                    $player->putInLobby(true);
+                    return;
+                }
+
+                // Checks if the player is spectating.
+                if($teamPlayer->isSpectator())
+                {
+                    $player->putInLobby(true);
+                }
+            }
+        });
+
+        // Broadcasts everything to the spectators & resets them.
+        $this->broadcastSpectators(function(Player $player)
+        {
+            if($player instanceof PracticePlayer)
+            {
+                // TODO: Send messages to the player.
+                $player->putInLobby(true);
+            }
+        });
+
+        // Resets the spectators.
+        $this->spectators = [];
     }
 
     /**
@@ -243,11 +287,16 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
         // TODO: Set the player as spectating.
         $player->teleport($this->getCenterPosition());
 
+        // Sets the spectator scoreboards.
         $scoreboardData = $player->getScoreboardData();
-        // TODO: Re Add Spectator Scoreboards.
-        /* if ($scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_DUEL_SPECTATOR) {
-            $scoreboardData->setScoreboard(ScoreboardData::SCOREBOARD_DUEL_SPECTATOR);
-        } */
+        if
+        (
+            $scoreboardData !== null
+            && $scoreboardData->getScoreboard() === ScoreboardData::SCOREBOARD_NONE
+        )
+        {
+            $scoreboardData->setScoreboard(BasicDuelsScoreboardManager::TYPE_SCOREBOARD_DUEL_SPECTATOR);
+        }
     }
 
     /**

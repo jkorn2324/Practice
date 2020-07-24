@@ -243,11 +243,6 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
         {
             $scoreboardData->setScoreboard(BasicDuelsScoreboardManager::TYPE_SCOREBOARD_DUEL_SPECTATOR);
         }
-
-        /* if($scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_DUEL_SPECTATOR)
-        {
-            $scoreboardData->setScoreboard(ScoreboardData::SCOREBOARD_DUEL_SPECTATOR);
-        } */
     }
 
     /**

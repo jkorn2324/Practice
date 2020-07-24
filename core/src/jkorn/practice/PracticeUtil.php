@@ -16,6 +16,7 @@ use pocketmine\level\Level;
 use pocketmine\level\Location;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\Player;
 use pocketmine\Server;
@@ -397,5 +398,36 @@ class PracticeUtil
         }
 
         $level->registerChunkLoader(new PracticeChunkLoader($level, $x, $z, $callable), $x, $z, true);
+    }
+
+
+    /**
+     * @param PracticePlayer $inPlayer - The input player.
+     * @param DataPacket $packet
+     * @param callable|null $callable
+     * @param PracticePlayer[]|null $viewers
+     *
+     * Broadcasts a packet to a group of viewers based on the position.
+     */
+    public static function broadcastPacketToViewers(PracticePlayer $inPlayer, DataPacket $packet, ?callable $callable = null, ?array $viewers = null): void
+    {
+        // Gets the viewers.
+        $viewers = $viewers ?? $inPlayer->getLevelNonNull()->getViewersForPosition($inPlayer->asVector3());
+
+        foreach($viewers as $viewer)
+        {
+            if($viewer->isOnline())
+            {
+                if(
+                    $callable !== null
+                    && !$callable($viewer, $packet)
+                )
+                {
+                    continue;
+                }
+
+                $viewer->batchDataPacket($packet);
+            }
+        }
     }
 }

@@ -8,6 +8,7 @@ namespace jkorn\bd\player\team;
 use jkorn\bd\arenas\IDuelArena;
 use jkorn\bd\scoreboards\BasicDuelsScoreboardManager;
 use jkorn\practice\games\duels\teams\DuelTeam;
+use jkorn\practice\games\IGame;
 use jkorn\practice\games\misc\TeamColor;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\player\PracticePlayer;
@@ -133,11 +134,27 @@ class BasicDuelTeam extends DuelTeam
             return false;
         }
 
-        $teamPlayer = $this->players[$player->getServerID()->toString()];
+        $teamPlayer = $this->players[$serverID = $player->getServerID()->toString()];
+        $this->eliminated[$serverID] = $teamPlayer->getDisplayName();
 
-        // TODO:
+        /** @var int $reason */
+        $reason = $extraData[0];
+        $playersLeft = $this->getPlayersLeft();
 
-        return $this->getPlayersLeft() === 0;
+        if($reason !== IGame::REASON_LEFT_SERVER)
+        {
+            // TODO: Handle unfair result.
+            $teamPlayer->setEliminated();
+            if($this->getPlayersLeft() !== 0)
+            {
+                $teamPlayer->setSpectator();
+            }
+            return $playersLeft === 0;
+        }
+
+        $teamPlayer->setOffline();
+        $this->removePlayer($teamPlayer);
+        return $playersLeft === 0;
     }
 
     /**
@@ -154,5 +171,38 @@ class BasicDuelTeam extends DuelTeam
         }
 
         return false;
+    }
+
+    /**
+     * @param $player
+     *
+     * Removes the player from the players list of the team,
+     * shouldn't be used to actually eliminate the player.
+     * If you want to eliminate the player, call eliminate()
+     */
+    public function removePlayer($player): void
+    {
+        // Checks to make sure the player is eliminated.
+        if(!$this->isEliminated($player))
+        {
+            return;
+        }
+
+        if
+        (
+            $player instanceof BasicDuelTeamPlayer
+            && isset($this->players[$serverID = $player->getServerID()->toString()])
+        )
+        {
+            unset($this->players[$serverID]);
+        }
+        elseif
+        (
+            $player instanceof PracticePlayer
+            && isset($this->players[$serverID = $player->getServerID()->toString()])
+        )
+        {
+            unset($this->players[$serverID]);
+        }
     }
 }

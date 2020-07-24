@@ -84,6 +84,15 @@ interface ITeam
     public function addPlayer(Player $player): bool;
 
     /**
+     * @param $player
+     *
+     * Removes the player from the players list of the team,
+     * shouldn't be used to actually eliminate the player.
+     * If you want to eliminate the player, call eliminate()
+     */
+    public function removePlayer($player): void;
+
+    /**
      * @return bool
      *
      * Determines if the team is full.

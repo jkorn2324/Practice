@@ -11,6 +11,7 @@ use jkorn\practice\games\misc\ITeamGame;
 use jkorn\practice\games\misc\TeamColor;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\player\PracticePlayer;
+use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\Player;
 
 abstract class TeamDuel extends AbstractDuel implements ITeamGame
@@ -140,9 +141,18 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
         $team2 = $this->team1->equals($team1) ? $this->team2 : $this->team1;
         $teamPlayer = $team1->getPlayer($player);
 
+        // Removes the player from the team.
+        if($team1->isEliminated($teamPlayer))
+        {
+            if($reason === self::REASON_LEFT_SERVER)
+            {
+                $team1->removePlayer($teamPlayer);
+            }
+            return;
+        }
+
         if($reason === self::STATUS_STARTING)
         {
-            $teamPlayer->setSpectator();
             $this->setEnded(null, self::STATUS_ENDED);
 
             if($reason === self::REASON_LEFT_SERVER)
@@ -150,21 +160,16 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
                 $teamPlayer->setOffline();
                 $this->onEnd();
                 $this->die();
+                return;
             }
+            $teamPlayer->setEliminated();
             return;
         }
 
         if($team1->eliminate($player, $reason))
         {
-            $teamPlayer->setEliminated();
             $this->setEnded($team2, self::STATUS_ENDING);
             return;
-        }
-
-        if($reason !== self::REASON_LEFT_SERVER)
-        {
-            $teamPlayer->setSpectator();
-            $teamPlayer->setEliminated();
         }
     }
 
@@ -221,5 +226,36 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
     public function isTeamsGenerated(): bool
     {
         return $this->generated;
+    }
+
+    /**
+     * @param PlayerRespawnEvent $event
+     *
+     * Handles when the player respawns.
+     */
+    protected function handlePlayerRespawn(PlayerRespawnEvent &$event): void
+    {
+        $player = $event->getPlayer();
+        $team = $this->getTeam($player);
+
+        if
+        (
+            $player instanceof PracticePlayer
+            && $team !== null
+        )
+        {
+            $teamPlayer = $team->getPlayer($player);
+            if ($teamPlayer->isEliminated())
+            {
+                if($teamPlayer->isSpectator())
+               {
+                   // TODO: Set the player as a fake spectator, setting the respawn position as the center position of the duel.
+                   $event->setRespawnPosition($this->getCenterPosition());
+                   return;
+               }
+
+                $player->putInLobby(false);
+            }
+        }
     }
 }

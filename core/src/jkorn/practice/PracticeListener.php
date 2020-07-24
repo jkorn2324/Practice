@@ -12,6 +12,7 @@ use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
+use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\Server;
 use jkorn\practice\items\PracticeItem;
 use jkorn\practice\player\info\ClientInfo;
@@ -117,6 +118,32 @@ class PracticeListener implements Listener
         )
         {
             $game->handleEvent($event);
+        }
+    }
+
+    /**
+     * @param PlayerRespawnEvent $event
+     *
+     * Called when the player respawns.
+     */
+    public function onRespawn(PlayerRespawnEvent $event): void
+    {
+        $player = $event->getPlayer();
+
+        if
+        (
+            $player instanceof PracticePlayer
+            && ($game = $player->getCurrentGame()) !== null
+            && $game instanceof IGame
+        )
+        {
+            // The game handles the event.
+            $game->handleEvent($event);
+        }
+        else
+        {
+            // By default, send the player to the lobby.
+            $player->putInLobby(false);
         }
     }
 }

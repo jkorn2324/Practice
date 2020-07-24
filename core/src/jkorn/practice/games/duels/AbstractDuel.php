@@ -10,9 +10,9 @@ use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerDeathEvent;
+use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
-use pocketmine\Player;
 use pocketmine\Server;
 use jkorn\practice\games\IGame;
 
@@ -175,6 +175,7 @@ abstract class AbstractDuel implements IGame
      * @param Event $event - The input event, here are the list
      * of events that this calls.
      * - PlayerDeathEvent
+     * - PlayerRespawnEvent
      *
      * Handles an event when the player is in the game.
      */
@@ -183,6 +184,10 @@ abstract class AbstractDuel implements IGame
         if($event instanceof PlayerDeathEvent)
         {
             $this->handlePlayerDeath($event);
+        }
+        elseif ($event instanceof PlayerRespawnEvent)
+        {
+            $this->handlePlayerRespawn($event);
         }
     }
 
@@ -212,6 +217,13 @@ abstract class AbstractDuel implements IGame
 
         $this->removeFromGame($player, $reason);
     }
+
+    /**
+     * @param PlayerRespawnEvent $event
+     *
+     * Handles when the player respawns.
+     */
+    abstract protected function handlePlayerRespawn(PlayerRespawnEvent &$event): void;
 
     /**
      * @return string

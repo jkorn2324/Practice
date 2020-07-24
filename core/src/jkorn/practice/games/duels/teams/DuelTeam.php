@@ -145,11 +145,11 @@ abstract class DuelTeam implements ITeam
     {
         if($player instanceof PracticePlayer)
         {
-            return isset($this->players[$player->getServerID()->toString()]);
+            return isset($this->eliminated[$player->getServerID()->toString()]);
         }
         elseif ($player instanceof DuelTeamPlayer)
         {
-            return isset($this->players[$player->getServerID()->toString()]);
+            return isset($this->eliminated[$player->getServerID()->toString()]);
         }
         return false;
     }

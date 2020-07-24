@@ -60,6 +60,7 @@ interface IGame
      * @param Event $event - The input event, here are the list
      * of event that this calls.
      * - PlayerDeathEvent
+     * - PlayerRespawnEvent
      *
      * Handles an event when the player is in the game.
      */

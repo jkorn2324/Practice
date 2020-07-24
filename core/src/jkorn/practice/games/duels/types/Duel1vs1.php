@@ -6,6 +6,7 @@ namespace jkorn\practice\games\duels\types;
 
 
 use jkorn\practice\kits\IKit;
+use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\Player;
 use jkorn\practice\games\duels\AbstractDuel;
 use jkorn\practice\games\duels\DuelPlayer;
@@ -226,5 +227,20 @@ abstract class Duel1vs1 extends AbstractDuel
             }
         }
         return null;
+    }
+
+    /**
+     * @param PlayerRespawnEvent $event
+     *
+     * Handles when the player respawns.
+     */
+    protected function handlePlayerRespawn(PlayerRespawnEvent &$event): void
+    {
+        $player = $event->getPlayer();
+        // Puts the player in the lobby by default.
+        if ($player instanceof PracticePlayer)
+        {
+            $player->putInLobby(false);
+        }
     }
 }
