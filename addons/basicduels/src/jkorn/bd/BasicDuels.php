@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace jkorn\bd;
 
+use jkorn\bd\scoreboards\BasicDuelsScoreboardManager;
 use jkorn\practice\PracticeCore;
 use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
@@ -26,7 +27,10 @@ class BasicDuels extends PluginBase
             new BasicDuelsManager($this)
         );
 
-        // TODO: Register the scoreboard.
+        PracticeCore::getBaseScoreboardDisplayManager()->registerScoreboardManager(
+            new BasicDuelsScoreboardManager($this),
+            true
+        );
     }
 
     /**

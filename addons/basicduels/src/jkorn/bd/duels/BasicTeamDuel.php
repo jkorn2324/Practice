@@ -331,4 +331,14 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
     {
         return $this->arena->getLevel();
     }
+
+    /**
+     * @return BasicDuelGameType
+     *
+     * Gets the game type of the duel.
+     */
+    public function getGameType(): BasicDuelGameType
+    {
+        return $this->gameType;
+    }
 }

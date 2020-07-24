@@ -6,10 +6,12 @@ namespace jkorn\bd\queues;
 
 use jkorn\bd\BasicDuelsManager;
 use jkorn\bd\duels\types\BasicDuelGameType;
+use jkorn\bd\scoreboards\BasicDuelsScoreboardManager;
 use jkorn\practice\games\misc\IAwaitingManager;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\PracticeCore;
+use jkorn\practice\scoreboard\ScoreboardData;
 use pocketmine\Player;
 
 class BasicQueuesManager implements IAwaitingManager
@@ -105,6 +107,16 @@ class BasicQueuesManager implements IAwaitingManager
         }
 
         $this->queues[$player->getServerID()->toString()] = $queue;
+
+        // Sets the scoreboard of the player.
+        $scoreboardData = $player->getScoreboardData();
+        if(
+            $scoreboardData !== null
+            && $scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_NONE
+        )
+        {
+            $scoreboardData->setScoreboard(BasicDuelsScoreboardManager::TYPE_SCOREBOARD_SPAWN_QUEUE);
+        }
     }
 
     /**
@@ -193,9 +205,37 @@ class BasicQueuesManager implements IAwaitingManager
         $queue = $this->queues[$id];
         unset($this->queues[$id]);
 
-        if($player->isOnline() && $sendMessage)
+        if($player->isOnline())
         {
-            // TODO: Send message.
+            if($sendMessage)
+            {
+                // TODO: Send message.
+            }
+
+            // Sets the scoreboard.
+            $scoreboardData = $player->getScoreboardData();
+            if(
+                $scoreboardData !== null
+                && $scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_NONE
+            )
+            {
+                $scoreboardData->setScoreboard(ScoreboardData::SCOREBOARD_SPAWN_DEFAULT);
+            }
         }
+    }
+
+    /**
+     * @param PracticePlayer $player
+     * @return BasicQueue|null
+     *
+     * Gets the player's awaiting queue.
+     */
+    public function getAwaiting(PracticePlayer $player): ?BasicQueue
+    {
+        if(isset($this->queues[$player->getServerID()->toString()]))
+        {
+            return $this->queues[$player->getServerID()->toString()];
+        }
+        return null;
     }
 }

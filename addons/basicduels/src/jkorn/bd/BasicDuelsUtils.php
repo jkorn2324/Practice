@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace jkorn\bd;
 
 
+use jkorn\bd\duels\Basic1vs1;
+use jkorn\bd\duels\IBasicDuel;
 use jkorn\bd\duels\types\BasicDuelGameType;
 use jkorn\bd\gen\BasicDuelsGeneratorInfo;
 use jkorn\bd\gen\types\RedDefault;
@@ -12,6 +14,7 @@ use jkorn\bd\gen\types\YellowDefault;
 use jkorn\bd\queues\BasicQueue;
 use jkorn\bd\queues\BasicQueuesManager;
 use jkorn\practice\forms\display\properties\FormDisplayStatistic;
+use jkorn\practice\games\duels\AbstractDuel;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\kits\SavedKit;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
@@ -40,6 +43,11 @@ class BasicDuelsUtils
     const STATISTIC_DUEL_TYPE_AWAITING = "duels.basic.stat.type.awaiting";
     const STATISTIC_DUEL_TYPE = "duels.basic.stat.type";
     const STATISTIC_DUEL_TYPE_KIT = "duels.basic.stat.type.kit";
+
+    const STATISTIC_PLAYER_DUEL_GAME_TYPE = "duels.basic.stat.type.player";
+    const STATISTIC_PLAYER_DUEL_KIT = "duels.basic.stat.type.player.kit";
+    const STATISTIC_DUELS_PLAYER_OPPONENT = "duels.basic.stat.player.opponent";
+    const STATISTIC_DUELS_DURATION = "duels.basic.stat.duration";
 
     /**
      * Initializes the generators.
@@ -247,6 +255,84 @@ class BasicDuelsUtils
                     }
                 }
                 return 0;
+            }
+        ));
+
+        // Gets the player's opponent.
+        ScoreboardStatistic::registerStatistic(new ScoreboardStatistic(
+            self::STATISTIC_DUELS_PLAYER_OPPONENT,
+            function(Player $player, Server $server)
+            {
+                if($player instanceof PracticePlayer)
+                {
+                    $game = $player->getCurrentGame();
+                    if($game instanceof Basic1vs1)
+                    {
+                        return $game->getOpponent($player)->getDisplayName();
+                    }
+                }
+
+                return "Unknown";
+            }
+        , false));
+
+        // Registers the statistic.
+        ScoreboardStatistic::registerStatistic(new ScoreboardStatistic(
+            self::STATISTIC_PLAYER_DUEL_GAME_TYPE,
+            function(Player $player, Server $server)
+            {
+                if($player instanceof PracticePlayer)
+                {
+                    $awaiting = $player->getAwaitingGameType();
+                    $game = $player->getCurrentGame();
+
+                    if
+                    (
+                        $awaiting !== null
+                        && $awaiting instanceof BasicQueuesManager
+                        && ($queuesManager = $awaiting->getAwaitingManager()) !== null
+                        && $queuesManager instanceof BasicQueuesManager
+                    )
+                    {
+                        $queue = $queuesManager->getAwaiting($player);
+                        if($queue !== null)
+                        {
+                            return $queue->getGameType()->getDisplayName();
+                        }
+                    }
+                    elseif
+                    (
+                        $game !== null
+                        && $game instanceof IBasicDuel
+                    )
+                    {
+                        return $game->getGameType()->getDisplayName();
+                    }
+                }
+
+                return "Unknown";
+            }
+        , false));
+
+        // Registers the duration to the duel utils.
+        ScoreboardStatistic::registerStatistic(new ScoreboardStatistic(
+            self::STATISTIC_DUELS_DURATION,
+            function(Player $player, Server $server)
+            {
+                if($player instanceof PracticePlayer)
+                {
+                    $game = $player->getCurrentGame();
+                    if(
+                        $game !== null
+                        && $game instanceof AbstractDuel
+                        && $game instanceof IBasicDuel
+                    )
+                    {
+                        return $game->getDuration();
+                    }
+                }
+
+                return "00:00";
             }
         ));
     }

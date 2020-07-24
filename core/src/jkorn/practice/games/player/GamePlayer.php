@@ -90,11 +90,14 @@ abstract class GamePlayer
     private $serverID;
     /** @var bool */
     private $online = true;
+    /** @var string */
+    private $displayName;
 
     public function __construct(PracticePlayer $player)
     {
         $this->player = $player;
         $this->serverID = $player->getServerID();
+        $this->displayName = $player->getDisplayName();
 
         $this->initProperties();
     }
@@ -191,6 +194,16 @@ abstract class GamePlayer
     public function setOffline(): void
     {
         $this->online = false;
+    }
+
+    /**
+     * @return string
+     *
+     * Gets the display name of the player.
+     */
+    public function getDisplayName(): string
+    {
+        return $this->displayName;
     }
 
     /**

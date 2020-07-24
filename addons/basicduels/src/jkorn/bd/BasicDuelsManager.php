@@ -150,7 +150,7 @@ class BasicDuelsManager implements IAwaitingGameManager
         if ($numPlayers !== 2) {
             $duel = new BasicTeamDuel($duelID, $kit, $randomArena, $gameType, ...$players);
         } else {
-            $duel = new Basic1vs1($duelID, $kit, $randomArena, $players[0], $players[1]);
+            $duel = new Basic1vs1($duelID, $kit, $randomArena, $players[0], $players[1], $gameType);
         }
 
         $this->duels[$duel->getID()] = $duel;

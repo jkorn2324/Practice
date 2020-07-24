@@ -212,4 +212,30 @@ abstract class AbstractDuel implements IGame
 
         $this->removeFromGame($player, $reason);
     }
+
+    /**
+     * @return string
+     *
+     * Gets the duration of the duel.
+     */
+    public function getDuration(): string
+    {
+        $seconds = $this->durationSeconds % 60;
+        $minutes = $this->durationSeconds / 60;
+
+        $minutesSection = "{$seconds}";
+        $secondsSection = "{$minutes}";
+
+        if($seconds < 10)
+        {
+            $secondsSection = "0{$seconds}";
+        }
+
+        if($minutes < 10)
+        {
+            $minutesSection = "0{$minutes}";
+        }
+
+        return "{$minutesSection}:{$secondsSection}";
+    }
 }

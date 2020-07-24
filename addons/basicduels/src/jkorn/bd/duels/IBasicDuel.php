@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\bd\duels;
 
 
+use jkorn\bd\duels\types\BasicDuelGameType;
 use jkorn\practice\games\IGame;
 use jkorn\practice\games\misc\ISpectatorGame;
 
@@ -31,4 +32,11 @@ interface IBasicDuel extends IGame, ISpectatorGame
      * Gets the number of players playing the duel in total.
      */
     public function getNumberOfPlayers(): int;
+
+    /**
+     * @return BasicDuelGameType
+     *
+     * Gets the game type of the duel.
+     */
+    public function getGameType(): BasicDuelGameType;
 }

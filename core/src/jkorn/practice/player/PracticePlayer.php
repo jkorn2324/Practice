@@ -811,9 +811,19 @@ class PracticePlayer extends Player
             $this->teleport(PracticeUtil::getLobbySpawn());
         }
 
+        // Sets the scoreboard.
+        $scoreboard = $this->getScoreboardData();
+        if(
+            $scoreboard !== null
+            && $scoreboard->getScoreboard() !== ScoreboardData::SCOREBOARD_NONE
+            && $scoreboard->getScoreboard() !== ScoreboardData::SCOREBOARD_SPAWN_DEFAULT
+        )
+        {
+            $scoreboard->setScoreboard(ScoreboardData::SCOREBOARD_SPAWN_DEFAULT);
+        }
+
         // Removes all of the effects.
         $this->removeAllEffects();
-
         PracticeCore::getItemManager()->sendItemsFromType(ItemManager::TYPE_LOBBY, $this);
     }
 

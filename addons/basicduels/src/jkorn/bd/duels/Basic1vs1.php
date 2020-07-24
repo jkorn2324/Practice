@@ -10,11 +10,14 @@ use jkorn\bd\arenas\IDuelArena;
 use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\arenas\PreGeneratedDuelArena;
 use jkorn\bd\BasicDuelsManager;
+use jkorn\bd\duels\types\BasicDuelGameType;
 use jkorn\bd\player\BasicDuelPlayer;
+use jkorn\bd\scoreboards\BasicDuelsScoreboardManager;
 use jkorn\practice\arenas\PracticeArena;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\PracticeUtil;
+use jkorn\practice\scoreboard\ScoreboardData;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Player;
@@ -36,6 +39,9 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
     /** @var IDuelArena|PracticeArena */
     private $arena;
 
+    /** @var BasicDuelGameType */
+    private $gameType;
+
     /**
      * Basic1Vs1 constructor.
      * @param int $id - The id of the duel.
@@ -43,13 +49,15 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
      * @param IDuelArena|PracticeArena $arena - The arena of the 1vs1.
      * @param Player $player1 - The first player of the 1vs1.
      * @param Player $player2 - The second player of the 1vs1.
+     * @param BasicDuelGameType $gameType
      *
      * The generic 1vs1 constructor.
      */
-    public function __construct(int $id, IKit $kit, $arena, Player $player1, Player $player2)
+    public function __construct(int $id, IKit $kit, $arena, Player $player1, Player $player2, BasicDuelGameType $gameType)
     {
         parent::__construct($kit, $player1, $player2, BasicDuelPlayer::class);
 
+        $this->gameType = $gameType;
         $this->arena = $arena;
         $this->id = $id;
         $this->spectators = [];
@@ -60,19 +68,33 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
      */
     protected function putPlayersInDuel(): void
     {
+        // Used to update the players.
+        $this->broadcastPlayers(function(Player $player)
+        {
+            if(!$player instanceof PracticePlayer)
+            {
+                return;
+            }
+
+            $player->setGamemode(0);
+            $player->setImmobile(true);
+            $player->clearInventory();
+
+            $this->kit->sendTo($player, false);
+
+            // Sets the scoreboard of the players.
+            $scoreboard = $player->getScoreboardData();
+            if(
+                $scoreboard !== null
+                && $scoreboard->getScoreboard() !== ScoreboardData::SCOREBOARD_NONE
+            )
+            {
+                $scoreboard->setScoreboard(BasicDuelsScoreboardManager::TYPE_SCOREBOARD_DUEL_1VS1_PLAYER);
+            }
+        });
+
         $player1 = $this->player1->getPlayer();
         $player2 = $this->player2->getPlayer();
-
-        $player1->setGamemode(0);
-        $player2->setGamemode(0);
-
-        // TODO Disable flight
-
-        $player1->setImmobile(true);
-        $player2->setImmobile(true);
-
-        $player1->clearInventory();
-        $player2->clearInventory();
 
         $p1Pos = $this->arena->getP1StartPosition();
         $position = new Position($p1Pos->x, $p1Pos->y, $p1Pos->z, $this->getLevel());
@@ -81,9 +103,6 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
         $p2Pos = $this->arena->getP2StartPosition();
         $position = new Position($p2Pos->x, $p2Pos->y, $p2Pos->z, $this->getLevel());
         $player2->teleportOnChunkGenerated($position);
-
-        $this->kit->sendTo($player1, false);
-        $this->kit->sendTo($player2, false);
     }
 
     /**
@@ -215,7 +234,16 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
         // TODO: Set the player as spectating.
         $player->teleport($this->getCenterPosition());
 
+        // Sets the spectator's scoreboard.
         $scoreboardData = $player->getScoreboardData();
+        if(
+            $scoreboardData !== null
+            && $scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_NONE
+        )
+        {
+            $scoreboardData->setScoreboard(BasicDuelsScoreboardManager::TYPE_SCOREBOARD_DUEL_SPECTATOR);
+        }
+
         /* if($scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_DUEL_SPECTATOR)
         {
             $scoreboardData->setScoreboard(ScoreboardData::SCOREBOARD_DUEL_SPECTATOR);
@@ -348,5 +376,15 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
     protected function getLevel(): Level
     {
         return $this->arena->getLevel();
+    }
+
+    /**
+     * @return BasicDuelGameType
+     *
+     * Gets the game type of the duel.
+     */
+    public function getGameType(): BasicDuelGameType
+    {
+        return $this->gameType;
     }
 }
