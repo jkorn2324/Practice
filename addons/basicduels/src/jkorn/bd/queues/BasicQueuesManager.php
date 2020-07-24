@@ -137,8 +137,7 @@ class BasicQueuesManager implements IAwaitingManager
 
         foreach ($this->queues as $serverID => $queue) {
             if ($queue->isMatching($input)) {
-                $matches[$serverID] = $input;
-
+                $matches[] = $queue;
                 if (count($matches) === $numMatches) {
                     return $matches;
                 }
@@ -158,11 +157,14 @@ class BasicQueuesManager implements IAwaitingManager
     {
         $matchedPlayers = [];
 
-        foreach ($players as $serverID => $player) {
-            if (isset($this->queues[$serverID])) {
+        foreach($players as $player) {
+
+            $thePlayer = $player->getPlayer();
+            $matchedPlayers[] = $thePlayer;
+
+            if (isset($this->queues[$serverID = $thePlayer->getServerID()->toString()])) {
                 unset($this->queues[$serverID]);
             }
-            $matchedPlayers[] = $player->getPlayer();
         }
 
         $matchedPlayers[] = $input->getPlayer();

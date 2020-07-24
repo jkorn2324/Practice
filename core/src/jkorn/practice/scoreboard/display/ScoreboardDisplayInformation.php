@@ -16,6 +16,9 @@ class ScoreboardDisplayInformation
     /** @var int[] */
     private $updatedLines;
 
+    /** @var ScoreboardDisplayLine */
+    private $title;
+
     public function __construct(string $localized, array &$data)
     {
         $this->localizedName = $localized;

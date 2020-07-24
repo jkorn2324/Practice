@@ -56,7 +56,7 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
         $this->id = $id;
         $this->gameType = $gameType;
         $this->arena = $arena;
-        $this->generateTeams($players);
+        $this->generateTeams(...$players);
     }
 
     /**
@@ -76,11 +76,11 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
     }
 
     /**
-     * @param Player...$players - Address to the original players.
+     * @param array $players - Address to the original players.
      *
      * Generates a random team for the players.
      */
-    protected function randomTeam(Player& ...$players): void
+    protected function randomTeam(array &$players): void
     {
         if(count($players) <= 0)
         {
@@ -92,16 +92,16 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
         $randomTeam = mt_rand() % 2;
         if($this->team1->isFull())
         {
-            $randomTeam = 1;
+            $randomTeam = BasicDuelTeam::TEAM_2;
         }
         elseif ($this->team2->isFull())
         {
-            $randomTeam = 0;
+            $randomTeam = BasicDuelTeam::TEAM_1;
         }
         /** @var Player $player */
         $player = $players[$randomKey];
 
-        if($randomTeam)
+        if($randomTeam === BasicDuelTeam::TEAM_2)
         {
             $this->team2->addPlayer($player);
         }
@@ -109,6 +109,7 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
         {
             $this->team1->addPlayer($player);
         }
+
         unset($players[$randomKey]);
         $this->randomTeam($players);
     }

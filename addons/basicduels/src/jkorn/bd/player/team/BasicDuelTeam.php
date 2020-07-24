@@ -6,8 +6,12 @@ namespace jkorn\bd\player\team;
 
 
 use jkorn\bd\arenas\IDuelArena;
+use jkorn\bd\scoreboards\BasicDuelsScoreboardManager;
 use jkorn\practice\games\duels\teams\DuelTeam;
+use jkorn\practice\games\misc\TeamColor;
 use jkorn\practice\kits\IKit;
+use jkorn\practice\player\PracticePlayer;
+use jkorn\practice\scoreboard\ScoreboardData;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Player;
@@ -45,8 +49,13 @@ class BasicDuelTeam extends DuelTeam
         $xAxis = $this->placeTeamsOnXAxis($arena, $teamNumber);
 
         // Gets the start position of the players.
-        $position = $teamNumber === self::TEAM_1 ? $arena->getP1StartPosition() : $arena->getP1StartPosition();
-        $position = new Position($position->x, $position->y, $position->z, $level);
+        $position = $teamNumber === self::TEAM_1 ? $arena->getP1StartPosition() : $arena->getP2StartPosition();
+
+        $startSubtracted = count($this->players) - 1; $difference = 2;
+
+        $startPositionX = $xAxis ? $position->x - $startSubtracted : $position->x;
+        $startPositionZ = !$xAxis ? $position->z - $startSubtracted : $position->z;
+        $position = new Position($startPositionX, $position->y, $startPositionZ, $level);
 
         foreach($this->players as $player)
         {
@@ -55,8 +64,30 @@ class BasicDuelTeam extends DuelTeam
                 $rawPlayer = $player->getPlayer();
 
                 $rawPlayer->setGamemode(0);
+
+                // TODO: DISABLE FLYING.
+
                 $rawPlayer->setImmobile(true);
                 $rawPlayer->clearInventory();
+
+                $rawPlayer->teleportOnChunkGenerated($position);
+
+                if($xAxis) {
+                    $position->x += $difference;
+                } else {
+                    $position->z += $difference;
+                }
+
+                $kit->sendTo($rawPlayer, false);
+
+                $scoreboardData = $rawPlayer->getScoreboardData();
+                if(
+                    $scoreboardData !== null
+                    && $scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_NONE
+                )
+                {
+                    $scoreboardData->setScoreboard(BasicDuelsScoreboardManager::TYPE_SCOREBOARD_DUEL_TEAM_PLAYER);
+                }
             }
         }
     }
@@ -86,27 +117,6 @@ class BasicDuelTeam extends DuelTeam
     }
 
     /**
-     * @param Position $position - The start position of the player.
-     * @param int $index - The index of the player.
-     * @param bool $xAxis - Determines which axis we are determining the position of.
-     * @return Position
-     *
-     * Determines the position based on the player's index.
-     */
-    protected function determinePosition(Position &$position, int $index, bool $xAxis): Position
-    {
-        $teamSize = $this->getTeamSize();
-        if($teamSize % 2 == 0)
-        {
-            $half = $teamSize / 2;
-            if($index < $half)
-            {
-                // TODO
-            }
-        }
-    }
-
-    /**
      * @param Player $player
      * @param mixed ...$extraData - The extraData containing the reason why the player was eliminated.
      * @return bool - Returns true if all members are eliminated.
@@ -115,8 +125,19 @@ class BasicDuelTeam extends DuelTeam
      */
     public function eliminate(Player $player, ...$extraData): bool
     {
-        // TODO: Implement eliminate() method.
-        return false;
+        if(
+            !$player instanceof PracticePlayer
+            || !$this->isInTeam($player)
+        )
+        {
+            return false;
+        }
+
+        $teamPlayer = $this->players[$player->getServerID()->toString()];
+
+        // TODO:
+
+        return $this->getPlayersLeft() === 0;
     }
 
     /**
@@ -127,7 +148,11 @@ class BasicDuelTeam extends DuelTeam
      */
     public function equals($object): bool
     {
-        // TODO: Implement equals() method.
+        if($object instanceof BasicDuelTeam)
+        {
+            return $object->getLocalizedName() === $this->getLocalizedName();
+        }
+
         return false;
     }
 }

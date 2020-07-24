@@ -89,4 +89,11 @@ interface ITeam
      * Determines if the team is full.
      */
     public function isFull(): bool;
+
+    /**
+     * @return TeamColor
+     *
+     * Gets the team's color.
+     */
+    public function getColor(): TeamColor;
 }

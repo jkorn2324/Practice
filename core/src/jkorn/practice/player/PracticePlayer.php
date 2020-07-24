@@ -451,7 +451,7 @@ class PracticePlayer extends Player
      *
      * Called when the player clicks.
      */
-    protected function onClick(bool $clickedBlock): void
+    public function onClick(bool $clickedBlock): void
     {
         $this->clicksInfo->addClick($clickedBlock);
     }
@@ -866,4 +866,15 @@ class PracticePlayer extends Player
             $this->teleport($position);
         }
     }
+
+    /**
+     * Called when the player respawns.
+     */
+    public function respawn(): void
+    {
+        parent::respawn();
+
+        $this->putInLobby(false);
+    }
+
 }

@@ -289,7 +289,7 @@ class BasicDuelsUtils
                     if
                     (
                         $awaiting !== null
-                        && $awaiting instanceof BasicQueuesManager
+                        && $awaiting instanceof BasicDuelsManager
                         && ($queuesManager = $awaiting->getAwaitingManager()) !== null
                         && $queuesManager instanceof BasicQueuesManager
                     )

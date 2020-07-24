@@ -7,17 +7,21 @@
 
 # The spawn scoreboard if player isn't in a queue.
 scoreboard.spawn.default:
-  line-1: " Online: {stat.online} "
-  line-2: ""
-  line-3: " Ping: {stat.ping} "
-  line-4: ""
-  line-5: " Github @jkorn2324 "
+  title: "Practice"
+  lines:
+    line-1: " Online: {stat.online} "
+    line-2: ""
+    line-3: " Ping: {stat.ping} "
+    line-4: ""
+    line-5: " Github @jkorn2324 "
 
 # The ffa scoreboard.
 scoreboard.ffa:
-  line-1: " Arena: {ffa.stat.arena} "
-  line-2: ""
-  line-3: " Ping: {stat.ping} "
-  line-4: " CPS: {stat.cps} "
-  line-5: ""
-  line-6: " Github @jkorn2324 "
+  title: "Practice"
+  lines:
+    line-1: " Arena: {ffa.stat.arena} "
+    line-2: ""
+    line-3: " Ping: {stat.ping} "
+    line-4: " CPS: {stat.cps} "
+    line-5: ""
+    line-6: " Github @jkorn2324 "

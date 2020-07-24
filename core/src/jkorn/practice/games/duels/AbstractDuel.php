@@ -220,20 +220,20 @@ abstract class AbstractDuel implements IGame
      */
     public function getDuration(): string
     {
-        $seconds = $this->durationSeconds % 60;
-        $minutes = $this->durationSeconds / 60;
+        $seconds = intval($this->durationSeconds % 60);
+        $minutes = intval($this->durationSeconds / 60);
 
-        $minutesSection = "{$seconds}";
-        $secondsSection = "{$minutes}";
+        $minutesSection = strval($minutes);
+        $secondsSection = strval($seconds);
 
         if($seconds < 10)
         {
-            $secondsSection = "0{$seconds}";
+            $secondsSection = "0" . strval($seconds);
         }
 
         if($minutes < 10)
         {
-            $minutesSection = "0{$minutes}";
+            $minutesSection = "0" . strval($minutes);
         }
 
         return "{$minutesSection}:{$secondsSection}";

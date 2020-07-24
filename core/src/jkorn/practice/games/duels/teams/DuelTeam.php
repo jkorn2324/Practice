@@ -6,6 +6,7 @@ namespace jkorn\practice\games\duels\teams;
 
 
 use jkorn\practice\games\misc\ITeam;
+use jkorn\practice\games\misc\TeamColor;
 use jkorn\practice\player\PracticePlayer;
 use pocketmine\Player;
 
@@ -24,10 +25,15 @@ abstract class DuelTeam implements ITeam
     /** @var string */
     private $localizedName = "";
 
-    public function __construct(int $teamSize, $playerClass)
+    /** @var TeamColor */
+    private $color;
+
+    public function __construct(int $teamSize, TeamColor $color, $playerClass)
     {
         $this->teamSize = $teamSize;
         $this->playerClass = $playerClass;
+
+        $this->color = $color;
 
         $this->players = [];
         $this->eliminated = [];
@@ -56,6 +62,10 @@ abstract class DuelTeam implements ITeam
         $inputPlayer = new $class($player);
         $this->players[$inputPlayer->getServerID()->toString()] = $inputPlayer;
         $this->localizedName .= $player->getDisplayName();
+
+        // TODO: Remove this so we can do this properly, but for now it stays.
+        $player->setNameTag($this->color->getTextColor() . $player->getDisplayName());
+
         return true;
     }
 
@@ -175,5 +185,15 @@ abstract class DuelTeam implements ITeam
     public function getTeamSize(): int
     {
         return $this->teamSize;
+    }
+
+    /**
+     * @return TeamColor
+     *
+     * Gets the duel team color.
+     */
+    public function getColor(): TeamColor
+    {
+        return $this->color;
     }
 }

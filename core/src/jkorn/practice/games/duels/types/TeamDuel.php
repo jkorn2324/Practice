@@ -8,6 +8,7 @@ namespace jkorn\practice\games\duels\types;
 use jkorn\practice\games\duels\AbstractDuel;
 use jkorn\practice\games\duels\teams\DuelTeam;
 use jkorn\practice\games\misc\ITeamGame;
+use jkorn\practice\games\misc\TeamColor;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\player\PracticePlayer;
 use pocketmine\Player;
@@ -30,10 +31,17 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
 
         $this->teamSize = $teamSize;
 
+        // Generates the team colors.
+        $teamColor1 = TeamColor::random();
+        do
+        {
+            $teamColor2 = TeamColor::random();
+        } while($teamColor1->equals($teamColor2));
+
         /** @var DuelTeam team1 */
-        $this->team1 = new $teamClass($teamSize, $playerClass);
+        $this->team1 = new $teamClass($teamSize, $teamColor1, $playerClass);
         /** @var DuelTeam team2 */
-        $this->team2 = new $teamClass($teamSize, $playerClass);
+        $this->team2 = new $teamClass($teamSize, $teamColor2, $playerClass);
     }
 
     /**
