@@ -83,7 +83,8 @@ class PracticeListener implements Listener
             $clientInfo = $player->getClientInfo();
             $item = $event->getItem();
 
-            if (($action = $event->getAction()) === PlayerInteractEvent::RIGHT_CLICK_BLOCK && $clientInfo instanceof ClientInfo && $clientInfo->isPE()) {
+            $action = $event->getAction();
+            if ($action === PlayerInteractEvent::RIGHT_CLICK_BLOCK && $clientInfo instanceof ClientInfo && $clientInfo->isPE()) {
                 $player->getClicksInfo()->addClick(true);
             }
 

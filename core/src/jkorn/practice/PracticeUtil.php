@@ -16,6 +16,7 @@ use pocketmine\level\Level;
 use pocketmine\level\Location;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
@@ -45,6 +46,12 @@ class PracticeUtil
         "{WHITE}" => TextFormat::WHITE,
         "{ITALIC}" => TextFormat::ITALIC,
         "{UNDERLINE}" => TextFormat::UNDERLINE
+    ];
+
+    const SWISH_SOUNDS = [
+        LevelSoundEventPacket::SOUND_ATTACK => true,
+        LevelSoundEventPacket::SOUND_ATTACK_NODAMAGE => true,
+        LevelSoundEventPacket::SOUND_ATTACK_STRONG => true
     ];
 
     /**

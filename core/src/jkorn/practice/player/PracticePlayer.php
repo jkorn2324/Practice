@@ -16,8 +16,7 @@ use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\form\Form;
 use pocketmine\level\Position;
-use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
+use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\SourceInterface;
@@ -158,28 +157,19 @@ class PracticePlayer extends Player
     }
 
     /**
-     * @param InventoryTransactionPacket $packet
+     * @param LevelSoundEventPacket $packet
      * @return bool
      *
-     * Called when the player handles an inventory transaction.
+     * Handles when player receives a sound.
      */
-    public function handleInventoryTransaction(InventoryTransactionPacket $packet): bool
+    public function handleLevelSoundEvent(LevelSoundEventPacket $packet): bool
     {
-        if(parent::handleInventoryTransaction($packet))
-        {
-            if(!$this->isOnline())
-            {
-                return true;
-            }
+        if(isset(PracticeUtil::SWISH_SOUNDS[$packet->sound])) {
 
-            if($packet->transactionType === InventoryTransactionPacket::TYPE_USE_ITEM || $packet->transactionType === InventoryTransactionPacket::TYPE_USE_ITEM_ON_ENTITY)
-            {
-                $this->onClick(false);
-            }
-
-            return true;
+            $this->onClick(false);
         }
-        return false;
+
+        return parent::handleLevelSoundEvent($packet);
     }
 
     /**
