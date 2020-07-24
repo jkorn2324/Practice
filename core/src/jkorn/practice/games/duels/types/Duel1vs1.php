@@ -21,57 +21,18 @@ abstract class Duel1vs1 extends AbstractDuel
     /**
      * Duel1vs1 constructor.
      * @param IKit $kit
-     * @param $arena - The input arena.
      * @param Player $player1 - The first player.
      * @param Player $player2 - The second player.
      * @param $playerTypeClass - The duel player type class.
      */
-    public function __construct(IKit $kit, $arena, Player $player1, Player $player2, $playerTypeClass)
+    public function __construct(IKit $kit, Player $player1, Player $player2, $playerTypeClass)
     {
-        parent::__construct($kit, $arena);
+        parent::__construct($kit);
 
         /** @var DuelPlayer player1 */
         $this->player1 = new $playerTypeClass($player1);
         /** @var DuelPlayer player2 */
         $this->player2 = new $playerTypeClass($player2);
-    }
-
-    /**
-     * Puts the players in the duel.
-     */
-    protected function putPlayersInDuel(): void
-    {
-        try
-        {
-            $player1 = $this->player1->getPlayer();
-            $player2 = $this->player2->getPlayer();
-
-            $player1->setGamemode(0);
-            $player2->setGamemode(0);
-
-            // TODO Disable flight
-
-            $player1->setImmobile(true);
-            $player2->setImmobile(true);
-
-            $player1->clearInventory();
-            $player2->clearInventory();
-
-            $p1Pos = $this->arena->getP1StartPosition();
-            $position = new Position($p1Pos->x, $p1Pos->y, $p1Pos->z, $this->level);
-            $player1->teleport($position);
-
-            $p2Pos = $this->arena->getP2StartPosition();
-            $position = new Position($p2Pos->x, $p2Pos->y, $p2Pos->z, $this->level);
-            $player2->teleport($position);
-
-            $this->kit->sendTo($player1, false);
-            $this->kit->sendTo($player2, false);
-
-        } catch (\Exception $e)
-        {
-            var_dump($e->getTraceAsString());
-        }
     }
 
     /**
@@ -102,23 +63,6 @@ abstract class Duel1vs1 extends AbstractDuel
         }
 
         return true;
-    }
-
-    /**
-     * @return Position
-     *
-     * Gets the center position of the duel.
-     */
-    protected function getCenterPosition(): Position
-    {
-        $pos1 = $this->arena->getP1StartPosition();
-        $pos2 = $this->arena->getP2StartPosition();
-
-        $averageX = ($pos1->x + $pos2->x) / 2;
-        $averageY = ($pos1->y + $pos2->y) / 2;
-        $averageZ = ($pos1->z + $pos2->z) / 2;
-
-        return new Position($averageX, $averageY, $averageZ, $this->level);
     }
 
     /**

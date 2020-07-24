@@ -6,13 +6,17 @@ namespace jkorn\bd\duels;
 
 
 use jkorn\bd\arenas\ArenaManager;
+use jkorn\bd\arenas\IDuelArena;
 use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\arenas\PreGeneratedDuelArena;
 use jkorn\bd\BasicDuelsManager;
 use jkorn\bd\player\BasicDuelPlayer;
+use jkorn\practice\arenas\PracticeArena;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\PracticeUtil;
+use pocketmine\level\Level;
+use pocketmine\level\Position;
 use pocketmine\Player;
 use jkorn\practice\games\duels\types\Duel1vs1;
 use jkorn\practice\player\PracticePlayer;
@@ -29,11 +33,14 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
     /** @var int */
     private $id;
 
+    /** @var IDuelArena|PracticeArena */
+    private $arena;
+
     /**
      * Basic1Vs1 constructor.
      * @param int $id - The id of the duel.
      * @param IKit $kit - The kit of the 1vs1.
-     * @param $arena - The arena of the 1vs1.
+     * @param IDuelArena|PracticeArena $arena - The arena of the 1vs1.
      * @param Player $player1 - The first player of the 1vs1.
      * @param Player $player2 - The second player of the 1vs1.
      *
@@ -41,10 +48,42 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
      */
     public function __construct(int $id, IKit $kit, $arena, Player $player1, Player $player2)
     {
-        parent::__construct($kit, $arena, $player1, $player2, BasicDuelPlayer::class);
+        parent::__construct($kit, $player1, $player2, BasicDuelPlayer::class);
 
+        $this->arena = $arena;
         $this->id = $id;
         $this->spectators = [];
+    }
+
+    /**
+     * Puts the players in the duel.
+     */
+    protected function putPlayersInDuel(): void
+    {
+        $player1 = $this->player1->getPlayer();
+        $player2 = $this->player2->getPlayer();
+
+        $player1->setGamemode(0);
+        $player2->setGamemode(0);
+
+        // TODO Disable flight
+
+        $player1->setImmobile(true);
+        $player2->setImmobile(true);
+
+        $player1->clearInventory();
+        $player2->clearInventory();
+
+        $p1Pos = $this->arena->getP1StartPosition();
+        $position = new Position($p1Pos->x, $p1Pos->y, $p1Pos->z, $this->getLevel());
+        $player1->teleportOnChunkGenerated($position);
+
+        $p2Pos = $this->arena->getP2StartPosition();
+        $position = new Position($p2Pos->x, $p2Pos->y, $p2Pos->z, $this->getLevel());
+        $player2->teleportOnChunkGenerated($position);
+
+        $this->kit->sendTo($player1, false);
+        $this->kit->sendTo($player2, false);
     }
 
     /**
@@ -281,5 +320,33 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
     public function getNumberOfPlayers(): int
     {
         return 2;
+    }
+
+
+    /**
+     * @return Position
+     *
+     * Gets the center position of the duel.
+     */
+    protected function getCenterPosition(): Position
+    {
+        $pos1 = $this->arena->getP1StartPosition();
+        $pos2 = $this->arena->getP2StartPosition();
+
+        $averageX = ($pos1->x + $pos2->x) / 2;
+        $averageY = ($pos1->y + $pos2->y) / 2;
+        $averageZ = ($pos1->z + $pos2->z) / 2;
+
+        return new Position($averageX, $averageY, $averageZ, $this->getLevel());
+    }
+
+    /**
+     * @return Level
+     *
+     * Gets the level of the duel.
+     */
+    protected function getLevel(): Level
+    {
+        return $this->arena->getLevel();
     }
 }

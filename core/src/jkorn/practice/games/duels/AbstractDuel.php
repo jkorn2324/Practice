@@ -9,8 +9,6 @@ use jkorn\practice\kits\IKit;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Server;
-use jkorn\practice\arenas\PracticeArena;
-use jkorn\practice\arenas\types\duels\IDuelArena;
 use jkorn\practice\games\IGame;
 
 abstract class AbstractDuel implements IGame
@@ -28,9 +26,6 @@ abstract class AbstractDuel implements IGame
     /** @var int - The current status of the duel. */
     protected $status = self::STATUS_STARTING;
 
-    /** @var IDuelArena|PracticeArena */
-    protected $arena;
-
     /** @var int */
     protected $countdownSeconds = 5, $endingSeconds = 2;
     /** @var int */
@@ -43,8 +38,6 @@ abstract class AbstractDuel implements IGame
 
     /** @var IKit */
     protected $kit;
-    /** @var Level */
-    protected $level;
 
     /** @var array */
     protected $results = [];
@@ -52,14 +45,11 @@ abstract class AbstractDuel implements IGame
     /**
      * AbstractDuel constructor.
      * @param IKit $kit
-     * @param IDuelArena|PracticeArena $arena
      */
-    public function __construct(IKit $kit, $arena)
+    public function __construct(IKit $kit)
     {
-        $this->arena = $arena;
         $this->server = Server::getInstance();
         $this->kit = $kit;
-        $this->level = $arena->getLevel();
         $this->results = [
             "winner" => null,
             "loser" => null
@@ -168,4 +158,11 @@ abstract class AbstractDuel implements IGame
         // TODO
         return "";
     }
+
+    /**
+     * @return Level
+     *
+     * Gets the level of the duel.
+     */
+    abstract protected function getLevel(): Level;
 }

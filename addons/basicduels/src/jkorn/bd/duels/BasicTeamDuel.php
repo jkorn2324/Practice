@@ -6,12 +6,14 @@ namespace jkorn\bd\duels;
 
 
 use jkorn\bd\arenas\ArenaManager;
+use jkorn\bd\arenas\IDuelArena;
 use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\arenas\PreGeneratedDuelArena;
 use jkorn\bd\BasicDuelsManager;
 use jkorn\bd\duels\types\BasicDuelGameType;
 use jkorn\bd\player\team\BasicDuelTeam;
 use jkorn\bd\player\team\BasicDuelTeamPlayer;
+use jkorn\practice\arenas\PracticeArena;
 use jkorn\practice\games\duels\types\TeamDuel;
 use jkorn\practice\games\IGameManager;
 use jkorn\practice\kits\IKit;
@@ -19,6 +21,8 @@ use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\PracticeUtil;
 use jkorn\practice\scoreboard\ScoreboardData;
+use pocketmine\level\Level;
+use pocketmine\level\Position;
 use pocketmine\Player;
 
 class BasicTeamDuel extends TeamDuel implements IBasicDuel
@@ -35,19 +39,23 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
     /** @var BasicDuelGameType */
     private $gameType;
 
+    /** @var IDuelArena|PracticeArena */
+    private $arena;
+
     /**
      * BasicTeamDuel constructor.
      * @param int $id
      * @param IKit $kit
-     * @param $arena
+     * @param IDuelArena|PracticeArena $arena
      * @param BasicDuelGameType $gameType
      * @param PracticePlayer...$players
      */
     public function __construct(int $id, IKit $kit, $arena, BasicDuelGameType $gameType, ...$players)
     {
-        parent::__construct(count($players), $kit, $arena, BasicDuelTeam::class, BasicDuelTeamPlayer::class);
+        parent::__construct(count($players), $kit, BasicDuelTeam::class, BasicDuelTeamPlayer::class);
         $this->id = $id;
         $this->gameType = $gameType;
+        $this->arena = $arena;
         $this->generateTeams($players);
     }
 
@@ -110,8 +118,8 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
      */
     protected function putPlayersInDuel(): void
     {
-        $this->team1->putPlayersInGame(BasicDuelTeam::TEAM_1, $this->arena, $this->kit, $this->level);
-        $this->team2->putPlayersInGame(BasicDuelTeam::TEAM_2, $this->arena, $this->kit, $this->level);
+        $this->team1->putPlayersInGame(BasicDuelTeam::TEAM_1, $this->arena, $this->kit, $this->getLevel());
+        $this->team2->putPlayersInGame(BasicDuelTeam::TEAM_2, $this->arena, $this->kit, $this->getLevel());
     }
 
     /**
@@ -295,5 +303,32 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
     public function getNumberOfPlayers(): int
     {
         return $this->getTeamSize() * 2;
+    }
+
+    /**
+     * @return Position
+     *
+     * Gets the center position of the duel.
+     */
+    protected function getCenterPosition(): Position
+    {
+        $pos1 = $this->arena->getP1StartPosition();
+        $pos2 = $this->arena->getP2StartPosition();
+
+        $averageX = ($pos1->x + $pos2->x) / 2;
+        $averageY = ($pos1->y + $pos2->y) / 2;
+        $averageZ = ($pos1->z + $pos2->z) / 2;
+
+        return new Position($averageX, $averageY, $averageZ, $this->getLevel());
+    }
+
+    /**
+     * @return Level
+     *
+     * Gets the level of the duel.
+     */
+    protected function getLevel(): Level
+    {
+        return $this->arena->getLevel();
     }
 }

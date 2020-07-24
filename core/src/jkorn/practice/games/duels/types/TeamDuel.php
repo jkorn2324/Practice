@@ -10,7 +10,6 @@ use jkorn\practice\games\duels\teams\DuelTeam;
 use jkorn\practice\games\misc\ITeamGame;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\player\PracticePlayer;
-use pocketmine\level\Position;
 use pocketmine\Player;
 
 abstract class TeamDuel extends AbstractDuel implements ITeamGame
@@ -25,9 +24,9 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
     /** @var DuelTeam */
     protected $team1, $team2;
 
-    public function __construct(int $teamSize, IKit $kit, $arena, $teamClass, $playerClass)
+    public function __construct(int $teamSize, IKit $kit, $teamClass, $playerClass)
     {
-        parent::__construct($kit, $arena);
+        parent::__construct($kit);
 
         $this->teamSize = $teamSize;
 
@@ -65,23 +64,6 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
             }
         }
         return true;
-    }
-
-    /**
-     * @return Position
-     *
-     * Gets the center position of the duel.
-     */
-    protected function getCenterPosition(): Position
-    {
-        $pos1 = $this->arena->getP1StartPosition();
-        $pos2 = $this->arena->getP2StartPosition();
-
-        $averageX = ($pos1->x + $pos2->x) / 2;
-        $averageY = ($pos1->y + $pos2->y) / 2;
-        $averageZ = ($pos1->z + $pos2->z) / 2;
-
-        return new Position($averageX, $averageY, $averageZ, $this->level);
     }
 
     /**

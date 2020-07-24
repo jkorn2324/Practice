@@ -16,6 +16,7 @@ use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\form\Form;
 use pocketmine\level\Position;
+use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
@@ -274,7 +275,7 @@ class PracticePlayer extends Player
         $dataProvider->loadPlayer($this);
 
         // Sends the given items to the player.
-        $this->putInLobby(false);
+        $this->putInLobby(true);
     }
 
     /**
@@ -843,5 +844,26 @@ class PracticePlayer extends Player
     {
         $this->lookingAtForm = false;
         return parent::onFormSubmit($formId, $responseData);
+    }
+
+
+    /**
+     * @param Position $position
+     *
+     * Teleports the player on chunk generated, usually called when a player
+     * first is teleported to a newly generated level.
+     */
+    public function teleportOnChunkGenerated(Position $position): void
+    {
+        $player = $this->getPlayer();
+        PracticeUtil::onChunkGenerated($position->getLevelNonNull(), $position->x >> 4, $position->z >> 4, function() use($player, $position)
+        {
+            $player->teleport($position);
+        });
+
+        if(!PracticeUtil::areLevelsEqual($this->getLevelNonNull(), $position->getLevelNonNull()))
+        {
+            $this->teleport($position);
+        }
     }
 }

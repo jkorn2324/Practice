@@ -6,6 +6,7 @@ namespace jkorn\practice;
 
 
 use jkorn\practice\commands\PracticeCommand;
+use jkorn\practice\level\gen\PracticeChunkLoader;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
 use pocketmine\item\enchantment\Enchantment;
@@ -369,5 +370,25 @@ class PracticeUtil
     {
         $level = Server::getInstance()->getDefaultLevel();
         return $level->getSpawnLocation();
+    }
+
+    /**
+     * @param Level $level - The level.
+     * @param int $x - The x coord.
+     * @param int $z - The y coord.
+     * @param callable $callable - The callback function
+     *
+     * Chunk loader that helps when a player first loads a chunk -> usually used after teleporting to a
+     * newly generated level.
+     */
+    public static function onChunkGenerated(Level $level, int $x, int $z, callable $callable): void
+    {
+        if($level->isChunkPopulated($x, $z))
+        {
+            $callable();
+            return;
+        }
+
+        $level->registerChunkLoader(new PracticeChunkLoader($level, $x, $z, $callable), $x, $z, true);
     }
 }
