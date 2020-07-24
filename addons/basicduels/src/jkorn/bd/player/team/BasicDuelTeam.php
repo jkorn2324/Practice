@@ -50,12 +50,18 @@ class BasicDuelTeam extends DuelTeam
         $xAxis = $this->placeTeamsOnXAxis($arena, $teamNumber);
 
         // Gets the start position of the players.
-        $position = $teamNumber === self::TEAM_1 ? $arena->getP1StartPosition() : $arena->getP2StartPosition();
+        $position = $teamNumber === self::TEAM_1 ? clone $arena->getP1StartPosition() : clone $arena->getP2StartPosition();
 
         $startSubtracted = count($this->players) - 1; $difference = 2;
 
-        $startPositionX = $xAxis ? $position->x - $startSubtracted : $position->x;
-        $startPositionZ = !$xAxis ? $position->z - $startSubtracted : $position->z;
+        $startPositionX = $position->x - $startSubtracted;
+        $startPositionZ = $position->z;
+
+        if(!$xAxis)
+        {
+            $startPositionX = $position->x;
+            $startPositionZ = $position->z - $startSubtracted;
+        }
         $position = new Position($startPositionX, $position->y, $startPositionZ, $level);
 
         foreach($this->players as $player)
@@ -104,17 +110,17 @@ class BasicDuelTeam extends DuelTeam
     {
         if($teamNumber === self::TEAM_1)
         {
-            $position = $arena->getP1StartPosition();
-            $opponentPosition = $arena->getP2StartPosition();
+            $position = clone $arena->getP1StartPosition();
+            $opponentPosition = clone $arena->getP2StartPosition();
         }
         else
         {
-            $position = $arena->getP2StartPosition();
-            $opponentPosition = $arena->getP1StartPosition();
+            $position = clone $arena->getP2StartPosition();
+            $opponentPosition = clone $arena->getP1StartPosition();
         }
         $xDifference = abs($position->x - $opponentPosition->x);
         $zDifference = abs($position->z - $opponentPosition->z);
-        return $xDifference >= $zDifference;
+        return $xDifference < $zDifference;
     }
 
     /**

@@ -64,7 +64,7 @@ class TeamColor
             self::initialize();
         }
 
-        $randomKey = array_keys(self::$teamColors)[mt_rand(0, count(self::$teamColors))];
+        $randomKey = array_keys(self::$teamColors)[mt_rand(0, count(self::$teamColors) - 1)];
         return self::$teamColors[$randomKey];
     }
 

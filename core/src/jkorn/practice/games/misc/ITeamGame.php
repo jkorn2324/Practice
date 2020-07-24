@@ -6,17 +6,18 @@ namespace jkorn\practice\games\misc;
 
 
 use jkorn\practice\games\IGame;
+use jkorn\practice\player\PracticePlayer;
 use pocketmine\Player;
 
 interface ITeamGame extends IGame
 {
 
     /**
-     * @param Player ...$players
+     * @param PracticePlayer[] $players
      *
      * Generates the teams in the game.
      */
-    public function generateTeams(Player...$players): void;
+    public function generateTeams(array &$players): void;
 
     /**
      * @return bool

@@ -51,23 +51,23 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
      * @param IKit $kit
      * @param IDuelArena|PracticeArena $arena
      * @param BasicDuelGameType $gameType
-     * @param PracticePlayer...$players
+     * @param PracticePlayer[] $players
      */
-    public function __construct(int $id, IKit $kit, $arena, BasicDuelGameType $gameType, ...$players)
+    public function __construct(int $id, IKit $kit, $arena, BasicDuelGameType $gameType, $players)
     {
-        parent::__construct(count($players), $kit, BasicDuelTeam::class, BasicDuelTeamPlayer::class);
+        parent::__construct($gameType->getNumberOfPlayers() / 2, $kit, BasicDuelTeam::class, BasicDuelTeamPlayer::class);
         $this->id = $id;
         $this->gameType = $gameType;
         $this->arena = $arena;
-        $this->generateTeams(...$players);
+        $this->generateTeams($players);
     }
 
     /**
-     * @param Player ...$players
+     * @param PracticePlayer[] $players
      *
      * Generates the teams in the game.
      */
-    public function generateTeams(Player ...$players): void
+    public function generateTeams(array &$players): void
     {
         if($this->generated)
         {
@@ -79,7 +79,7 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
     }
 
     /**
-     * @param array $players - Address to the original players.
+     * @param PracticePlayer[] $players - Address to the original players.
      *
      * Generates a random team for the players.
      */

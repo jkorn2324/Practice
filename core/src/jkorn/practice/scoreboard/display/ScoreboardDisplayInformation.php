@@ -35,8 +35,12 @@ class ScoreboardDisplayInformation
      */
     public function initDisplay(array &$data): void
     {
+        $this->title = new ScoreboardDisplayLine($data["title"]);
+
+        $lines = $data["lines"];
         $length = 0;
-        foreach($data as $line => $text)
+
+        foreach($lines as $line => $text)
         {
             // Should start the line at 0.
             $scoreboardLine = intval(str_replace("line-", "", $line));
@@ -98,5 +102,15 @@ class ScoreboardDisplayInformation
         }
 
         return null;
+    }
+
+    /**
+     * @return ScoreboardDisplayLine
+     *
+     * Gets the title of the scoreboard.
+     */
+    public function getTitle()
+    {
+        return $this->title;
     }
 }

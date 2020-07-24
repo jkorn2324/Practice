@@ -151,7 +151,7 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
             return;
         }
 
-        if($reason === self::STATUS_STARTING)
+        if($this->status === self::STATUS_STARTING)
         {
             $this->setEnded(null, self::STATUS_ENDED);
 
@@ -163,6 +163,12 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
                 return;
             }
             $teamPlayer->setEliminated();
+            return;
+        }
+
+        // Checks whether the duel is still in progress.
+        if($this->status !== self::STATUS_IN_PROGRESS)
+        {
             return;
         }
 

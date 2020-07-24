@@ -809,10 +809,11 @@ class PracticePlayer extends Player
 
     /**
      * @param bool $teleport
+     * @param bool $resetScoreboard - Determines whether to reset the scoreboard.
      *
      * Puts the player in the lobby.
      */
-    public function putInLobby(bool $teleport): void
+    public function putInLobby(bool $teleport, bool $resetScoreboard = true): void
     {
         // TODO: Add more things.
         if($teleport)
@@ -823,7 +824,8 @@ class PracticePlayer extends Player
         // Sets the scoreboard.
         $scoreboard = $this->getScoreboardData();
         if(
-            $scoreboard !== null
+            $resetScoreboard
+            && $scoreboard !== null
             && $scoreboard->getScoreboard() !== ScoreboardData::SCOREBOARD_NONE
             && $scoreboard->getScoreboard() !== ScoreboardData::SCOREBOARD_SPAWN_DEFAULT
         )
