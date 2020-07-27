@@ -214,6 +214,12 @@ abstract class AbstractDuel implements IGame
         }
 
         $this->removeFromGame($player, $reason);
+
+        // Sets the death message as none.
+        $event->setDeathMessage("");
+
+        $event->setXpDropAmount(0);
+        $event->setDrops([]);
     }
 
     /**

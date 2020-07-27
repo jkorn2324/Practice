@@ -7,6 +7,7 @@ namespace jkorn\practice\games\duels\types;
 
 use jkorn\practice\games\duels\AbstractDuel;
 use jkorn\practice\games\duels\teams\DuelTeam;
+use jkorn\practice\games\duels\teams\DuelTeamPlayer;
 use jkorn\practice\games\misc\ITeamGame;
 use jkorn\practice\games\misc\TeamColor;
 use jkorn\practice\kits\IKit;
@@ -191,6 +192,7 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
             return;
         }
 
+        $this->broadcastElimination($player, $reason);
         if($team1->eliminate($player, $reason))
         {
             $this->setEnded($team2, self::STATUS_ENDING);
@@ -283,4 +285,12 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
             }
         }
     }
+
+    /**
+     * @param Player $player - The player being eliminated.
+     * @param int $reason - The reason the player is eliminated.
+     *
+     * Broadcasts the elimination to the group of players.
+     */
+    abstract protected function broadcastElimination(Player $player, int $reason): void;
 }

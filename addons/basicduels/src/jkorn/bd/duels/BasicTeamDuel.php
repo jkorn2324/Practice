@@ -496,4 +496,39 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
 
         return "Winner: None - Loser: None";
     }
+
+    /**
+     * @param Player $player - The player being eliminated.
+     * @param int $reason - The reason the player is eliminated.
+     *
+     * Broadcasts the elimination to the group of players.
+     */
+    protected function broadcastElimination(Player $player, int $reason): void
+    {
+        $this->broadcastGlobal(function(Player $inputPlayer) use($player, $reason)
+        {
+            if(
+                $inputPlayer instanceof PracticePlayer
+                && $inputPlayer->equalsPlayer($player)
+                && $reason === self::REASON_LEFT_SERVER
+            )
+            {
+                return;
+            }
+
+            // TODO: Prefix.
+            $message = $player->getDisplayName() . " has been eliminated.";
+            $manager = PracticeCore::getBaseMessageManager()->getMessageManager(BasicDuelsMessageManager::NAME);
+            if($manager !== null)
+            {
+                $messageObject = $manager->getMessage(BasicDuelsMessages::DUELS_TEAMS_MESSAGE_PLAYER_ELIMINATED);
+                if($messageObject !== null)
+                {
+                    $message = $messageObject->getText($inputPlayer, $player);
+                }
+            }
+
+            $player->sendMessage($message);
+        });
+    }
 }

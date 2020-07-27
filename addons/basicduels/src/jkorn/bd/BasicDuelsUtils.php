@@ -16,6 +16,7 @@ use jkorn\practice\display\DisplayStatistic;
 use jkorn\practice\games\duels\AbstractDuel;
 use jkorn\practice\games\duels\DuelPlayer;
 use jkorn\practice\games\duels\teams\DuelTeam;
+use jkorn\practice\games\duels\teams\DuelTeamPlayer;
 use jkorn\practice\games\duels\types\Duel1vs1;
 use jkorn\practice\games\duels\types\TeamDuel;
 use jkorn\practice\kits\IKit;
@@ -707,6 +708,28 @@ class BasicDuelsUtils implements BasicDuelsStatistics
                     }
                 }
                 return 0;
+            }
+        ));
+
+        // Registers the player that was eliminated, data consists of the player object.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_DUELS_TEAM_PLAYER_ELIMINATED,
+            function(Player $player, Server $server, $data)
+            {
+                if(is_string($data))
+                {
+                    return $data;
+                }
+                elseif($data instanceof PracticePlayer)
+                {
+                    return $data->getDisplayName();
+                }
+                elseif ($data instanceof DuelTeamPlayer)
+                {
+                    return $data->getDisplayName();
+                }
+
+                return "None";
             }
         ));
     }

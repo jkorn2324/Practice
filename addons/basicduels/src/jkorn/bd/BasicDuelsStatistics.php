@@ -40,6 +40,8 @@ interface BasicDuelsStatistics
     const STATISTIC_DUELS_PLAYER_TEAM_PLAYERS_LEFT = "duels.basic.stat.player.team.players.left";
     const STATISTIC_DUELS_PLAYER_TEAM_SIZE = "duels.basic.stat.player.team.size";
 
+    const STATISTIC_DUELS_TEAM_PLAYER_ELIMINATED = "duels.basic.team.stat.eliminated.player.name";
+
     const STATISTIC_DUELS_PLAYER_OPPOSITE_TEAM_COLOR = "duels.basic.stat.player.opposite.team.color";
     const STATISTIC_DUELS_PLAYER_OPPOSITE_TEAM_ELIMINATED = "duels.basic.stat.player.opposite.team.eliminated";
     const STATISTIC_DUELS_PLAYER_OPPOSITE_TEAM_PLAYERS_LEFT = "duels.basic.stat.player.opposite.team.players.left";

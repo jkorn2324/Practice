@@ -24,9 +24,11 @@ interface BasicDuelsMessages
     const DUELS_1VS1_RESULT_MESSAGE_SPECTATORS = "duels.basic.1vs1.result.message.spectator";
     const DUELS_1VS1_RESULT_MESSAGE_DRAW = "duels.basic.1vs1.result.message.draw";
 
-    // TODO: Statistics for these messages.
     const DUELS_TEAMS_RESULT_MESSAGE_WINNING_TEAM = "duels.basic.team.result.message.winning";
     const DUELS_TEAMS_RESULT_MESSAGE_LOSING_TEAM = "duels.basic.team.result.message.losing";
     const DUELS_TEAMS_RESULT_MESSAGE_SPECTATORS = "duels.basic.team.result.message.spectator";
     const DUELS_TEAMS_RESULT_MESSAGE_FAILED = "duels.basic.team.result.message.failed";
+
+    // TODO: Add statistics.
+    const DUELS_TEAMS_MESSAGE_PLAYER_ELIMINATED = "duels.basic.team.result.message.eliminated";
 }

@@ -28,3 +28,6 @@ duels.basic.team.result.message.spectator: "W: {duels.basic.team.stat.winner.col
 # The message that all players (including spectators) receive if the game failed to start.
 # Occurs when a player from either team leaves the game before starting.
 duels.basic.team.result.message.failed: "W: None - L: None"
+
+# The message when the player is eliminated from the duel.
+duels.basic.team.result.message.eliminated: "{duels.basic.team.stat.eliminated.player.name} has been eliminated."
