@@ -255,7 +255,7 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
             {
                 if($teamPlayer->isSpectator())
                {
-                   // TODO: Set the player as a fake spectator, setting the respawn position as the center position of the duel.
+                   // TODO: Set the player as a fake spectator
                    $event->setRespawnPosition($this->getCenterPosition());
                    return;
                }

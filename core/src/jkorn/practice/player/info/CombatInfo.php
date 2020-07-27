@@ -60,7 +60,7 @@ class CombatInfo
         }
 
         if ($currentCombat !== $combat && $sendMessage) {
-            // TODO: Send combat message.
+            $this->sendCombatMessage($combat);
         }
     }
 
@@ -73,10 +73,27 @@ class CombatInfo
             $this->combatSeconds--;
             if ($this->combatSeconds <= 0) {
                 $this->combatSeconds = 0;
-                // TODO: Send combat message.
+                $this->sendCombatMessage(false);
             }
         }
     }
 
+
+    /**
+     * @param bool $combat
+     *
+     * Sends the combat message to the player based on input.
+     */
+    private function sendCombatMessage(bool $combat): void
+    {
+        if($combat)
+        {
+            // TODO: Send player in combat message.
+        }
+        else
+        {
+            // TODO: Send player out of combat message.
+        }
+    }
 
 }

@@ -15,6 +15,7 @@ use jkorn\bd\duels\types\BasicDuelGameType;
 use jkorn\bd\forms\BasicDuelsFormManager;
 use jkorn\bd\gen\BasicDuelsGeneratorInfo;
 use jkorn\bd\duels\IBasicDuel;
+use jkorn\bd\messages\BasicDuelsMessageManager;
 use jkorn\bd\queues\BasicQueuesManager;
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\games\IGame;
@@ -212,8 +213,13 @@ class BasicDuelsManager implements IAwaitingGameManager
     {
         // Registers the arena manager generator.
         PracticeCore::getBaseArenaManager()->registerArenaManager(new ArenaManager(), true);
+        // Registers the form manager.
         PracticeCore::getBaseFormDisplayManager()->registerFormDisplayManager(
             new BasicDuelsFormManager($this->core), true
+        );
+        // Registers the message manager.
+        PracticeCore::getBaseMessageManager()->register(
+            new BasicDuelsMessageManager($this->core), true
         );
 
         // Initializes the generators.

@@ -108,7 +108,6 @@ class BasicSettingsForm extends FormDisplay
      */
     public static function decode(string $localized, array $data)
     {
-        // TODO: Edit so it corresponds with the SettingsInfo class
         $title = TextFormat::BOLD . "Basic Settings";
         $description = "Form to edit your basic settings.";
 

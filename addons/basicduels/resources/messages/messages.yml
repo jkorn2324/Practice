@@ -1,0 +1,11 @@
+# The messages file used for the basic duels addon.
+
+
+# The first countdown seconds title that the player receives.
+duels.basic.countdown.title.seconds.5: "Starting in {duels.basic.countdown.seconds}..."
+# The countdown seconds title that the player receives during
+# the 1st, 2nd, 3rd, and 4th countdown second.
+duels.basic.countdown.title.seconds.4-1: "{duels.basic.countdown.seconds}..."
+# The countdown seconds title that the player receives when
+# the basic duel begins.
+duels.basic.countdown.title.begin: "GO"

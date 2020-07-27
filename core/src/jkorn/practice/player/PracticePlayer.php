@@ -587,13 +587,16 @@ class PracticePlayer extends Player implements IPracticeMessages
      */
     public function setInFFA(FFAArena $arena): void
     {
-        // TODO: Check if player was in a queue and remove them.
-        // TODO: Check if player is in a duel.
-
-        if(!$this->isInLobby())
+        if($this->isInGame())
         {
-            // TODO: Message saying player isn't in the lobby.
             return;
+        }
+
+        // Removes the player from awaiting in a game.
+        $awaiting = $this->getAwaitingGameType();
+        if($awaiting !== null)
+        {
+            $awaiting->getAwaitingManager()->removeAwaiting($this, false);
         }
 
         $this->ffaArena = $arena;
@@ -760,8 +763,6 @@ class PracticePlayer extends Player implements IPracticeMessages
                 $damager->getCombatInfo()->setInCombat(true);
                 $this->getCombatInfo()->setInCombat(true);
             }
-
-            // TODO: Update Duel storage.
         }
     }
 

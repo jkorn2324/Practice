@@ -16,6 +16,11 @@ interface DisplayStatisticNames
     const STATISTIC_ONLINE_PLAYERS = "stat.online.players";
     const STATISTIC_MAX_PLAYERS = "stat.max.players";
 
+    const STATISTIC_SERVER_CURRENT_TPS = "stat.server.current.tps";
+    const STATISTIC_SERVER_AVERAGE_TPS = "stat.server.average.tps";
+    const STATISTIC_SERVER_CURRENT_LOAD = "stat.server.current.load";
+    const STATISTIC_SERVER_AVERAGE_LOAD = "stat.server.average.load";
+
     const STATISTIC_PLAYER_PING = "stat.player.ping";
     const STATISTIC_PLAYER_NAME = "stat.player.name";
     const STATISTIC_PLAYER_OS = "stat.player.os";
@@ -38,11 +43,7 @@ interface DisplayStatisticNames
     const STATISTIC_FFA_ARENA_PLAYERS_PLAYING = "stat.ffa.arena.players.playing";
     const STATISTIC_FFA_ARENA_KIT = "stat.ffa.arena.kit";
 
-    // The kit name statistic.
-    const STATISTIC_KIT_NAME = "stat.kit.name";
-
     // TODO: These statistics.
     const STATISTIC_PLAYER_RANK = "stat.player.rank";
-    const STATISTIC_SERVER_TPS = "stat.server.tps";
 
 }

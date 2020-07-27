@@ -208,7 +208,6 @@ class JSONDataProvider implements IDataProvider
                  */
                 public function onRun()
                 {
-                    // TODO: Implement onRun() method.
                     if(!file_exists($this->jsonFile))
                     {
                         $file = fopen($this->jsonFile, "w");

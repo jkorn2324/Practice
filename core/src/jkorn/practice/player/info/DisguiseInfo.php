@@ -24,10 +24,10 @@ class DisguiseInfo
     /** @var string */
     private $oldName;
 
-    public function __construct(Skin $skin, string $oldName)
+    public function __construct(Skin $skin, string $oldName, ?string $newName = null)
     {
         // TODO: Generate random name.
-        $this->name = "";
+        $this->name = $newName ?? "";
         // TODO: Generate skin data.
         $this->skinData = null;
 

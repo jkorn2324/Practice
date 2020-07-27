@@ -13,6 +13,7 @@ use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
+use pocketmine\Player;
 use pocketmine\Server;
 use jkorn\practice\games\IGame;
 
@@ -154,15 +155,12 @@ abstract class AbstractDuel implements IGame
     abstract protected function getCenterPosition(): Position;
     
     /**
+     * @param Player $player
      * @return string
      *
      * Gets the countdown message of the duel.
      */
-    protected function getCountdownMessage(): string
-    {
-        // TODO
-        return "";
-    }
+    abstract protected function getCountdownMessage(Player $player): string;
 
     /**
      * @return Level
@@ -259,5 +257,15 @@ abstract class AbstractDuel implements IGame
     public function getKit(): IKit
     {
         return $this->kit;
+    }
+
+    /**
+     * @return int
+     *
+     * Gets the countdown seconds of the duel.
+     */
+    public function getCountdownSeconds(): int
+    {
+        return $this->countdownSeconds;
     }
 }

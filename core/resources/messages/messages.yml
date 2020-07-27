@@ -6,4 +6,6 @@ player.join.message: "[+] {stat.player.name}"
 player.leave.message: "[-] {stat.player.name}"
 
 # The kit equipped message.
-player.kit.equip.message: "You have equipped the {stat.player.equipped.kit} kit.";
+player.kit.equip.message: "You have equipped the {stat.player.equipped.kit} kit."
+# The join ffa arena message.
+player.ffa.arena.join.message: "You have joined {stat.ffa.arena.name} ffa arena!"

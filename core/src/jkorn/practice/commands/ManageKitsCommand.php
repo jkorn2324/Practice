@@ -37,7 +37,7 @@ class ManageKitsCommand extends PracticeCommand implements IPracticePermissions
         }
         else
         {
-            // TODO: Send message.
+            // TODO: Send error message.
         }
     }
 

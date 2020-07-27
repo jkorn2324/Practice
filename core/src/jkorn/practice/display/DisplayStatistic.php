@@ -146,6 +146,41 @@ class DisplayStatistic implements DisplayStatisticNames
                 return "Unknown";
             }
         , false));
+
+        // Server's ticks per second.
+        self::register(new DisplayStatistic(
+            self::STATISTIC_SERVER_CURRENT_TPS,
+            function(Player $player, Server $server, $data)
+            {
+                return round($server->getTicksPerSecond(), 2);
+            }
+        ));
+
+        // Server's average ticks per second.
+        self::register(new DisplayStatistic(
+            self::STATISTIC_SERVER_AVERAGE_TPS,
+            function(Player $player, Server $server, $data)
+            {
+                return round($server->getTicksPerSecondAverage(), 2);
+            }
+        ));
+
+        // Server's current load.
+        self::register(new DisplayStatistic(
+            self::STATISTIC_SERVER_CURRENT_LOAD,
+            function(Player $player, Server $server, $data)
+            {
+                return round($server->getTickUsage(), 2);
+            }
+        ));
+
+        self::register(new DisplayStatistic(
+            self::STATISTIC_SERVER_AVERAGE_LOAD,
+            function(Player $player, Server $server, $data)
+            {
+                return round($server->getTickUsageAverage(), 2);
+            }
+        ));
     }
 
     /**

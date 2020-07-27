@@ -11,6 +11,8 @@ use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\arenas\PreGeneratedDuelArena;
 use jkorn\bd\BasicDuelsManager;
 use jkorn\bd\duels\types\BasicDuelGameType;
+use jkorn\bd\messages\BasicDuelsMessageManager;
+use jkorn\bd\messages\BasicDuelsMessages;
 use jkorn\bd\player\team\BasicDuelTeam;
 use jkorn\bd\player\team\BasicDuelTeamPlayer;
 use jkorn\bd\scoreboards\BasicDuelsScoreboardManager;
@@ -386,5 +388,38 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
     public function getGameType(): BasicDuelGameType
     {
         return $this->gameType;
+    }
+
+    /**
+     * @param Player $player
+     * @return string
+     *
+     * Gets the countdown message of the duel.
+     */
+    protected function getCountdownMessage(Player $player): string
+    {
+        $manager = PracticeCore::getBaseMessageManager()->getMessageManager(BasicDuelsMessageManager::NAME);
+
+        if($manager === null)
+        {
+            // TODO: Autogenerate countdown.
+            return "";
+        }
+
+        if($this->countdownSeconds === 5) {
+            $text = $manager->getMessage(BasicDuelsMessages::COUNTDOWN_SECONDS_TITLE_FIVE);
+        } elseif ($this->countdownSeconds === 0) {
+            $text = $manager->getMessage(BasicDuelsMessages::COUNTDOWN_SECONDS_TITLE_BEGIN);
+        } else {
+            $text = $manager->getMessage(BasicDuelsMessages::COUNTDOWN_SECONDS_TITLE_FOUR_THRU_ONE);
+        }
+
+        if($text !== null)
+        {
+            return $text->getText($player, $this);
+        }
+
+        // TODO: Autogenerate countdown.
+        return "";
     }
 }

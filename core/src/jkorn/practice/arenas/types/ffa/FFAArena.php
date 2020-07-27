@@ -6,6 +6,8 @@ namespace jkorn\practice\arenas\types\ffa;
 
 
 use jkorn\practice\kits\IKit;
+use jkorn\practice\messages\IPracticeMessages;
+use jkorn\practice\messages\managers\PracticeMessageManager;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
@@ -124,7 +126,18 @@ class FFAArena extends PracticeArena implements ISaved
 
         if($message)
         {
-            // TODO: Send message.
+            // TODO: Prefix
+            $messageText = "You have joined the " . $this->getName() . " ffa arena!";
+            $displayManager = PracticeCore::getBaseMessageManager()->getMessageManager(PracticeMessageManager::NAME);
+            if($displayManager !== null)
+            {
+                $theMessage = $displayManager->getMessage(IPracticeMessages::PLAYER_FFA_ARENA_JOIN_MESSAGE);
+                if($message !== null)
+                {
+                    $messageText = $theMessage->getText($player, $this);
+                }
+            }
+            $player->sendMessage($messageText);
         }
     }
 

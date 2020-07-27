@@ -125,17 +125,10 @@ class ItemManager extends AbstractManager
             });
         }
 
-        /* if(isset($this->items[self::ITEM_QUEUE_LEAVE])) {
-            $this->items[self::ITEM_QUEUE_LEAVE]->setOnUseCallback(function (Player $player) {
-                // TODO
-                return true;
-            });
-        } */
-
         if(isset($this->items[self::ITEM_PLAY_GAMES]))
         {
             $this->items[self::ITEM_PLAY_GAMES]->setOnUseCallback(function(Player $player) {
-                // TODO
+
                 $theForm = PracticeCore::getBaseFormDisplayManager()->getForm(PracticeFormManager::FORM_PLAY_GAMES);
                 if($theForm !== null)
                 {
