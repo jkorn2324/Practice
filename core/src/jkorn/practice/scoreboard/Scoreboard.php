@@ -183,9 +183,12 @@ class Scoreboard
 
     /**
      * Resends the scoreboard to the player.
+     *
+     * @param string|null $title - The title of the scoreboard.
      */
-    public function resendScoreboard() : void
+    public function resendScoreboard(?string $title = null) : void
     {
+        $this->title = $title ?? $this->title;
         $this->initScoreboard();
     }
 

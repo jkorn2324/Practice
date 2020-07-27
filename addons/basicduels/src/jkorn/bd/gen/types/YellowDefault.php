@@ -17,7 +17,7 @@ class YellowDefault extends ArenaGenerator implements ColorIDs
 {
 
     // Overriden to provide support for team duels.
-    protected static $arenaChunkLength = 4;
+    protected static $arenaChunkLength = 3;
     protected static $arenaChunkWidth = 3;
 
     /**

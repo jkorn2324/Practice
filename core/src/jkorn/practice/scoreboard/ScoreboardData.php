@@ -50,22 +50,29 @@ class ScoreboardData
             return;
         }
 
+
+        // Gets the title based on display information.
+        $title = "Practice";
+        $displayInfo = PracticeCore::getBaseScoreboardDisplayManager()->getDisplayInfo($type);
+        if($displayInfo !== null)
+        {
+            $title = $displayInfo->getTitle()->getText($this->player);
+        }
+
         if($this->scoreboard !== null)
         {
             if($this->scoreboard->isRemoved())
             {
-                $this->scoreboard->resendScoreboard();
+                $this->scoreboard->resendScoreboard($title);
             }
 
             $this->scoreboard->clearScoreboard();
         }
         else
         {
-            // TODO: Get title.
-            $this->scoreboard = new Scoreboard($this->player, "Practice");
+            $this->scoreboard = new Scoreboard($this->player, $title);
         }
 
-        $displayInfo = PracticeCore::getBaseScoreboardDisplayManager()->getDisplayInfo($type);
         if($displayInfo === null)
         {
             $this->removeScoreboard();
@@ -74,6 +81,7 @@ class ScoreboardData
         }
 
         $lines = $displayInfo->getLines();
+
         foreach($lines as $index => $line)
         {
             $this->scoreboard->addLine($index, $line->getText($this->player));

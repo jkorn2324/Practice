@@ -38,7 +38,7 @@ class PostGeneratedDuelArena extends PracticeArena implements IDuelArena
         $sizeX = $extraData->arenaSizeX;
         $sizeZ = $extraData->arenaSizeZ;
         /** @var Vector3 $center */
-        $center = $extraData->center;
+        $center = clone $extraData->center;
         if($sizeX >= $sizeZ)
         {
             $center->z = $sizeZ - 4;
@@ -61,7 +61,7 @@ class PostGeneratedDuelArena extends PracticeArena implements IDuelArena
         $sizeX = $extraData->arenaSizeX;
         $sizeZ = $extraData->arenaSizeZ;
         /** @var Vector3 $center */
-        $center = $extraData->center;
+        $center = clone $extraData->center;
         if($sizeX >= $sizeZ)
         {
             $center->z = 4;
