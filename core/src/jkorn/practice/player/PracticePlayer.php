@@ -393,35 +393,6 @@ class PracticePlayer extends Player implements IPracticeMessages
         {
             $this->scoreboardData->reloadScoreboard();
         }
-
-        /* $scoreboardDisplay = $this->settingsInfo->getProperty(SettingsInfo::SCOREBOARD_DISPLAY);
-        if($scoreboardDisplay !== null && $this->scoreboardData !== null)
-        {
-            $display = (bool)$scoreboardDisplay->getValue();
-            $scoreboardType = $this->scoreboardData->getScoreboard();
-
-            if($display && $scoreboardType === ScoreboardData::SCOREBOARD_NONE)
-            {
-                // TODO: Check if player is in a queue, if he is in ffa, etc...
-                $inputType = ScoreboardData::SCOREBOARD_SPAWN_DEFAULT;
-                if($this->isInLobby())
-                {
-                } elseif ($this->isInFFA())
-                {
-                    $inputType = ScoreboardData::SCOREBOARD_FFA;
-                }
-            }
-            elseif (!$display && $scoreboardType !== ScoreboardData::SCOREBOARD_NONE)
-            {
-                $inputType = ScoreboardData::SCOREBOARD_NONE;
-            }
-
-            // Checks if input type is set, if so, update the scoreboard.
-            if(isset($inputType))
-            {
-                $this->scoreboardData->setScoreboard($inputType);
-            }
-        } */
     }
 
     /**

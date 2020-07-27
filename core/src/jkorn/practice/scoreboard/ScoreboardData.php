@@ -43,7 +43,15 @@ class ScoreboardData
      *
      * Sets the scoreboard according to the type.
      */
-    public function setScoreboard(string $type): void {
+    public function setScoreboard(string $type): void
+    {
+
+        // Don't do anything is anyone tries to set the
+        // scoreboard as none.
+        if($type === self::SCOREBOARD_NONE)
+        {
+            return;
+        }
 
         $currentType = $this->getScoreboard();
         if($currentType === self::SCOREBOARD_NONE)
@@ -54,7 +62,11 @@ class ScoreboardData
         }
 
         // Makes sure we don't send a duplicate.
-        if($type === $this->scoreboardType)
+        if(
+            $type === $this->scoreboardType
+            && $this->scoreboard !== null
+            && !$this->scoreboard->isRemoved()
+        )
         {
             $this->scoreboardType = $type;
             return;
@@ -100,19 +112,18 @@ class ScoreboardData
     }
 
     /**
-     * @param bool - Gets the raw type of scoreboard.
      * @return string
      *
      * Gets the scoreboard type.
      */
-    public function getScoreboard(bool $rawType = false): string
+    public function getScoreboard(): string
     {
         $settingsInfo = $this->player->getSettingsInfo();
         $property = $settingsInfo->getProperty(SettingsInfo::SCOREBOARD_DISPLAY);
         if($property !== null)
         {
             $enabled = $property->getValue();
-            if(!$enabled && !$rawType)
+            if(!$enabled)
             {
                 return self::SCOREBOARD_NONE;
             }
