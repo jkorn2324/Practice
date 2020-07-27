@@ -32,7 +32,6 @@ scoreboard.duel.player.teams:
     line-3: ""
     line-4: " Github @jkorn2324 "
 
-
 # The duel spectator scoreboard.
 scoreboard.duel.spectator:
   title: "Practice"
