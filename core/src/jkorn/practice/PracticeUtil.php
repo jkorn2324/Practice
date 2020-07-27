@@ -19,6 +19,7 @@ use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\Player;
+use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use jkorn\practice\player\PracticePlayer;
@@ -356,7 +357,6 @@ class PracticeUtil
      */
     public static function deleteLevel($level, bool $async = false): void
     {
-        // TODO: Implement function
         $server = Server::getInstance();
 
         if(is_string($level))
@@ -368,9 +368,14 @@ class PracticeUtil
             $path = $server->getDataPath() . "worlds/" . $level->getFolderName();
         }
 
+        if(!isset($path))
+        {
+            return;
+        }
+
         if(!$async)
         {
-            // TODO: Delete the level nonasync.
+            self::removeDirectory($path);
             return;
         }
 
@@ -384,8 +389,80 @@ class PracticeUtil
                 $this->path = $path;
             }
 
-            // TODO: Implement
+            /**
+             * Actions to execute when run
+             *
+             * @return void
+             */
+            public function onRun()
+            {
+                $this->removeDirectory($this->path);
+            }
+
+            /**
+             * @param string $path
+             *
+             * Removes the directory based on the path name -> same function used in practice util.
+             */
+            private function removeDirectory(string $path): void
+            {
+                if(!is_dir($path))
+                {
+                    return;
+                }
+
+                if(substr($path, strlen($path) - 1, 1) != '/')
+                {
+                    $path .= "/";
+                }
+
+                $files = glob($path . "*", GLOB_MARK);
+                foreach($files as $file)
+                {
+                    if(is_dir($file))
+                    {
+                        self::removeDirectory($path);
+                    }
+                    else
+                    {
+                        unlink($file);
+                    }
+                }
+                rmdir($path);
+            }
         });
+    }
+
+    /**
+     * @param string $path - The path name.
+     *
+     * Removes the directory based on the input path.
+     */
+    public static function removeDirectory(string $path): void
+    {
+        if(!is_dir($path))
+        {
+            return;
+        }
+
+        if(substr($path, strlen($path) - 1, 1) != '/')
+        {
+            $path .= "/";
+        }
+
+        $files = glob($path . "*", GLOB_MARK);
+        foreach($files as $file)
+        {
+            if(is_dir($file))
+            {
+                self::removeDirectory($path);
+            }
+            else
+            {
+                unlink($file);
+            }
+        }
+        rmdir($path);
     }
 
     /**
