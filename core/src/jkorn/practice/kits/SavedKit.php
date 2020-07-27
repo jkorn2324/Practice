@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace jkorn\practice\kits;
 
 
+use jkorn\practice\messages\IPracticeMessages;
+use jkorn\practice\messages\managers\PracticeMessageManager;
+use jkorn\practice\PracticeCore;
 use pocketmine\entity\EffectInstance;
 use pocketmine\item\Item;
 use pocketmine\Player;
@@ -80,7 +83,18 @@ class SavedKit implements ISaved, IKit
 
         if($sendMessage)
         {
-            // TODO: Send message to the player.
+            // TODO: Add prefix to default text.
+            $text = "You have equipped the " . $this->getName() . " kit!";
+            $messageManager = PracticeCore::getBaseMessageManager()->getMessageManager(PracticeMessageManager::NAME);
+            if($messageManager !== null)
+            {
+                $textMessage = $messageManager->getMessage(IPracticeMessages::PLAYER_KIT_EQUIP_MESSAGE);
+                if($textMessage !== null)
+                {
+                    $text = $textMessage->getText($player, $this);
+                }
+            }
+            $player->sendMessage($text);
         }
     }
 

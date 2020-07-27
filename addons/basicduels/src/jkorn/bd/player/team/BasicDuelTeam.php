@@ -88,10 +88,7 @@ class BasicDuelTeam extends DuelTeam
                 $kit->sendTo($rawPlayer, false);
 
                 $scoreboardData = $rawPlayer->getScoreboardData();
-                if(
-                    $scoreboardData !== null
-                    && $scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_NONE
-                )
+                if($scoreboardData !== null)
                 {
                     $scoreboardData->setScoreboard(BasicDuelsScoreboardManager::TYPE_SCOREBOARD_DUEL_TEAM_PLAYER);
                 }

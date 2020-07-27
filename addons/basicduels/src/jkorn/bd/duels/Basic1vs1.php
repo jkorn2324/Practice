@@ -84,10 +84,7 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
 
             // Sets the scoreboard of the players.
             $scoreboard = $player->getScoreboardData();
-            if(
-                $scoreboard !== null
-                && $scoreboard->getScoreboard() !== ScoreboardData::SCOREBOARD_NONE
-            )
+            if($scoreboard !== null)
             {
                 $scoreboard->setScoreboard(BasicDuelsScoreboardManager::TYPE_SCOREBOARD_DUEL_1VS1_PLAYER);
             }
@@ -236,10 +233,7 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
 
         // Sets the spectator's scoreboard.
         $scoreboardData = $player->getScoreboardData();
-        if(
-            $scoreboardData !== null
-            && $scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_NONE
-        )
+        if($scoreboardData !== null)
         {
             $scoreboardData->setScoreboard(BasicDuelsScoreboardManager::TYPE_SCOREBOARD_DUEL_SPECTATOR);
         }

@@ -4,3 +4,6 @@
 player.join.message: "[+] {stat.player.name}"
 # The leave message of the player.
 player.leave.message: "[-] {stat.player.name}"
+
+# The kit equipped message.
+player.kit.equip.message: "You have equipped the {stat.player.equipped.kit} kit.";

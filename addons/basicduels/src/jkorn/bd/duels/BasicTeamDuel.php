@@ -289,11 +289,7 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
 
         // Sets the spectator scoreboards.
         $scoreboardData = $player->getScoreboardData();
-        if
-        (
-            $scoreboardData !== null
-            && $scoreboardData->getScoreboard() === ScoreboardData::SCOREBOARD_NONE
-        )
+        if ($scoreboardData !== null)
         {
             $scoreboardData->setScoreboard(BasicDuelsScoreboardManager::TYPE_SCOREBOARD_DUEL_SPECTATOR);
         }

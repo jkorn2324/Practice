@@ -214,8 +214,8 @@ class PracticePlayer extends Player implements IPracticeMessages
             }
         }
 
-        $property = $this->settingsInfo->getProperty(SettingsInfo::SCOREBOARD_DISPLAY);
-        $this->scoreboardData = new ScoreboardData($this, $property->getValue() ? ScoreboardData::SCOREBOARD_SPAWN_DEFAULT : ScoreboardData::SCOREBOARD_NONE);
+        // Automatically sets the scoreboard type.
+        $this->scoreboardData = new ScoreboardData($this, ScoreboardData::SCOREBOARD_SPAWN_DEFAULT);
     }
 
     /**
@@ -389,7 +389,12 @@ class PracticePlayer extends Player implements IPracticeMessages
      */
     public function settingsUpdateScoreboard(): void
     {
-        $scoreboardDisplay = $this->settingsInfo->getProperty(SettingsInfo::SCOREBOARD_DISPLAY);
+        if($this->scoreboardData !== null)
+        {
+            $this->scoreboardData->reloadScoreboard();
+        }
+
+        /* $scoreboardDisplay = $this->settingsInfo->getProperty(SettingsInfo::SCOREBOARD_DISPLAY);
         if($scoreboardDisplay !== null && $this->scoreboardData !== null)
         {
             $display = (bool)$scoreboardDisplay->getValue();
@@ -416,7 +421,7 @@ class PracticePlayer extends Player implements IPracticeMessages
             {
                 $this->scoreboardData->setScoreboard($inputType);
             }
-        }
+        } */
     }
 
     /**
@@ -850,8 +855,6 @@ class PracticePlayer extends Player implements IPracticeMessages
         if(
             $resetScoreboard
             && $scoreboard !== null
-            && $scoreboard->getScoreboard() !== ScoreboardData::SCOREBOARD_NONE
-            && $scoreboard->getScoreboard() !== ScoreboardData::SCOREBOARD_SPAWN_DEFAULT
         )
         {
             $scoreboard->setScoreboard(ScoreboardData::SCOREBOARD_SPAWN_DEFAULT);

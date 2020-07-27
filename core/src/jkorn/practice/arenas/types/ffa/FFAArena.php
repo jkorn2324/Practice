@@ -117,7 +117,7 @@ class FFAArena extends PracticeArena implements ISaved
         $this->players++;
 
         $scoreboardData = $player->getScoreboardData();
-        if($scoreboardData !== null && $scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_NONE)
+        if($scoreboardData !== null)
         {
             $scoreboardData->setScoreboard(ScoreboardData::SCOREBOARD_FFA);
         }

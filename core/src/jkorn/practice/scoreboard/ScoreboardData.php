@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace jkorn\practice\scoreboard;
 
 
+use jkorn\practice\player\info\settings\SettingsInfo;
+use jkorn\practice\player\PracticePlayer;
 use pocketmine\Player;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\scoreboard\display\ScoreboardDisplayLine;
@@ -20,7 +22,7 @@ class ScoreboardData
 
     /** @var string */
     private $scoreboardType;
-    /** @var Player */
+    /** @var Player|PracticePlayer */
     private $player;
 
     /** @var Scoreboard|null */
@@ -43,13 +45,20 @@ class ScoreboardData
      */
     public function setScoreboard(string $type): void {
 
-        if($type === self::SCOREBOARD_NONE)
+        $currentType = $this->getScoreboard();
+        if($currentType === self::SCOREBOARD_NONE)
         {
             $this->removeScoreboard();
             $this->scoreboardType = $type;
             return;
         }
 
+        // Makes sure we don't send a duplicate.
+        if($type === $this->scoreboardType)
+        {
+            $this->scoreboardType = $type;
+            return;
+        }
 
         // Gets the title based on display information.
         $title = "Practice";
@@ -91,12 +100,24 @@ class ScoreboardData
     }
 
     /**
+     * @param bool - Gets the raw type of scoreboard.
      * @return string
      *
      * Gets the scoreboard type.
      */
-    public function getScoreboard(): string
+    public function getScoreboard(bool $rawType = false): string
     {
+        $settingsInfo = $this->player->getSettingsInfo();
+        $property = $settingsInfo->getProperty(SettingsInfo::SCOREBOARD_DISPLAY);
+        if($property !== null)
+        {
+            $enabled = $property->getValue();
+            if(!$enabled && !$rawType)
+            {
+                return self::SCOREBOARD_NONE;
+            }
+        }
+
         return $this->scoreboardType;
     }
 
@@ -105,7 +126,7 @@ class ScoreboardData
      */
     public function reloadScoreboard(): void
     {
-        $this->setScoreboard($this->scoreboardType);
+        $this->setScoreboard($this->getScoreboard(true));
     }
 
     /**
@@ -113,7 +134,7 @@ class ScoreboardData
      */
     private function removeScoreboard(): void
     {
-        if($this->scoreboard !== null) {
+        if($this->scoreboard !== null && !$this->scoreboard->isRemoved()) {
             $this->scoreboard->removeScoreboard();
         }
     }
@@ -123,7 +144,8 @@ class ScoreboardData
      */
     public function update(): void
     {
-        if($this->scoreboard !== null && $this->scoreboardType !== self::SCOREBOARD_NONE) {
+        $scoreboardType = $this->getScoreboard();
+        if($this->scoreboard !== null && $scoreboardType !== self::SCOREBOARD_NONE) {
 
             $scoreboardDisplayInfo = PracticeCore::getBaseScoreboardDisplayManager()->getDisplayInfo($this->scoreboardType);
             if($scoreboardDisplayInfo === null)

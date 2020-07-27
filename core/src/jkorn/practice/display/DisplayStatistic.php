@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\display;
 
 
+use jkorn\practice\kits\IKit;
 use jkorn\practice\player\info\stats\StatsInfo;
 use jkorn\practice\player\PracticePlayer;
 use pocketmine\Player;
@@ -129,14 +130,18 @@ class DisplayStatistic implements DisplayStatisticNames
             self::STATISTIC_PLAYER_EQUIPPED_KIT,
             function(Player $player, Server $server, $data)
             {
-               if($player instanceof PracticePlayer)
-               {
-                   $equippedKit = $player->getEquippedKit();
-                   if($equippedKit !== null)
-                   {
-                       return $equippedKit->getName();
-                   }
-               }
+                if($data instanceof IKit)
+                {
+                    return $data->getName();
+                }
+                elseif($player instanceof PracticePlayer)
+                {
+                    $equippedKit = $player->getEquippedKit();
+                    if($equippedKit !== null)
+                    {
+                        return $equippedKit->getName();
+                    }
+                }
 
                 return "Unknown";
             }

@@ -110,10 +110,7 @@ class BasicQueuesManager implements IAwaitingManager
 
         // Sets the scoreboard of the player.
         $scoreboardData = $player->getScoreboardData();
-        if(
-            $scoreboardData !== null
-            && $scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_NONE
-        )
+        if($scoreboardData !== null)
         {
             $scoreboardData->setScoreboard(BasicDuelsScoreboardManager::TYPE_SCOREBOARD_SPAWN_QUEUE);
         }
@@ -216,10 +213,7 @@ class BasicQueuesManager implements IAwaitingManager
 
             // Sets the scoreboard.
             $scoreboardData = $player->getScoreboardData();
-            if(
-                $scoreboardData !== null
-                && $scoreboardData->getScoreboard() !== ScoreboardData::SCOREBOARD_NONE
-            )
+            if($scoreboardData !== null)
             {
                 $scoreboardData->setScoreboard(ScoreboardData::SCOREBOARD_SPAWN_DEFAULT);
             }

@@ -38,6 +38,9 @@ interface DisplayStatisticNames
     const STATISTIC_FFA_ARENA_PLAYERS_PLAYING = "stat.ffa.arena.players.playing";
     const STATISTIC_FFA_ARENA_KIT = "stat.ffa.arena.kit";
 
+    // The kit name statistic.
+    const STATISTIC_KIT_NAME = "stat.kit.name";
+
     // TODO: These statistics.
     const STATISTIC_PLAYER_RANK = "stat.player.rank";
     const STATISTIC_SERVER_TPS = "stat.server.tps";
