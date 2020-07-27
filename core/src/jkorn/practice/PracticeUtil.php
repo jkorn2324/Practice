@@ -365,6 +365,8 @@ class PracticeUtil
         }
         elseif ($level instanceof Level)
         {
+            $server->unloadLevel($level);
+
             $path = $server->getDataPath() . "worlds/" . $level->getFolderName();
         }
 
@@ -421,7 +423,7 @@ class PracticeUtil
                 {
                     if(is_dir($file))
                     {
-                        self::removeDirectory($path);
+                        self::removeDirectory($file);
                     }
                     else
                     {
@@ -455,7 +457,7 @@ class PracticeUtil
         {
             if(is_dir($file))
             {
-                self::removeDirectory($path);
+                self::removeDirectory($file);
             }
             else
             {

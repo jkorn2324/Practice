@@ -385,7 +385,7 @@ class BasicDuelsManager implements IAwaitingGameManager
         {
             if(strpos($file, "game.duels.basic.") !== false)
             {
-                PracticeUtil::deleteLevel($file, true);
+                PracticeUtil::deleteLevel($file, false);
             }
         }
     }
