@@ -250,4 +250,14 @@ abstract class AbstractDuel implements IGame
 
         return "{$minutesSection}:{$secondsSection}";
     }
+
+    /**
+     * @return IKit
+     *
+     * Gets the kit of the duel.
+     */
+    public function getKit(): IKit
+    {
+        return $this->kit;
+    }
 }

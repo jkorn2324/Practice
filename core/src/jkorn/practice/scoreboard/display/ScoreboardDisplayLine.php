@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace jkorn\practice\scoreboard\display;
 
 
+use jkorn\practice\display\DisplayStatistic;
 use pocketmine\Player;
 use jkorn\practice\misc\IDisplayText;
 use jkorn\practice\PracticeUtil;
-use jkorn\practice\scoreboard\display\statistics\ScoreboardStatistic;
 
 class ScoreboardDisplayLine implements IDisplayText
 {
@@ -16,7 +16,7 @@ class ScoreboardDisplayLine implements IDisplayText
     /** @var string */
     private $text;
 
-    /** @var ScoreboardStatistic[] */
+    /** @var DisplayStatistic[] */
     private $statistics;
 
     public function __construct(string $text = "")
@@ -26,27 +26,18 @@ class ScoreboardDisplayLine implements IDisplayText
     }
 
     /**
-     * @return string
-     *
-     * Gets the raw text.
-     */
-    public function getRawText(): string
-    {
-        return $this->text;
-    }
-
-    /**
      * @param Player $player -> The text based on the display line.
+     * @param mixed $args -> The arguments for the text.
      * @return string
      *
      * Gets the text from the scoreboard.
      */
-    public function getText(Player $player): string
+    public function getText(Player $player, $args = null): string
     {
         $output = $this->text;
 
         PracticeUtil::convertMessageColors($output);
-        ScoreboardStatistic::convert($player, $output);
+        DisplayStatistic::convert($output, $player, $args);
 
         return $output;
     }
@@ -58,7 +49,7 @@ class ScoreboardDisplayLine implements IDisplayText
      */
     public function containsStatistics(): bool
     {
-        return ScoreboardStatistic::containsStatistics($this->text);
+        return DisplayStatistic::containsStatistics($this->text, true);
     }
 
 }

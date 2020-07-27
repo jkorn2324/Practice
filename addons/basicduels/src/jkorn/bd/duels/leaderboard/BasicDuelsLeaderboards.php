@@ -46,8 +46,8 @@ class BasicDuelsLeaderboards implements IGameLeaderboard
      */
     private function initGroups(): void
     {
-        $this->addGroup($wins = new LeaderboardGroup(BasicDuelsUtils::STATISTIC_DUELS_WINS));
-        $this->addGroup($losses = new LeaderboardGroup(BasicDuelsUtils::STATISTIC_DUELS_LOSSES));
+        $this->addGroup($wins = new LeaderboardGroup(BasicDuelsUtils::STATISTIC_DUELS_PLAYER_WINS));
+        $this->addGroup($losses = new LeaderboardGroup(BasicDuelsUtils::STATISTIC_DUELS_PLAYER_LOSSES));
         $this->addGroup(new WLRatioGroup($wins, $losses));
     }
 

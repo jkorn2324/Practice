@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\forms\display\properties;
+namespace jkorn\practice\forms\display;
 
 
+use jkorn\practice\display\DisplayStatistic;
 use pocketmine\Player;
 use jkorn\practice\misc\IDisplayText;
 use jkorn\practice\PracticeUtil;
@@ -21,16 +22,6 @@ class FormDisplayText implements IDisplayText
     }
 
     /**
-     * @return string
-     *
-     * Gets the raw text.
-     */
-    public function getRawText(): string
-    {
-        return $this->text;
-    }
-
-    /**
      * @param Player $player
      * @param mixed|null $args
      * @return string
@@ -41,7 +32,7 @@ class FormDisplayText implements IDisplayText
     {
         $text = $this->text;
 
-        FormDisplayStatistic::convert($text, $player, $args);
+        DisplayStatistic::convert($text, $player, $args);
         PracticeUtil::convertMessageColors($text);
 
         return $text;

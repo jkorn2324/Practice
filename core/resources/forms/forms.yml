@@ -42,8 +42,8 @@ form.FFA.play:
   description: "Select the ffa arena that you want to play."
   buttons:
     select.arena.template:
-      top.text: "{ffa.stat.arena}"
-      bottom.text: "Players: {ffa.stat.arena.players}"
+      top.text: "{stat.ffa.arena.name}"
+      bottom.text: "Players: {stat.ffa.arena.players.playing}"
     select.arena.none:
       top.text: "None"
       bottom.text: ""
@@ -56,8 +56,8 @@ form.games.play:
   description: "Select the games that you want to play."
   buttons:
     select.game.template:
-      top.text: "Play {games.stat.type}"
-      bottom.text: "Players: {games.stat.type.players}"
+      top.text: "Play {stat.games.type}"
+      bottom.text: "Players: {stat.games.type.players.playing}"
     select.game.none:
       top.text: "None"
       bottom.text: ""

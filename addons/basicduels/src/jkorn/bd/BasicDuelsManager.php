@@ -218,10 +218,9 @@ class BasicDuelsManager implements IAwaitingGameManager
         // Initializes the generators.
         BasicDuelsUtils::initGenerators();
 
-        BasicDuelsUtils::registerFormDisplayStats();
+        BasicDuelsUtils::registerDisplayStats();
         BasicDuelsUtils::registerPlayerSettings();
         BasicDuelsUtils::registerPlayerStatistics();
-        BasicDuelsUtils::registerScoreboardStatistics();
     }
 
     /**
@@ -231,10 +230,9 @@ class BasicDuelsManager implements IAwaitingGameManager
     {
         PracticeCore::getBaseArenaManager()->unregisterArenaManager(ArenaManager::TYPE);
 
-        BasicDuelsUtils::unregisterFormDisplayStats();
+        BasicDuelsUtils::unregisterDisplayStats();
         BasicDuelsUtils::unregisterPlayerSettings();
         BasicDuelsUtils::unregisterPlayerStatistics();
-        BasicDuelsUtils::unregisterScoreboardStatistics();
     }
 
     /**

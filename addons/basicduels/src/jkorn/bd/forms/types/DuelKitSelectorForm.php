@@ -14,7 +14,7 @@ namespace jkorn\bd\forms\types;
 use jkorn\bd\BasicDuelsManager;
 use jkorn\bd\duels\types\BasicDuelGameType;
 use jkorn\practice\forms\display\FormDisplay;
-use jkorn\practice\forms\display\properties\FormDisplayText;
+use jkorn\practice\forms\display\FormDisplayText;
 use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\PracticeCore;

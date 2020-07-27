@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace jkorn\practice\games;
 
 
-use jkorn\practice\forms\display\properties\FormDisplayStatistic;
+use jkorn\practice\display\DisplayStatistic;
+use jkorn\practice\display\DisplayStatisticNames;
 use jkorn\practice\games\misc\IAwaitingGameManager;
-use jkorn\practice\scoreboard\display\statistics\ScoreboardStatistic;
 use pocketmine\Player;
 use pocketmine\Server;
 use jkorn\practice\PracticeCore;
-use pocketmine\utils\TextFormat;
 
 /**
  * Class BaseGameManager
@@ -19,13 +18,8 @@ use pocketmine\utils\TextFormat;
  *
  * The main game manager.
  */
-class BaseGameManager
+class BaseGameManager implements DisplayStatisticNames
 {
-
-    const STATISTIC_GAMES_TYPE = "games.stat.type";
-    const STATISTIC_GAMES_TYPE_PLAYERS = "games.stat.type.players";
-    const STATISTIC_GAMES_PLAYERS = "games.stat.players";
-
     /** @var IGameManager[] */
     private $gameTypes = [];
     /** @var int */
@@ -49,66 +43,10 @@ class BaseGameManager
      */
     protected function initStatistics(): void
     {
-        $this->registerFormStatistics();
-        $this->registerScoreboardStatistics();
-    }
-
-    /**
-     * Registers the form statistics, etc...
-     */
-    private function registerFormStatistics(): void
-    {
-        // Registers the total game players.
-        FormDisplayStatistic::registerStatistic(
-            new FormDisplayStatistic(self::STATISTIC_GAMES_PLAYERS,
-                function(Player $player, Server $server, $data)
-                {
-                    $playersCount = 0;
-                    $games = PracticeCore::getBaseGameManager()->getGameTypes();
-                    foreach($games as $game)
-                    {
-                        $playersCount += $game->getPlayersPlaying();
-                    }
-
-                    return $playersCount;
-                })
-        );
-
-        // Registers the total game players based on type.
-        FormDisplayStatistic::registerStatistic(
-            new FormDisplayStatistic(self::STATISTIC_GAMES_TYPE_PLAYERS,
-                function(Player $player, Server $server, $data)
-                {
-                    if($data instanceof IGameManager)
-                    {
-                        return $data->getPlayersPlaying();
-                    }
-                    return 0;
-                })
-        );
-
-        FormDisplayStatistic::registerStatistic(
-            new FormDisplayStatistic(self::STATISTIC_GAMES_TYPE,
+        // Gets the total number of players playing in games.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_GAMES_PLAYERS_PLAYING,
             function(Player $player, Server $server, $data)
-            {
-                if($data instanceof IGameManager)
-                {
-                    return $data->getTitle();
-                }
-                return TextFormat::RED . "Unknown";
-            })
-        );
-    }
-
-    /**
-     * Register the scoreboard statistics.
-     */
-    private function registerScoreboardStatistics(): void
-    {
-        // Gets the number of players in games.
-        ScoreboardStatistic::registerStatistic(new ScoreboardStatistic(
-            self::STATISTIC_GAMES_PLAYERS,
-            function(Player $player, Server $server)
             {
                 $playersCount = 0;
                 $games = PracticeCore::getBaseGameManager()->getGameTypes();
@@ -116,10 +54,35 @@ class BaseGameManager
                 {
                     $playersCount += $game->getPlayersPlaying();
                 }
-
                 return $playersCount;
             }
         ));
+
+        // Gets the number of players in a particular game type.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_GAMES_TYPE_PLAYERS_PLAYING,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof IGameManager)
+                {
+                    return $data->getPlayersPlaying();
+                }
+                return 0;
+            }
+        ));
+
+        // Gets the game type name.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_GAMES_TYPE,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof IGameManager)
+                {
+                    return $data->getTitle();
+                }
+                return "Unknown";
+            }
+        , false));
     }
 
     /**

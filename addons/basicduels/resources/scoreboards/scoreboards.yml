@@ -3,19 +3,18 @@
 
 # The spawn scoreboard if player is in a basic duel queue.
 scoreboard.spawn.queue:
-  line-1: " Online: {stat.online} "
+  line-1: " Online: {stat.online.players} "
   line-2: ""
-  line-3: " Ping: {stat.ping} "
+  line-3: " Ping: {stat.player.ping} "
   line-4: ""
   line-5: " Queue: "
-  line-6: " {duels.basic.stat.type.player} {duels.basic.stat.type.player.kit} "
-  # TODO Add Kit Statistic
+  line-6: " {duels.basic.stat.type.player} {duels.basic.stat.kit.player} "
   line-7: ""
   line-8: " Github @jkorn2324 "
 
 # The duel 1vs1 scoreboard.
 scoreboard.duel.player.1vs1:
-  line-1: " Opponent: {duels.basic.stat.player.opponent} "
+  line-1: " Opponent: {duels.basic.stat.player.opponent.name} "
   line-2: " Duration: {duels.basic.stat.duration} "
   line-3: ""
   line-4: " Github @jkorn2324 "
@@ -31,6 +30,6 @@ scoreboard.duel.player.teams:
 # The duel spectator scoreboard.
 scoreboard.duel.spectator:
   line-1: " Duration: {duels.basic.stat.duration} "
-  line-2: " Game: {duels.basic.stat.type.duel} {duels.basic.stat.type.duel.kit} " # TODO Add Kit Statistic
+  line-2: " Game: {duels.basic.stat.type} {duels.basic.stat.kit} "
   line-3: ""
   line-4: " Github @jkorn2324 "

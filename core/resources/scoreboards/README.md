@@ -8,12 +8,9 @@ This README explains how to use the scoreboard system in the new Practice Core s
 The default scoreboard types that are used by the internal Practice Core plugin are:
 
 - `scoreboard.spawn.default` - Used when a  player is at spawn and not in a queue.
-- `scoreboard.spawn.queue` - Used when a player is at spawn and in a queue for a duel.
 - `scoreboard.ffa` - Used when a player is in a FFA arena.
-- `scoreboard.duel.player` - Used when a player is in a duel.
-- `scoreboard.duel.spectator` - Used when the player is spectating a duel.
 
-**DO NOT EDIT THE SCOREBOARD TYPE NAMES IN THE SCOREBOARDS.YML FILE, IF YOU DO, YOUR PRACTICE CORE WILL NOT WORK.**
+**DO NOT EDIT THE SCOREBOARD TYPE NAMES IN SCOREBOARDS.YML FILE, IF YOU DO, THE SCOREBOARDS WILL NOT WORK.**
 
 ## Editing the Display
 You can change what the scoreboards display and which
@@ -80,7 +77,7 @@ There are certain statistics that you can display on a given line by using a set
 ```yaml
 scoreboard.spawn:
 	# Displays how many online-players there are.
-	line-1: " Online-Players: {stat.online} "
+	line-1: " Online-Players: {stat.online.players} "
 ```
 
 ** DISCLAIMER: ** Certain statistics only work when the player is in a certain scenario or has a specific scoreboard type.
@@ -91,25 +88,30 @@ This provides the list of the scoreboard statistics that this core allows.
  ---
 #### Default Statistics:
 These are the statistics that work for any scoreboard, regardless of game-modes that are enabled.
-- `{stat.kills}` - Lists the number of kills the player has ever on the server.
-- `{stat.deaths}` - Lists the number of deaths the player has ever on the server.
-- `{stat.cps}` - Lists the clicks-per-second of the player.
-- `{stat.online}` - Displays the current number of players on the server.
-- `{stat.ping}` - Displays the current player's ping.
+- `{stat.online.players}` - Displays the current number of players on the server.
+- `{stat.max.players}` - Displays the maximum number of players that could join the server.
+
+- `{stat.player.kills}` - Lists the number of kills the player has ever on the server.
+- `{stat.player.deaths}` - Lists the number of deaths the player has ever on the server.
+- `{stat.player.kdr}` - Lists the KDR of the player on the server.
+- `{stat.player.cps}` - Lists the clicks-per-second of the player.
+- `{stat.player.ping}` - Displays the current player's ping.
 - `{stat.player.name}` - Displays the current player's name.
-- `{stat.os}` - Displays the device operating system.
-- `{stat.equipped.kit}` - Displays the current kit equipped by the player, defaults to `None` if they don't have a kit.
-- `{stat.rank}` - Displays the current player's rank.
-- `{stat.games.playing}` - Displays the number of players playing a game.
+- `{stat.player.os}` - Displays the device operating system.
+- `{stat.player.equipped.kit}` - Displays the current kit equipped by the player, defaults to `None` if they don't have a kit.
+- `{stat.player.rank}` - Displays the current player's rank.
+
+- `{stat.games.players.playing}` - Displays the total number of players playing in all games.
 ---
+
 #### FFA Statistics:
 These are the statistics that are added if FFA Arenas are enabled. 
 
 These statistics work for any scoreboard:
-- `{ffa.stat.players}` - Displays the total number of players playing in FFA.
+- `{stat.ffa.players.playing}` - Displays the total number of players playing in FFA.
 
 These statistics ONLY work if the FFA scoreboard is currently displayed:
-- `{ffa.stat.arena}` - Displays the current ffa arena the player is playing.
-- `{ffa.stat.arena.players}` - Displays the current number of players playing in the arena.
-- `{ffa.stat.arena.kit}` - Displays the ffa arena kit.
+- `{stat.ffa.arena.name}` - Displays the current ffa arena the player is playing.
+- `{stat.ffa.arena.players.playing}` - Displays the current number of players playing in the arena.
+- `{stat.ffa.arena.kit}` - Displays the ffa arena kit.
 ---

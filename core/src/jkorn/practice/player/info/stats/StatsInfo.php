@@ -5,14 +5,24 @@ declare(strict_types=1);
 namespace jkorn\practice\player\info\stats;
 
 
+use jkorn\practice\display\DisplayStatistic;
 use jkorn\practice\misc\ISavedHeader;
 use jkorn\practice\player\info\stats\properties\IntegerStatProperty;
+use jkorn\practice\player\PracticePlayer;
+use pocketmine\Player;
+use pocketmine\Server;
 
+/**
+ * Class StatsInfo
+ * @package jkorn\practice\player\info\stats
+ *
+ * The statistics information for the player.
+ */
 class StatsInfo implements ISavedHeader
 {
 
-    const STAT_KILLS = "stat.kills";
-    const STAT_DEATHS = "stat.deaths";
+    const STAT_KILLS = "stat.player.kills";
+    const STAT_DEATHS = "stat.player.deaths";
 
     /** @var StatPropertyInfo[] */
     private static $statistics = [];
@@ -30,7 +40,8 @@ class StatsInfo implements ISavedHeader
      * @param StatPropertyInfo $info
      * @param bool $override
      *
-     * Registers the statistic to the statistics list.
+     * Registers the statistic to the statistics list. Registers not only a new
+     * property info, it registers the display value for the property.
      */
     public static function registerStatistic(StatPropertyInfo $info, bool $override = true): void
     {
@@ -40,18 +51,37 @@ class StatsInfo implements ISavedHeader
         }
 
         self::$statistics[$info->getName()] = $info;
+
+        // Registers the new display statistic.
+        DisplayStatistic::register(new DisplayStatistic(
+            $name = $info->getName(),
+            function(Player $player, Server $server, $data) use($name)
+            {
+                if($player instanceof PracticePlayer)
+                {
+                    $statistics = $player->getStatsInfo();
+                    $statistic = $statistics->getStatistic($name);
+                    if($statistic !== null)
+                    {
+                        return $statistic->getValue();
+                    }
+                }
+                return 0;
+            }
+        , true), $override);
     }
 
     /**
      * @param string $name
      *
-     * Unregisters the statistic.
+     * Unregisters the statistic from everywhere.
      */
     public static function unregisterStatistic(string $name): void
     {
         if(isset(self::$statistics[$name]))
         {
             unset(self::$statistics[$name]);
+            DisplayStatistic::unregisterStatistic($name);
         }
     }
 

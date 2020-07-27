@@ -1,0 +1,6 @@
+# Provides the list of all the messages used by the internal core within the game.
+
+# The join message of the player.
+player.join.message: "[+] {stat.player.name}"
+# The leave message of the player.
+player.leave.message: "[-] {stat.player.name}"

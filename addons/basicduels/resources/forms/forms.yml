@@ -8,7 +8,7 @@ form.selector.type.duel:
   buttons:
     duel.button.template:
       top.text: "Play {duels.basic.stat.type} "
-      bottom.text: "Queued: {duels.basic.stat.type.awaiting} "
+      bottom.text: "Queued: {duels.basic.stat.type.awaiting.players} "
     duel.button.none:
       top.text: "None"
       bottom.text: ""
@@ -22,8 +22,8 @@ form.selector.type.kit:
   description: "Select the type of kit you want to play."
   buttons:
     duel.button.template:
-      top.text: "{duels.basic.stat.type.kit}"
-      bottom.text: "Queued: {duels.basic.stat.type.kit.awaiting}"
+      top.text: "{duels.basic.stat.kit}"
+      bottom.text: "Queued: {duels.basic.stat.type.kit.awaiting.players}"
     duel.button.none:
       top.text: "None"
       bottom.text: ""

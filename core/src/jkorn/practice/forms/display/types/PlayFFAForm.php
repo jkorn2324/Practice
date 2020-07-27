@@ -6,7 +6,7 @@ namespace jkorn\practice\forms\display\types;
 
 
 use jkorn\practice\arenas\types\ffa\FFAArenaManager;
-use jkorn\practice\forms\display\properties\FormDisplayText;
+use jkorn\practice\forms\display\FormDisplayText;
 use jkorn\practice\kits\IKit;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
@@ -115,8 +115,8 @@ class PlayFFAForm extends FormDisplay
 
         $buttons = [
             "select.arena.template" => [
-                "top.text" => "{" . FFAArenaManager::STATISTIC_FFA_ARENA . "}",
-                "bottom.text" => "Players: {" . FFAArenaManager::STATISTIC_FFA_ARENA_PLAYERS . "}"
+                "top.text" => "{" . FFAArenaManager::STATISTIC_FFA_ARENA_NAME . "}",
+                "bottom.text" => "Players: {" . FFAArenaManager::STATISTIC_FFA_ARENA_PLAYERS_PLAYING . "}"
             ],
             "select.arena.none" => [
                 "top.text" => "None",

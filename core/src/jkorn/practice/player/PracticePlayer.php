@@ -8,6 +8,8 @@ namespace jkorn\practice\player;
 use jkorn\practice\games\IGame;
 use jkorn\practice\games\misc\IAwaitingGameManager;
 use jkorn\practice\kits\IKit;
+use jkorn\practice\messages\IPracticeMessages;
+use jkorn\practice\messages\managers\PracticeMessageManager;
 use pocketmine\entity\Attribute;
 use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
@@ -43,7 +45,7 @@ use jkorn\practice\scoreboard\ScoreboardData;
  *
  * The default Practice player class.
  */
-class PracticePlayer extends Player
+class PracticePlayer extends Player implements IPracticeMessages
 {
 
     /** @var ScoreboardData|null */
@@ -285,6 +287,17 @@ class PracticePlayer extends Player
 
         // Sends the given items to the player.
         $this->putInLobby(true);
+
+        // Sets the join message of the event.
+        $practiceMessageManager = PracticeCore::getBaseMessageManager()->getMessageManager(PracticeMessageManager::NAME);
+        if($practiceMessageManager !== null)
+        {
+            $joinMessage = $practiceMessageManager->getMessage(self::PLAYER_JOIN_MESSAGE);
+            if($joinMessage !== null)
+            {
+                $event->setJoinMessage($joinMessage->getText($this));
+            }
+        }
     }
 
     /**
@@ -313,6 +326,17 @@ class PracticePlayer extends Player
         if($this->ffaArena !== null)
         {
             $this->ffaArena->removePlayer();
+        }
+
+        // Sets the leave message of the event.
+        $practiceMessageManager = PracticeCore::getBaseMessageManager()->getMessageManager(PracticeMessageManager::NAME);
+        if($practiceMessageManager !== null)
+        {
+            $leaveMessage = $practiceMessageManager->getMessage(self::PLAYER_LEAVE_MESSAGE);
+            if($leaveMessage !== null)
+            {
+                $event->setQuitMessage($leaveMessage->getText($this));
+            }
         }
 
         $dataProvider = PracticeDataManager::getDataProvider();

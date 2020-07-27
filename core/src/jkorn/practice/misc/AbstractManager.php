@@ -16,7 +16,7 @@ abstract class AbstractManager
 
     public function __construct(bool $loadAsync)
     {
-        $this->server = PracticeCore::getInstance()->getServer();
+        $this->server = Server::getInstance();
 
         $this->load($loadAsync);
     }

@@ -9,7 +9,7 @@ use jkorn\bd\BasicDuelsManager;
 use jkorn\bd\duels\types\BasicDuelGameType;
 use jkorn\bd\forms\BasicDuelsFormManager;
 use jkorn\practice\forms\display\FormDisplay;
-use jkorn\practice\forms\display\properties\FormDisplayText;
+use jkorn\practice\forms\display\FormDisplayText;
 use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\PracticeCore;
