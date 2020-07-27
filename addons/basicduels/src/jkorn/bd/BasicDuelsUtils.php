@@ -14,7 +14,10 @@ use jkorn\bd\queues\BasicQueue;
 use jkorn\bd\queues\BasicQueuesManager;
 use jkorn\practice\display\DisplayStatistic;
 use jkorn\practice\games\duels\AbstractDuel;
+use jkorn\practice\games\duels\DuelPlayer;
+use jkorn\practice\games\duels\teams\DuelTeam;
 use jkorn\practice\games\duels\types\Duel1vs1;
+use jkorn\practice\games\duels\types\TeamDuel;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
 use jkorn\practice\player\info\settings\properties\BooleanSettingProperty;
@@ -27,36 +30,10 @@ use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 use pocketmine\Server;
 
-class BasicDuelsUtils
+class BasicDuelsUtils implements BasicDuelsStatistics
 {
+    // The PE Only Setting
     const SETTING_PE_ONLY = "duels.basic.pe.only";
-
-    // Stats that are registered in the statsInfo class.
-    const STATISTIC_DUELS_PLAYER_WINS = "duels.basic.stat.wins";
-    const STATISTIC_DUELS_PLAYER_LOSSES = "duels.basic.stat.losses";
-
-    const STATISTIC_DUELS_PLAYER_WL_RATIO = "duels.basic.stat.wl.ratio";
-
-    const STATISTIC_DUEL_TYPE_AWAITING_PLAYERS = "duels.basic.stat.type.awaiting.players";
-    const STATISTIC_DUEL_TYPE_AWAITING_KIT_PLAYERS = "duels.basic.stat.type.kit.awaiting.players";
-
-    const STATISTIC_DUEL_GAME_TYPE = "duels.basic.stat.type";
-    const STATISTIC_DUEL_KIT = "duels.basic.stat.kit";
-
-    const STATISTIC_PLAYER_DUEL_GAME_TYPE = "duels.basic.stat.type.player";
-    const STATISTIC_PLAYER_DUEL_KIT = "duels.basic.stat.kit.player";
-
-    const STATISTIC_DUELS_COUNTDOWN_SECONDS = "duels.basic.countdown.seconds";
-
-    const STATISTIC_DUELS_PLAYER_OPPONENT_NAME = "duels.basic.stat.player.opponent.name";
-    // TODO: Add these
-    const STATISTIC_DUELS_PLAYER_OPPONENT_PING = "duels.basic.stat.player.opponent.ping";
-    const STATISTIC_DUELS_PLAYER_OPPONENT_CPS = "duels.basic.stat.player.opponent.cps";
-
-    const STATISTIC_DUELS_PLAYER_TEAM_COLOR = "duels.basic.stat.player.team.color";
-    const STATISTIC_DUELS_PLAYER_OPPOSITE_TEAM_COLOR = "duels.basic.stat.player.opposite.team.color";
-
-    const STATISTIC_DUELS_DURATION = "duels.basic.stat.duration";
 
     /**
      * Initializes the generators.
@@ -372,6 +349,366 @@ class BasicDuelsUtils
                 return 5;
             }
         ));
+
+        // The gets the winner name based on the data, data should be a duel or an array.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_DUELS_1VS1_WINNER_NAME,
+            function(Player $player, Server $server, $data)
+            {
+                if(is_array($data) && isset($data["winner"]))
+                {
+                    $winner = $data["winner"];
+
+                    if($winner instanceof DuelPlayer)
+                    {
+                        return $winner->getDisplayName();
+                    }
+                    else
+                    {
+                        return "None";
+                    }
+                }
+                elseif ($data instanceof IBasicDuel)
+                {
+                    $results = $data->getResults();
+                    if(isset($results["winner"]))
+                    {
+                        $winner = $results["winner"];
+                        if($winner instanceof DuelPlayer)
+                        {
+                            return $winner->getDisplayName();
+                        }
+                    }
+                    return "None";
+                }
+
+                return "Unknown";
+            }
+        ));
+
+        // Gets the loser's name. The data should be either an array or a basic duel.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_DUELS_1VS1_LOSER_NAME,
+            function(Player $player, Server $server, $data)
+            {
+                if(is_array($data) && isset($data["loser"]))
+                {
+                    $loser = $data["loser"];
+                    if($loser instanceof DuelPlayer)
+                    {
+                        return $loser->getDisplayName();
+                    }
+                    else
+                    {
+                        return "None";
+                    }
+                }
+                elseif ($data instanceof IBasicDuel)
+                {
+                    $results = $data->getResults();
+                    if(isset($results["loser"]))
+                    {
+                        $loser = $results["loser"];
+                        if($loser instanceof DuelPlayer)
+                        {
+                            return $loser->getDisplayName();
+                        }
+                    }
+                    return "None";
+                }
+
+                return "Unknown";
+            }
+        ));
+
+
+        // Registers the duels winning team color.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_DUELS_TEAMS_WINNING_TEAM_COLOR,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof IBasicDuel)
+                {
+                    $results = $data->getResults();
+                    if(isset($results["winner"]))
+                    {
+                        $winner = $results["winner"];
+                        if($winner instanceof DuelTeam)
+                        {
+                            return $winner->getColor()->getColorName();
+                        }
+                    }
+
+                    return "None";
+                }
+
+                return "Unknown";
+            }
+        ));
+
+        // Registers the losing team color.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_DUELS_TEAMS_LOSING_TEAM_COLOR,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof IBasicDuel)
+                {
+                    $results = $data->getResults();
+                    if(isset($results["loser"]))
+                    {
+                        $loser = $results["loser"];
+                        if($loser instanceof DuelTeam)
+                        {
+                            return $loser->getColor()->getColorName();
+                        }
+                    }
+                    return "None";
+                }
+
+                return "Unknown";
+            }
+        ));
+
+        // Registers the team color to the displaystatistic list.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_DUELS_PLAYER_TEAM_COLOR,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof TeamDuel)
+                {
+                    $team = $data->getTeam($player);
+                    if($team !== null)
+                    {
+                        return $team->getColor()->getColorName();
+                    }
+                }
+                elseif ($player instanceof PracticePlayer)
+                {
+                    $game = $player->getCurrentGame();
+                    if($game instanceof TeamDuel)
+                    {
+                        $team = $game->getTeam($player);
+                        if($team !== null)
+                        {
+                            return $team->getColor()->getColorName();
+                        }
+                    }
+                }
+
+                return "Unknown";
+            }
+        ));
+
+        // Registers the opposite player's team.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_DUELS_PLAYER_OPPOSITE_TEAM_COLOR,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof TeamDuel)
+                {
+                    $team = $data->getOppositeTeam($player);
+                    if($team !== null)
+                    {
+                        return $team->getColor()->getColorName();
+                    }
+                    return "None";
+                }
+                elseif ($player instanceof PracticePlayer)
+                {
+                    $game = $player->getCurrentGame();
+                    if($game instanceof TeamDuel)
+                    {
+                        $team = $game->getOppositeTeam($player);
+                        if($team !== null)
+                        {
+                            return $team->getColor()->getColorName();
+                        }
+                        return "None";
+                    }
+                }
+
+                return "Unknown";
+            }
+        ));
+
+        // Gets the number of players eliminated.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_DUELS_PLAYER_TEAM_ELIMINATED,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof TeamDuel)
+                {
+                    $team = $data->getTeam($player);
+                    if($team !== null)
+                    {
+                        return $team->getEliminated();
+                    }
+                }
+                elseif ($player instanceof PracticePlayer)
+                {
+                    $game = $player->getCurrentGame();
+                    if($game instanceof TeamDuel)
+                    {
+                        $team = $game->getTeam($player);
+                        if($team !== null)
+                        {
+                            return $team->getEliminated();
+                        }
+                    }
+                }
+
+                return 0;
+            }
+        ));
+
+        // Registers the player's team left.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_DUELS_PLAYER_TEAM_PLAYERS_LEFT,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof TeamDuel)
+                {
+                    $team = $data->getTeam($player);
+                    if($team !== null)
+                    {
+                        return $team->getPlayersLeft();
+                    }
+                }
+                elseif ($player instanceof PracticePlayer)
+                {
+                    $game = $player->getCurrentGame();
+                    if($game instanceof TeamDuel)
+                    {
+                        $team = $game->getTeam($player);
+                        if($team !== null)
+                        {
+                            return $team->getPlayersLeft();
+                        }
+                    }
+                }
+
+                return 0;
+            }
+        ));
+
+        // Gets the player's team size.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_DUELS_PLAYER_TEAM_SIZE,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof TeamDuel)
+                {
+                    $team = $data->getTeam($player);
+                    if($team !== null)
+                    {
+                        return $team->getTeamSize();
+                    }
+                }
+                elseif ($player instanceof PracticePlayer)
+                {
+                    $game = $player->getCurrentGame();
+                    if($game instanceof TeamDuel)
+                    {
+                        $team = $game->getTeam($player);
+                        if($team !== null)
+                        {
+                            return $team->getTeamSize();
+                        }
+                    }
+                }
+
+                return 0;
+            }
+        ));
+
+        // Gets the number of players eliminated of the opposite team.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_DUELS_PLAYER_OPPOSITE_TEAM_ELIMINATED,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof TeamDuel)
+                {
+                    $team = $data->getOppositeTeam($player);
+                    if($team !== null)
+                    {
+                        return $team->getEliminated();
+                    }
+                }
+                elseif ($player instanceof PracticePlayer)
+                {
+                    $game = $player->getCurrentGame();
+                    if($game instanceof TeamDuel)
+                    {
+                        $team = $game->getOppositeTeam($player);
+                        if($team !== null)
+                        {
+                            return $team->getEliminated();
+                        }
+                    }
+                }
+
+                return 0;
+            }
+        ));
+
+        // Registers the player's team left.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_DUELS_PLAYER_OPPOSITE_TEAM_PLAYERS_LEFT,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof TeamDuel)
+                {
+                    $team = $data->getOppositeTeam($player);
+                    if($team !== null)
+                    {
+                        return $team->getPlayersLeft();
+                    }
+                }
+                elseif ($player instanceof PracticePlayer)
+                {
+                    $game = $player->getCurrentGame();
+                    if($game instanceof TeamDuel)
+                    {
+                        $team = $game->getOppositeTeam($player);
+                        if($team !== null)
+                        {
+                            return $team->getPlayersLeft();
+                        }
+                    }
+                }
+
+                return 0;
+            }
+        ));
+
+        // The player's opposite team size.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_DUELS_PLAYER_OPPOSITE_TEAM_SIZE,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof TeamDuel)
+                {
+                    $team = $data->getOppositeTeam($player);
+                    if($team !== null)
+                    {
+                        return $team->getTeamSize();
+                    }
+                }
+                elseif ($player instanceof PracticePlayer)
+                {
+                    $game = $player->getCurrentGame();
+                    if($game instanceof TeamDuel)
+                    {
+                        $team = $game->getOppositeTeam($player);
+                        if($team !== null)
+                        {
+                            return $team->getTeamSize();
+                        }
+                    }
+                }
+                return 0;
+            }
+        ));
     }
 
     /**
@@ -387,7 +724,21 @@ class BasicDuelsUtils
         DisplayStatistic::unregisterStatistic(self::STATISTIC_PLAYER_DUEL_GAME_TYPE);
         DisplayStatistic::unregisterStatistic(self::STATISTIC_PLAYER_DUEL_KIT);
         DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_OPPONENT_NAME);
+        DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_OPPONENT_CPS);
+        DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_OPPONENT_PING);
         DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_DURATION);
+        DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_TEAMS_WINNING_TEAM_COLOR);
+        DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_TEAMS_LOSING_TEAM_COLOR);
+
+        DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_TEAM_COLOR);
+        DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_TEAM_PLAYERS_LEFT);
+        DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_TEAM_ELIMINATED);
+        DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_TEAM_SIZE);
+
+        DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_OPPOSITE_TEAM_COLOR);
+        DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_OPPOSITE_TEAM_PLAYERS_LEFT);
+        DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_OPPOSITE_TEAM_ELIMINATED);
+        DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_OPPOSITE_TEAM_SIZE);
     }
 
     /**

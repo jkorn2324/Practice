@@ -39,4 +39,11 @@ interface IBasicDuel extends IGame, ISpectatorGame
      * Gets the game type of the duel.
      */
     public function getGameType(): BasicDuelGameType;
+
+    /**
+     * @return array
+     *
+     * Gets the results of the duel.
+     */
+    public function getResults(): array;
 }

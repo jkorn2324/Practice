@@ -16,6 +16,7 @@ use jkorn\bd\messages\BasicDuelsMessages;
 use jkorn\bd\player\BasicDuelPlayer;
 use jkorn\bd\scoreboards\BasicDuelsScoreboardManager;
 use jkorn\practice\arenas\PracticeArena;
+use jkorn\practice\games\duels\DuelPlayer;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\PracticeUtil;
@@ -140,32 +141,37 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
         // Updates the first player.
         if($this->player1->isOnline())
         {
-            // TODO: Sends the final message to player1.
             $player = $this->player1->getPlayer();
             if(!$this->player1->isDead())
             {
                 $player->putInLobby(true);
             }
+
+            // TODO: Prefix
+            $player->sendMessage($this->getResultMessage($player));
         }
 
         // Updates the second player.
         if($this->player2->isOnline())
         {
-            // TODO: Sends the final message to player2.
             $player = $this->player2->getPlayer();
             if(!$this->player2->isDead())
             {
                 $player->putInLobby(true);
             }
+
+            // TODO: Prefix
+            $player->sendMessage($this->getResultMessage($player));
         }
 
         // Broadcasts everything to the spectators & resets them.
         $this->broadcastSpectators(function(Player $player)
         {
-            if($player instanceof PracticePlayer)
+            if($player instanceof PracticePlayer && $player->isOnline())
             {
                 // TODO: Send messages to the player.
                 $player->putInLobby(true);
+                $player->sendMessage($this->getResultMessage($player));
             }
         });
 
@@ -410,5 +416,79 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
 
         // TODO: Autogenerate countdown.
         return "";
+    }
+
+    /**
+     * @return array
+     *
+     * Gets the results of the duel.
+     */
+    public function getResults(): array
+    {
+        return $this->results;
+    }
+
+    /**
+     * @param Player $player - The input player.
+     *
+     * @return string
+     *
+     * Gets the result message of the 1vs1.
+     */
+    protected function getResultMessage(Player $player): string
+    {
+        $results = $this->results;
+
+        if(isset($results["winner"], $results["loser"]))
+        {
+            /** @var DuelPlayer|null $winner */
+            $winner = $results["winner"];
+            /** @var DuelPlayer|null $loser */
+            $loser = $results["loser"];
+
+            $manager = PracticeCore::getBaseMessageManager()->getMessageManager(BasicDuelsMessageManager::NAME);
+
+            if($manager !== null)
+            {
+                // Always show the draw message if winner & loser is null.
+                if($winner === null || $loser === null)
+                {
+                    $messageObject = $manager->getMessage(BasicDuelsMessages::DUELS_1VS1_RESULT_MESSAGE_DRAW);
+                    if($messageObject !== null)
+                    {
+                        return $messageObject->getText($player, $this);
+                    }
+                }
+
+                if($this->isSpectator($player))
+                {
+                    $messageLocalized = BasicDuelsMessages::DUELS_1VS1_RESULT_MESSAGE_SPECTATORS;
+                }
+                elseif ($winner->equals($player))
+                {
+                    $messageLocalized = BasicDuelsMessages::DUELS_1VS1_RESULT_MESSAGE_WINNER;
+                }
+                elseif ($loser->equals($player))
+                {
+                    $messageLocalized = BasicDuelsMessages::DUELS_1VS1_RESULT_MESSAGE_LOSER;
+                }
+
+                if(isset($messageLocalized))
+                {
+                    $messageObject = $manager->getMessage($messageLocalized);
+                    if($messageObject !== null)
+                    {
+                        return $messageObject->getText($player, $this);
+                    }
+                }
+            }
+
+            $winnerDisplay = $winner !== null ? $winner->getDisplayName() : "None";
+            $loserDisplay = $loser !== null ? $loser->getDisplayName() : "None";
+
+            return "Winner: {$winnerDisplay} - Loser: {$loserDisplay}";
+        }
+
+        return "Winner: None - Loser: None";
     }
 }

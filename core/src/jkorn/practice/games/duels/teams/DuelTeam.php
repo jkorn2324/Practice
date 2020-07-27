@@ -90,6 +90,16 @@ abstract class DuelTeam implements ITeam
     }
 
     /**
+     * @return int
+     *
+     * Gets the number of players eliminated.
+     */
+    public function getEliminated(): int
+    {
+        return count($this->eliminated);
+    }
+
+    /**
      * @return string
      *
      * Gets the localized name of the team type.

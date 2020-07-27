@@ -40,4 +40,12 @@ interface ITeamGame extends IGame
      * Gets the team from the player.
      */
     public function getTeam(Player $player);
+
+    /**
+     * @param Player $player
+     * @return mixed
+     *
+     * Gets the opposite team from the player.
+     */
+    public function getOppositeTeam(Player $player);
 }

@@ -125,6 +125,25 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
 
     /**
      * @param Player $player
+     * @return DuelTeam|null
+     *
+     * Gets the opposite team from the player.
+     */
+    public function getOppositeTeam(Player $player)
+    {
+        if($this->team1->isInTeam($player))
+        {
+            return $this->team2;
+        }
+        elseif ($this->team2->isInTeam($player))
+        {
+            return $this->team1;
+        }
+        return null;
+    }
+
+    /**
+     * @param Player $player
      * @param int $reason
      *
      * Removes the player from the game based on the reason.

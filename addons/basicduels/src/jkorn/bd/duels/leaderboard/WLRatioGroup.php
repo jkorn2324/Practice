@@ -23,7 +23,7 @@ class WLRatioGroup extends LeaderboardGroup
 
     public function __construct(LeaderboardGroup $kills, LeaderboardGroup $deaths)
     {
-        parent::__construct(BasicDuelsUtils::STATISTIC_DUELS_PLAYER_WL_RATIO, false);
+        parent::__construct(BasicDuelsUtils::STATISTIC_DUELS_PLAYER_WL_RATIO, "Basic Duels W/L Ratio", false);
 
         $this->wins = $kills;
         $this->losses = $deaths;

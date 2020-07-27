@@ -25,10 +25,24 @@ class LeaderboardGroup
     /** @var bool */
     private $load;
 
-    public function __construct(string $statistic, bool $load = true)
+    /** @var string */
+    private $displayName;
+
+    public function __construct(string $statistic, string $displayName, bool $load = true)
     {
         $this->statistic = $statistic;
         $this->load = $load;
+        $this->displayName = $displayName;
+    }
+
+    /**
+     * @return string
+     *
+     * Gets the display name of the leaderboard group.
+     */
+    public function getDisplayName(): string
+    {
+        return $this->displayName;
     }
 
     /**

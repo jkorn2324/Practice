@@ -28,6 +28,13 @@ interface ITeam
     /**
      * @return int
      *
+     * Gets the number of players eliminated.
+     */
+    public function getEliminated(): int;
+
+    /**
+     * @return int
+     *
      * Gets the team size.
      */
     public function getTeamSize(): int;

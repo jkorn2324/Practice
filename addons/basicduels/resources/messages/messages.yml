@@ -9,3 +9,22 @@ duels.basic.countdown.title.seconds.4-1: "{duels.basic.countdown.seconds}..."
 # The countdown seconds title that the player receives when
 # the basic duel begins.
 duels.basic.countdown.title.begin: "GO"
+
+# The message that the winner of the 1vs1 duel receives if the duel isn't a draw.
+duels.basic.1vs1.result.message.winner: "Winner: {duels.basic.1vs1.stat.winner.name} - Loser: {duels.basic.1vs1.stat.loser.name}"
+# The message that the loser of the 1vs1 duel receives if the duel isn't a draw.
+duels.basic.1vs1.result.message.loser: "Winner: {duels.basic.1vs1.stat.winner.name} - Loser: {duels.basic.1vs1.stat.loser.name}"
+# The message that the spectator of the 1vs1 duel receives if the duel isn't a draw.
+duels.basic.1vs1.result.message.spectator: "Winner: {duels.basic.1vs1.stat.winner.name} - Loser: {duels.basic.1vs1.stat.loser.name}"
+# The message that all players (including spectators) of the duel receive if the 1vs1 duel is a draw.
+duels.basic.1vs1.result.message.draw: "Winner: None - Loser: None "
+
+# The message that the players of the winning team receive.
+duels.basic.team.result.message.winning: "W: {duels.basic.team.stat.winner.color} - L: {duels.basic.team.stat.loser.color}"
+# The message that the players of the losing team receive.
+duels.basic.team.result.message.loser: "W: {duels.basic.team.stat.winner.color} - L: {duels.basic.team.stat.loser.color}"
+# The message that the spectators of the team duel receive.
+duels.basic.team.result.message.spectator: "W: {duels.basic.team.stat.winner.color} - L: {duels.basic.team.stat.loser.color}"
+# The message that all players (including spectators) receive if the game failed to start.
+# Occurs when a player from either team leaves the game before starting.
+duels.basic.team.result.message.failed: "W: None - L: None"
