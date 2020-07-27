@@ -5,12 +5,12 @@
 scoreboard.spawn.queue:
   title: "Practice"
   lines:
-    line-1: " Online: {stat.online} "
+    line-1: " Online: {stat.online.players} "
     line-2: ""
-    line-3: " Ping: {stat.ping} "
+    line-3: " Ping: {stat.player.ping} "
     line-4: ""
     line-5: " Queue: "
-    line-6: " {duels.basic.stat.type.player} {duels.basic.stat.type.player.kit} "
+    line-6: " {duels.basic.stat.type.player} {duels.basic.stat.kit.player} "
     line-7: ""
     line-8: " Github @jkorn2324 "
 
@@ -18,7 +18,7 @@ scoreboard.spawn.queue:
 scoreboard.duel.player.1vs1:
   title: "Practice"
   lines:
-    line-1: " Opponent: {duels.basic.stat.player.opponent} "
+    line-1: " Opponent: {duels.basic.stat.player.opponent.name} "
     line-2: " Duration: {duels.basic.stat.duration} "
     line-3: ""
     line-4: " Github @jkorn2324 "
@@ -37,6 +37,6 @@ scoreboard.duel.spectator:
   title: "Practice"
   lines:
     line-1: " Duration: {duels.basic.stat.duration} "
-    line-2: " Game: {duels.basic.stat.type.duel} {duels.basic.stat.type.duel.kit} " # TODO Add Kit Statistic
+    line-2: " Game: {duels.basic.stat.type.player} {duels.basic.stat.kit.player} "
     line-3: ""
     line-4: " Github @jkorn2324 "

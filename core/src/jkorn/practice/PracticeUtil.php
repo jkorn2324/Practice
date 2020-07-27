@@ -357,6 +357,35 @@ class PracticeUtil
     public static function deleteLevel($level, bool $async = false): void
     {
         // TODO: Implement function
+        $server = Server::getInstance();
+
+        if(is_string($level))
+        {
+            $path = $server->getDataPath() . "worlds/" . $level;
+        }
+        elseif ($level instanceof Level)
+        {
+            $path = $server->getDataPath() . "worlds/" . $level->getFolderName();
+        }
+
+        if(!$async)
+        {
+            // TODO: Delete the level nonasync.
+            return;
+        }
+
+        $server->getAsyncPool()->submitTask(new class($path) extends AsyncTask
+        {
+            /** @var string */
+            private $path;
+
+            public function __construct(string $path)
+            {
+                $this->path = $path;
+            }
+
+            // TODO: Implement
+        });
     }
 
     /**

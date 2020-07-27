@@ -58,8 +58,8 @@ abstract class AbstractMessageManager
 
         // Creates the MD file.
         if(
-            !file_exists($mdFile = $this->destinationFolder . "/README.md")
-            && file_exists($this->resourcesFolder . "/README.md")
+            file_exists($this->resourcesFolder . "/README.md")
+            && !file_exists($mdFile = $this->destinationFolder . "/README.md")
         )
         {
             $mdResource = fopen($this->resourcesFolder . "/README.md", "rb");
@@ -69,9 +69,12 @@ abstract class AbstractMessageManager
         }
 
         // Creates a new scoreboards yaml file if it doesn't exist.
-        if(!file_exists($inputFile = $this->destinationFolder . "/scoreboards.yml"))
+        if(
+            file_exists($this->resourcesFolder . "/messages.yml")
+            && !file_exists($inputFile = $this->destinationFolder . "/messages.yml")
+        )
         {
-            $yamlResources = fopen($this->resourcesFolder . "/scoreboards.yml", "rb");
+            $yamlResources = fopen($this->resourcesFolder . "/messages.yml", "rb");
             stream_copy_to_stream($yamlResources, $file = fopen($inputFile, "wb"));
             fclose($yamlResources);
             fclose($file);

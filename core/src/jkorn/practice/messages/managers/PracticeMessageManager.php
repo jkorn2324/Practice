@@ -19,7 +19,7 @@ class PracticeMessageManager extends AbstractMessageManager implements IPractice
     public function __construct(PracticeCore $core)
     {
         $this->core = $core;
-        parent::__construct($core->getResourcesFolder() . "messages/", $core->getDataFolder() . "messages/");
+        parent::__construct($core->getResourcesFolder() . "messages", $core->getDataFolder() . "messages");
     }
 
     /**
