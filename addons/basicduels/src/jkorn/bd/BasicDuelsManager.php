@@ -25,6 +25,7 @@ use jkorn\practice\kits\IKit;
 use jkorn\practice\level\gen\PracticeGeneratorInfo;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
 use jkorn\practice\player\PracticePlayer;
+use jkorn\practice\PracticeUtil;
 use pocketmine\Player;
 use pocketmine\Server;
 use jkorn\practice\PracticeCore;
@@ -221,6 +222,9 @@ class BasicDuelsManager implements IAwaitingGameManager
         BasicDuelsUtils::registerDisplayStats();
         BasicDuelsUtils::registerPlayerSettings();
         BasicDuelsUtils::registerPlayerStatistics();
+
+        // Clears the levels from the previous games.
+        $this->removeLevels();
     }
 
     /**
@@ -256,6 +260,7 @@ class BasicDuelsManager implements IAwaitingGameManager
         if(!isset($duelArena) || $duelArena === null)
         {
             $levelName = "game.duels.basic.{$duelID}";
+
             /** @var BasicDuelsGeneratorInfo $randomGenerator */
             $randomGenerator = PracticeGeneratorManager::randomGenerator(
                 function(PracticeGeneratorInfo $info) use($numPlayers)
@@ -362,5 +367,26 @@ class BasicDuelsManager implements IAwaitingGameManager
     public function getLeaderboard(): ?IGameLeaderboard
     {
         return $this->leaderboards;
+    }
+
+    /**
+     * Removes the duel levels.
+     */
+    private function removeLevels(): void
+    {
+        $directory = $this->server->getDataPath() . "worlds/";
+        if(!is_dir($directory))
+        {
+            return;
+        }
+
+        $files = scandir($directory);
+        foreach($files as $file)
+        {
+            if(strpos($file, "game.duels.basic.") !== false)
+            {
+                PracticeUtil::deleteLevel($file, true);
+            }
+        }
     }
 }
