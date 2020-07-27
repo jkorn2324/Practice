@@ -46,6 +46,8 @@ class BasicDuelsUtils
     const STATISTIC_PLAYER_DUEL_GAME_TYPE = "duels.basic.stat.type.player";
     const STATISTIC_PLAYER_DUEL_KIT = "duels.basic.stat.kit.player";
 
+    const STATISTIC_DUELS_COUNTDOWN_SECONDS = "duels.basic.countdown.seconds";
+
     const STATISTIC_DUELS_PLAYER_OPPONENT_NAME = "duels.basic.stat.player.opponent.name";
     // TODO: Add these
     const STATISTIC_DUELS_PLAYER_OPPONENT_PING = "duels.basic.stat.player.opponent.ping";
@@ -203,8 +205,8 @@ class BasicDuelsUtils
                 }
 
                 return "Unknown";
-            }
-            , false));
+            })
+        );
 
         // Gets the player's duel kit.
         DisplayStatistic::register(new DisplayStatistic(
@@ -239,8 +241,8 @@ class BasicDuelsUtils
                 }
 
                 return "Unknown";
-            }
-            , false));
+            })
+        );
 
         // Registers the opponent name to the statistics.
         DisplayStatistic::register(new DisplayStatistic(
@@ -347,6 +349,27 @@ class BasicDuelsUtils
                 }
 
                 return "00:00";
+            }
+        ));
+
+        // Registers the duel countdown seconds statistic.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_DUELS_COUNTDOWN_SECONDS,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof AbstractDuel)
+                {
+                    return $data->getCountdownSeconds();
+                }
+                elseif ($player instanceof PracticePlayer)
+                {
+                    $game = $player->getCurrentGame();
+                    if($game instanceof AbstractDuel)
+                    {
+                        return $game->getCountdownSeconds();
+                    }
+                }
+                return 5;
             }
         ));
     }

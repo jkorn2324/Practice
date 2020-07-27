@@ -137,7 +137,7 @@ class ScoreboardData
      */
     public function reloadScoreboard(): void
     {
-        $this->setScoreboard($this->getScoreboard(true));
+        $this->setScoreboard($this->scoreboardType);
     }
 
     /**

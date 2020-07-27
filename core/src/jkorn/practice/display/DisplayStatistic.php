@@ -241,6 +241,7 @@ class DisplayStatistic implements DisplayStatisticNames
         foreach (self::$statistics as $localized => $statistic)
         {
             $statisticVariable = "{$localized}";
+
             if(strpos($text, $statisticVariable) !== false)
             {
                 if(!$checkForUpdate)
@@ -248,7 +249,10 @@ class DisplayStatistic implements DisplayStatisticNames
                     return true;
                 }
 
-                return $statistic->doUpdateForScoreboards();
+                if($statistic->doUpdateForScoreboards())
+                {
+                    return true;
+                }
             }
         }
         return false;
