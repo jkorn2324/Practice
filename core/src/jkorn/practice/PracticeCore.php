@@ -6,6 +6,7 @@ namespace jkorn\practice;
 
 
 use jkorn\practice\commands\ManageKitsCommand;
+use jkorn\practice\commands\SpectateCommand;
 use jkorn\practice\display\DisplayStatistic;
 use jkorn\practice\forms\display\BaseFormDisplayManager;
 use jkorn\practice\forms\internal\InternalForms;
@@ -237,6 +238,8 @@ class PracticeCore extends PluginBase
     {
         // Registers the kit manager command.
         PracticeUtil::registerCommand(new ManageKitsCommand());
+        // Registers the spectate command.
+        PracticeUtil::registerCommand(new SpectateCommand());
     }
 
 }

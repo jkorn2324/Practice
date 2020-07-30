@@ -27,6 +27,7 @@ use jkorn\practice\PracticeUtil;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Player;
+use pocketmine\utils\TextFormat;
 
 class BasicTeamDuel extends TeamDuel implements IBasicDuel
 {
@@ -595,5 +596,69 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
     public function getSpectatorCount(): int
     {
         return count($this->spectators);
+    }
+
+    /**
+     * @param Player $player - The player used to get the message.
+     *
+     * @return string
+     *
+     * Gets the display title of the spectator game,
+     * used so that the spectator form could show the game's basic
+     * information.
+     */
+    public function getSpectatorFormDisplay(Player $player): string
+    {
+        // TODO: Get message from handler.
+        $line1 = $this->gameType->getDisplayName() . " Basic Duel\n";
+        $line2 = "Spectators: " . $this->getSpectatorCount();
+        return $line1 . $line2;
+    }
+
+    /**
+     * @return string
+     *
+     * Gets the game's form texture, used so that the form
+     * gets pretty printed.
+     */
+    public function getSpectatorFormTexture(): string
+    {
+        return $this->gameType->getTexture();
+    }
+
+    /**
+     * @return string
+     *
+     * Gets the game's description, used to display the information
+     * on forms to players looking to watch the game.
+     */
+    public function getGameDescription(): string
+    {
+        $team1Players = "None";
+        if($this->team1 instanceof BasicDuelTeam)
+        {
+            $team1Players = $this->team1->displayPlayers();
+        }
+
+        $team2Players = "None";
+        if($this->team2 instanceof BasicDuelTeam)
+        {
+            $team2Players = $this->team2->displayPlayers();
+        }
+
+        $description = [
+            "Game: " . $this->gameType->getDisplayName() . " Basic Duel\n",
+            "",
+            "Team-1: ",
+            " > Color: " . $this->team1->getColor()->getTextColor() . $this->team1->getColor()->getColorName() . TextFormat::RESET,
+            " > Players: " . $team1Players,
+            "Team-2: ",
+            " > Color: " . $this->team2->getColor()->getTextColor() . $this->team2->getColor()->getColorName() . TextFormat::RESET,
+            " > Players: " . $team2Players,
+            "",
+            "Players Spectator(s): " . $this->getSpectatorCount()
+        ];
+
+        return implode("\n", $description);
     }
 }

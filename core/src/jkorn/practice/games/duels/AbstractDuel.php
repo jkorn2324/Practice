@@ -274,4 +274,14 @@ abstract class AbstractDuel implements IGame
     {
         return $this->countdownSeconds;
     }
+
+    /**
+     * @return int
+     *
+     * Gets the status of the duel.
+     */
+    public function getStatus(): int
+    {
+        return $this->status;
+    }
 }

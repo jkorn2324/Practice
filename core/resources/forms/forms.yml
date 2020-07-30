@@ -61,3 +61,10 @@ form.games.play:
     select.game.none:
       top.text: "None"
       bottom.text: ""
+
+# The form that contains the text display for the
+# game selection for the spectator form.
+form.spectator.game.selection:
+  class: jkorn\practice\forms\display\types\SpectatorSelectionForm
+  title: "Spectate Game"
+  description: "Select the game that you want to spectate."

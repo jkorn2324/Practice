@@ -14,6 +14,7 @@ use jkorn\practice\player\PracticePlayer;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Player;
+use pocketmine\utils\TextFormat;
 
 class BasicDuelTeam extends DuelTeam
 {
@@ -205,5 +206,26 @@ class BasicDuelTeam extends DuelTeam
         {
             unset($this->players[$serverID]);
         }
+    }
+
+    /**
+     * @return string
+     *
+     * Displays the players from the duel team.
+     */
+    public function displayPlayers(): string
+    {
+        $displayPlayers = [];
+        foreach($this->players as $player)
+        {
+            $displayPlayers[$player->getDisplayName()] = TextFormat::GREEN . $player->getDisplayName();
+        }
+
+        foreach($this->eliminated as $serverID => $eliminatedDisplay)
+        {
+            $displayPlayers[$eliminatedDisplay] = TextFormat::RED . $eliminatedDisplay;
+        }
+
+        return implode(TextFormat::GRAY . ", " . TextFormat::RESET, array_values($displayPlayers)) . TextFormat::RESET;
     }
 }

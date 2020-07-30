@@ -539,4 +539,53 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
     {
         return count($this->spectators);
     }
+
+    /**
+     *
+     * @param Player $player - The input player used to get the message.
+     *
+     * @return string
+     *
+     * Gets the display title of the spectator game,
+     * used so that the spectator form could show the game's basic
+     * information.
+     */
+    public function getSpectatorFormDisplay(Player $player): string
+    {
+        // TODO: Get message from literal.
+        $firstLine = $this->gameType->getDisplayName() . " Basic Duel\n";
+        $secondLine = "Spectators: " . $this->getSpectatorCount();
+        return $firstLine . $secondLine;
+    }
+
+    /**
+     * @return string
+     *
+     * Gets the game's form texture, used so that the form
+     * gets pretty printed.
+     */
+    public function getSpectatorFormTexture(): string
+    {
+        return $this->gameType->getTexture();
+    }
+
+    /**
+     * @return string
+     *
+     * Gets the game's description, used to display the information
+     * on forms to players looking to watch the game.
+     */
+    public function getGameDescription(): string
+    {
+        $description = [
+            "Game: " . $this->gameType->getDisplayName() . " Basic Duel",
+            "",
+            "Player-1: " . $this->player1->getDisplayName(),
+            "Player-2: " . $this->player2->getDisplayName(),
+            "",
+            "Spectator(s): " . $this->getSpectatorCount()
+        ];
+
+        return implode("\n", $description);
+    }
 }

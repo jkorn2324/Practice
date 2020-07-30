@@ -50,4 +50,32 @@ interface ISpectatorGame extends IGame
      * Gets the spectator count of the game.
      */
     public function getSpectatorCount(): int;
+
+    /**
+     * @param Player $player - The player used to get the message.
+     *
+     * @return string
+     *
+     * Gets the display title of the spectator game,
+     * used so that the spectator form could show the game's basic
+     * information.
+     */
+    public function getSpectatorFormDisplay(Player $player): string;
+
+    /**
+     * @return string
+     *
+     * Gets the game's form texture, used so that the form
+     * gets pretty printed.
+     */
+    public function getSpectatorFormTexture(): string;
+
+    /**
+     * @return string
+     *
+     * Gets the game's description, used to display the information
+     * on forms to players looking to watch the game.
+     */
+    public function getGameDescription(): string;
+
 }

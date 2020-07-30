@@ -225,6 +225,28 @@ class BaseGameManager implements DisplayStatisticNames
     }
 
     /**
+     * @return ISpectatorGame[]
+     *
+     * Gets the list of all spectating games currently running, used
+     * for displaying a list of spectating games so the player
+     * could join.
+     */
+    public function getSpectatingGames()
+    {
+        $games = [];
+
+        foreach($this->gameTypes as $gameType)
+        {
+            if($gameType instanceof ISpectatingGameManager)
+            {
+                $games = array_replace($games, $gameType->getGames());
+            }
+        }
+
+        return $games;
+    }
+
+    /**
      * Saves the data from the manager, unused here.
      *
      * @param bool $async

@@ -16,4 +16,6 @@ interface IPracticePermissions
 
     // Manages the kits.
     const MANAGE_KITS = "practice.permission.manage.kits";
+    // Spectate the player.
+    const SPECTATE = "practice.permission.spectate";
 }

@@ -18,4 +18,11 @@ interface ISpectatingGameManager extends IGameManager
      * Gets the game from the spectator.
      */
     public function getFromSpectator(Player $player): ?ISpectatorGame;
+
+    /**
+     * @return ISpectatorGame[]
+     *
+     * Gets all of the games.
+     */
+    public function getGames();
 }

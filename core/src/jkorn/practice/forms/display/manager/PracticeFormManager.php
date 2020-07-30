@@ -19,6 +19,7 @@ class PracticeFormManager extends AbstractFormDisplayManager
     const FORM_SETTINGS_BASIC = "form.settings.basic";
     const FORM_SETTINGS_BUILDER_MODE = "form.settings.builder";
     const FORM_PLAY_FFA = "form.FFA.play";
+    const FORM_SPECTATOR_SELECTION = "form.spectator.game.selection";
 
     /** @var PracticeCore */
     private $core;

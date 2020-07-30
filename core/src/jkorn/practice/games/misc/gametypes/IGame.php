@@ -65,4 +65,11 @@ interface IGame
      * Handles an event when the player is in the game.
      */
     public function handleEvent(Event &$event): void;
+
+    /**
+     * @return int
+     *
+     * Gets the game's status.
+     */
+    public function getStatus(): int;
 }

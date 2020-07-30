@@ -18,10 +18,13 @@ use jkorn\bd\duels\IBasicDuel;
 use jkorn\bd\messages\BasicDuelsMessageManager;
 use jkorn\bd\queues\BasicQueuesManager;
 use jkorn\practice\forms\display\FormDisplay;
+use jkorn\practice\games\duels\AbstractDuel;
 use jkorn\practice\games\misc\gametypes\IGame;
+use jkorn\practice\games\misc\gametypes\ISpectatorGame;
 use jkorn\practice\games\misc\managers\IAwaitingGameManager;
 use jkorn\practice\games\misc\managers\awaiting\IAwaitingManager;
 use jkorn\practice\games\misc\leaderboards\IGameLeaderboard;
+use jkorn\practice\games\misc\managers\ISpectatingGameManager;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\level\gen\PracticeGeneratorInfo;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
@@ -31,7 +34,7 @@ use pocketmine\Player;
 use pocketmine\Server;
 use jkorn\practice\PracticeCore;
 
-class BasicDuelsManager implements IAwaitingGameManager
+class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager
 {
 
     const NAME = "basic.duels";
@@ -303,6 +306,25 @@ class BasicDuelsManager implements IAwaitingGameManager
     }
 
     /**
+     * @param Player $player
+     * @return ISpectatorGame|null
+     *
+     * Gets the game from the spectator.
+     */
+    public function getFromSpectator(Player $player): ?ISpectatorGame
+    {
+        foreach($this->duels as $duel)
+        {
+            if($duel->isSpectator($player))
+            {
+                return $duel;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @return int
      *
      * Gets the number of players playing.
@@ -394,5 +416,30 @@ class BasicDuelsManager implements IAwaitingGameManager
                 PracticeUtil::deleteLevel($file, false);
             }
         }
+    }
+
+    /**
+     * @return ISpectatorGame[]
+     *
+     * Gets all of the games.
+     */
+    public function getGames()
+    {
+        $games = [];
+
+        foreach($this->duels as $duel)
+        {
+            if($duel instanceof AbstractDuel)
+            {
+                $status = $duel->getStatus();
+
+                if($status < AbstractDuel::STATUS_ENDING)
+                {
+                    $games[] = $duel;
+                }
+            }
+        }
+
+        return $games;
     }
 }
