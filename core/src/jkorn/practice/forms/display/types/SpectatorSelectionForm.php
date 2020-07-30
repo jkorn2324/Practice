@@ -61,6 +61,8 @@ class SpectatorSelectionForm extends FormDisplay
         }
 
         $form->setExtraData(["games" => $inputGames]);
+        $player->sendForm($form);
+
     }
 
     /**

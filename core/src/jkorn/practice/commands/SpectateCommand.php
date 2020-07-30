@@ -78,6 +78,6 @@ class SpectateCommand extends PracticeCommand implements IPracticePermissions
             }
         }
 
-        return false;
+        return true;
     }
 }

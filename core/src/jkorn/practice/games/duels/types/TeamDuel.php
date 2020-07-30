@@ -56,10 +56,10 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
     {
         if($checkSeconds)
         {
-            $countdownMessage = $this->getCountdownMessage();
             $showDuration = $this->countdownSeconds === 0 ? 10 : 20;
-            $this->broadcastPlayers(function(Player $player) use($countdownMessage, $showDuration)
+            $this->broadcastPlayers(function(Player $player) use($showDuration)
             {
+                $countdownMessage = $this->getCountdownMessage($player);
                 $player->sendTitle($countdownMessage, "", 5, $showDuration, 5);
             });
 

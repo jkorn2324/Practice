@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace jkorn\bd\duels\types;
 
 
-use jkorn\practice\games\misc\IGameInfo;
+use jkorn\practice\games\misc\gametypes\info\IGameInfo;
 
 class BasicDuelGameInfo implements IGameInfo
 {
