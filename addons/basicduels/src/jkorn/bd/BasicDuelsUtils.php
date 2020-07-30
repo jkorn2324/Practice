@@ -6,7 +6,7 @@ namespace jkorn\bd;
 
 
 use jkorn\bd\duels\IBasicDuel;
-use jkorn\bd\duels\types\BasicDuelGameType;
+use jkorn\bd\duels\types\BasicDuelGameInfo;
 use jkorn\bd\gen\BasicDuelsGeneratorInfo;
 use jkorn\bd\gen\types\RedDefault;
 use jkorn\bd\gen\types\YellowDefault;
@@ -19,6 +19,7 @@ use jkorn\practice\games\duels\teams\DuelTeam;
 use jkorn\practice\games\duels\teams\DuelTeamPlayer;
 use jkorn\practice\games\duels\types\Duel1vs1;
 use jkorn\practice\games\duels\types\TeamDuel;
+use jkorn\practice\games\player\GamePlayer;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
 use jkorn\practice\player\info\settings\properties\BooleanSettingProperty;
@@ -79,7 +80,7 @@ class BasicDuelsUtils implements BasicDuelsStatistics
                 if (is_array($data) && isset($data["type"], $data["kit"])) {
                     /** @var IKit $kit */
                     $kit = $data["kit"];
-                    /** @var BasicDuelGameType $type */
+                    /** @var BasicDuelGameInfo $type */
                     $type = $data["type"];
                     $manager = PracticeCore::getBaseGameManager()->getGameManager(BasicDuelsManager::NAME);
 
@@ -101,7 +102,7 @@ class BasicDuelsUtils implements BasicDuelsStatistics
         DisplayStatistic::register(new DisplayStatistic(
                 self::STATISTIC_DUEL_TYPE_AWAITING_PLAYERS,
                 function (Player $player, Server $server, $data) {
-                    if ($data instanceof BasicDuelGameType) {
+                    if ($data instanceof BasicDuelGameInfo) {
                         $manager = PracticeCore::getBaseGameManager()->getGameManager(BasicDuelsManager::NAME);
                         if ($manager instanceof BasicDuelsManager) {
                             $queues = $manager->getAwaitingManager();
@@ -121,11 +122,11 @@ class BasicDuelsUtils implements BasicDuelsStatistics
         DisplayStatistic::register(new DisplayStatistic(
             self::STATISTIC_DUEL_GAME_TYPE,
             function (Player $player, Server $server, $data) {
-                if ($data instanceof BasicDuelGameType) {
+                if ($data instanceof BasicDuelGameInfo) {
                     return $data->getDisplayName();
                 } elseif (is_array($data) && isset($data["type"])) {
                     $type = $data["type"];
-                    if ($type instanceof BasicDuelGameType) {
+                    if ($type instanceof BasicDuelGameInfo) {
                         return $type->getDisplayName();
                     } elseif (is_string($type)) {
                         return $type;
@@ -159,7 +160,7 @@ class BasicDuelsUtils implements BasicDuelsStatistics
         DisplayStatistic::register(new DisplayStatistic(
             self::STATISTIC_PLAYER_DUEL_GAME_TYPE,
             function (Player $player, Server $server, $data) {
-                if ($data instanceof BasicDuelGameType) {
+                if ($data instanceof BasicDuelGameInfo) {
                     return $data->getDisplayName();
                 } elseif ($data instanceof IBasicDuel) {
                     return $data->getGameType()->getDisplayName();
@@ -732,6 +733,45 @@ class BasicDuelsUtils implements BasicDuelsStatistics
                 return "None";
             }
         ));
+
+        // Gets the spectator's player name.
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_SPECTATOR_PLAYER_NAME,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof Player)
+                {
+                    return $data->getDisplayName();
+                }
+                elseif ($data instanceof GamePlayer)
+                {
+                    return $data->getDisplayName();
+                }
+
+                return $player->getDisplayName();
+            }
+        ));
+
+        DisplayStatistic::register(new DisplayStatistic(
+            self::STATISTIC_SPECTATORS_COUNT,
+            function(Player $player, Server $server, $data)
+            {
+                if($data instanceof IBasicDuel)
+                {
+                    return $data->getSpectatorCount();
+                }
+                elseif ($player instanceof PracticePlayer)
+                {
+                    $game = $player->getSpectatingGame();
+                    if($game !== null)
+                    {
+                        return $game->getSpectatorCount();
+                    }
+                }
+
+                return 0;
+            }
+        ));
     }
 
     /**
@@ -746,10 +786,13 @@ class BasicDuelsUtils implements BasicDuelsStatistics
         DisplayStatistic::unregisterStatistic(self::STATISTIC_DUEL_KIT);
         DisplayStatistic::unregisterStatistic(self::STATISTIC_PLAYER_DUEL_GAME_TYPE);
         DisplayStatistic::unregisterStatistic(self::STATISTIC_PLAYER_DUEL_KIT);
+
         DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_OPPONENT_NAME);
         DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_OPPONENT_CPS);
         DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_OPPONENT_PING);
+
         DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_DURATION);
+
         DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_TEAMS_WINNING_TEAM_COLOR);
         DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_TEAMS_LOSING_TEAM_COLOR);
 
@@ -762,6 +805,11 @@ class BasicDuelsUtils implements BasicDuelsStatistics
         DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_OPPOSITE_TEAM_PLAYERS_LEFT);
         DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_OPPOSITE_TEAM_ELIMINATED);
         DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_OPPOSITE_TEAM_SIZE);
+
+        DisplayStatistic::unregisterStatistic(self::STATISTIC_DUELS_TEAM_PLAYER_ELIMINATED);
+
+        DisplayStatistic::unregisterStatistic(self::STATISTIC_SPECTATOR_PLAYER_NAME);
+        DisplayStatistic::unregisterStatistic(self::STATISTIC_SPECTATORS_COUNT);
     }
 
     /**

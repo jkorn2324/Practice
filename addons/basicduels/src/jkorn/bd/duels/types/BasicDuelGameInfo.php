@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace jkorn\bd\duels\types;
 
 
-use jkorn\practice\games\misc\IGameType;
+use jkorn\practice\games\misc\IGameInfo;
 
-class BasicDuelGameType implements IGameType
+class BasicDuelGameInfo implements IGameInfo
 {
 
     /** @var string */
@@ -71,7 +71,7 @@ class BasicDuelGameType implements IGameType
      */
     public function equals($object): bool
     {
-        if($object instanceof BasicDuelGameType)
+        if($object instanceof BasicDuelGameInfo)
         {
             return $object->getLocalizedName() === $this->getLocalizedName();
         }

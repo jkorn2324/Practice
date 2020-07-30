@@ -11,16 +11,16 @@ use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\duels\Basic1vs1;
 use jkorn\bd\duels\leaderboard\BasicDuelsLeaderboards;
 use jkorn\bd\duels\BasicTeamDuel;
-use jkorn\bd\duels\types\BasicDuelGameType;
+use jkorn\bd\duels\types\BasicDuelGameInfo;
 use jkorn\bd\forms\BasicDuelsFormManager;
 use jkorn\bd\gen\BasicDuelsGeneratorInfo;
 use jkorn\bd\duels\IBasicDuel;
 use jkorn\bd\messages\BasicDuelsMessageManager;
 use jkorn\bd\queues\BasicQueuesManager;
 use jkorn\practice\forms\display\FormDisplay;
-use jkorn\practice\games\IGame;
-use jkorn\practice\games\misc\IAwaitingGameManager;
-use jkorn\practice\games\misc\IAwaitingManager;
+use jkorn\practice\games\misc\gametypes\IGame;
+use jkorn\practice\games\misc\managers\IAwaitingGameManager;
+use jkorn\practice\games\misc\managers\awaiting\IAwaitingManager;
 use jkorn\practice\games\misc\leaderboards\IGameLeaderboard;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\level\gen\PracticeGeneratorInfo;
@@ -73,31 +73,31 @@ class BasicDuelsManager implements IAwaitingGameManager
      */
     private function initGameTypes(): void
     {
-        $this->registerGameType(new BasicDuelGameType(2,
+        $this->registerGameType(new BasicDuelGameInfo(2,
             "1vs1", "textures/ui/dressing_room_customization.png"));
-        $this->registerGameType(new BasicDuelGameType(4,
+        $this->registerGameType(new BasicDuelGameInfo(4,
             "2vs2", "textures/ui/FriendsDiversity.png"));
-        $this->registerGameType(new BasicDuelGameType(6,
+        $this->registerGameType(new BasicDuelGameInfo(6,
             "3vs3", "textures/ui/dressing_room_skins.png"));
     }
 
     /**
-     * @param BasicDuelGameType $gameType
+     * @param BasicDuelGameInfo $gameType
      *
      * Registers the game type.
      */
-    private function registerGameType(BasicDuelGameType $gameType): void
+    private function registerGameType(BasicDuelGameInfo $gameType): void
     {
         $this->gameTypes[$gameType->getLocalizedName()] = $gameType;
     }
 
     /**
      * @param string $gameType
-     * @return BasicDuelGameType|null
+     * @return BasicDuelGameInfo|null
      *
      * Gets the game type based on the localized name.
      */
-    public function getGameType(string $gameType): ?BasicDuelGameType
+    public function getGameType(string $gameType): ?BasicDuelGameInfo
     {
         if(isset($this->gameTypes[$gameType]))
         {
@@ -141,7 +141,7 @@ class BasicDuelsManager implements IAwaitingGameManager
         $players = $args[0];
         /** @var IKit $kit */
         $kit = $args[1];
-        /** @var BasicDuelGameType $gameType */
+        /** @var BasicDuelGameInfo $gameType */
         $gameType = $args[2];
         /** @var bool $found */
         $found = $args[3];
@@ -339,7 +339,7 @@ class BasicDuelsManager implements IAwaitingGameManager
     }
 
     /**
-     * @return BasicDuelGameType[]
+     * @return BasicDuelGameInfo[]
      *
      * Gets the duels game types.
      */

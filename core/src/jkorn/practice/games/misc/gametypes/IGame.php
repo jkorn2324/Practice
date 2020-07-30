@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\games;
+namespace jkorn\practice\games\misc\gametypes;
 
 
 use pocketmine\event\Event;

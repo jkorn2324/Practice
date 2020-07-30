@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice;
 
 
-use jkorn\practice\games\IGame;
+use jkorn\practice\games\misc\gametypes\IGame;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\event\player\PlayerDeathEvent;

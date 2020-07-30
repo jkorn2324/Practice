@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\games\misc;
+namespace jkorn\practice\games\misc\gametypes;
 
 
-use jkorn\practice\games\IGame;
 use jkorn\practice\player\PracticePlayer;
 use pocketmine\Player;
 

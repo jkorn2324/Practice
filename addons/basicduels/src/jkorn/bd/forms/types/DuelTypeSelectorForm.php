@@ -6,7 +6,7 @@ namespace jkorn\bd\forms\types;
 
 
 use jkorn\bd\BasicDuelsManager;
-use jkorn\bd\duels\types\BasicDuelGameType;
+use jkorn\bd\duels\types\BasicDuelGameInfo;
 use jkorn\bd\forms\BasicDuelsFormManager;
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\display\FormDisplayText;
@@ -61,7 +61,7 @@ class DuelTypeSelectorForm extends FormDisplay
     {
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
-            /** @var BasicDuelGameType[] $gameTypes */
+            /** @var BasicDuelGameInfo[] $gameTypes */
             $gameTypes = $extraData["gameTypes"];
             if(count($gameTypes) <= 0)
             {

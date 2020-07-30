@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace jkorn\practice\games\duels\teams;
 
 
-use jkorn\practice\games\misc\ITeam;
-use jkorn\practice\games\misc\TeamColor;
+use jkorn\practice\games\misc\teams\ITeam;
+use jkorn\practice\games\misc\teams\TeamColor;
 use jkorn\practice\player\PracticePlayer;
 use pocketmine\Player;
 

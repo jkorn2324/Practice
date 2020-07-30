@@ -15,7 +15,7 @@ use jkorn\practice\data\PracticeDataManager;
 use jkorn\practice\games\misc\leaderboards\LeaderboardGroup;
 use pocketmine\Server;
 use jkorn\bd\BasicDuelsManager;
-use jkorn\practice\games\IGameManager;
+use jkorn\practice\games\misc\managers\IGameManager;
 use jkorn\practice\games\misc\leaderboards\IGameLeaderboard;
 
 class BasicDuelsLeaderboards implements IGameLeaderboard

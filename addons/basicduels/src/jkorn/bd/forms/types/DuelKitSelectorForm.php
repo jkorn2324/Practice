@@ -12,7 +12,7 @@ namespace jkorn\bd\forms\types;
 
 
 use jkorn\bd\BasicDuelsManager;
-use jkorn\bd\duels\types\BasicDuelGameType;
+use jkorn\bd\duels\types\BasicDuelGameInfo;
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\display\FormDisplayText;
 use jkorn\practice\forms\types\SimpleForm;
@@ -80,7 +80,7 @@ class DuelKitSelectorForm extends FormDisplay
         if(
             isset($args[0])
             && ($type = $args[0]) !== null
-            && $type instanceof BasicDuelGameType)
+            && $type instanceof BasicDuelGameInfo)
         {
             $gameType = $type;
         }
@@ -97,7 +97,7 @@ class DuelKitSelectorForm extends FormDisplay
             if($data !== null)
             {
                 $kit = $kits[(int)$data];
-                /** @var BasicDuelGameType $gameType */
+                /** @var BasicDuelGameInfo $gameType */
                 $gameType = $extraData["type"];
 
                 /** @var BasicDuelsManager|null $gameManager */

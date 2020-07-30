@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace jkorn\practice\games\misc;
 
-
-interface IGameType
+/**
+ * Interface IGameInfo
+ * @package jkorn\practice\games\misc
+ *
+ * The base game type class, used for awaiting information.
+ */
+interface IGameInfo
 {
 
     /**

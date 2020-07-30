@@ -56,4 +56,8 @@ interface BasicDuelsStatistics
     const STATISTIC_DUELS_TEAMS_WINNING_TEAM_COLOR = "duels.basic.team.stat.winner.color";
     const STATISTIC_DUELS_TEAMS_LOSING_TEAM_COLOR = "duels.basic.team.stat.loser.color";
 
+    // The spectator name of the player.
+    const STATISTIC_SPECTATOR_PLAYER_NAME = "duels.basic.stat.spectator.name";
+    const STATISTIC_SPECTATORS_COUNT = "duels.basic.stat.spectator.count";
+
 }

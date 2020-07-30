@@ -8,7 +8,7 @@ namespace jkorn\practice\forms\display\types;
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\display\FormDisplayText;
 use jkorn\practice\forms\types\SimpleForm;
-use jkorn\practice\games\IGameManager;
+use jkorn\practice\games\misc\managers\IGameManager;
 use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;

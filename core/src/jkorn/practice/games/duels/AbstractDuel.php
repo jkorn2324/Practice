@@ -15,7 +15,7 @@ use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Player;
 use pocketmine\Server;
-use jkorn\practice\games\IGame;
+use jkorn\practice\games\misc\gametypes\IGame;
 
 abstract class AbstractDuel implements IGame
 {

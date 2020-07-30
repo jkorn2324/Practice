@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\games;
+namespace jkorn\practice\games\misc\managers;
 
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\games\misc\leaderboards\IGameLeaderboard;
+use jkorn\practice\games\misc\gametypes\IGame;
 use pocketmine\Player;
 
 interface IGameManager

@@ -10,7 +10,7 @@ use jkorn\bd\arenas\IDuelArena;
 use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\arenas\PreGeneratedDuelArena;
 use jkorn\bd\BasicDuelsManager;
-use jkorn\bd\duels\types\BasicDuelGameType;
+use jkorn\bd\duels\types\BasicDuelGameInfo;
 use jkorn\bd\messages\BasicDuelsMessageManager;
 use jkorn\bd\messages\BasicDuelsMessages;
 use jkorn\bd\player\team\BasicDuelTeam;
@@ -39,7 +39,7 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
     /** @var PracticePlayer[] */
     private $spectators = [];
 
-    /** @var BasicDuelGameType */
+    /** @var BasicDuelGameInfo */
     private $gameType;
 
     /** @var IDuelArena|PracticeArena */
@@ -50,10 +50,10 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
      * @param int $id
      * @param IKit $kit
      * @param IDuelArena|PracticeArena $arena
-     * @param BasicDuelGameType $gameType
+     * @param BasicDuelGameInfo $gameType
      * @param PracticePlayer[] $players
      */
-    public function __construct(int $id, IKit $kit, $arena, BasicDuelGameType $gameType, $players)
+    public function __construct(int $id, IKit $kit, $arena, BasicDuelGameInfo $gameType, $players)
     {
         parent::__construct($gameType->getNumberOfPlayers() / 2, $kit, BasicDuelTeam::class, BasicDuelTeamPlayer::class);
         $this->id = $id;
@@ -173,6 +173,12 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
                 // Checks if the player is spectating.
                 if($teamPlayer->isSpectator())
                 {
+                    // Sets the player as fake spectating as false
+                    if($player->isFakeSpectating())
+                    {
+                        $player->setFakeSpectating(false);
+                    }
+
                     $player->putInLobby(true);
                 }
             }
@@ -185,7 +191,11 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
 
             if($player instanceof PracticePlayer)
             {
-                // TODO: Send messages to the player.
+                if($player->isFakeSpectating())
+                {
+                    $player->setFakeSpectating(false);
+                }
+
                 $player->putInLobby(true);
             }
         });
@@ -287,7 +297,13 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
 
         $serverID = $player->getServerID()->toString();
         $this->spectators[$serverID] = $player;
-        // TODO: Set the player as spectating.
+
+        // Sets the player as a fake spectator.
+        if(!$player->isFakeSpectating())
+        {
+            $player->setFakeSpectating(true);
+        }
+
         $player->teleport($this->getCenterPosition());
 
         // Sets the spectator scoreboards.
@@ -295,6 +311,24 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
         if ($scoreboardData !== null)
         {
             $scoreboardData->setScoreboard(BasicDuelsScoreboardManager::TYPE_SCOREBOARD_DUEL_SPECTATOR);
+        }
+
+        if($broadcast)
+        {
+            $messageManager = PracticeCore::getBaseMessageManager()->getMessageManager(BasicDuelsMessageManager::NAME);
+            $messageObject = $messageManager !== null ? $messageManager->getMessage(BasicDuelsMessages::DUELS_SPECTATOR_MESSAGE_JOIN) : null;
+
+            $this->broadcastGlobal(function(Player $iPlayer) use($player, $messageObject)
+            {
+                // TODO: Add Prefix.
+                $message = $player->getDisplayName() . " is now spectating the duel.";
+                if($messageObject !== null)
+                {
+                    $message = $messageObject->getText($iPlayer, $player);
+                }
+
+                $iPlayer->sendMessage($message);
+            });
         }
     }
 
@@ -316,13 +350,34 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
         if(isset($this->spectators[$serverID]))
         {
             unset($this->spectators[$serverID]);
+
             if($player->isOnline())
             {
-                // TODO: Unset the player as spectator.
-                if($teleportToSpawn)
+                // Removes the player as fake spectating.
+                if($player->isFakeSpectating())
                 {
-                    // TODO: Put player in lobby.
+                    $player->setFakeSpectating(false);
                 }
+
+                $player->putInLobby($teleportToSpawn);
+            }
+
+            if($broadcast)
+            {
+                $messageManager = PracticeCore::getBaseMessageManager()->getMessageManager(BasicDuelsMessageManager::NAME);
+                $messageObject = $messageManager !== null ? $messageManager->getMessage(BasicDuelsMessages::DUELS_SPECTATOR_MESSAGE_LEAVE) : null;
+
+                $this->broadcastGlobal(function(Player $iPlayer) use($player, $messageObject)
+                {
+                    // TODO: Add Prefix.
+                    $message = $player->getDisplayName() . " is no longer spectating the duel.";
+                    if($messageObject !== null)
+                    {
+                        $message = $messageObject->getText($iPlayer, $player);
+                    }
+
+                    $iPlayer->sendMessage($message);
+                });
             }
         }
     }
@@ -382,11 +437,11 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
     }
 
     /**
-     * @return BasicDuelGameType
+     * @return BasicDuelGameInfo
      *
      * Gets the game type of the duel.
      */
-    public function getGameType(): BasicDuelGameType
+    public function getGameType(): BasicDuelGameInfo
     {
         return $this->gameType;
     }
@@ -530,5 +585,15 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
 
             $player->sendMessage($message);
         });
+    }
+
+    /**
+     * @return int
+     *
+     * Gets the spectator count of the game.
+     */
+    public function getSpectatorCount(): int
+    {
+        return count($this->spectators);
     }
 }

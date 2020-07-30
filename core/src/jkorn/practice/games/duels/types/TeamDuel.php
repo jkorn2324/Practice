@@ -7,9 +7,8 @@ namespace jkorn\practice\games\duels\types;
 
 use jkorn\practice\games\duels\AbstractDuel;
 use jkorn\practice\games\duels\teams\DuelTeam;
-use jkorn\practice\games\duels\teams\DuelTeamPlayer;
-use jkorn\practice\games\misc\ITeamGame;
-use jkorn\practice\games\misc\TeamColor;
+use jkorn\practice\games\misc\gametypes\ITeamGame;
+use jkorn\practice\games\misc\teams\TeamColor;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\player\PracticePlayer;
 use pocketmine\event\player\PlayerRespawnEvent;
@@ -276,7 +275,12 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
             {
                 if($teamPlayer->isSpectator())
                {
-                   // TODO: Set the player as a fake spectator
+                   // Sets the player as a fake spectator.
+                   if(!$player->isFakeSpectating())
+                   {
+                       $player->setFakeSpectating(true);
+                   }
+
                    $event->setRespawnPosition($this->getCenterPosition());
                    return;
                }

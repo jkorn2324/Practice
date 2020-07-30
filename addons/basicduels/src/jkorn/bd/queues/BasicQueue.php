@@ -6,20 +6,20 @@ namespace jkorn\bd\queues;
 
 
 use jkorn\bd\BasicDuelsUtils;
-use jkorn\bd\duels\types\BasicDuelGameType;
+use jkorn\bd\duels\types\BasicDuelGameInfo;
 use jkorn\practice\games\duels\AbstractQueue;
 use jkorn\practice\player\PracticePlayer;
 
 class BasicQueue extends AbstractQueue
 {
 
-    /** @var BasicDuelGameType */
+    /** @var BasicDuelGameInfo */
     private $gameType;
 
     /** @var bool */
     private $peOnly = false;
 
-    public function __construct(PracticePlayer $player, $kit, BasicDuelGameType $gameType)
+    public function __construct(PracticePlayer $player, $kit, BasicDuelGameInfo $gameType)
     {
         parent::__construct($player, $kit);
         $this->gameType = $gameType;
@@ -56,11 +56,11 @@ class BasicQueue extends AbstractQueue
     }
 
     /**
-     * @return BasicDuelGameType
+     * @return BasicDuelGameInfo
      *
      * Gets the game type.
      */
-    public function getGameType(): BasicDuelGameType
+    public function getGameType(): BasicDuelGameInfo
     {
         return $this->gameType;
     }

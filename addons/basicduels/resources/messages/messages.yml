@@ -1,6 +1,5 @@
 # The messages file used for the basic duels addon.
 
-
 # The first countdown seconds title that the player receives.
 duels.basic.countdown.title.seconds.5: "Starting in\n{duels.basic.countdown.seconds}..."
 # The countdown seconds title that the player receives during
@@ -30,4 +29,9 @@ duels.basic.team.result.message.spectator: "W: {duels.basic.team.stat.winner.col
 duels.basic.team.result.message.failed: "W: None - L: None"
 
 # The message when the player is eliminated from the duel.
-duels.basic.team.result.message.eliminated: "{duels.basic.team.stat.eliminated.player.name} has been eliminated."
+duels.basic.team.message.player.eliminated: "{duels.basic.team.stat.eliminated.player.name} has been eliminated."
+
+# Called when the spectators have left the duel.
+duels.basic.spectator.message.leave: "{duels.basic.stat.spectator.name} is no longer spectating the duel."
+# Called when the spectators have joined the duel.
+duels.basic.spectator.message.join: "{duels.basic.stat.spectator.name} is now spectating the duel."

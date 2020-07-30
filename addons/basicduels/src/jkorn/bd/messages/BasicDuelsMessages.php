@@ -29,6 +29,9 @@ interface BasicDuelsMessages
     const DUELS_TEAMS_RESULT_MESSAGE_SPECTATORS = "duels.basic.team.result.message.spectator";
     const DUELS_TEAMS_RESULT_MESSAGE_FAILED = "duels.basic.team.result.message.failed";
 
-    // TODO: Add statistics.
-    const DUELS_TEAMS_MESSAGE_PLAYER_ELIMINATED = "duels.basic.team.result.message.eliminated";
+    const DUELS_TEAMS_MESSAGE_PLAYER_ELIMINATED = "duels.basic.team.message.player.eliminated";
+
+    # TODO: Spectator messages.
+    const DUELS_SPECTATOR_MESSAGE_LEAVE = "duels.basic.spectator.message.leave";
+    const DUELS_SPECTATOR_MESSAGE_JOIN = "duels.basic.spectator.message.join";
 }

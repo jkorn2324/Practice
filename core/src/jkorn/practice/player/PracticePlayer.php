@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace jkorn\practice\player;
 
 
-use jkorn\practice\games\IGame;
-use jkorn\practice\games\misc\IAwaitingGameManager;
+use jkorn\practice\games\misc\gametypes\IGame;
+use jkorn\practice\games\misc\managers\IAwaitingGameManager;
+use jkorn\practice\games\misc\gametypes\ISpectatorGame;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\messages\IPracticeMessages;
 use jkorn\practice\messages\managers\PracticeMessageManager;
@@ -82,6 +83,9 @@ class PracticePlayer extends Player implements IPracticeMessages
     private $doSave = true, $didSave = false;
     /** @var bool - Determines if player is viewing form. */
     private $lookingAtForm = false;
+
+    /** @var bool */
+    private $fakeSpectating = false;
 
     /**
      * PracticePlayer constructor.
@@ -646,6 +650,68 @@ class PracticePlayer extends Player implements IPracticeMessages
     }
 
     /**
+     * Sets the player as a fake spectator:
+     * - Survival Mode
+     * - Invisible
+     * - Flying Permissions
+     *
+     * @param bool $spectating - Determines whether the player is spectating or not.
+     */
+    public function setFakeSpectating(bool $spectating): void
+    {
+        if($spectating === $this->fakeSpectating)
+        {
+            return;
+        }
+
+        if($spectating)
+        {
+            $this->setGamemode(0);
+        }
+
+        $this->setInvisible($spectating);
+        $this->setAllowFlight($spectating);
+
+        if(!$spectating)
+        {
+            $this->setFlying(false);
+        }
+
+        $this->fakeSpectating = $spectating;
+    }
+
+    /**
+     * @return bool
+     *
+     * Determines whether the player is fake spectating.
+     */
+    public function isFakeSpectating(): bool
+    {
+        return $this->fakeSpectating;
+    }
+
+    /**
+     * @return ISpectatorGame|null
+     *
+     * Gets the spectating game of the player.
+     */
+    public function getSpectatingGame(): ?ISpectatorGame
+    {
+        return PracticeCore::getBaseGameManager()->getSpectatingGame($this);
+    }
+
+    /**
+     * @return bool
+     *
+     * Determines if the player is spectating a game.
+     */
+    public function isSpectatingGame(): bool
+    {
+        $game = $this->getSpectatingGame();
+        return $game !== null;
+    }
+
+    /**
      * @return IAwaitingGameManager|null - Returns the game manager if player
      *                   is awaiting a game, null otherwise.
      *
@@ -695,7 +761,7 @@ class PracticePlayer extends Player implements IPracticeMessages
      */
     public function attack(EntityDamageEvent $event): void
     {
-        if(!$this->canBeDamaged())
+        if(!$this->canBeDamaged($event))
         {
             $event->setCancelled(true);
             return;
@@ -707,15 +773,27 @@ class PracticePlayer extends Player implements IPracticeMessages
     }
 
     /**
+     * @param EntityDamageEvent &$event - The input event.
+     *
      * @return bool
      *
      * Determines if the player can be damaged.
      */
-    public function canBeDamaged(): bool
+    public function canBeDamaged(EntityDamageEvent &$event): bool
     {
-        if($this->isCreative() || $this->isSpectator())
+        if($this->isCreative() || $this->isSpectator() || $this->isFakeSpectating())
         {
             return false;
+        }
+
+        // Checks whether the damager is a fake spectator and cancels the event.
+        if($event instanceof EntityDamageByEntityEvent)
+        {
+            $damager = $event->getDamager();
+            if($damager instanceof PracticePlayer && $damager->isFakeSpectating())
+            {
+                return false;
+            }
         }
 
         if($this->isInFFA())
@@ -865,7 +943,6 @@ class PracticePlayer extends Player implements IPracticeMessages
         $this->lookingAtForm = false;
         return parent::onFormSubmit($formId, $responseData);
     }
-
 
     /**
      * @param Position $position

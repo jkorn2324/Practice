@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace jkorn\practice\games\misc\leaderboards;
 
 
-use jkorn\practice\games\IGameManager;
+use jkorn\practice\games\misc\managers\IGameManager;
 
 interface IGameLeaderboard
 {

@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\games\misc;
+namespace jkorn\practice\games\misc\gametypes;
 
 
+use jkorn\practice\games\misc\gametypes\IGame;
 use pocketmine\Player;
 
-interface ISpectatorGame
+interface ISpectatorGame extends IGame
 {
 
     /**
@@ -42,4 +43,11 @@ interface ISpectatorGame
      * Broadcasts something to the spectators.
      */
     public function broadcastSpectators(callable $callable): void;
+
+    /**
+     * @return int
+     *
+     * Gets the spectator count of the game.
+     */
+    public function getSpectatorCount(): int;
 }

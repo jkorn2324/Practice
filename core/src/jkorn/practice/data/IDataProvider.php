@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\data;
 
 
-use jkorn\practice\games\IGameManager;
+use jkorn\practice\games\misc\managers\IGameManager;
 use jkorn\practice\games\misc\leaderboards\LeaderboardGroup;
 use pocketmine\Player;
 

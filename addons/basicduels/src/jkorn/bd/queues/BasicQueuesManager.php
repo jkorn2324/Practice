@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace jkorn\bd\queues;
 
 use jkorn\bd\BasicDuelsManager;
-use jkorn\bd\duels\types\BasicDuelGameType;
+use jkorn\bd\duels\types\BasicDuelGameInfo;
 use jkorn\bd\scoreboards\BasicDuelsScoreboardManager;
-use jkorn\practice\games\misc\IAwaitingManager;
+use jkorn\practice\games\misc\managers\awaiting\IAwaitingManager;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\PracticeCore;
@@ -75,7 +75,7 @@ class BasicQueuesManager implements IAwaitingManager
 
         if (
             !(is_string($data->kit) || $data->kit instanceof IKit)
-            || !$data->gameType instanceof BasicDuelGameType
+            || !$data->gameType instanceof BasicDuelGameInfo
         ) {
             return;
         }
@@ -96,6 +96,8 @@ class BasicQueuesManager implements IAwaitingManager
         if (isset($this->queues[$player->getServerID()->toString()])) {
             unset($this->queues[$player->getServerID()->toString()]);
         }
+
+        // TODO: Join the queue
 
         $matched = $this->findAwaitingMatches($queue);
         if ($matched !== null) {

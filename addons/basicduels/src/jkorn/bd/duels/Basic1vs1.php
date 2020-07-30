@@ -10,7 +10,7 @@ use jkorn\bd\arenas\IDuelArena;
 use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\arenas\PreGeneratedDuelArena;
 use jkorn\bd\BasicDuelsManager;
-use jkorn\bd\duels\types\BasicDuelGameType;
+use jkorn\bd\duels\types\BasicDuelGameInfo;
 use jkorn\bd\messages\BasicDuelsMessageManager;
 use jkorn\bd\messages\BasicDuelsMessages;
 use jkorn\bd\player\BasicDuelPlayer;
@@ -42,7 +42,7 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
     /** @var IDuelArena|PracticeArena */
     private $arena;
 
-    /** @var BasicDuelGameType */
+    /** @var BasicDuelGameInfo */
     private $gameType;
 
     /**
@@ -52,11 +52,11 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
      * @param IDuelArena|PracticeArena $arena - The arena of the 1vs1.
      * @param Player $player1 - The first player of the 1vs1.
      * @param Player $player2 - The second player of the 1vs1.
-     * @param BasicDuelGameType $gameType
+     * @param BasicDuelGameInfo $gameType
      *
      * The generic 1vs1 constructor.
      */
-    public function __construct(int $id, IKit $kit, $arena, Player $player1, Player $player2, BasicDuelGameType $gameType)
+    public function __construct(int $id, IKit $kit, $arena, Player $player1, Player $player2, BasicDuelGameInfo $gameType)
     {
         parent::__construct($kit, $player1, $player2, BasicDuelPlayer::class);
 
@@ -236,7 +236,12 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
 
         $serverID = $player->getServerID()->toString();
         $this->spectators[$serverID] = $player;
-        // TODO: Set the player as spectating.
+
+        if(!$player->isFakeSpectating())
+        {
+            $player->setFakeSpectating(true);
+        }
+
         $player->teleport($this->getCenterPosition());
 
         // Sets the spectator's scoreboard.
@@ -244,6 +249,24 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
         if($scoreboardData !== null)
         {
             $scoreboardData->setScoreboard(BasicDuelsScoreboardManager::TYPE_SCOREBOARD_DUEL_SPECTATOR);
+        }
+
+        if($broadcast)
+        {
+            $messageManager = PracticeCore::getBaseMessageManager()->getMessageManager(BasicDuelsMessageManager::NAME);
+            $messageObject = $messageManager !== null ? $messageManager->getMessage(BasicDuelsMessages::DUELS_SPECTATOR_MESSAGE_JOIN) : null;
+
+            $this->broadcastGlobal(function(Player $iPlayer) use($player, $messageObject)
+            {
+                // TODO: Add Prefix.
+                $message = $player->getDisplayName() . " is now spectating the duel.";
+                if($messageObject !== null)
+                {
+                    $message = $messageObject->getText($iPlayer, $player);
+                }
+
+                $iPlayer->sendMessage($message);
+            });
         }
     }
 
@@ -262,22 +285,38 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
         }
 
         $serverID = $player->getServerID()->toString();
+
         if(isset($this->spectators[$serverID]))
         {
             unset($this->spectators[$serverID]);
+
             if($player->isOnline())
             {
-                // TODO: Unset the player as spectator.
-                $displayName = $player->getDisplayName();
-                if($teleportToSpawn)
+                // Resets the player as spectating.
+                if($player->isFakeSpectating())
                 {
-                    // TODO: Put player in lobby.
+                    $player->setFakeSpectating(false);
                 }
+
+                $player->putInLobby($teleportToSpawn);
             }
 
             if($broadcastMessage)
             {
-                // TODO: Broadcast the message.
+                $messageManager = PracticeCore::getBaseMessageManager()->getMessageManager(BasicDuelsMessageManager::NAME);
+                $messageObject = $messageManager !== null ? $messageManager->getMessage(BasicDuelsMessages::DUELS_SPECTATOR_MESSAGE_LEAVE) : null;
+
+                $this->broadcastGlobal(function(Player $iPlayer) use($player, $messageObject)
+                {
+                    // TODO: Add Prefix.
+                    $message = $player->getDisplayName() . " is no longer spectating the duel.";
+                    if($messageObject !== null)
+                    {
+                        $message = $messageObject->getText($iPlayer, $player);
+                    }
+
+                    $iPlayer->sendMessage($message);
+                });
             }
         }
     }
@@ -347,7 +386,6 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
         return 2;
     }
 
-
     /**
      * @return Position
      *
@@ -376,11 +414,11 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
     }
 
     /**
-     * @return BasicDuelGameType
+     * @return BasicDuelGameInfo
      *
      * Gets the game type of the duel.
      */
-    public function getGameType(): BasicDuelGameType
+    public function getGameType(): BasicDuelGameInfo
     {
         return $this->gameType;
     }
@@ -490,5 +528,15 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
         }
 
         return "Winner: None - Loser: None";
+    }
+
+    /**
+     * @return int
+     *
+     * Gets the spectator count of the game.
+     */
+    public function getSpectatorCount(): int
+    {
+        return count($this->spectators);
     }
 }

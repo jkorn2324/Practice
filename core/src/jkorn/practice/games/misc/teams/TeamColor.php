@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\games\misc;
+namespace jkorn\practice\games\misc\teams;
 
 use pocketmine\utils\TextFormat;
 

@@ -7,7 +7,13 @@ namespace jkorn\practice\games;
 
 use jkorn\practice\display\DisplayStatistic;
 use jkorn\practice\display\DisplayStatisticNames;
-use jkorn\practice\games\misc\IAwaitingGameManager;
+use jkorn\practice\games\misc\gametypes\IGame;
+use jkorn\practice\games\misc\managers\IAwaitingGameManager;
+use jkorn\practice\games\misc\managers\ISpectatingGameManager;
+use jkorn\practice\games\misc\managers\IGameManager;
+
+use jkorn\practice\games\misc\gametypes\ISpectatorGame;
+
 use pocketmine\Player;
 use pocketmine\Server;
 use jkorn\practice\PracticeCore;
@@ -169,6 +175,29 @@ class BaseGameManager implements DisplayStatisticNames
             }
         }
 
+        return null;
+    }
+
+    /**
+     * @param Player $player
+     * @return ISpectatorGame|null
+     *
+     * Gets the game the player is spectating.
+     */
+    public function getSpectatingGame(Player $player): ?ISpectatorGame
+    {
+        foreach($this->gameTypes as $gameType)
+        {
+            if($gameType instanceof ISpectatingGameManager)
+            {
+                $game = $gameType->getFromSpectator($player);
+
+                if($game !== null)
+                {
+                    return $game;
+                }
+            }
+        }
         return null;
     }
 
