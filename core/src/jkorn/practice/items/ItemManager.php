@@ -15,7 +15,6 @@ use jkorn\practice\PracticeCore;
 class ItemManager extends AbstractManager
 {
     const ITEM_PLAY_GAMES = "item.play.games";
-    const ITEM_PLAY_FFA = "item.play.ffa";
     const ITEM_PLAYER_SETTINGS = "item.player.settings";
 
     const TYPE_LOBBY = "type.lobby";
@@ -181,7 +180,6 @@ class ItemManager extends AbstractManager
             case self::TYPE_LOBBY:
 
                 $this->sendItem($player, $this->items[self::ITEM_PLAY_GAMES]);
-                $this->sendItem($player, $this->items[self::ITEM_PLAY_FFA]);
                 $this->sendItem($player, $this->items[self::ITEM_PLAYER_SETTINGS]);
                 break;
         }

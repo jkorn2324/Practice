@@ -257,7 +257,7 @@ class FFAGameManager implements IGameManager, FFADisplayStatistics
      */
     public function getTexture(): string
     {
-        return "textures/ui/iron_recipe_equipment.png";
+        return "textures/ui/icon_recipe_equipment.png";
     }
 
     /**

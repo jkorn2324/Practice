@@ -119,7 +119,8 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
      */
     public function update(int $currentTick): void
     {
-        foreach ($this->duels as $duel) {
+        foreach ($this->duels as $duel)
+        {
             $duel->update();
         }
 

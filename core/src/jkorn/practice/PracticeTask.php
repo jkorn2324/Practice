@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice;
 
 
+use jkorn\practice\games\misc\managers\IUpdatedGameManager;
 use pocketmine\scheduler\Task;
 use pocketmine\Server;
 
@@ -49,7 +50,10 @@ class PracticeTask extends Task
 
         foreach($games as $game)
         {
-            $game->update($this->currentTick);
+            if($game instanceof IUpdatedGameManager)
+            {
+                $game->update($this->currentTick);
+            }
         }
     }
 }

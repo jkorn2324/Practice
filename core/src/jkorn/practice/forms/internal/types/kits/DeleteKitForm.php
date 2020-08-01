@@ -68,7 +68,7 @@ class DeleteKitForm implements IInternalForm
         });
 
 
-        $form->setTitle("Delete Kit");
+        $form->setTitle(TextFormat::BOLD . "Delete Kit");
 
         $content = [
             "Are you sure you want to delete the kit from the server?",

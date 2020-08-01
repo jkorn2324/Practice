@@ -11,6 +11,7 @@ use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\PracticeCore;
+use pocketmine\utils\TextFormat;
 use pocketmine\Player;
 
 class KitSelectorMenu implements IInternalForm
@@ -78,7 +79,7 @@ class KitSelectorMenu implements IInternalForm
 
         });
 
-        $form->setTitle("Select Kit");
+        $form->setTitle(TextFormat::BOLD . "Select Kit");
         $form->setContent("Select the kit to edit or delete.");
 
         $kits = PracticeCore::getKitManager()->getAll();

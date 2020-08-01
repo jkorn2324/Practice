@@ -10,6 +10,7 @@ use jkorn\practice\forms\internal\InternalForms;
 use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\player\PracticePlayer;
 use pocketmine\Player;
+use pocketmine\utils\TextFormat;
 
 class KitManagerMenu implements IInternalForm
 {
@@ -73,13 +74,13 @@ class KitManagerMenu implements IInternalForm
             }
         });
 
-        $form->setTitle("Manage Kits");
+        $form->setTitle(TextFormat::BOLD . "Manage Kits");
         $form->setContent("Manage the kits in the server.");
 
-        $form->addButton("Create Kit", 0, "textures/ui/confirm.png");
-        $form->addButton("Edit Kit", 0, "textures/ui/debug_glyph_color.png");
-        $form->addButton("Delete Kit", 0, "textures/ui/realms_red_x.png");
-        $form->addButton("View Kit", 0, "textures/ui/magnifyingGlass.png");
+        $form->addButton(TextFormat::BOLD . "Create Kit", 0, "textures/ui/confirm.png");
+        $form->addButton(TextFormat::BOLD . "Edit Kit", 0, "textures/ui/debug_glyph_color.png");
+        $form->addButton(TextFormat::BOLD . "Delete Kit", 0, "textures/ui/realms_red_x.png");
+        $form->addButton(TextFormat::BOLD . "View Kit", 0, "textures/ui/magnifyingGlass.png");
 
         $player->sendForm($form);
     }

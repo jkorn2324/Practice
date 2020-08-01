@@ -78,7 +78,7 @@ class CreateKitForm implements IInternalForm
             }
         });
 
-        $form->setTitle("Create New Kit");
+        $form->setTitle(TextFormat::BOLD . "Create New Kit");
         $form->addLabel("This option creates a new kit from the items in your inventory and the effects currently on your player.");
 
         $form->addInput("Please provide the name of the kit that you want to create:");

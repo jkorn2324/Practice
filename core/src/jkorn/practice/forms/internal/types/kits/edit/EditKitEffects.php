@@ -1,16 +1,21 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: jkorn2324
+ * Date: 2020-07-31
+ * Time: 19:41
+ */
 
 declare(strict_types=1);
 
-namespace jkorn\practice\forms\internal\types\kits;
+namespace jkorn\practice\forms\internal\types\kits\edit;
 
 
 use jkorn\practice\forms\internal\IInternalForm;
-use jkorn\practice\forms\types\SimpleForm;
-use jkorn\practice\player\PracticePlayer;
 use pocketmine\Player;
+use pocketmine\utils\TextFormat;
 
-class EditKitMenu implements IInternalForm
+class EditKitEffects implements IInternalForm
 {
 
     /**
@@ -20,7 +25,7 @@ class EditKitMenu implements IInternalForm
      */
     public function getLocalizedName(): string
     {
-        return self::EDIT_KIT_MENU;
+        return self::EDIT_KIT_EFFECTS;
     }
 
     /**
@@ -31,7 +36,8 @@ class EditKitMenu implements IInternalForm
      */
     public function display(Player $player, ...$args): void
     {
-        if(
+        if
+        (
             $player instanceof PracticePlayer
             && $player->isInGame()
         )
@@ -39,11 +45,16 @@ class EditKitMenu implements IInternalForm
             return;
         }
 
-        $form = new SimpleForm(function(Player $player, $data, $extraData)
+        if
+        (
+            !isset($args[0])
+            || ($kit = $args[0]) === null
+            || !$kit instanceof IKit
+        )
         {
+            return;
+        }
 
-        });
-
-        $player->sendForm($form);
+        // TODO: Edit kit effects.
     }
 }

@@ -7,7 +7,10 @@ namespace jkorn\practice\forms\internal;
 
 use jkorn\practice\forms\internal\types\kits\CreateKitForm;
 use jkorn\practice\forms\internal\types\kits\DeleteKitForm;
-use jkorn\practice\forms\internal\types\kits\EditKitMenu;
+use jkorn\practice\forms\internal\types\kits\edit\EditKitEffects;
+use jkorn\practice\forms\internal\types\kits\edit\EditKitItems;
+use jkorn\practice\forms\internal\types\kits\edit\EditKitKnockback;
+use jkorn\practice\forms\internal\types\kits\edit\EditKitMenu;
 use jkorn\practice\forms\internal\types\kits\KitManagerMenu;
 use jkorn\practice\forms\internal\types\kits\KitSelectorMenu;
 use jkorn\practice\forms\IPracticeForm;
@@ -31,9 +34,12 @@ class InternalForms implements IInternalFormIDs
     {
         self::registerForm(new KitManagerMenu());
         self::registerForm(new KitSelectorMenu());
-        self::registerForm(new EditKitMenu());
         self::registerForm(new CreateKitForm());
         self::registerForm(new DeleteKitForm());
+        self::registerForm(new EditKitMenu());
+        self::registerForm(new EditKitItems());
+        self::registerForm(new EditKitKnockback());
+        self::registerForm(new EditKitEffects());
     }
 
     /**
@@ -45,7 +51,7 @@ class InternalForms implements IInternalFormIDs
      */
     public static function registerForm(IInternalForm $form, bool $override = false): void
     {
-        if(isset(self::$forms[$name = $form->getLocalizedName()]) && $override)
+        if(isset(self::$forms[$name = $form->getLocalizedName()]) && !$override)
         {
             return;
         }
