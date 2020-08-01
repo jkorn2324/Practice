@@ -38,49 +38,4 @@ class BasicDuelsFormManager extends AbstractFormDisplayManager
     {
         return self::NAME;
     }
-
-    /**
-     * @param string $inputFile
-     *
-     * Loads the form displays from the input file.
-     */
-    protected function loadFormDisplays(string &$inputFile): void
-    {
-        $fileData = yaml_parse_file($inputFile);
-        if(!is_array($fileData))
-        {
-            return;
-        }
-
-        foreach($fileData as $localizedName => $data)
-        {
-            if(!isset($data["class"]))
-            {
-                continue;
-            }
-
-            $namespacedClass = $data["class"];
-            if (!class_exists($namespacedClass) || !is_subclass_of($namespacedClass, FormDisplay::class))
-            {
-                continue;
-            }
-
-            // Loads the display forms to the array based on reflection class
-            // information.
-            try {
-
-                $reflection = new \ReflectionClass($namespacedClass);
-                $method = $reflection->getMethod("decode");
-                $formDisplay = $method->invokeArgs(null, [$localizedName, $data]);
-                if($formDisplay instanceof FormDisplay)
-                {
-                    $this->forms[$formDisplay->getLocalizedName()] = $formDisplay;
-                }
-
-            } catch (\Exception $e) {
-
-                $this->server->getLogger()->alert($e->getTraceAsString());
-            }
-        }
-    }
 }

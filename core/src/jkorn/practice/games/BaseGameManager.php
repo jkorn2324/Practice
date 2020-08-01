@@ -14,6 +14,7 @@ use jkorn\practice\games\misc\managers\IGameManager;
 
 use jkorn\practice\games\misc\gametypes\ISpectatorGame;
 
+use jkorn\practice\games\misc\managers\IUpdatedGameManager;
 use pocketmine\Player;
 use pocketmine\Server;
 use jkorn\practice\PracticeCore;
@@ -208,7 +209,10 @@ class BaseGameManager implements DisplayStatisticNames
     {
         foreach($this->gameTypes as $game)
         {
-            $game->update($this->currentTicks);
+            if($game instanceof IUpdatedGameManager)
+            {
+                $game->update($this->currentTicks);
+            }
         }
 
         $this->currentTicks++;

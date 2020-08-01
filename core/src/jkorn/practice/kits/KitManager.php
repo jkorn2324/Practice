@@ -253,8 +253,6 @@ class KitManager extends AbstractManager
             unlink($file);
         }
 
-        // TODO: Remove kit from all arenas.
-
         unset($this->kits[$localized]);
     }
 }

@@ -6,6 +6,12 @@ namespace jkorn\practice\arenas;
 
 use pocketmine\level\Level;
 
+/**
+ * Class PracticeArena
+ * @package jkorn\practice\arenas
+ *
+ * The base practice arena class, used generally for practice arenas.
+ */
 abstract class PracticeArena
 {
     /** @var string */

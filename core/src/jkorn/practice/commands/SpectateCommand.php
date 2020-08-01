@@ -6,7 +6,6 @@ namespace jkorn\practice\commands;
 
 
 use jkorn\practice\forms\display\manager\PracticeFormManager;
-use jkorn\practice\forms\internal\InternalForms;
 use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\PracticeCore;
 use pocketmine\command\CommandSender;
@@ -62,11 +61,6 @@ class SpectateCommand extends PracticeCommand implements IPracticePermissions
         {
             // TODO: Send game message.
             if($target->isInGame())
-            {
-                return false;
-            }
-            // TODO: Send ffa message.
-            if($target->isInFFA())
             {
                 return false;
             }

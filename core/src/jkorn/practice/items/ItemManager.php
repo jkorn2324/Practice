@@ -87,30 +87,6 @@ class ItemManager extends AbstractManager
      */
     private function updateCallbacks(): void
     {
-        // This edits the callable of the ffa item.
-        if (isset($this->items[self::ITEM_PLAY_FFA])) {
-
-            $ffaItem = $this->items[self::ITEM_PLAY_FFA];
-
-            $ffaItem->setOnUseCallback(function (Player $player) {
-
-                // Sends the play form to the player.
-                $theForm = PracticeCore::getBaseFormDisplayManager()->getForm(PracticeFormManager::FORM_PLAY_FFA);
-                if ($theForm !== null) {
-                    $theForm->display($player);
-                } else {
-                    $player->sendMessage(TextFormat::RED . "[ERROR-PRACTICE] Internal plugin error, unable to show the play ffa form.");
-                }
-                return true;
-            });
-
-            $ffaItem->setOnSendCallback(function(Player $player)
-            {
-                $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager("ffa");
-                return $arenaManager !== null;
-            });
-        }
-
         // This edits the callback of the settings item.
         if (isset($this->items[self::ITEM_PLAYER_SETTINGS])) {
             $this->items[self::ITEM_PLAYER_SETTINGS]->setOnUseCallback(function (Player $player) {

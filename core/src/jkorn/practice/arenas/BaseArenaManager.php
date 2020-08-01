@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace jkorn\practice\arenas;
 
 
-use jkorn\practice\arenas\types\ffa\FFAArenaManager;
 use jkorn\practice\misc\ISaved;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\misc\AbstractManager;
@@ -33,20 +32,7 @@ class BaseArenaManager extends AbstractManager
 
         $this->arenas = [];
 
-        $this->registerDefaultManagers($core);
-
         parent::__construct(false);
-    }
-
-    /**
-     *
-     * @param PracticeCore $core
-     *
-     * Registers the specific arena types.
-     */
-    private function registerDefaultManagers(PracticeCore &$core): void
-    {
-        $this->registerArenaManager(new FFAArenaManager($core));
     }
 
     /**

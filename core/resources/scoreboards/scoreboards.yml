@@ -14,14 +14,3 @@ scoreboard.spawn.default:
     line-3: " Ping: {stat.player.ping} "
     line-4: ""
     line-5: " Github @jkorn2324 "
-
-# The ffa scoreboard.
-scoreboard.ffa:
-  title: "Practice"
-  lines:
-    line-1: " Arena: {stat.ffa.arena.name} "
-    line-2: ""
-    line-3: " Ping: {stat.player.ping} "
-    line-4: " CPS: {stat.player.cps} "
-    line-5: ""
-    line-6: " Github @jkorn2324 "

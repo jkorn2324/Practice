@@ -26,7 +26,6 @@ use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\SourceInterface;
 use pocketmine\Player;
 use pocketmine\utils\UUID;
-use jkorn\practice\arenas\types\ffa\FFAArena;
 use jkorn\practice\data\PracticeDataManager;
 use jkorn\practice\items\ItemManager;
 use jkorn\practice\player\info\ActionsInfo;
@@ -76,8 +75,6 @@ class PracticePlayer extends Player implements IPracticeMessages
 
     /** @var IKit|null */
     private $equippedKit = null;
-    /** @var FFAArena|null */
-    private $ffaArena = null;
 
     /** @var bool */
     private $doSave = true, $didSave = false;
@@ -324,12 +321,6 @@ class PracticePlayer extends Player implements IPracticeMessages
         if($game !== null)
         {
             $game->removeFromGame($this, IGame::REASON_LEFT_SERVER);
-        }
-
-        // Removes the player from the ffa arena.
-        if($this->ffaArena !== null)
-        {
-            $this->ffaArena->removePlayer();
         }
 
         // Sets the leave message of the event.
@@ -585,50 +576,6 @@ class PracticePlayer extends Player implements IPracticeMessages
     }
 
     /**
-     * @param FFAArena $arena
-     *
-     * Sets the player in an FFA arena.
-     */
-    public function setInFFA(FFAArena $arena): void
-    {
-        if($this->isInGame())
-        {
-            return;
-        }
-
-        // Removes the player from awaiting in a game.
-        $awaiting = $this->getAwaitingGameType();
-        if($awaiting !== null)
-        {
-            $awaiting->getAwaitingManager()->removeAwaiting($this, false);
-        }
-
-        $this->ffaArena = $arena;
-        $arena->teleportTo($this, true);
-    }
-
-    /**
-     * @return bool
-     *
-     * Sets the player in an FFA arena.
-     */
-    public function isInFFA(): bool
-    {
-        return $this->ffaArena !== null;
-    }
-
-    /**
-     * @return FFAArena|null
-     *
-     * Gets the current ffa arena that the player
-     * is in.
-     */
-    public function getFFAArena(): ?FFAArena
-    {
-        return $this->ffaArena;
-    }
-
-    /**
      * @return IGame|null
      *
      * Gets the current game of the player.
@@ -796,11 +743,6 @@ class PracticePlayer extends Player implements IPracticeMessages
             }
         }
 
-        if($this->isInFFA())
-        {
-            return !$this->ffaArena->isWithinSpawn($this);
-        }
-
         if($this->isInLobby())
         {
             return false;
@@ -836,11 +778,12 @@ class PracticePlayer extends Player implements IPracticeMessages
             // Updates the attack speed.
             $this->attackTime = $speed;
 
-            if($damager->isInFFA() && $damager->getFFAArena()->equals($this->ffaArena) && $event->getCause() !== EntityDamageEvent::CAUSE_SUICIDE)
+
+            /* if($damager->isInFFA() && $damager->getFFAArena()->equals($this->ffaArena) && $event->getCause() !== EntityDamageEvent::CAUSE_SUICIDE)
             {
                 $damager->getCombatInfo()->setInCombat(true);
                 $this->getCombatInfo()->setInCombat(true);
-            }
+            } */
         }
     }
 

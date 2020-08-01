@@ -2,19 +2,22 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\forms\display\types;
+namespace jkorn\ffa\forms\types;
 
 
-use jkorn\practice\arenas\types\ffa\FFAArenaManager;
+use jkorn\ffa\statistics\FFADisplayStatistics;
+use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\display\FormDisplayText;
-use jkorn\practice\kits\IKit;
+use jkorn\practice\forms\types\SimpleForm;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
-use jkorn\practice\arenas\types\ffa\FFAArena;
-use jkorn\practice\forms\display\FormDisplay;
-use jkorn\practice\forms\types\SimpleForm;
-use jkorn\practice\PracticeCore;
 
+/**
+ * Class PlayFFAForm
+ * @package jkorn\ffa\forms\types
+ *
+ * The display for the Play FFA Form.
+ */
 class PlayFFAForm extends FormDisplay
 {
 
@@ -53,12 +56,6 @@ class PlayFFAForm extends FormDisplay
      */
     public function display(Player $player, ...$args): void
     {
-        $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager("ffa");
-        if($arenaManager === null)
-        {
-            return;
-        }
-
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
             // TODO: Get output.
@@ -67,37 +64,21 @@ class PlayFFAForm extends FormDisplay
         $form->setTitle($this->formData["title"]->getText($player));
         $form->setContent($this->formData["description"]->getText($player));
 
-        $arenas = $arenaManager->getArenas();
-        if(count($arenas) <= 0)
+        // TODO: Get the games rather than the arenas.
+        $games = [];
+        if(count($games) <= 0)
         {
             $form->addButton(
                 $this->formData["button.select.arena.none"]->getText($player)
             );
-            $form->setExtraData(["arenas" => []]);
+            $form->setExtraData(["games" => []]);
             $player->sendForm($form);
             return;
         }
 
-        $inputArenas = [];
+        $inputGames = [];
 
-        foreach($arenas as $arena)
-        {
-            if($arena instanceof FFAArena)
-            {
-                $kit = $arena->getKit();
-                $texture = $kit instanceof IKit ? $kit->getTexture() : null;
-
-                $form->addButton(
-                    $this->formData["button.select.arena.template"]->getText($player, $arena),
-                    $texture !== null ? 0 : -1,
-                    $texture
-                );
-
-                $inputArenas[] = $arena;
-            }
-        }
-
-        $form->setExtraData(["arenas" => $inputArenas]);
+        $form->setExtraData(["games" => $inputGames]);
         $player->sendForm($form);
     }
 
@@ -115,8 +96,8 @@ class PlayFFAForm extends FormDisplay
 
         $buttons = [
             "select.arena.template" => [
-                "top.text" => "{" . FFAArenaManager::STATISTIC_FFA_ARENA_NAME . "}",
-                "bottom.text" => "Players: {" . FFAArenaManager::STATISTIC_FFA_ARENA_PLAYERS_PLAYING . "}"
+                "top.text" => "{" . FFADisplayStatistics::STATISTIC_FFA_ARENA_NAME . "}",
+                "bottom.text" => "Players: {" . FFADisplayStatistics::STATISTIC_FFA_ARENA_PLAYERS_PLAYING . "}"
             ],
             "select.arena.none" => [
                 "top.text" => "None",

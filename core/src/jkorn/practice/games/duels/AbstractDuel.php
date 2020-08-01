@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\games\duels;
 
 
+use jkorn\practice\games\misc\gametypes\IUpdatedGame;
 use jkorn\practice\kits\IKit;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
@@ -15,9 +16,8 @@ use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Player;
 use pocketmine\Server;
-use jkorn\practice\games\misc\gametypes\IGame;
 
-abstract class AbstractDuel implements IGame
+abstract class AbstractDuel implements IUpdatedGame
 {
 
     const STATUS_STARTING = 0;

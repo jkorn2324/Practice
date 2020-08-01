@@ -37,12 +37,6 @@ interface DisplayStatisticNames
     const STATISTIC_GAMES_TYPE_PLAYERS_PLAYING = "stat.games.type.players.playing";
     const STATISTIC_GAMES_PLAYERS_PLAYING = "stat.games.players.playing";
 
-    // The FFA Default Statistics
-    const STATISTIC_FFA_PLAYERS_PLAYING = "stat.ffa.players.playing";
-    const STATISTIC_FFA_ARENA_NAME = "stat.ffa.arena.name";
-    const STATISTIC_FFA_ARENA_PLAYERS_PLAYING = "stat.ffa.arena.players.playing";
-    const STATISTIC_FFA_ARENA_KIT = "stat.ffa.arena.kit";
-
     // TODO: These statistics.
     const STATISTIC_PLAYER_RANK = "stat.player.rank";
 

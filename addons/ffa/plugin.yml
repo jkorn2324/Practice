@@ -1,0 +1,6 @@
+name: PracticeAddon - FFA
+api: ["3.0.0"]
+version: "1.0.0"
+main: jkorn\ffa\FFAAddon
+description: "FFA Addon for Practice - by jkorn2324"
+website: "https://github.com/jkorn2324"

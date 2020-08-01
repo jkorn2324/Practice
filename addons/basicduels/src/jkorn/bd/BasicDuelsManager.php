@@ -17,6 +17,7 @@ use jkorn\bd\gen\BasicDuelsGeneratorInfo;
 use jkorn\bd\duels\IBasicDuel;
 use jkorn\bd\messages\BasicDuelsMessageManager;
 use jkorn\bd\queues\BasicQueuesManager;
+use jkorn\bd\scoreboards\BasicDuelsScoreboardManager;
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\games\duels\AbstractDuel;
 use jkorn\practice\games\misc\gametypes\IGame;
@@ -25,6 +26,7 @@ use jkorn\practice\games\misc\managers\IAwaitingGameManager;
 use jkorn\practice\games\misc\managers\awaiting\IAwaitingManager;
 use jkorn\practice\games\misc\leaderboards\IGameLeaderboard;
 use jkorn\practice\games\misc\managers\ISpectatingGameManager;
+use jkorn\practice\games\misc\managers\IUpdatedGameManager;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\level\gen\PracticeGeneratorInfo;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
@@ -34,7 +36,7 @@ use pocketmine\Player;
 use pocketmine\Server;
 use jkorn\practice\PracticeCore;
 
-class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager
+class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager, IUpdatedGameManager
 {
 
     const NAME = "basic.duels";
@@ -130,7 +132,7 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager
     /**
      * @param mixed ...$args - The arguments needed to create a new game.
      *
-     * The arguments needed to create a new
+     * The arguments needed to create a new game.
      */
     public function create(...$args): void
     {
@@ -216,10 +218,12 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager
     {
         // Registers the arena manager generator.
         PracticeCore::getBaseArenaManager()->registerArenaManager(new ArenaManager(), true);
+        // Registers the scoreboard manager.
+        PracticeCore::getBaseScoreboardDisplayManager()->registerScoreboardManager(
+            new BasicDuelsScoreboardManager($this->core), true);
         // Registers the form manager.
         PracticeCore::getBaseFormDisplayManager()->registerFormDisplayManager(
-            new BasicDuelsFormManager($this->core), true
-        );
+            new BasicDuelsFormManager($this->core), true);
         // Registers the message manager.
         PracticeCore::getBaseMessageManager()->register(
             new BasicDuelsMessageManager($this->core), true

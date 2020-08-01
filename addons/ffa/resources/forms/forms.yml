@@ -1,0 +1,14 @@
+
+# The form that contains the text display for
+# the Play FFA form menu.
+form.ffa.play:
+  class: jkorn\ffa\forms\types\PlayFFAForm
+  title: "Play FFA"
+  description: "Select the ffa arena that you want to play."
+  buttons:
+    select.arena.template:
+      top.text: "{stat.ffa.arena.name}"
+      bottom.text: "Players: {stat.ffa.arena.players.playing}"
+    select.arena.none:
+      top.text: "None"
+      bottom.text: ""

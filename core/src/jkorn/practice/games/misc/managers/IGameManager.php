@@ -22,32 +22,12 @@ interface IGameManager
     public function onUnregistered(): void;
 
     /**
-     * @param mixed ...$args - The arguments needed to create a new game.
-     *
-     * The arguments needed to create a new
-     */
-    public function create(...$args): void;
-
-    /**
      * @param Player $player
      * @return IGame|null - Returns the game the player is playing, false otherwise.
      *
      * Gets the game from the player.
      */
     public function getFromPlayer(Player $player): ?IGame;
-
-    /**
-     * @param $game
-     *
-     * Removes the game from the list.
-     */
-    public function remove($game): void;
-
-    /**
-     * Updates the game manager.
-     * @param int $currentTick
-     */
-    public function update(int $currentTick): void;
 
     /**
      * @return string

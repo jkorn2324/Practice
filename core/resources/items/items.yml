@@ -10,16 +10,6 @@ item.play.games:
     lore: "Tap on this item to open the play ffa menu!"
   item.slot: 0
 
-# The item that displays the play games menu.
-item.play.ffa:
-  item.info:
-    id: 399
-    metadata: 1
-  item.display:
-    name: "Play FFA"
-    lore: "Tap on this item to open the play games menu!"
-  item.slot: 1
-
 # The item that opens the player settings.
 item.player.settings:
   item.info:
@@ -28,8 +18,9 @@ item.player.settings:
   item.display:
     name: "Player Settings"
     lore: "Tap on this item to open your settings!"
-  item.slot: 2
+  item.slot: 1
 
+# TODO: Remove this.
 # The item that allows you to leave the duels queue.
 item.queue.leave:
   item.info:

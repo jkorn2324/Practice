@@ -15,16 +15,6 @@ interface IGame
     const REASON_UNFAIR_RESULT = 2;
 
     /**
-     * Updates the game.
-     */
-    public function update(): bool;
-
-    /**
-     * Called to kill the game officially.
-     */
-    public function die(): void;
-
-    /**
      * @param $player - The player.
      * @return bool
      *
@@ -65,11 +55,4 @@ interface IGame
      * Handles an event when the player is in the game.
      */
     public function handleEvent(Event &$event): void;
-
-    /**
-     * @return int
-     *
-     * Gets the game's status.
-     */
-    public function getStatus(): int;
 }

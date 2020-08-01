@@ -35,20 +35,6 @@ form.settings.builder:
     enabled.worlds: "Select the worlds that you want to enable/disable builder mode for:"
 
 # The form that contains the text display for
-# the Play FFA form menu.
-form.FFA.play:
-  class: jkorn\practice\forms\display\types\PlayFFAForm
-  title: "Play FFA"
-  description: "Select the ffa arena that you want to play."
-  buttons:
-    select.arena.template:
-      top.text: "{stat.ffa.arena.name}"
-      bottom.text: "Players: {stat.ffa.arena.players.playing}"
-    select.arena.none:
-      top.text: "None"
-      bottom.text: ""
-
-# The form that contains the text display for
 # the Play Games form menu.
 form.games.play:
   class: jkorn\practice\forms\display\types\PlayGamesForm

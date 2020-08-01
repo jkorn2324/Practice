@@ -8,7 +8,6 @@ This README explains how to use the scoreboard system in the new Practice Core s
 The default scoreboard types that are used by the internal Practice Core plugin are:
 
 - `scoreboard.spawn.default` - Used when a  player is at spawn and not in a queue.
-- `scoreboard.ffa` - Used when a player is in a FFA arena.
 
 **DO NOT EDIT THE SCOREBOARD TYPE NAMES IN SCOREBOARDS.YML FILE, IF YOU DO, THE SCOREBOARDS WILL NOT WORK.**
 
@@ -102,16 +101,4 @@ These are the statistics that work for any scoreboard, regardless of game-modes 
 - `{stat.player.rank}` - Displays the current player's rank.
 
 - `{stat.games.players.playing}` - Displays the total number of players playing in all games.
----
-
-#### FFA Statistics:
-These are the statistics that are added if FFA Arenas are enabled. 
-
-These statistics work for any scoreboard:
-- `{stat.ffa.players.playing}` - Displays the total number of players playing in FFA.
-
-These statistics ONLY work if the FFA scoreboard is currently displayed:
-- `{stat.ffa.arena.name}` - Displays the current ffa arena the player is playing.
-- `{stat.ffa.arena.players.playing}` - Displays the current number of players playing in the arena.
-- `{stat.ffa.arena.kit}` - Displays the ffa arena kit.
 ---

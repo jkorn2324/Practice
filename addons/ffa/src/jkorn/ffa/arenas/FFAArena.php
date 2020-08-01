@@ -2,36 +2,36 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\arenas\types\ffa;
+namespace jkorn\ffa\arenas;
 
 
+use jkorn\ffa\scoreboards\FFAScoreboardManager;
+use jkorn\practice\arenas\SavedPracticeArena;
 use jkorn\practice\kits\IKit;
-use jkorn\practice\messages\IPracticeMessages;
-use jkorn\practice\messages\managers\PracticeMessageManager;
+use jkorn\practice\kits\SavedKit;
+use jkorn\practice\level\SpawnArea;
+use jkorn\practice\player\PracticePlayer;
+use jkorn\practice\PracticeCore;
+use jkorn\practice\PracticeUtil;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 use pocketmine\Server;
-use jkorn\practice\arenas\PracticeArena;
-use jkorn\practice\kits\SavedKit;
-use jkorn\practice\level\SpawnArea;
-use jkorn\practice\misc\ISaved;
-use jkorn\practice\player\PracticePlayer;
-use jkorn\practice\PracticeCore;
-use jkorn\practice\PracticeUtil;
-use jkorn\practice\scoreboard\ScoreboardData;
 
-class FFAArena extends PracticeArena implements ISaved
+/**
+ * Class FFAArena
+ * @package jkorn\ffa\arenas
+ *
+ * The FFA Arena class.
+ */
+class FFAArena extends SavedPracticeArena
 {
 
     /** @var IKit|null */
     private $kit;
     /** @var SpawnArea */
     private $spawnArea;
-
-    /** @var int */
-    private $players = 0;
 
     public function __construct(string $name, Level $level, SpawnArea $spawnArea, ?IKit $kit = null)
     {
@@ -62,40 +62,17 @@ class FFAArena extends PracticeArena implements ISaved
     }
 
     /**
-     * @return int
-     *
-     * Gets the number of players in the arena.
-     */
-    public function getPlayers(): int
-    {
-        return $this->players;
-    }
-
-    /**
-     * Decrements the number of players
-     * within the arena.
-     */
-    public function removePlayer(): void
-    {
-        if(--$this->players < 0)
-        {
-            $this->players = 0;
-        }
-    }
-
-    /**
      * @param Player $player
-     * @param bool $message
      *
      * Teleports the player to the ffa arena.
      */
-    public function teleportTo(Player $player, bool $message = true): void
+    public function teleportTo(Player $player): void
     {
         if(!$player instanceof PracticePlayer)
         {
             return;
         }
-        
+
         $player->clearInventory();
         if($this->kit !== null)
         {
@@ -116,28 +93,10 @@ class FFAArena extends PracticeArena implements ISaved
         $player->setFood($player->getMaxFood());
         $player->setSaturation($player->getMaxSaturation());
 
-        $this->players++;
-
         $scoreboardData = $player->getScoreboardData();
         if($scoreboardData !== null)
         {
-            $scoreboardData->setScoreboard(ScoreboardData::SCOREBOARD_FFA);
-        }
-
-        if($message)
-        {
-            // TODO: Prefix
-            $messageText = "You have joined the " . $this->getName() . " ffa arena!";
-            $displayManager = PracticeCore::getBaseMessageManager()->getMessageManager(PracticeMessageManager::NAME);
-            if($displayManager !== null)
-            {
-                $theMessage = $displayManager->getMessage(IPracticeMessages::PLAYER_FFA_ARENA_JOIN_MESSAGE);
-                if($message !== null)
-                {
-                    $messageText = $theMessage->getText($player, $this);
-                }
-            }
-            $player->sendMessage($messageText);
+            $scoreboardData->setScoreboard(FFAScoreboardManager::FFA_SCOREBOARD);
         }
     }
 
