@@ -128,6 +128,13 @@ class EffectInformation
                 return self::$information[$effect->getId()];
             }
         }
+        elseif (is_int($effect))
+        {
+            if(isset(self::$information[$effect]))
+            {
+                return self::$information[$effect];
+            }
+        }
 
         return null;
     }

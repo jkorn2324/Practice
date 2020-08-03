@@ -8,6 +8,7 @@ namespace jkorn\practice\forms\internal\types\kits\edit\effects;
 use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\kits\IKit;
+use jkorn\practice\misc\EffectInformation;
 use pocketmine\entity\EffectInstance;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
@@ -84,10 +85,15 @@ class RemoveKitEffect extends InternalForm
             }
         });
 
+        $effectInformation = EffectInformation::getInformation($effect);
+
         $form->setTitle(TextFormat::BOLD . "Remove Effect");
 
         $content = [
             "Are you sure you want to remove the effect from the kit?",
+            "",
+            "Effect: " . $effectInformation->getName(),
+            "",
             "Select " . TextFormat::BOLD . "yes" . TextFormat::RESET . " to remove, or " . TextFormat::BOLD . "no" . TextFormat::RESET . " to cancel."
         ];
 

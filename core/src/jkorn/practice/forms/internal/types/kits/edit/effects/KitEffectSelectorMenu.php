@@ -129,22 +129,18 @@ class KitEffectSelectorMenu extends InternalForm
 
             foreach($effects as $effect)
             {
-                if($effect instanceof EffectInstance)
+                $effectInformation = EffectInformation::getInformation($effect);
+                if($effectInformation !== null)
                 {
-                    $effectInformation = EffectInformation::getInformation($effect->getId());
-                    if($effectInformation !== null)
+                    $texture = $effectInformation->getFormTexture();
+                    if($texture !== "")
                     {
-                        $texture = $effectInformation->getFormTexture();
-                        if($texture !== "")
-                        {
-                            $form->addButton($effectInformation->getName(), 0, $texture);
-                        }
-                        else
-                        {
-                            $form->addButton($effectInformation->getName());
-                        }
-                        $inputEffects[] = $effect;
+                        $form->addButton($effectInformation->getName(), 0, $texture);
                     }
+                    else {
+                        $form->addButton($effectInformation->getName());
+                    }
+                    $inputEffects[] = $effect;
                 }
             }
             $form->addExtraData("effects", $inputEffects);
