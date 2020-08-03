@@ -30,7 +30,6 @@ class EditKitEffect extends InternalForm
      */
     protected function onDisplay(Player $player, ...$args): void
     {
-        // TODO: Implement onDisplay() method.
         if
         (
             !isset($args[0])
