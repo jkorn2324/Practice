@@ -26,7 +26,7 @@ abstract class InternalForm implements IPracticeForm, IInternalFormIDs
     /** @var InternalForm[] */
     private static $forms = [];
 
-    /** @var bool */
+    /** @var bool - Determines whether the internal form is initialized. */
     private static $initialized = false;
 
     /**
@@ -45,6 +45,8 @@ abstract class InternalForm implements IPracticeForm, IInternalFormIDs
         self::registerForm(new KitEffectSelectorMenu());
         self::registerForm(new RemoveKitEffect());
         self::registerForm(new AddKitEffect());
+
+        self::$initialized = true;
     }
 
     /**
@@ -76,7 +78,6 @@ abstract class InternalForm implements IPracticeForm, IInternalFormIDs
         if(!self::$initialized)
         {
             self::initDefaults();
-            self::$initialized = true;
         }
 
         if(isset(self::$forms[$name]))

@@ -9,7 +9,6 @@ use jkorn\practice\kits\data\KitCombatData;
 use jkorn\practice\messages\IPracticeMessages;
 use jkorn\practice\messages\managers\PracticeMessageManager;
 use jkorn\practice\PracticeCore;
-use pocketmine\entity\EffectInstance;
 use pocketmine\item\Item;
 use pocketmine\Player;
 use jkorn\practice\player\PracticePlayer;
@@ -233,15 +232,6 @@ class SavedKit implements ISaved, IKit
                 $outputArmor[PracticeUtil::convertArmorIndex($slot)] = $exportedItem;
             }
         }
-
-        /* foreach($dataEffects as $effect)
-        {
-            $exportedEffect = PracticeUtil::arrToEffect($effect);
-            if($exportedEffect !== null)
-            {
-                $outputEffects[] = $exportedEffect;
-            }
-        } */
 
         return new SavedKit(
             $name,
