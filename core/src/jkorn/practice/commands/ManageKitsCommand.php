@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\commands;
 
 
-use jkorn\practice\forms\internal\InternalForms;
+use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\player\PracticePlayer;
 use pocketmine\command\CommandSender;
 use pocketmine\Player;
@@ -30,7 +30,7 @@ class ManageKitsCommand extends PracticeCommand implements IPracticePermissions
      */
     protected function onExecute(CommandSender $sender, string $commandLabel, array $args): void
     {
-        $form = InternalForms::getForm(InternalForms::KIT_MANAGER_MENU);
+        $form = InternalForm::getForm(InternalForms::KIT_MANAGER_MENU);
         if($form !== null && $sender instanceof Player)
         {
             $form->display($sender);

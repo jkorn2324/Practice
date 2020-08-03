@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\kits;
 
 
+use jkorn\practice\kits\data\KitCombatData;
 use jkorn\practice\messages\IPracticeMessages;
 use jkorn\practice\messages\managers\PracticeMessageManager;
 use jkorn\practice\PracticeCore;
@@ -25,25 +26,25 @@ class SavedKit implements ISaved, IKit
     /** @var string */
     private $texture;
 
-    /** @var EffectInstance[] */
-    private $effects;
     /** @var string */
     private $name;
 
     /** @var KitCombatData */
     private $combatData;
+    /** @var KitEffectsData */
+    private $effectsData;
 
     /** @var bool */
     private $build;
 
-    public function __construct(string $name, array $items, array $armor, array $effects, KitCombatData $data, string $texture = "", bool $canBuild = false)
+    public function __construct(string $name, array $items, array $armor, KitEffectsData $effectsData, KitCombatData $combatData, string $texture = "", bool $canBuild = false)
     {
         $this->name = $name;
         $this->texture = $texture;
         $this->items = $items;
         $this->armor = $armor;
-        $this->effects = $effects;
-        $this->combatData = $data;
+        $this->effectsData = $effectsData;
+        $this->combatData = $combatData;
         $this->build = $canBuild;
     }
 
@@ -76,10 +77,7 @@ class SavedKit implements ISaved, IKit
         }
 
         // Sends the effects to the player.
-        foreach($this->effects as $effect)
-        {
-            $player->addEffect($effect);
-        }
+        $this->effectsData->sendTo($player);
 
         if($sendMessage)
         {
@@ -120,6 +118,16 @@ class SavedKit implements ISaved, IKit
     }
 
     /**
+     * @return KitEffectsData
+     *
+     * Gets the kit effects data.
+     */
+    public function getEffectsData(): KitEffectsData
+    {
+        // TODO: Implement getEffectsData() method.
+    }
+
+    /**
      * @return bool
      *
      * Determines if the player can build while using that kit.
@@ -136,7 +144,7 @@ class SavedKit implements ISaved, IKit
      */
     public function export(): array
     {
-        $items = []; $armor = []; $effects = [];
+        $items = []; $armor = [];
 
         foreach($this->items as $slot => $item)
         {
@@ -152,17 +160,12 @@ class SavedKit implements ISaved, IKit
             $armor[PracticeUtil::convertArmorIndex($slot)] = PracticeUtil::itemToArr($item);
         }
 
-        foreach($this->effects as $effect)
-        {
-            $effects[] = PracticeUtil::effectToArr($effect);
-        }
-
         return [
             "items" => $items,
             "armor" => $armor,
-            "effects" => $effects,
+            KitEffectsData::EFFECTS_HEADER => $this->effectsData->export(),
             "texture" => $this->texture,
-            $this->combatData->getHeader() => $this->combatData->export(),
+            KitCombatData::KIT_HEADER => $this->combatData->export(),
             "build" => $this->build
         ];
     }
@@ -211,7 +214,6 @@ class SavedKit implements ISaved, IKit
 
         $dataItems = $data["items"]; $outputItems = [];
         $dataArmor = $data["armor"]; $outputArmor = [];
-        $dataEffects = $data["effects"]; $outputEffects = [];
 
         foreach($dataItems as $slot => $item)
         {
@@ -231,20 +233,20 @@ class SavedKit implements ISaved, IKit
             }
         }
 
-        foreach($dataEffects as $effect)
+        /* foreach($dataEffects as $effect)
         {
             $exportedEffect = PracticeUtil::arrToEffect($effect);
             if($exportedEffect !== null)
             {
                 $outputEffects[] = $exportedEffect;
             }
-        }
+        } */
 
         return new SavedKit(
             $name,
             $outputItems,
             $outputArmor,
-            $outputEffects,
+            KitEffectsData::decode($data[KitEffectsData::EFFECTS_HEADER]),
             KitCombatData::decode($data[KitCombatData::KIT_HEADER]),
             $data["texture"],
             $build

@@ -5,48 +5,51 @@ declare(strict_types=1);
 namespace jkorn\practice\forms\internal\types\kits;
 
 
-use jkorn\practice\forms\internal\IInternalForm;
-use jkorn\practice\forms\internal\InternalForms;
+use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\kits\IKit;
-use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\PracticeCore;
 use pocketmine\utils\TextFormat;
 use pocketmine\Player;
 
-class KitSelectorMenu implements IInternalForm
+class KitSelectorMenu extends InternalForm
 {
+
+    /**
+     * @return string
+     *
+     * Gets the localized name of the practice form.
+     */
+    public function getLocalizedName(): string
+    {
+        return self::KIT_SELECTOR;
+    }
+
+    /**
+     * @param Player $player
+     * @return bool
+     *
+     * Tests the permission of the player to see if they can use the form.
+     */
+    public function testPermission(Player $player): bool
+    {
+        // TODO: Implement testPermission() method.
+        return true;
+    }
 
     /**
      * @param Player $player
      * @param mixed ...$args
      *
-     * Displays the form to the player.
+     * Called when the display method first occurs.
      */
-    public function display(Player $player, ...$args): void
+    protected function onDisplay(Player $player, ...$args): void
     {
-        if(
-            $player instanceof PracticePlayer
-            && $player->isInGame()
-        )
-        {
-            return;
-        }
-
         // Gets the form type.
         $formType = isset($args[0]) ? $args[0] : self::VIEW_KIT_FORM;
 
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
-            if(
-                $player instanceof PracticePlayer
-                && $player->isInGame()
-            )
-            {
-                // TODO: Send message.
-                return;
-            }
-
             $type = self::VIEW_KIT_FORM;
             if(isset($extraData["formType"]))
             {
@@ -69,14 +72,11 @@ class KitSelectorMenu implements IInternalForm
             }
 
             $kit = $kits[(int)$data];
-            $form = InternalForms::getForm($type);
+            $form = InternalForm::getForm($type);
             if($form !== null)
             {
                 $form->display($player, $kit);
             }
-
-            // TODO
-
         });
 
         $form->setTitle(TextFormat::BOLD . "Select Kit");
@@ -109,15 +109,5 @@ class KitSelectorMenu implements IInternalForm
         $form->addExtraData("kits", $inputKits);
         $form->addExtraData("formType", $formType);
         $player->sendForm($form);
-    }
-
-    /**
-     * @return string
-     *
-     * Gets the localized name of the practice form.
-     */
-    public function getLocalizedName(): string
-    {
-        return self::KIT_SELECTOR;
     }
 }

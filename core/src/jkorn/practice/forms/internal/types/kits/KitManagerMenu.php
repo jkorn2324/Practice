@@ -5,67 +5,70 @@ declare(strict_types=1);
 namespace jkorn\practice\forms\internal\types\kits;
 
 
-use jkorn\practice\forms\internal\IInternalForm;
-use jkorn\practice\forms\internal\InternalForms;
+use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\types\SimpleForm;
-use jkorn\practice\player\PracticePlayer;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
-class KitManagerMenu implements IInternalForm
+class KitManagerMenu extends InternalForm
 {
+
+    /**
+     * @return string
+     *
+     * Gets the localized name of the practice form.
+     */
+    public function getLocalizedName(): string
+    {
+        return self::KIT_MANAGER_MENU;
+    }
+
+    /**
+     * @param Player $player
+     * @return bool
+     *
+     * Tests the permission of the player to see if they can use the form.
+     */
+    public function testPermission(Player $player): bool
+    {
+        // TODO: Implement testPermission() method.
+        return true;
+    }
 
     /**
      * @param Player $player
      * @param mixed ...$args
      *
-     * Displays the form to the player.
+     * Called when the display method first occurs.
      */
-    public function display(Player $player, ...$args): void
+    protected function onDisplay(Player $player, ...$args): void
     {
-        if(
-            $player instanceof PracticePlayer
-            && $player->isInGame()
-        )
-        {
-            return;
-        }
-
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
-            if(
-                $player instanceof PracticePlayer
-                && $player->isInGame()
-            )
-            {
-                // TODO: Send message.
-                return;
-            }
-
             if($data !== null)
             {
                 switch((int)$data)
                 {
                     case 0:
-                        $form = InternalForms::getForm(self::CREATE_KIT_FORM);
+                        $form = InternalForm::getForm(self::CREATE_KIT_FORM);
                         if($form !== null) {
                             $form->display($player);
                         }
                         break;
                     case 1:
-                        $form = InternalForms::getForm(self::KIT_SELECTOR);
+                        $form = InternalForm::getForm(self::KIT_SELECTOR);
                         if($form !== null) {
                             $form->display($player, self::EDIT_KIT_MENU);
                         }
                         break;
                     case 2:
-                        $form = InternalForms::getForm(self::KIT_SELECTOR);
+                        $form = InternalForm::getForm(self::KIT_SELECTOR);
                         if($form !== null) {
                             $form->display($player, self::DELETE_KIT_FORM);
                         }
                         break;
                     case 3:
-                        $form = InternalForms::getForm(self::KIT_SELECTOR);
+                        $form = InternalForm::getForm(self::KIT_SELECTOR);
                         if($form !== null) {
                             $form->display($player, self::VIEW_KIT_FORM);
                         }
@@ -83,15 +86,5 @@ class KitManagerMenu implements IInternalForm
         $form->addButton(TextFormat::BOLD . "View Kit", 0, "textures/ui/magnifyingGlass.png");
 
         $player->sendForm($form);
-    }
-
-    /**
-     * @return string
-     *
-     * Gets the localized name of the practice form.
-     */
-    public function getLocalizedName(): string
-    {
-        return self::KIT_MANAGER_MENU;
     }
 }

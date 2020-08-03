@@ -1,22 +1,14 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jkorn2324
- * Date: 2020-07-31
- * Time: 19:35
- */
 
 declare(strict_types=1);
 
-namespace jkorn\practice\forms\internal\types\kits\edit;
+namespace jkorn\practice\forms\internal\types\kits\edit\effects;
 
 
 use jkorn\practice\forms\internal\InternalForm;
-use jkorn\practice\kits\IKit;
 use pocketmine\Player;
-use pocketmine\utils\TextFormat;
 
-class EditKitItems extends InternalForm
+class AddKitEffect extends InternalForm
 {
 
     /**
@@ -26,7 +18,7 @@ class EditKitItems extends InternalForm
      */
     public function getLocalizedName(): string
     {
-        return self::EDIT_KIT_ITEMS;
+        return self::ADD_KIT_EFFECT;
     }
 
     /**
@@ -37,17 +29,7 @@ class EditKitItems extends InternalForm
      */
     protected function onDisplay(Player $player, ...$args): void
     {
-        if
-        (
-            !isset($args[0])
-            || ($kit = $args[0]) === null
-            || !$kit instanceof IKit
-        )
-        {
-            return;
-        }
-
-        //TODO
+        // TODO: Implement onDisplay() method.
     }
 
     /**
@@ -58,7 +40,7 @@ class EditKitItems extends InternalForm
      */
     protected function testPermission(Player $player): bool
     {
-        // TODO: Implement testPermission() method.
+        // TODO
         return true;
     }
 }

@@ -11,14 +11,15 @@ declare(strict_types=1);
 namespace jkorn\practice\forms\internal\types\kits\edit;
 
 
-use jkorn\practice\forms\internal\IInternalForm;
+use jkorn\practice\forms\internal\InternalForm;
+use jkorn\practice\forms\types\CustomForm;
 use jkorn\practice\kits\IKit;
-use jkorn\practice\player\PracticePlayer;
+use jkorn\practice\kits\data\KitCombatData;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
 
-class EditKitKnockback implements IInternalForm
+class EditKitKnockback extends InternalForm
 {
 
     /**
@@ -35,19 +36,10 @@ class EditKitKnockback implements IInternalForm
      * @param Player $player
      * @param mixed ...$args
      *
-     * Displays the form to the player.
+     * Called when the display method first occurs.
      */
-    public function display(Player $player, ...$args): void
+    protected function onDisplay(Player $player, ...$args): void
     {
-        if
-        (
-            $player instanceof PracticePlayer
-            && $player->isInGame()
-        )
-        {
-            return;
-        }
-
         if
         (
             !isset($args[0])
@@ -58,6 +50,45 @@ class EditKitKnockback implements IInternalForm
             return;
         }
 
-        // TODO: Edit knockback form.
+        $form = new CustomForm(function(Player $player, $data, $extraData)
+        {
+            if($data !== null)
+            {
+                /** @var IKit $kit */
+                $kit = $extraData["kit"];
+                $combatInfo = $kit->getCombatData();
+
+                $combatInfo->update(KitCombatData::HORIZONTAL_KB, $data[1]);
+                $combatInfo->update(KitCombatData::VERTICAL_KB, $data[2]);
+                $combatInfo->update(KitCombatData::ATTACK_DELAY, $data[3]);
+
+                // TODO: Send message that kit's kb has been successfully updated.
+            }
+        });
+
+        $knockback = $kit->getCombatData();
+
+        $form->setTitle(TextFormat::BOLD . "Edit Knockback");
+
+        $form->addLabel("Edit the knockback information of the kit.");
+        $form->addInput("Horizontal (X, Z) Knockback", strval($knockback->getXZ()));
+        $form->addInput("Vertical (Y) Knockback", strval($knockback->getY()));
+        $form->addInput("Attack Delay", strval($knockback->getSpeed()));
+
+        $form->setExtraData(["kit", $kit]);
+
+        $player->sendForm($form);
+    }
+
+    /**
+     * @param Player $player
+     * @return bool
+     *
+     * Tests the form's permissions to see if the player can use it.
+     */
+    protected function testPermission(Player $player): bool
+    {
+        // TODO: Implement testPermission() method.
+        return true;
     }
 }

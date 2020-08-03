@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace jkorn\practice\forms\internal\types\kits;
 
 
-use jkorn\practice\forms\internal\IInternalForm;
+use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\types\CustomForm;
-use jkorn\practice\kits\KitCombatData;
+use jkorn\practice\kits\data\KitCombatData;
+use jkorn\practice\kits\KitEffectsData;
 use jkorn\practice\kits\SavedKit;
-use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
-class CreateKitForm implements IInternalForm
+class CreateKitForm extends InternalForm
 {
 
     /**
@@ -31,18 +31,10 @@ class CreateKitForm implements IInternalForm
      * @param Player $player
      * @param mixed ...$args
      *
-     * Displays the form to the player.
+     * Called when the display method first occurs.
      */
-    public function display(Player $player, ...$args): void
+    protected function onDisplay(Player $player, ...$args): void
     {
-        if(
-            $player instanceof PracticePlayer
-            && $player->isInGame()
-        )
-        {
-            return;
-        }
-
         $form = new CustomForm(function(Player $player, $data, $extraData)
         {
             // TODO
@@ -54,7 +46,6 @@ class CreateKitForm implements IInternalForm
                 if(strpos($kitName, ' ') !== false)
                 {
                     // TODO: Send message that the name can't have spaces.
-                    var_dump("spaces in name {$kitName}");
                     return;
                 }
 
@@ -62,7 +53,7 @@ class CreateKitForm implements IInternalForm
                     $kitName,
                     $player->getInventory()->getContents(true),
                     $player->getArmorInventory()->getContents(true),
-                    [],
+                    new KitEffectsData(),
                     new KitCombatData(0.4, 0.4, 10),
                     ""
                 );
@@ -84,5 +75,17 @@ class CreateKitForm implements IInternalForm
         $form->addInput("Please provide the name of the kit that you want to create:");
 
         $player->sendForm($form);
+    }
+
+    /**
+     * @param Player $player
+     * @return bool
+     *
+     * Tests the form's permissions to see if the player can use it.
+     */
+    protected function testPermission(Player $player): bool
+    {
+        // TODO: Implement testPermission() method.
+        return true;
     }
 }

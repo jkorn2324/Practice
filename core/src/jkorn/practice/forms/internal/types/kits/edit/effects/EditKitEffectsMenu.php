@@ -1,8 +1,14 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: jkorn2324
+ * Date: 2020-07-31
+ * Time: 19:41
+ */
 
 declare(strict_types=1);
 
-namespace jkorn\practice\forms\internal\types\kits\edit;
+namespace jkorn\practice\forms\internal\types\kits\edit\effects;
 
 
 use jkorn\practice\forms\internal\InternalForm;
@@ -11,8 +17,7 @@ use jkorn\practice\kits\IKit;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
-
-class EditKitMenu extends InternalForm
+class EditKitEffectsMenu extends InternalForm
 {
 
     /**
@@ -22,7 +27,7 @@ class EditKitMenu extends InternalForm
      */
     public function getLocalizedName(): string
     {
-        return self::EDIT_KIT_MENU;
+        return self::EDIT_KIT_EFFECTS_MENU;
     }
 
     /**
@@ -45,39 +50,38 @@ class EditKitMenu extends InternalForm
 
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
-
             if($data !== null)
             {
                 switch((int)$data)
                 {
                     case 0:
-                        $form = InternalForm::getForm(self::EDIT_KIT_ITEMS);
+                        $formDisplay = self::ADD_KIT_EFFECT;
                         break;
                     case 1:
-                        $form = InternalForm::getForm(self::EDIT_KIT_KNOCKBACK);
+                        $formDisplay = self::EDIT_KIT_EFFECT;
                         break;
                     case 2:
-                        $form = InternalForm::getForm(self::EDIT_KIT_EFFECTS_MENU);
-                        break;
-                    case 3:
+                        $formDisplay = self::REMOVE_KIT_EFFECT;
                         break;
                 }
 
-                if(isset($form) && $form instanceof InternalForm)
+                if(isset($formDisplay))
                 {
-                    /** @var IKit $kit */
-                    $kit = $extraData["kit"];
-                    $form->display($player, $kit);
+                    $form = InternalForm::getForm(self::EFFECT_KIT_SELECTOR_MENU);
+                    if($form !== null)
+                    {
+                        $form->display($player, $extraData["kit"], $formDisplay);
+                    }
                 }
             }
         });
 
-        $form->setTitle(TextFormat::BOLD . "Edit Kit");
-        $form->setContent("Choose whether to edit the kit's items, knockback, or effects.");
+        $form->setTitle(TextFormat::BOLD . "Kit Effects Menu");
 
-        $form->addButton(TextFormat::BOLD . "Edit Items", 0, "textures/ui/inventory_icon.png");
-        $form->addButton(TextFormat::BOLD . "Edit Knockback", 0, "textures/ui/strength_effect.png");
-        $form->addButton(TextFormat::BOLD . "Edit Effects", 0, "textures/ui/absorption_effect.png");
+        $form->setContent("This menu allows you to edit the kit's effects.");
+        $form->addButton(TextFormat::BOLD . "Add an Effect", 0, "textures/ui/confirm.png");
+        $form->addButton(TextFormat::BOLD . "Edit an Effect", 0, "textures/ui/debug_glyph_color.png");
+        $form->addButton(TextFormat::BOLD . "Remove an Effect", 0, "textures/ui/cancel.png");
 
         $form->addExtraData("kit", $kit);
 

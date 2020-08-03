@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\kits;
 
 
+use jkorn\practice\kits\data\KitCombatData;
 use pocketmine\Player;
 
 interface IKit
@@ -24,6 +25,13 @@ interface IKit
      * Gets the kit combat data.
      */
     public function getCombatData(): KitCombatData;
+
+    /**
+     * @return KitEffectsData
+     *
+     * Gets the kit effects data.
+     */
+    public function getEffectsData(): KitEffectsData;
 
     /**
      * @param $kit

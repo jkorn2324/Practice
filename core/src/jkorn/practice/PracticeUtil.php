@@ -175,29 +175,29 @@ class PracticeUtil
 
     /**
      * @param EffectInstance $instance
-     * @param int $duration
+     * @param int|null $duration - The input duration of the effect.
      * @return array
      *
      * Converts an effect instance to an array.
      */
-    public static function effectToArr(EffectInstance $instance, int $duration = 30 * 60 * 20): array
+    public static function effectToArr(EffectInstance $instance, ?int $duration = null): array
     {
         return [
             "id" => $instance->getId(),
             "amplifier" => $instance->getAmplifier(),
-            "duration" => $duration
+            "duration" => $duration ?? $instance->getDuration()
         ];
     }
 
     /**
-     * @param array $input
+     * @param $input
      * @return EffectInstance|null
      *
      * Converts an array to an effect instance.
      */
-    public static function arrToEffect(array $input): ?EffectInstance
+    public static function arrToEffect($input): ?EffectInstance
     {
-        if(!isset($input["id"], $input["amplifier"], $input["duration"]))
+        if(!is_array($input) || !isset($input["id"], $input["amplifier"], $input["duration"]))
         {
             return null;
         }

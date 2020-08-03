@@ -9,7 +9,6 @@ use jkorn\practice\commands\ManageKitsCommand;
 use jkorn\practice\commands\SpectateCommand;
 use jkorn\practice\display\DisplayStatistic;
 use jkorn\practice\forms\display\BaseFormDisplayManager;
-use jkorn\practice\forms\internal\InternalForms;
 use jkorn\practice\games\BaseGameManager;
 use jkorn\practice\games\player\GamePlayer;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
@@ -66,8 +65,6 @@ class PracticeCore extends PluginBase
         GamePlayer::init();
         // The settings information to initialize.
         SettingsInfo::init();
-        // Initializes the default internal forms.
-        InternalForms::initDefaults();
 
         // Initializes all of the display statistics.
         DisplayStatistic::init();
