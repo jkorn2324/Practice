@@ -74,6 +74,11 @@ class KitEffectSelectorMenu extends InternalForm
         $form->setTitle(TextFormat::BOLD . "Select Effect");
         $form->setContent("Select the effect to add/remove/edit.");
 
+        if(isset($args[1]))
+        {
+            $outputMenu = $args[1];
+        }
+
         // Sets the effects of the form.
         if(isset($outputMenu) && $outputMenu !== self::ADD_KIT_EFFECT) {
             $this->setEffects($form, $kit);
@@ -86,6 +91,8 @@ class KitEffectSelectorMenu extends InternalForm
         {
             $form->addExtraData("formType", $outputMenu);
         }
+
+        $player->sendForm($form);
     }
 
     /**
@@ -106,7 +113,7 @@ class KitEffectSelectorMenu extends InternalForm
      *
      * Sets the effects in the simple form.
      */
-    private function setEffects(SimpleForm &$form, ?$kit = null): void
+    private function setEffects(SimpleForm &$form, ?IKit $kit = null): void
     {
         // Determines that the effects are from the kit and not from the effects data.
         if($kit !== null)

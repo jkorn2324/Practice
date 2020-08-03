@@ -52,7 +52,7 @@ class EditKitKnockback extends InternalForm
 
         $form = new CustomForm(function(Player $player, $data, $extraData)
         {
-            if($data !== null)
+            if($data !== null && isset($extraData["kit"]))
             {
                 /** @var IKit $kit */
                 $kit = $extraData["kit"];
@@ -75,7 +75,7 @@ class EditKitKnockback extends InternalForm
         $form->addInput("Vertical (Y) Knockback", strval($knockback->getY()));
         $form->addInput("Attack Delay", strval($knockback->getSpeed()));
 
-        $form->setExtraData(["kit", $kit]);
+        $form->addExtraData("kit", $kit);
 
         $player->sendForm($form);
     }
