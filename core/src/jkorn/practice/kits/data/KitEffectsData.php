@@ -1,7 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
-namespace jkorn\practice\kits;
+namespace jkorn\practice\kits\data;
 
 
 use jkorn\practice\misc\ISaved;

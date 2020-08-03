@@ -47,11 +47,11 @@ class KitEffectSelectorMenu extends InternalForm
 
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
-            if($data !== null && isset($extraData["action"], $extraData["kit"], $extraData["effects"]))
+            if($data !== null && isset($extraData["formType"], $extraData["kit"], $extraData["effects"]))
             {
                 /** @var IKit $kit */
                 $kit = $extraData["kit"];
-                $action = strval($extraData["action"]);
+                $action = strval($extraData["formType"]);
                 /** @var EffectInstance[] $effects */
                 $effects = $extraData["effects"];
 
@@ -84,7 +84,7 @@ class KitEffectSelectorMenu extends InternalForm
         $form->addExtraData("kit", $kit);
         if(isset($outputMenu))
         {
-            $form->addExtraData("action", $outputMenu);
+            $form->addExtraData("formType", $outputMenu);
         }
     }
 

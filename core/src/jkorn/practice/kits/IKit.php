@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\kits;
 
 
+use jkorn\practice\kits\data\KitEffectsData;
 use jkorn\practice\kits\data\KitCombatData;
 use pocketmine\Player;
 

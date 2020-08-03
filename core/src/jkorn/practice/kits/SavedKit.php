@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace jkorn\practice\kits;
 
-
+use jkorn\practice\kits\data\KitEffectsData;
 use jkorn\practice\kits\data\KitCombatData;
 use jkorn\practice\messages\IPracticeMessages;
 use jkorn\practice\messages\managers\PracticeMessageManager;
@@ -125,6 +125,7 @@ class SavedKit implements ISaved, IKit
     public function getEffectsData(): KitEffectsData
     {
         // TODO: Implement getEffectsData() method.
+        return $this->effectsData;
     }
 
     /**

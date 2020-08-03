@@ -30,7 +30,7 @@ class ManageKitsCommand extends PracticeCommand implements IPracticePermissions
      */
     protected function onExecute(CommandSender $sender, string $commandLabel, array $args): void
     {
-        $form = InternalForm::getForm(InternalForms::KIT_MANAGER_MENU);
+        $form = InternalForm::getForm(InternalForm::KIT_MANAGER_MENU);
         if($form !== null && $sender instanceof Player)
         {
             $form->display($sender);
@@ -61,20 +61,6 @@ class ManageKitsCommand extends PracticeCommand implements IPracticePermissions
             return false;
         }
 
-        if($target instanceof PracticePlayer)
-        {
-            // TODO: Game message.
-            if($target->isInGame())
-            {
-                return false;
-            }
-
-            // TODO: Spectator message.
-            if($target->isSpectator())
-            {
-                return false;
-            }
-        }
         return true;
     }
 }

@@ -8,7 +8,7 @@ namespace jkorn\practice\forms\internal\types\kits;
 use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\types\CustomForm;
 use jkorn\practice\kits\data\KitCombatData;
-use jkorn\practice\kits\KitEffectsData;
+use jkorn\practice\kits\data\KitEffectsData;
 use jkorn\practice\kits\SavedKit;
 use jkorn\practice\PracticeCore;
 use pocketmine\Player;
