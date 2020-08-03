@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\forms\internal\types\kits\edit\effects;
 
 
-use jkorn\practice\forms\types\CustomForm;
+use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\misc\EffectInformation;
 use pocketmine\entity\EffectInstance;
 use jkorn\practice\forms\internal\InternalForm;
@@ -34,7 +34,6 @@ class AddKitEffect extends InternalForm
      */
     protected function onDisplay(Player $player, ...$args): void
     {
-        // TODO: Implement onDisplay() method.
         if
         (
             !isset($args[0])
@@ -55,7 +54,7 @@ class AddKitEffect extends InternalForm
             return;
         }
 
-        $form = new CustomForm(function(Player $player, $data, $extraData)
+        $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
             if($data !== null && isset($extraData["kit"], $extraData["effect"]))
             {

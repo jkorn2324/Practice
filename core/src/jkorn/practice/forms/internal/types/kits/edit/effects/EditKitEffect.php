@@ -14,6 +14,7 @@ namespace jkorn\practice\forms\internal\types\kits\edit\effects;
 use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\types\CustomForm;
 use jkorn\practice\kits\IKit;
+use jkorn\practice\misc\EffectInformation;
 use pocketmine\Player;
 use pocketmine\entity\EffectInstance;
 use pocketmine\utils\TextFormat;
@@ -52,13 +53,56 @@ class EditKitEffect extends InternalForm
 
         $form = new CustomForm(function(Player $player, $data, $extraData)
         {
+            if($data !== null && isset($extraData["kit"], $extraData["effect"]))
+            {
+                /** @var IKit $kit */
+                $kit = $extraData["kit"];
+                /** @var EffectInstance $effect */
+                $effect = $extraData["effect"];
 
+                $duration = $data[2];
+                $amplifier = $data[3];
+
+                if(!is_numeric($duration) || !is_numeric($amplifier))
+                {
+                    return;
+                }
+
+                // Duration in Seconds
+                $duration = intval($duration) * 20;
+                $amplifier = intval($amplifier);
+
+                if($effect->getAmplifier() !== $amplifier)
+                {
+                    $effect->setAmplifier($amplifier);
+                }
+
+                if($effect->getDuration() !== $duration)
+                {
+                    $effect->setDuration($duration);
+                }
+
+                // Overrides the effect.
+                $kit->getEffectsData()->addEffect($effect);
+
+                // TODO: Send message saying player successfully edited the kit.
+            }
         });
+
+        $effectInformation = EffectInformation::getInformation($effect);
 
         $form->setTitle(TextFormat::BOLD . "Edit Effect");
         $form->addLabel("Edits the selected effect and saves it to the kit.");
 
-        // TODO
+        $form->addLabel("Effect: " . $effectInformation->getName());
+
+        $form->addInput("Effect Duration (In Seconds)", strval($effect->getDuration() / 20));
+        $form->addInput("Effect Strength (Amplifier)", strval($effect->getAmplifier()));
+
+        $form->addExtraData("effect", $effect);
+        $form->addExtraData("kit", $kit);
+
+        $player->sendForm($form);
     }
 
     /**
