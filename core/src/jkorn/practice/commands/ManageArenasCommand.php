@@ -34,7 +34,6 @@ class ManageArenasCommand extends PracticeCommand implements IPracticePermission
     protected function onExecute(CommandSender $sender, string $commandLabel, array $args): void
     {
         $form = InternalForm::getForm(InternalForm::ARENA_MENU_MANAGER);
-        var_dump($form);
         if($form !== null && $sender instanceof Player)
         {
             $form->display($sender);

@@ -10,6 +10,7 @@ use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\PracticeCore;
 use pocketmine\Player;
+use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class ArenaMenu extends InternalForm
@@ -34,9 +35,11 @@ class ArenaMenu extends InternalForm
                     return;
                 }
 
+                Server::getInstance()->broadcastMessage("Found Arena Menu");
                 if(isset($managers[(int)$data]))
                 {
                     $manager = $managers[(int)$data];
+                    Server::getInstance()->broadcastMessage($manager->getType());
                     $form = $manager->getArenaEditorMenu();
                     if($form !== null)
                     {
