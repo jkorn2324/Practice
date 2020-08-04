@@ -8,9 +8,10 @@ namespace jkorn\ffa\arenas;
 use jkorn\ffa\FFAAddon;
 use jkorn\ffa\FFAGameManager;
 use jkorn\practice\arenas\IArenaManager;
+use jkorn\practice\forms\IPracticeForm;
 use pocketmine\Server;
 
-class FFAArenaManager  implements IArenaManager
+class FFAArenaManager implements IArenaManager
 {
 
     const MANAGER_TYPE = "ffa.manager";
@@ -81,13 +82,27 @@ class FFAArenaManager  implements IArenaManager
     }
 
     /**
-     * @param FFAArena $arena
+     * @param $arena
+     * @param bool $override - Determines whether to override the arena.
+     *
+     * @return bool - Determines whether or not the arena has been successfully added.
      *
      * Adds an arena to the manager.
      */
-    public function addArena($arena): void
+    public function addArena($arena, bool $override = false): bool
     {
-        // TODO: Implement addArena() method.
+        if(!$arena instanceof FFAArena)
+        {
+            return false;
+        }
+
+        if(isset($this->arenas[$arena->getLocalizedName()]) && !$override)
+        {
+            return false;
+        }
+
+        $this->arenas[$arena->getLocalizedName()] = $arena;
+        return true;
     }
 
     /**
@@ -98,7 +113,8 @@ class FFAArenaManager  implements IArenaManager
      */
     public function getArena(string $name)
     {
-        if (isset($this->arenas[$localized = strtolower($name)])) {
+        if (isset($this->arenas[$localized = strtolower($name)]))
+        {
             return $this->arenas[$localized];
         }
 
@@ -112,7 +128,10 @@ class FFAArenaManager  implements IArenaManager
      */
     public function deleteArena($arena): void
     {
-        // TODO: Implement deleteArena() method.
+        if($arena instanceof FFAArena && $this->arenas[$arena->getLocalizedName()])
+        {
+            unset($this->arenas[$arena->getLocalizedName()]);
+        }
     }
 
     /**
@@ -167,5 +186,40 @@ class FFAArenaManager  implements IArenaManager
     {
         return is_a($manager, __NAMESPACE__ . "\\" . self::class)
             && get_class($manager) === self::class;
+    }
+
+    /**
+     * @return string
+     *
+     * Gets the display name of the arena manager,
+     * used for the main form display.
+     */
+    public function getFormDisplayName(): string
+    {
+        return "FFA";
+    }
+
+    /**
+     * @return string
+     *
+     * Gets the form texture for the main arena manager,
+     * return "" for no texture.
+     */
+    public function getFormTexture(): string
+    {
+        // TODO: Get texture.
+        return "";
+    }
+
+    /**
+     * @return IPracticeForm|null
+     *
+     * Gets the arena editor selection menu.
+     */
+    public function getArenaEditorMenu(): ?IPracticeForm
+    {
+        // TODO: Implement getArenaEditorMenu() method.
+
+        return null;
     }
 }

@@ -144,6 +144,21 @@ class FFAArena extends SavedPracticeArena
     }
 
     /**
+     * @return string
+     *
+     * Gets the form texture.
+     */
+    public function getFormTexture(): string
+    {
+        if($this->kit !== null)
+        {
+            return $this->kit->getTexture();
+        }
+
+        return "textures/ui/deop.png";
+    }
+
+    /**
      * @param $arena
      * @return bool
      *

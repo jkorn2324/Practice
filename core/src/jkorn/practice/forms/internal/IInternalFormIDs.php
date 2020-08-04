@@ -35,4 +35,6 @@ interface IInternalFormIDs
 
     const EFFECT_KIT_SELECTOR_MENU = "kit.effect.selector.menu";
 
+    const ARENA_MENU_MANAGER = "arena.menu.manager";
+
 }

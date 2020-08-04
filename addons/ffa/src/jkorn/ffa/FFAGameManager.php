@@ -152,7 +152,19 @@ class FFAGameManager implements IGameManager, FFADisplayStatistics
         DisplayStatistic::register(new DisplayStatistic(
             self::STATISTIC_FFA_ARENA_KIT,
             function (Player $player, Server $server, $data) {
-                if ($data instanceof FFAArena) {
+                if($data instanceof FFAGame)
+                {
+                    $arena = $data->getArena();
+                    if($arena !== null)
+                    {
+                        $kit = $arena->getKit();
+                        if($kit !== null)
+                        {
+                            return $kit->getName();
+                        }
+                    }
+                    return "None";
+                } elseif ($data instanceof FFAArena) {
                     $kit = $data->getKit();
                     if ($kit !== null) {
                         return $kit->getName();

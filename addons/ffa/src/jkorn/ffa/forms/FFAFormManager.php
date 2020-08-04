@@ -6,7 +6,13 @@ namespace jkorn\ffa\forms;
 
 
 use jkorn\ffa\FFAAddon;
+use jkorn\ffa\forms\internal\CreateFFAArena;
+use jkorn\ffa\forms\internal\DeleteFFAArena;
+use jkorn\ffa\forms\internal\EditFFAArena;
+use jkorn\ffa\forms\internal\FFAArenaMenu;
+use jkorn\ffa\forms\internal\FFAArenaSelector;
 use jkorn\practice\forms\display\manager\AbstractFormDisplayManager;
+use jkorn\practice\forms\internal\InternalForm;
 
 class FFAFormManager extends AbstractFormDisplayManager
 {
@@ -29,7 +35,21 @@ class FFAFormManager extends AbstractFormDisplayManager
     {
         $this->core = $core;
 
+        $this->registerInternalForms();
+
         parent::__construct($core->getResourcesFolder() . "forms/", $core->getDataFolder() . "forms/");
+    }
+
+    /**
+     * Registers the internal forms.
+     */
+    private function registerInternalForms(): void
+    {
+        InternalForm::registerForm(new FFAArenaSelector());
+        InternalForm::registerForm(new FFAArenaMenu());
+        InternalForm::registerForm(new EditFFAArena());
+        InternalForm::registerForm(new CreateFFAArena());
+        InternalForm::registerForm(new DeleteFFAArena());
     }
 
     /**

@@ -2,28 +2,20 @@
 
 declare(strict_types=1);
 
-namespace jkorn\practice\forms\internal\types\kits;
+namespace jkorn\ffa\forms\internal;
 
 
+use jkorn\ffa\arenas\FFAArena;
+use jkorn\ffa\arenas\FFAArenaManager;
 use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\types\SimpleForm;
-use jkorn\practice\kits\SavedKit;
 use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
-class DeleteKitForm extends InternalForm
+class DeleteFFAArena extends InternalForm implements FFAInternalForms
 {
 
-    /**
-     * @return string
-     *
-     * Gets the localized name of the practice form.
-     */
-    public function getLocalizedName(): string
-    {
-        return self::DELETE_KIT_FORM;
-    }
 
     /**
      * @param Player $player
@@ -33,35 +25,42 @@ class DeleteKitForm extends InternalForm
      */
     protected function onDisplay(Player $player, ...$args): void
     {
-        $kit = $args[0];
-        if(!$kit instanceof SavedKit)
+        if
+        (
+            !isset($args[0])
+            || ($arena = $args[0]) === null
+            || !$arena instanceof FFAArena
+        )
         {
             return;
         }
 
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
-
-            if(
-                $data !== null
-                && (int)$data === 0
-            )
+            if($data !== null && isset($extraData["arena"]))
             {
-                /** @var SavedKit $kit */
-                $kit = $extraData["kit"];
-                PracticeCore::getKitManager()->delete($kit);
+                /** @var FFAArena|null $arena */
+                $arena = $extraData["arena"];
 
-                // TODO: Send message to player.
+                $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager(FFAArenaManager::MANAGER_TYPE);
+
+                if(!$arenaManager instanceof FFAArenaManager)
+                {
+                    return;
+                }
+
+                $arenaManager->deleteArena($arena);
+
+                // TODO: SEND MESSAGE
             }
         });
 
-
-        $form->setTitle(TextFormat::BOLD . "Delete Kit");
+        $form->setTitle(TextFormat::BOLD . "Delete FFA Arena");
 
         $content = [
-            "Are you sure you want to delete the kit from the server?",
+            "Are you sure you want to delete the ffa arena from the server?",
             "",
-            "Kit: " . $kit->getName(),
+            "FFA Arena: " . $arena->getName(),
             "",
             "Select " . TextFormat::BOLD . "yes" . TextFormat::RESET . " to delete, or " . TextFormat::BOLD . "no" . TextFormat::RESET . " to cancel."
         ];
@@ -71,7 +70,7 @@ class DeleteKitForm extends InternalForm
         $form->addButton(TextFormat::BOLD . "Yes", 0, "textures/ui/confirm.png");
         $form->addButton(TextFormat::BOLD . "No", 0, "textures/ui/cancel.png");
 
-        $form->addExtraData("kit", $kit);
+        $form->addExtraData("arena", $arena);
 
         $player->sendForm($form);
     }
@@ -86,5 +85,15 @@ class DeleteKitForm extends InternalForm
     {
         // TODO: Implement testPermission() method.
         return true;
+    }
+
+    /**
+     * @return string
+     *
+     * Gets the localized name of the internal form.
+     */
+    public function getLocalizedName(): string
+    {
+        return self::FFA_ARENA_DELETE;
     }
 }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace jkorn\practice\arenas;
 
 
+use jkorn\practice\forms\IPracticeForm;
+
 interface IArenaManager
 {
     /**
@@ -19,10 +21,13 @@ interface IArenaManager
 
     /**
      * @param $arena
+     * @param bool $override - Determines whether to override the arena.
+     *
+     * @return bool - Determines whether or not the arena has been successfully added.
      *
      * Adds an arena to the manager.
      */
-    public function addArena($arena): void;
+    public function addArena($arena, bool $override = false): bool;
 
     /**
      * @param string $name
@@ -82,4 +87,29 @@ interface IArenaManager
      * Determines if one manager is equivalent to another.
      */
     public function equals($manager): bool;
+
+    // ------------------------------ The Form Display Information ---------------------------
+
+    /**
+     * @return string
+     *
+     * Gets the display name of the arena manager,
+     * used for the main form display.
+     */
+    public function getFormDisplayName(): string;
+
+    /**
+     * @return string
+     *
+     * Gets the form texture for the main arena manager,
+     * return "" for no texture.
+     */
+    public function getFormTexture(): string;
+
+    /**
+     * @return IPracticeForm|null
+     *
+     * Gets the arena editor selection menu.
+     */
+    public function getArenaEditorMenu(): ?IPracticeForm;
 }

@@ -150,4 +150,14 @@ class BaseArenaManager extends AbstractManager
 
         return null;
     }
+
+    /**
+     * @return array|IArenaManager[]
+     *
+     * Gets all of the arena managers.
+     */
+    public function getArenaManagers()
+    {
+        return $this->arenaManagers;
+    }
 }

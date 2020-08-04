@@ -177,11 +177,7 @@ class FFAGame implements IGame
     {
         if($this->arena !== null)
         {
-            $kit = $this->arena->getKit();
-            if($kit !== null)
-            {
-                return $kit->getTexture();
-            }
+            return $this->arena->getFormTexture();
         }
 
         return "";

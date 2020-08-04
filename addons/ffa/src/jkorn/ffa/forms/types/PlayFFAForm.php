@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace jkorn\ffa\forms\types;
 
 
+use jkorn\ffa\FFAGameManager;
+use jkorn\ffa\games\FFAGame;
 use jkorn\ffa\statistics\FFADisplayStatistics;
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\display\FormDisplayText;
 use jkorn\practice\forms\types\SimpleForm;
+use jkorn\practice\games\misc\gametypes\IGame;
+use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
@@ -56,16 +60,42 @@ class PlayFFAForm extends FormDisplay
      */
     public function display(Player $player, ...$args): void
     {
+        $gameManager = PracticeCore::getBaseGameManager()->getGameManager(FFAGameManager::GAME_TYPE);
+        if(!$gameManager instanceof FFAGameManager)
+        {
+            return;
+        }
+
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
-            // TODO: Get output.
+            if($data !== null && isset($extraData["games"]))
+            {
+                /** @var IGame[] $games */
+                $games = $extraData["games"];
+                if(count($games) <= 0)
+                {
+                    return;
+                }
+
+                if(isset($games[$data]))
+                {
+                    $game = $games[$data];
+                    if($game instanceof FFAGame)
+                    {
+                        $game->putInGame($player);
+                    }
+                }
+            }
         });
 
         $form->setTitle($this->formData["title"]->getText($player));
         $form->setContent($this->formData["description"]->getText($player));
 
-        // TODO: Get the games rather than the arenas.
-        $games = [];
+        $games = $gameManager->getGames(function(FFAGame $game)
+        {
+            return $game->validate();
+        });
+
         if(count($games) <= 0)
         {
             $form->addButton(
@@ -77,6 +107,19 @@ class PlayFFAForm extends FormDisplay
         }
 
         $inputGames = [];
+        foreach($games as $game)
+        {
+            $texture = $game->getTexture();
+            if($texture !== "")
+            {
+                $form->addButton($this->formData["button.select.arena.template"]->getText($player, $game), 0, $texture);
+            }
+            else
+            {
+                $form->addButton($this->formData["button.select.arena.template"]->getText($player, $game));
+            }
+            $inputGames[] = $game;
+        }
 
         $form->setExtraData(["games" => $inputGames]);
         $player->sendForm($form);
