@@ -12,3 +12,6 @@ permissions:
   practice.permission.spectate:
     description: "Allows the player to spectate other games."
     default: true
+  practice.permission.manage.arenas:
+    description: "Allows the player to manage the arenas."
+    default: op

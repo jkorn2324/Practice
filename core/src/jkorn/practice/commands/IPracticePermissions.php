@@ -18,4 +18,6 @@ interface IPracticePermissions
     const MANAGE_KITS = "practice.permission.manage.kits";
     // Spectate the player.
     const SPECTATE = "practice.permission.spectate";
+    // Manages the arenas.
+    const MANAGE_ARENAS = "practice.permission.manage.arenas";
 }

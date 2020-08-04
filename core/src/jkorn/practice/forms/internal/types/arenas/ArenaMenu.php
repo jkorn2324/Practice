@@ -49,7 +49,7 @@ class ArenaMenu extends InternalForm
         if(count($arenas) <= 0)
         {
             $form->addButton("None");
-            $form->addExtraData("managers", $arenas);
+            $form->addExtraData("managers", []);
             $player->sendForm($form);
             return;
         }

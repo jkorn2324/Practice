@@ -63,6 +63,7 @@ class ArenaManager implements IArenaManager
     public function addArena($arena, bool $override = false): bool
     {
         // TODO: Implement addArena() method.
+        return true;
     }
 
     /**
@@ -114,6 +115,13 @@ class ArenaManager implements IArenaManager
         {
             return null;
         }
+
+        $randomKey = array_keys($this->openArenas)[mt_rand(0, count($this->openArenas) - 1)];
+        if(isset($this->arenas[$randomKey]))
+        {
+            return $this->arenas[$randomKey];
+        }
+        return null;
     }
 
     /**

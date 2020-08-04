@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice;
 
 
+use jkorn\practice\commands\ManageArenasCommand;
 use jkorn\practice\commands\ManageKitsCommand;
 use jkorn\practice\commands\SpectateCommand;
 use jkorn\practice\display\DisplayStatistic;
@@ -237,6 +238,8 @@ class PracticeCore extends PluginBase
         PracticeUtil::registerCommand(new ManageKitsCommand());
         // Registers the spectate command.
         PracticeUtil::registerCommand(new SpectateCommand());
+        // Registers the arena manager command.
+        PracticeUtil::registerCommand(new ManageArenasCommand());
     }
 
 }
