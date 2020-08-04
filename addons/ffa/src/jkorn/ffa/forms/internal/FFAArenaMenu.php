@@ -60,6 +60,8 @@ class FFAArenaMenu extends InternalForm implements FFAInternalForms
         $form->addButton(TextFormat::BOLD . "Create Arena", 0, "textures/ui/confirm.png");
         $form->addButton(TextFormat::BOLD . "Edit Arena", 0, "textures/ui/debug_glyph_color.png");
         $form->addButton(TextFormat::BOLD . "Delete Arena", 0, "textures/ui/realms_red_x.png");
+
+        $player->sendForm($form);
     }
 
     /**

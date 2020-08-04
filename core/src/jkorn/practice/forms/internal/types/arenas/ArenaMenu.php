@@ -35,11 +35,9 @@ class ArenaMenu extends InternalForm
                     return;
                 }
 
-                Server::getInstance()->broadcastMessage("Found Arena Menu");
                 if(isset($managers[(int)$data]))
                 {
                     $manager = $managers[(int)$data];
-                    Server::getInstance()->broadcastMessage($manager->getType());
                     $form = $manager->getArenaEditorMenu();
                     if($form !== null)
                     {

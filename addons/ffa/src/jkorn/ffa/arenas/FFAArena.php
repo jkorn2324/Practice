@@ -36,8 +36,8 @@ class FFAArena extends SavedPracticeArena
     public function __construct(string $name, Level $level, SpawnArea $spawnArea, ?IKit $kit = null)
     {
         parent::__construct($name, $level);
-        $this->kit = $kit;
 
+        $this->kit = $kit;
         $this->spawnArea = $spawnArea;
     }
 
@@ -184,7 +184,7 @@ class FFAArena extends SavedPracticeArena
     public static function decode(string $name, array $data): ?FFAArena
     {
         $server = Server::getInstance();
-        if(isset($data["kit"], $data["spawn"], $data["level"], $data["area"]))
+        if(isset($data["kit"], $data["spawn"], $data["level"]))
         {
             $loaded = true;
             if(!$server->isLevelLoaded($data["level"]))

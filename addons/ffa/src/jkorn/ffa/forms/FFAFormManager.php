@@ -45,11 +45,11 @@ class FFAFormManager extends AbstractFormDisplayManager
      */
     private function registerInternalForms(): void
     {
-        InternalForm::registerForm(new FFAArenaSelector());
-        InternalForm::registerForm(new FFAArenaMenu());
-        InternalForm::registerForm(new EditFFAArena());
-        InternalForm::registerForm(new CreateFFAArena());
-        InternalForm::registerForm(new DeleteFFAArena());
+        InternalForm::registerForm(new FFAArenaSelector(), true);
+        InternalForm::registerForm(new FFAArenaMenu(), true);
+        InternalForm::registerForm(new EditFFAArena(), true);
+        InternalForm::registerForm(new CreateFFAArena(), true);
+        InternalForm::registerForm(new DeleteFFAArena(), true);
     }
 
     /**

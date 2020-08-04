@@ -46,18 +46,6 @@ class FFAGameManager implements IGameManager, FFADisplayStatistics
         $this->server = $core->getServer();
     }
 
-    /**
-     * @param array|FFAArena[] $arenas
-     *
-     * Loads the games from the arena manager.
-     */
-    public function loadGames(array &$arenas): void
-    {
-        foreach($arenas as $arena)
-        {
-            $this->games[$arena->getLocalizedName()] = new FFAGame($arena);
-        }
-    }
 
     /**
      * Called when the game manager is first registered.
@@ -66,7 +54,7 @@ class FFAGameManager implements IGameManager, FFADisplayStatistics
     {
         // Registers the arena manager.
         PracticeCore::getBaseArenaManager()->registerArenaManager(
-            new FFAArenaManager($this->core, $this), true);
+            new FFAArenaManager($this->core), true);
         PracticeCore::getBaseScoreboardDisplayManager()->registerScoreboardManager(
             new FFAScoreboardManager($this->core), true);
         PracticeCore::getBaseFormDisplayManager()->registerFormDisplayManager(
@@ -223,6 +211,38 @@ class FFAGameManager implements IGameManager, FFADisplayStatistics
         }
 
         return null;
+    }
+
+    /**
+     * @param $arena - The arena for the game.
+     *
+     * Used to add a game to the game list,
+     * should not be used by external plugins.
+     */
+    public function createGame(&$arena): void
+    {
+        if(!$arena instanceof FFAArena)
+        {
+            return;
+        }
+
+        $game = new FFAGame($arena);
+        $this->games[$arena->getLocalizedName()] = $game;
+    }
+
+    /**
+     * @param string $localized
+     *
+     * Removes the game from the ffa game manager,
+     * should not be used by external addons or plugins.
+     */
+    public function removeGame(string $localized): void
+    {
+        if(isset($this->games[$localized]))
+        {
+            // TODO: Remove players from game possibly.
+            unset($this->games[$localized]);
+        }
     }
 
     /**

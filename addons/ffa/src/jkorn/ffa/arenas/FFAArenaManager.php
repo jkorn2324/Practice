@@ -8,20 +8,20 @@ namespace jkorn\ffa\arenas;
 use jkorn\ffa\FFAAddon;
 use jkorn\ffa\FFAGameManager;
 use jkorn\ffa\forms\internal\FFAInternalForms;
+use jkorn\ffa\games\FFAGame;
 use jkorn\practice\arenas\IArenaManager;
 use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\IPracticeForm;
+use jkorn\practice\PracticeCore;
 use pocketmine\Server;
 
 class FFAArenaManager implements IArenaManager
 {
 
-    const MANAGER_TYPE = "ffa.manager";
+    const MANAGER_TYPE = "ffa_arena_manager";
 
     /** @var FFAAddon */
     private $core;
-    /** @var FFAGameManager */
-    private $manager;
 
     /** @var Server */
     private $server;
@@ -32,12 +32,10 @@ class FFAArenaManager implements IArenaManager
     /** @var FFAArena[] */
     private $arenas = [];
 
-    public function __construct(FFAAddon $core, FFAGameManager $manager)
+    public function __construct(FFAAddon $core)
     {
         $this->core = $core;
         $this->server = $core->getServer();
-
-        $this->manager = $manager;
     }
 
     /**
@@ -55,18 +53,71 @@ class FFAArenaManager implements IArenaManager
         } else {
             $contents = json_decode(file_get_contents($filePath), true);
             if (is_array($contents)) {
+                $gameManager = $this->getGameManager();
                 foreach ($contents as $arenaName => $data) {
                     $arena = FFAArena::decode($arenaName, $data);
                     if ($arena !== null) {
                         $this->arenas[$arena->getLocalizedName()] = $arena;
+                        // Adds the game to the game list.
+                        $this->addGame($arena->getLocalizedName(), $gameManager);
                     }
                 }
             }
         }
 
         // Loads the games from the ffa arenas.
-        $this->manager->loadGames($this->arenas);
         $this->loaded = true;
+    }
+
+    /**
+     * @param string $localized
+     * @param FFAGameManager|null $manager - The ffa game manager.
+     *
+     * Adds the game to the game manager.
+     */
+    private function addGame(string $localized, ?FFAGameManager $manager = null): void
+    {
+        if(!isset($this->arenas[$localized]))
+        {
+            return;
+        }
+
+        $arena = $this->arenas[$localized];
+        $manager = $manager ?? $this->getGameManager();
+        if($manager !== null)
+        {
+            $manager->createGame($arena);
+        }
+    }
+
+    /**
+     * @param string $localized
+     * @param FFAGameManager|null $manager - The FFA Game manager.
+     *
+     * Removes the game from the game manager.
+     */
+    private function removeGame(string $localized, ?FFAGameManager $manager = null): void
+    {
+        $manager = $manager ?? $this->getGameManager();
+        if($manager !== null)
+        {
+            $manager->removeGame($localized);
+        }
+    }
+
+    /**
+     * @return FFAGameManager|null
+     *
+     * Gets the game manager.
+     */
+    private function getGameManager(): ?FFAGameManager
+    {
+        $manager = PracticeCore::getBaseArenaManager()->getArenaManager(FFAGameManager::GAME_TYPE);
+        if($manager instanceof FFAGameManager)
+        {
+            return $manager;
+        }
+        return null;
     }
 
     /**
@@ -104,6 +155,8 @@ class FFAArenaManager implements IArenaManager
         }
 
         $this->arenas[$arena->getLocalizedName()] = $arena;
+        $this->addGame($arena->getLocalizedName());
+
         return true;
     }
 
@@ -132,6 +185,8 @@ class FFAArenaManager implements IArenaManager
     {
         if($arena instanceof FFAArena && $this->arenas[$arena->getLocalizedName()])
         {
+            // Removes the game.
+            $this->removeGame($arena->getLocalizedName());
             unset($this->arenas[$arena->getLocalizedName()]);
         }
     }

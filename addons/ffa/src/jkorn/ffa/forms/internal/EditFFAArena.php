@@ -42,6 +42,12 @@ class EditFFAArena extends InternalForm implements FFAInternalForms
 
                 /** @var IKit[] $kits */
                 $kits = $extraData["kits"];
+
+                if(count($kits) <= 0)
+                {
+                    return;
+                }
+
                 $kitIndex = $data[2];
 
                 // Sets the kit as null or the index.
@@ -89,6 +95,8 @@ class EditFFAArena extends InternalForm implements FFAInternalForms
         // Sets the extra data.
         $form->addExtraData("kits", $inKits);
         $form->addExtraData("arena", $arena);
+
+        $player->sendForm($form);
     }
 
     /**
