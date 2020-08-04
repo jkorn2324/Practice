@@ -7,7 +7,9 @@ namespace jkorn\ffa\arenas;
 
 use jkorn\ffa\FFAAddon;
 use jkorn\ffa\FFAGameManager;
+use jkorn\ffa\forms\internal\FFAInternalForms;
 use jkorn\practice\arenas\IArenaManager;
+use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\IPracticeForm;
 use pocketmine\Server;
 
@@ -218,8 +220,6 @@ class FFAArenaManager implements IArenaManager
      */
     public function getArenaEditorMenu(): ?IPracticeForm
     {
-        // TODO: Implement getArenaEditorMenu() method.
-
-        return null;
+        return InternalForm::getForm(FFAInternalForms::FFA_ARENA_MENU);
     }
 }

@@ -29,10 +29,14 @@ class ArenaMenu extends InternalForm
             {
                 /** @var IArenaManager[] $managers */
                 $managers = $extraData["managers"];
-
-                if(isset($managers[$data]))
+                if(count($managers) <= 0)
                 {
-                    $manager = $managers[$data];
+                    return;
+                }
+
+                if(isset($managers[(int)$data]))
+                {
+                    $manager = $managers[(int)$data];
                     $form = $manager->getArenaEditorMenu();
                     if($form !== null)
                     {

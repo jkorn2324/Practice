@@ -13,6 +13,7 @@ namespace jkorn\practice\commands;
 
 use jkorn\practice\forms\internal\InternalForm;
 use pocketmine\command\CommandSender;
+use pocketmine\Player;
 
 class ManageArenasCommand extends PracticeCommand implements IPracticePermissions
 {
