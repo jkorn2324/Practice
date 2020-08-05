@@ -188,16 +188,6 @@ class SavedKit implements ISaved, IKit
     }
 
     /**
-     * @return string
-     *
-     * Gets the texture of the kit.
-     */
-    public function getTexture(): string
-    {
-        return $this->texture;
-    }
-
-    /**
      * @return ButtonTexture|null
      *
      * Gets the button texture information.
@@ -216,7 +206,7 @@ class SavedKit implements ISaved, IKit
      */
     public static function decode(string $name, $data)
     {
-        if(!isset($data["items"], $data["armor"], $data["effects"], $data[KitCombatData::KIT_HEADER], $data["texture"]))
+        if(!isset($data["items"], $data["armor"], $data[KitEffectsData::EFFECTS_HEADER], $data[KitCombatData::KIT_HEADER]))
         {
             return null;
         }
@@ -244,13 +234,19 @@ class SavedKit implements ISaved, IKit
             }
         }
 
+        $texture = null;
+        if(isset($data["texture"]))
+        {
+            $texture = ButtonTexture::decode($data["texture"]);
+        }
+
         return new SavedKit(
             $name,
             $outputItems,
             $outputArmor,
             KitEffectsData::decode($data[KitEffectsData::EFFECTS_HEADER]),
             KitCombatData::decode($data[KitCombatData::KIT_HEADER]),
-            ButtonTexture::decode($data["texture"]),
+            $texture,
             $build
         );
     }

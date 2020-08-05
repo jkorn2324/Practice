@@ -90,7 +90,7 @@ class ButtonTexture implements ISaved
      *
      * Decodes the data and creates a new button texture object.
      */
-    public static function decode(&$data): ?ButtonTexture
+    public static function decode($data): ?ButtonTexture
     {
         if(is_array($data) && isset($data["type"], $data["path"]))
         {

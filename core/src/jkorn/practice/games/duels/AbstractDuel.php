@@ -174,6 +174,11 @@ abstract class AbstractDuel implements IUpdatedGame
      * of events that this calls.
      * - PlayerDeathEvent
      * - PlayerRespawnEvent
+     * - EntityDamageEvent
+     *   - EntityDamageByEntityEvent
+     *   - EntityDamageByChildEntityEvent
+     * - BlockPlaceEvent
+     * - BlockBreakEvent
      *
      * Handles an event when the player is in the game.
      */

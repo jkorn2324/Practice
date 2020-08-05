@@ -70,7 +70,7 @@ class KitManager extends AbstractManager
                         if(strpos($file, ".json") === false) {
                             continue;
                         }
-                        $contents = json_decode(file_get_contents($this->kitDirectory . "/" . $file), true);
+                        $contents = json_decode(file_get_contents($this->kitDirectory . $file), true);
                         $name = str_replace(".json", "", $file);
                         $kits[$name] = $contents;
                     }
@@ -104,7 +104,6 @@ class KitManager extends AbstractManager
         if(!is_dir($this->kitDirectory))
         {
             mkdir($this->kitDirectory);
-            return;
         }
 
         $files = scandir($this->kitDirectory);
@@ -118,7 +117,8 @@ class KitManager extends AbstractManager
             if(strpos($file, ".json") === false) {
                 continue;
             }
-            $contents = json_decode(file_get_contents($this->kitDirectory . "/" . $file), true);
+
+            $contents = json_decode(file_get_contents($this->kitDirectory . $file), true);
             $name = str_replace(".json", "", $file);
             $kits[$name] = $contents;
         }
@@ -133,9 +133,13 @@ class KitManager extends AbstractManager
      */
     public function postLoad($data): void
     {
+        if(!is_array($data))
+        {
+            return;
+        }
         foreach($data as $kitName => $kitData) {
             $kit = SavedKit::decode((string)$kitName, $kitData);
-            if($kit instanceof SavedKit) {
+            if($kit !== null) {
                 $this->kits[strtolower($kit->getName())] = $kit;
             }
         }

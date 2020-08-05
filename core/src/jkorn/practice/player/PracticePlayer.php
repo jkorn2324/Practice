@@ -757,11 +757,6 @@ class PracticePlayer extends Player implements IPracticeMessages
             }
         }
 
-        if($this->isInLobby())
-        {
-            return false;
-        }
-
         return true;
     }
 

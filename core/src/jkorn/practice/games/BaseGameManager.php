@@ -112,6 +112,7 @@ class BaseGameManager implements DisplayStatisticNames
 
             $oldGameManager = $this->gameManagers[$gameType];
             $oldGameManager->onUnregistered();
+            $oldGameManager->onSave();
         }
 
         $this->gameManagers[$gameType] = $manager;
@@ -297,6 +298,9 @@ class BaseGameManager implements DisplayStatisticNames
      */
     public function save(bool $async = false): void
     {
-
+        foreach($this->gameManagers as $gameManager)
+        {
+            $gameManager->onSave();
+        }
     }
 }

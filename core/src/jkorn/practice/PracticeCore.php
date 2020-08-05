@@ -106,6 +106,11 @@ class PracticeCore extends PluginBase
             self::$kitManager->save();
         }
 
+        if(self::$baseGameManager instanceof BaseGameManager)
+        {
+            self::$baseGameManager->save();
+        }
+
         // Saves all of the players information.
         PracticeDataManager::getDataProvider()->saveAllPlayers();
     }

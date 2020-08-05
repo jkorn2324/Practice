@@ -6,6 +6,7 @@ namespace jkorn\practice\forms\internal\types\kits;
 
 
 use jkorn\practice\forms\internal\InternalForm;
+use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\kits\SavedKit;
 use jkorn\practice\PracticeCore;
@@ -68,8 +69,8 @@ class DeleteKitForm extends InternalForm
 
         $form->setContent(implode($content, "\n"));
 
-        $form->addButton(TextFormat::BOLD . "Yes", 0, "textures/ui/confirm.png");
-        $form->addButton(TextFormat::BOLD . "No", 0, "textures/ui/cancel.png");
+        $form->addButton(TextFormat::BOLD . "Yes", new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/confirm.png"));
+        $form->addButton(TextFormat::BOLD . "No", new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/cancel.png"));
 
         $form->addExtraData("kit", $kit);
 

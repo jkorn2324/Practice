@@ -6,6 +6,7 @@ namespace jkorn\practice\forms\internal\types\kits;
 
 
 use jkorn\practice\forms\internal\InternalForm;
+use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\forms\types\SimpleForm;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
@@ -80,10 +81,10 @@ class KitManagerMenu extends InternalForm
         $form->setTitle(TextFormat::BOLD . "Manage Kits");
         $form->setContent("Manage the kits in the server.");
 
-        $form->addButton(TextFormat::BOLD . "Create Kit", 0, "textures/ui/confirm.png");
-        $form->addButton(TextFormat::BOLD . "Edit Kit", 0, "textures/ui/debug_glyph_color.png");
-        $form->addButton(TextFormat::BOLD . "Delete Kit", 0, "textures/ui/realms_red_x.png");
-        $form->addButton(TextFormat::BOLD . "View Kit", 0, "textures/ui/magnifyingGlass.png");
+        $form->addButton(TextFormat::BOLD . "Create Kit", new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/confirm.png"));
+        $form->addButton(TextFormat::BOLD . "Edit Kit", new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/debug_glyph_color.png"));
+        $form->addButton(TextFormat::BOLD . "Delete Kit", new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/realms_red_x.png"));
+        $form->addButton(TextFormat::BOLD . "View Kit", new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/magnifyingGlass.png"));
 
         $player->sendForm($form);
     }

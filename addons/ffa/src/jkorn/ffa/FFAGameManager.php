@@ -127,6 +127,8 @@ class FFAGameManager implements IGameManager, FFADisplayStatistics
                     {
                         return $arena->getName();
                     }
+                } elseif ($data instanceof FFAArena) {
+                    return $data->getName();
                 } elseif ($player instanceof PracticePlayer) {
                     $game = $player->getCurrentGame();
                     if($game instanceof FFAGame)

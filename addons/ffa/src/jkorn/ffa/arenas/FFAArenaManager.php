@@ -75,6 +75,7 @@ class FFAArenaManager extends PracticeArenaManager
         }
 
         $this->arenas[$arena->getLocalizedName()] = $arena;
+        $this->addGame($arena);
         return true;
     }
 

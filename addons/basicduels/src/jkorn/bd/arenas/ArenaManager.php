@@ -46,6 +46,11 @@ class ArenaManager extends PracticeArenaManager
         else
         {
             $contents = json_decode(file_get_contents($this->arenasFile), true);
+            if(!is_array($contents))
+            {
+                return;
+            }
+
             foreach($contents as $arenaName => $data)
             {
                 $arena = PreGeneratedDuelArena::decode($arenaName, $data);

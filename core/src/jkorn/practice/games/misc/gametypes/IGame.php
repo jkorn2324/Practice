@@ -51,7 +51,11 @@ interface IGame
      * of event that this calls.
      * - PlayerDeathEvent
      * - PlayerRespawnEvent
-     *
+     * - EntityDamageEvent - TODO
+     *   - EntityDamageByEntityEvent
+     *   - EntityDamageByChildEntityEvent
+     * - BlockPlaceEvent - TODO
+     * - BlockBreakEvent - TODO
      * Handles an event when the player is in the game.
      */
     public function handleEvent(Event &$event): void;

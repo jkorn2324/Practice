@@ -40,7 +40,7 @@ class FFAGame implements IGame
         }
 
         $kit = $this->arena->getKit();
-        return $kit === null;
+        return $kit !== null;
     }
 
     /**
@@ -80,7 +80,10 @@ class FFAGame implements IGame
             return;
         }
 
-        // Teleports the player to the arena.
+
+        // Adds the player to the players list.
+        $this->players[$player->getServerID()->toString()] = $player;
+        // Teleports the player to the arena, must be set after we add the player to the list.
         $this->arena->teleportTo($player);
 
         if($message)
@@ -101,9 +104,6 @@ class FFAGame implements IGame
 
             $player->sendMessage($messageText);
         }
-
-        // Adds the player to the players list.
-        $this->players[$player->getServerID()->toString()] = $player;
     }
 
     /**
@@ -198,14 +198,28 @@ class FFAGame implements IGame
      * of event that this calls.
      * - PlayerDeathEvent
      * - PlayerRespawnEvent => DO NOTHING HERE AS PLAYER IS REMOVED.
-     *
+     * - EntityDamageEvent
+     *   - EntityDamageByEntityEvent
+     *   - EntityDamageByChildEntityEvent
+     * - BlockPlaceEvent
+     * - BlockBreakEvent
      * Handles an event when the player is in the game.
      */
     public function handleEvent(Event &$event): void
     {
         if($event instanceof PlayerDeathEvent)
         {
-            // TODO: Update player deaths, update player kills.
+            $this->handleDeathEvent($event);
         }
+    }
+
+    /**
+     * @param PlayerDeathEvent $event
+     *
+     * Handles when the player dies in an FFA Arena.
+     */
+    protected function handleDeathEvent(PlayerDeathEvent &$event): void
+    {
+        // TODO: Update player deaths, update player kills.
     }
 }

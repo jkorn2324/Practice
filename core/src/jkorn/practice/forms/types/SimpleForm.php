@@ -85,16 +85,74 @@ class SimpleForm extends Form
 
     /**
      * @param string $text
-     * @param ButtonTexture|null $info - The button's texture information.
-     * @param string $label
+     * @param mixed...$args - The arguments for the simple form.
+     *
+     * Adds a button to the simple form based on the arguments.
+     * These are the valid method calls that can be used:
+     * - addButton(string text);
+     * - addButton(string text, ButtonTexture texture);
+     * - addButton(string text, ButtonTexture texture, string label);
+     * - addButton(string text, int imageType, string path);
+     * - addButton(string text, int imageType, string path, string label);
+     * - addButton(string text, string label);
+     * - addButton(string text, string label, ButtonTexture texture);
      */
-    public function addButton(string $text, ?ButtonTexture $info = null, ?string $label = null) : void {
+    public function addButton(string $text, ...$args) : void {
+
         $content = ["text" => $text];
-        if($info !== null)
+
+        if(isset($args[0]))
         {
-            $info->import($content);
+            $firstArgument = $args[0];
+
+            if($firstArgument instanceof ButtonTexture)
+            {
+                $firstArgument->import($content);
+                if
+                (
+                    isset($args[1])
+                    && (is_string(($secondArgument = $args[1]))
+                    || is_integer($secondArgument))
+                )
+                {
+                    $label = $secondArgument;
+                }
+            }
+            elseif (
+                is_integer($firstArgument)
+                && isset($args[1])
+                && is_string(($secondArgument = $args[1]))
+            )
+            {
+                $texture = new ButtonTexture(intval($firstArgument), strval($secondArgument));
+                $texture->import($content);
+
+                if(
+                    isset($args[3])
+                    && (is_int($thirdArgument = $args[3])
+                    || is_string($thirdArgument))
+                )
+                {
+                    $label = $thirdArgument;
+                }
+            }
+            elseif (is_string($firstArgument))
+            {
+                $label = $firstArgument;
+
+                if
+                (
+                    isset($args[1])
+                    && ($secondArgument = $args[1]) !== null
+                    && $secondArgument instanceof ButtonTexture
+                )
+                {
+                    $secondArgument->import($content);
+                }
+            }
         }
+
         $this->data["buttons"][] = $content;
-        $this->labelMap[] = $label ?? count($this->labelMap);
+        $this->labelMap[] = isset($label) ? $label : count($this->labelMap);
     }
 }

@@ -47,6 +47,13 @@ abstract class PracticeArenaManager
      */
     public function load(): void
     {
+        // Makes the new directory.
+        $directory = $this->getDirectory();
+        if(!is_dir($directory))
+        {
+            mkdir($directory);
+        }
+
         $this->onLoad();
         $this->loaded = true;
     }
