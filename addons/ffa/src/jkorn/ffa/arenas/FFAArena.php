@@ -7,6 +7,7 @@ namespace jkorn\ffa\arenas;
 
 use jkorn\ffa\scoreboards\FFAScoreboardManager;
 use jkorn\practice\arenas\SavedPracticeArena;
+use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\kits\SavedKit;
 use jkorn\practice\level\SpawnArea;
@@ -33,12 +34,18 @@ class FFAArena extends SavedPracticeArena
     /** @var SpawnArea */
     private $spawnArea;
 
-    public function __construct(string $name, Level $level, SpawnArea $spawnArea, ?IKit $kit = null)
+    /** @var ButtonTexture|null */
+    private $buttonTexture;
+
+    public function __construct(string $name, Level $level, SpawnArea $spawnArea, ?IKit $kit = null, ?ButtonTexture $texture = null)
     {
         parent::__construct($name, $level);
 
         $this->kit = $kit;
         $this->spawnArea = $spawnArea;
+
+        // Sets the button texture of the ffa arena.
+        $this->buttonTexture = $texture;
     }
 
     /**
@@ -139,23 +146,31 @@ class FFAArena extends SavedPracticeArena
         return [
             "kit" => $kitInfo,
             "spawn" => $this->spawnArea->export(),
-            "level" => $this->level->getName()
+            "level" => $this->level->getName(),
+            "texture" => $this->buttonTexture !== null ? $this->buttonTexture->export() : null
         ];
     }
 
     /**
-     * @return string
+     * @return ButtonTexture|null
      *
-     * Gets the form texture.
+     * Gets the form button texture of the ffa arena.
      */
-    public function getFormTexture(): string
+    public function getFormButtonTexture(): ?ButtonTexture
     {
-        if($this->kit !== null)
+        if($this->buttonTexture === null)
         {
-            return $this->kit->getTexture();
+            if($this->kit !== null)
+            {
+                $texture = $this->kit->getFormButtonTexture();
+                if($texture !== null)
+                {
+                    return $texture;
+                }
+            }
+            return new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/deop.png");
         }
-
-        return "textures/ui/deop.png";
+        return $this->buttonTexture;
     }
 
     /**
@@ -205,7 +220,12 @@ class FFAArena extends SavedPracticeArena
 
             if($spawn !== null && $level !== null)
             {
-                return new FFAArena($name, $level, $spawn, $kit);
+                $texture = null;
+                if(isset($data["texture"]))
+                {
+                    $texture = ButtonTexture::decode($data["texture"]);
+                }
+                return new FFAArena($name, $level, $spawn, $kit, $texture);
             }
         }
 

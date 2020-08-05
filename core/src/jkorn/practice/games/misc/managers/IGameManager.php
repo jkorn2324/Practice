@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace jkorn\practice\games\misc\managers;
 
+use jkorn\practice\arenas\PracticeArenaManager;
 use jkorn\practice\forms\display\FormDisplay;
+use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\games\misc\leaderboards\IGameLeaderboard;
 use jkorn\practice\games\misc\gametypes\IGame;
 use pocketmine\Player;
@@ -22,6 +24,11 @@ interface IGameManager
     public function onUnregistered(): void;
 
     /**
+     * Called when the game manager has been saved.
+     */
+    public function onSave(): void;
+
+    /**
      * @param Player $player
      * @return IGame|null - Returns the game the player is playing, false otherwise.
      *
@@ -35,20 +42,6 @@ interface IGameManager
      * Gets the type of game manager.
      */
     public function getType(): string;
-
-    /**
-     * @return string
-     *
-     * Gets the title of the type of game.
-     */
-    public function getTitle(): string;
-
-    /**
-     * @return string
-     *
-     * Gets the texture of the game type, used for forms.
-     */
-    public function getTexture(): string;
 
     /**
      * @param $manager
@@ -66,11 +59,12 @@ interface IGameManager
     public function getPlayersPlaying(): int;
 
     /**
-     * @return FormDisplay|null
+     * @return PracticeArenaManager|null
      *
-     * Gets the corresponding form used to put the player in the game.
+     * Gets the game manager's arena manager, return null if the game
+     * manager doesn't use an arena manager.
      */
-    public function getGameSelector(): ?FormDisplay;
+    public function getArenaManager(): ?PracticeArenaManager;
 
     /**
      * @return IGameLeaderboard|null
@@ -79,4 +73,27 @@ interface IGameManager
      * if the game doesn't have a leaderboard.
      */
     public function getLeaderboard(): ?IGameLeaderboard;
+
+    // ----------------------------------- FORM INFORMATION -----------------------------
+
+    /**
+     * @return string
+     *
+     * Gets the title of the type of game.
+     */
+    public function getDisplayName(): string;
+
+    /**
+     * @return ButtonTexture|null
+     *
+     * Gets the form button texture.
+     */
+    public function getFormButtonTexture(): ?ButtonTexture;
+
+    /**
+     * @return FormDisplay|null
+     *
+     * Gets the corresponding form used to put the player in the game.
+     */
+    public function getGameSelector(): ?FormDisplay;
 }

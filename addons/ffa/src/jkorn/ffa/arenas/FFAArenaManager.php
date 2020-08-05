@@ -7,140 +7,60 @@ namespace jkorn\ffa\arenas;
 
 use jkorn\ffa\FFAAddon;
 use jkorn\ffa\FFAGameManager;
-use jkorn\ffa\forms\internal\FFAInternalForms;
-use jkorn\ffa\games\FFAGame;
-use jkorn\practice\arenas\IArenaManager;
+use jkorn\ffa\forms\internal\FFAInternalFormIDs;
+use jkorn\practice\arenas\PracticeArenaManager;
 use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\IPracticeForm;
-use jkorn\practice\PracticeCore;
-use pocketmine\Server;
+use jkorn\practice\forms\types\properties\ButtonTexture;
 
-class FFAArenaManager implements IArenaManager
+class FFAArenaManager extends PracticeArenaManager
 {
 
-    const MANAGER_TYPE = "ffa_arena_manager";
-
-    /** @var FFAAddon */
-    private $core;
-
-    /** @var Server */
-    private $server;
-
-    /** @var bool */
-    private $loaded = false;
-
     /** @var FFAArena[] */
-    private $arenas = [];
+    private $arenas;
 
-    public function __construct(FFAAddon $core)
+    /** @var string */
+    private $arenasFile;
+
+    public function __construct(FFAAddon $addon, FFAGameManager $parent)
     {
-        $this->core = $core;
-        $this->server = $core->getServer();
+        $this->arenas = [];
+
+        parent::__construct($addon->getDataFolder(), $parent, false);
+
+        // Stores the data folder.
+        $this->arenasFile = $this->getDirectory() . "arenas.json";
     }
 
     /**
-     * @param $arenaFolder
-     * @param bool $async
-     *
-     * Loads the contents of the file and exports them as an arena.
+     * Used to load the arenas of the arena manager.
      */
-    public function load(string &$arenaFolder, bool $async): void
+    protected function onLoad(): void
     {
-        $filePath = $arenaFolder . $this->getType() . ".json";
-        if (!file_exists($filePath)) {
-            $file = fopen($filePath, "w");
+        if (!file_exists($this->arenasFile)) {
+            $file = fopen($this->arenasFile, "w");
             fclose($file);
         } else {
-            $contents = json_decode(file_get_contents($filePath), true);
+            $contents = json_decode(file_get_contents($this->arenasFile), true);
             if (is_array($contents)) {
-                $gameManager = $this->getGameManager();
                 foreach ($contents as $arenaName => $data) {
                     $arena = FFAArena::decode($arenaName, $data);
                     if ($arena !== null) {
                         $this->arenas[$arena->getLocalizedName()] = $arena;
-                        // Adds the game to the game list.
-                        $this->addGame($arena->getLocalizedName(), $gameManager);
+                        $this->addGame($arena);
                     }
                 }
             }
         }
-
-        // Loads the games from the ffa arenas.
-        $this->loaded = true;
     }
 
     /**
-     * @param string $localized
-     * @param FFAGameManager|null $manager - The ffa game manager.
-     *
-     * Adds the game to the game manager.
-     */
-    private function addGame(string $localized, ?FFAGameManager $manager = null): void
-    {
-        if(!isset($this->arenas[$localized]))
-        {
-            return;
-        }
-
-        $arena = $this->arenas[$localized];
-        $manager = $manager ?? $this->getGameManager();
-        if($manager !== null)
-        {
-            $manager->createGame($arena);
-        }
-    }
-
-    /**
-     * @param string $localized
-     * @param FFAGameManager|null $manager - The FFA Game manager.
-     *
-     * Removes the game from the game manager.
-     */
-    private function removeGame(string $localized, ?FFAGameManager $manager = null): void
-    {
-        $manager = $manager ?? $this->getGameManager();
-        if($manager !== null)
-        {
-            $manager->removeGame($localized);
-        }
-    }
-
-    /**
-     * @return FFAGameManager|null
-     *
-     * Gets the game manager.
-     */
-    private function getGameManager(): ?FFAGameManager
-    {
-        $manager = PracticeCore::getBaseArenaManager()->getArenaManager(FFAGameManager::GAME_TYPE);
-        if($manager instanceof FFAGameManager)
-        {
-            return $manager;
-        }
-        return null;
-    }
-
-    /**
-     * @return array
-     *
-     * Exports the contents of the file.
-     */
-    public function export(): array
-    {
-        $exported = [];
-        foreach ($this->arenas as $arena) {
-            $exported[$arena->getName()] = $arena->export();
-        }
-        return $exported;
-    }
-
-    /**
-     * @param $arena
-     * @param bool $override - Determines whether to override the arena.
+     * @param $arena - The arena to add to the list.
+     * @param bool $override
      *
      * @return bool - Determines whether or not the arena has been successfully added.
      *
-     * Adds an arena to the manager.
+     * Adds an arena to the practice arena manager.
      */
     public function addArena($arena, bool $override = false): bool
     {
@@ -155,126 +75,115 @@ class FFAArenaManager implements IArenaManager
         }
 
         $this->arenas[$arena->getLocalizedName()] = $arena;
-        $this->addGame($arena->getLocalizedName());
-
         return true;
     }
 
     /**
-     * @param string $name
+     * @param string $name - The name of the arena.
      * @return mixed
      *
-     * Gets an arena from its name.
+     * Gets the arena from the arena list.
      */
     public function getArena(string $name)
     {
-        if (isset($this->arenas[$localized = strtolower($name)]))
+        if(isset($this->arenas[strtolower($name)]))
         {
-            return $this->arenas[$localized];
+            return $this->arenas[strtolower($name)];
         }
-
         return null;
     }
 
     /**
-     * @param $arena
+     * @param callable|null $filter - This filters the based on a callable,
+     *        the callable should return a boolean and should contain an arena parameter.
      *
-     * Deletes the arena from the list.
+     * @return array|FFAArena[]
+     *
+     * Gets the arenas from the arena list.
+     */
+    public function getArenas(?callable $filter = null)
+    {
+        if($filter !== null)
+        {
+            return array_filter($this->arenas, $filter);
+        }
+
+        return $this->arenas;
+    }
+
+    /**
+     * @param $arena - The arena to delete from the list.
+     *
+     * Deletes the arena from the arena list.
      */
     public function deleteArena($arena): void
     {
         if($arena instanceof FFAArena && $this->arenas[$arena->getLocalizedName()])
         {
             // Removes the game.
-            $this->removeGame($arena->getLocalizedName());
+            $this->deleteGame($arena->getLocalizedName());
             unset($this->arenas[$arena->getLocalizedName()]);
         }
     }
 
     /**
-     * @return array|FFAArena[]
+     * @param FFAArena $arena
      *
-     * Gets an array or list of arenas.
+     * Adds the game to the parent game manager.
      */
-    public function getArenas()
+    private function addGame(FFAArena &$arena): void
     {
-        return $this->arenas;
+        /** @var FFAGameManager $gameManager */
+        $gameManager = $this->getGameManager();
+        $gameManager->createGame($arena);
     }
 
     /**
-     * @return string
+     * @param string $localized
      *
-     * Gets the arena manager type.
+     * Deletes the game from the game manager.
      */
-    public function getType(): string
+    private function deleteGame(string $localized): void
     {
-        return self::MANAGER_TYPE;
+        /** @var FFAGameManager $gameManager */
+        $gameManager = $this->getGameManager();
+        $gameManager->removeGame($localized);
     }
 
     /**
-     * @return bool
+     * Used to save the arenas.
      *
-     * Determines if the arena manager is loaded.
+     * @return bool - Return true if the arenas have successfully been saved, false otherwise.
      */
-    public function isLoaded(): bool
+    protected function onSave(): bool
     {
-        return $this->loaded;
+        $exported = [];
+        foreach($this->arenas as $arena)
+        {
+            $exported[$arena->getName()] = $arena->export();
+        }
+        file_put_contents($this->arenasFile, json_encode($exported));
+        return true;
     }
 
     /**
-     * Called when the arena manager is first registered.
-     * Used to register statistics that correspond with the manager.
-     */
-    public function onRegistered(): void {}
-
-    /**
-     * Called when the arena manager is unregistered.
-     * Called to unregister statistics.
-     */
-    public function onUnregistered(): void {}
-
-    /**
-     * @param $manager
-     * @return bool
+     * @return ButtonTexture|null
      *
-     * Determines if one manager is equivalent to another.
+     * Gets the form display texture.
      */
-    public function equals($manager): bool
+    public function getFormButtonTexture(): ?ButtonTexture
     {
-        return is_a($manager, __NAMESPACE__ . "\\" . self::class)
-            && get_class($manager) === self::class;
-    }
-
-    /**
-     * @return string
-     *
-     * Gets the display name of the arena manager,
-     * used for the main form display.
-     */
-    public function getFormDisplayName(): string
-    {
-        return "FFA";
-    }
-
-    /**
-     * @return string
-     *
-     * Gets the form texture for the main arena manager,
-     * return "" for no texture.
-     */
-    public function getFormTexture(): string
-    {
-        // TODO: Get texture.
-        return "";
+        // TODO: Implement getFormButtonTexture() method.
+        return null;
     }
 
     /**
      * @return IPracticeForm|null
      *
-     * Gets the arena editor selection menu.
+     * Gets the menu used to edit the arenas.
      */
     public function getArenaEditorMenu(): ?IPracticeForm
     {
-        return InternalForm::getForm(FFAInternalForms::FFA_ARENA_MENU);
+        return InternalForm::getForm(FFAInternalFormIDs::FFA_ARENA_MENU);
     }
 }

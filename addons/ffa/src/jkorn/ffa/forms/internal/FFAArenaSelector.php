@@ -7,13 +7,14 @@ namespace jkorn\ffa\forms\internal;
 
 use jkorn\ffa\arenas\FFAArena;
 use jkorn\ffa\arenas\FFAArenaManager;
+use jkorn\ffa\FFAGameManager;
 use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
-class FFAArenaSelector extends InternalForm implements FFAInternalForms
+class FFAArenaSelector extends FFAInternalForm
 {
 
     /**
@@ -24,12 +25,14 @@ class FFAArenaSelector extends InternalForm implements FFAInternalForms
      */
     protected function onDisplay(Player $player, ...$args): void
     {
-
-        $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager(FFAArenaManager::MANAGER_TYPE);
-        if(!$arenaManager instanceof FFAArenaManager)
+        $ffaManager = PracticeCore::getBaseGameManager()->getGameManager(FFAGameManager::GAME_TYPE);
+        if(!$ffaManager instanceof FFAGameManager)
         {
             return;
         }
+
+        /** @var FFAArenaManager $arenaManager */
+        $arenaManager = $ffaManager->getArenaManager();
 
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
@@ -67,16 +70,7 @@ class FFAArenaSelector extends InternalForm implements FFAInternalForms
         $inArena = [];
         foreach($arenas as $arena)
         {
-            $texture = $arena->getFormTexture();
-
-            if($texture !== "")
-            {
-                $form->addButton($arena->getName(), 0, $texture);
-            }
-            else
-            {
-                $form->addButton($arena->getName());
-            }
+            $form->addButton($arena->getName(), $arena->getFormButtonTexture());
             $inArena[] = $arena;
         }
 

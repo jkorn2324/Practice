@@ -11,8 +11,10 @@ use jkorn\ffa\forms\FFAFormManager;
 use jkorn\ffa\games\FFAGame;
 use jkorn\ffa\scoreboards\FFAScoreboardManager;
 use jkorn\ffa\statistics\FFADisplayStatistics;
+use jkorn\practice\arenas\PracticeArenaManager;
 use jkorn\practice\display\DisplayStatistic;
 use jkorn\practice\forms\display\FormDisplay;
+use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\games\misc\gametypes\IGame;
 use jkorn\practice\games\misc\leaderboards\IGameLeaderboard;
 use jkorn\practice\games\misc\managers\IGameManager;
@@ -38,12 +40,16 @@ class FFAGameManager implements IGameManager, FFADisplayStatistics
     /** @var Server */
     private $server;
 
+    /** @var FFAArenaManager */
+    private $arenaManager;
+
     public function __construct(FFAAddon $core)
     {
         $this->games = [];
-
         $this->core = $core;
         $this->server = $core->getServer();
+
+        $this->arenaManager = new FFAArenaManager($core, $this);
     }
 
 
@@ -52,9 +58,10 @@ class FFAGameManager implements IGameManager, FFADisplayStatistics
      */
     public function onRegistered(): void
     {
+        // Loads the arena manager.
+        $this->arenaManager->load();
+
         // Registers the arena manager.
-        PracticeCore::getBaseArenaManager()->registerArenaManager(
-            new FFAArenaManager($this->core), true);
         PracticeCore::getBaseScoreboardDisplayManager()->registerScoreboardManager(
             new FFAScoreboardManager($this->core), true);
         PracticeCore::getBaseFormDisplayManager()->registerFormDisplayManager(
@@ -195,6 +202,14 @@ class FFAGameManager implements IGameManager, FFADisplayStatistics
     }
 
     /**
+     * Called when the game manager has been saved.
+     */
+    public function onSave(): void
+    {
+        $this->arenaManager->save();
+    }
+
+    /**
      * @param Player $player
      * @return IGame|null - Returns the game the player is playing, false otherwise.
      *
@@ -277,19 +292,19 @@ class FFAGameManager implements IGameManager, FFADisplayStatistics
      *
      * Gets the title of the type of game.
      */
-    public function getTitle(): string
+    public function getDisplayName(): string
     {
         return "FFA";
     }
 
     /**
-     * @return string
+     * @return ButtonTexture|null
      *
-     * Gets the texture of the game type, used for forms.
+     * Gets the form button texture.
      */
-    public function getTexture(): string
+    public function getFormButtonTexture(): ?ButtonTexture
     {
-        return "textures/ui/icon_recipe_equipment.png";
+        return new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/icon_recipe_equipment.png");
     }
 
     /**
@@ -350,5 +365,15 @@ class FFAGameManager implements IGameManager, FFADisplayStatistics
     public function getLeaderboard(): ?IGameLeaderboard
     {
         return null;
+    }
+
+    /**
+     * @return PracticeArenaManager
+     *
+     * Gets the game's arena manager.
+     */
+    public function getArenaManager(): PracticeArenaManager
+    {
+        return $this->arenaManager;
     }
 }

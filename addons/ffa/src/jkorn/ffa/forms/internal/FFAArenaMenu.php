@@ -6,11 +6,12 @@ namespace jkorn\ffa\forms\internal;
 
 
 use jkorn\practice\forms\internal\InternalForm;
+use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\forms\types\SimpleForm;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
-class FFAArenaMenu extends InternalForm implements FFAInternalForms
+class FFAArenaMenu extends FFAInternalForm
 {
 
     /**
@@ -57,9 +58,12 @@ class FFAArenaMenu extends InternalForm implements FFAInternalForms
         $form->setTitle(TextFormat::BOLD . "FFA Arena Menu");
         $form->setContent("Select whether you want to edit, create, or delete an ffa arena.");
 
-        $form->addButton(TextFormat::BOLD . "Create Arena", 0, "textures/ui/confirm.png");
-        $form->addButton(TextFormat::BOLD . "Edit Arena", 0, "textures/ui/debug_glyph_color.png");
-        $form->addButton(TextFormat::BOLD . "Delete Arena", 0, "textures/ui/realms_red_x.png");
+        $form->addButton(TextFormat::BOLD . "Create Arena",
+            new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/confirm.png"));
+        $form->addButton(TextFormat::BOLD . "Edit Arena",
+            new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/debug_glyph_color.png"));
+        $form->addButton(TextFormat::BOLD . "Delete Arena",
+            new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/realms_red_x.png"));
 
         $player->sendForm($form);
     }

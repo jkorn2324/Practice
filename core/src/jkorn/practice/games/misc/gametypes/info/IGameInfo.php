@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace jkorn\practice\games\misc\gametypes\info;
 
+use jkorn\practice\forms\types\properties\ButtonTexture;
+
 /**
  * Interface IGameInfo
  * @package jkorn\practice\games\misc
@@ -14,11 +16,11 @@ interface IGameInfo
 {
 
     /**
-     * @return string
+     * @return ButtonTexture|null
      *
-     * Gets the texture of the game type.
+     * Gets the form button texture.
      */
-    public function getTexture(): string;
+    public function getFormButtonTexture(): ?ButtonTexture;
 
     /**
      * @return string

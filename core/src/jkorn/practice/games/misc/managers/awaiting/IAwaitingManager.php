@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\games\misc\managers\awaiting;
 
 
+use jkorn\practice\games\misc\managers\IAwaitingGameManager;
 use pocketmine\Player;
 
 /**
@@ -16,6 +17,13 @@ use pocketmine\Player;
  */
 interface IAwaitingManager
 {
+
+    /**
+     * @return IAwaitingGameManager
+     *
+     * Gets the parent game manager.
+     */
+    public function getGameManager(): IAwaitingGameManager;
 
     /**
      * @param callable|null $callable - The callable function.

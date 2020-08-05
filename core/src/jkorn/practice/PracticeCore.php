@@ -18,7 +18,6 @@ use jkorn\practice\player\info\stats\StatsInfo;
 use jkorn\practice\scoreboard\display\BaseScoreboardDisplayManager;
 use pocketmine\entity\Entity;
 use pocketmine\plugin\PluginBase;
-use jkorn\practice\arenas\BaseArenaManager;
 use jkorn\practice\data\PracticeDataManager;
 use jkorn\practice\data\providers\JSONDataProvider;
 use jkorn\practice\entities\FishingHook;
@@ -32,8 +31,6 @@ class PracticeCore extends PluginBase
     /** @var PracticeCore */
     private static $instance;
 
-    /** @var BaseArenaManager */
-    private static $baseArenaManager;
     /** @var KitManager */
     private static $kitManager;
     /** @var BaseScoreboardDisplayManager */
@@ -78,7 +75,6 @@ class PracticeCore extends PluginBase
 
         self::$baseMessageManager = new BaseMessageManager($this);
         self::$kitManager = new KitManager($this);
-        self::$baseArenaManager = new BaseArenaManager($this);
         self::$baseGameManager = new BaseGameManager($this);
         self::$itemManager = new ItemManager($this);
 
@@ -110,11 +106,6 @@ class PracticeCore extends PluginBase
             self::$kitManager->save();
         }
 
-        if(self::$baseArenaManager instanceof BaseArenaManager)
-        {
-            self::$baseArenaManager->save();
-        }
-
         // Saves all of the players information.
         PracticeDataManager::getDataProvider()->saveAllPlayers();
     }
@@ -138,16 +129,6 @@ class PracticeCore extends PluginBase
     public static function getInstance()
     {
         return self::$instance;
-    }
-
-    /**
-     * @return BaseArenaManager
-     *
-     * Gets the arena manager.
-     */
-    public static function getBaseArenaManager(): BaseArenaManager
-    {
-        return self::$baseArenaManager;
     }
 
     /**

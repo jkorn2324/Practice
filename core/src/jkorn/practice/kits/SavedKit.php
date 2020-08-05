@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace jkorn\practice\kits;
 
+use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\kits\data\KitEffectsData;
 use jkorn\practice\kits\data\KitCombatData;
 use jkorn\practice\messages\IPracticeMessages;
@@ -22,8 +23,8 @@ class SavedKit implements ISaved, IKit
     /** @var Item[] */
     private $armor;
 
-    /** @var string */
-    private $texture;
+    /** @var ButtonTexture|null */
+    private $buttonTexture;
 
     /** @var string */
     private $name;
@@ -36,10 +37,10 @@ class SavedKit implements ISaved, IKit
     /** @var bool */
     private $build;
 
-    public function __construct(string $name, array $items, array $armor, KitEffectsData $effectsData, KitCombatData $combatData, string $texture = "", bool $canBuild = false)
+    public function __construct(string $name, array $items, array $armor, KitEffectsData $effectsData, KitCombatData $combatData, ?ButtonTexture $texture = null, bool $canBuild = false)
     {
         $this->name = $name;
-        $this->texture = $texture;
+        $this->buttonTexture = $texture;
         $this->items = $items;
         $this->armor = $armor;
         $this->effectsData = $effectsData;
@@ -164,7 +165,7 @@ class SavedKit implements ISaved, IKit
             "items" => $items,
             "armor" => $armor,
             KitEffectsData::EFFECTS_HEADER => $this->effectsData->export(),
-            "texture" => $this->texture,
+            "texture" => $this->buttonTexture !== null ? $this->buttonTexture->export() : null,
             KitCombatData::KIT_HEADER => $this->combatData->export(),
             "build" => $this->build
         ];
@@ -194,6 +195,16 @@ class SavedKit implements ISaved, IKit
     public function getTexture(): string
     {
         return $this->texture;
+    }
+
+    /**
+     * @return ButtonTexture|null
+     *
+     * Gets the button texture information.
+     */
+    public function getFormButtonTexture(): ?ButtonTexture
+    {
+        return $this->buttonTexture;
     }
 
     /**
@@ -239,7 +250,7 @@ class SavedKit implements ISaved, IKit
             $outputArmor,
             KitEffectsData::decode($data[KitEffectsData::EFFECTS_HEADER]),
             KitCombatData::decode($data[KitCombatData::KIT_HEADER]),
-            $data["texture"],
+            ButtonTexture::decode($data["texture"]),
             $build
         );
     }

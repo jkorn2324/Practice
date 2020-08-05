@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\bd\duels\types;
 
 
+use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\games\misc\gametypes\info\IGameInfo;
 
 class BasicDuelGameInfo implements IGameInfo
@@ -12,12 +13,12 @@ class BasicDuelGameInfo implements IGameInfo
 
     /** @var string */
     private $name;
-    /** @var string */
+    /** @var ButtonTexture */
     private $texture;
     /** @var int */
     private $numPlayers;
 
-    public function __construct(int $numPlayers, string $name, string $texture)
+    public function __construct(int $numPlayers, string $name, ButtonTexture $texture)
     {
         $this->name = $name;
         $this->texture = $texture;
@@ -25,11 +26,11 @@ class BasicDuelGameInfo implements IGameInfo
     }
 
     /**
-     * @return string
+     * @return ButtonTexture|null
      *
-     * Gets the texture of the game type.
+     * Gets the form button texture.
      */
-    public function getTexture(): string
+    public function getFormButtonTexture(): ?ButtonTexture
     {
         return $this->texture;
     }

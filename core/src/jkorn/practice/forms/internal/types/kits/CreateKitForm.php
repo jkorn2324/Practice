@@ -54,8 +54,7 @@ class CreateKitForm extends InternalForm
                     $player->getInventory()->getContents(true),
                     $player->getArmorInventory()->getContents(true),
                     new KitEffectsData(),
-                    new KitCombatData(0.4, 0.4, 10),
-                    ""
+                    new KitCombatData(0.4, 0.4, 10)
                 );
 
                 if(PracticeCore::getKitManager()->add($savedKit))

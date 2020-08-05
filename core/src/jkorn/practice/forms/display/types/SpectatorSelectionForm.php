@@ -44,19 +44,7 @@ class SpectatorSelectionForm extends FormDisplay
         $inputGames = [];
         foreach($games as $game)
         {
-            $texture = $game->getSpectatorFormTexture();
-            if($texture !== "")
-            {
-                $form->addButton(
-                    $game->getSpectatorFormDisplay($player),
-                    0,
-                    $texture
-                );
-            }
-            else
-            {
-                $form->addButton($game->getSpectatorFormDisplay($player));
-            }
+            $form->addButton($game->getSpectatorFormDisplayName($player), $game->getSpectatorFormButtonTexture());
             $inputGames[] = $game;
         }
 

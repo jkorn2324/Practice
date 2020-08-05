@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace jkorn\bd\duels;
 
 
-use jkorn\bd\arenas\ArenaManager;
 use jkorn\bd\arenas\IDuelArena;
+use jkorn\bd\arenas\ArenaManager;
 use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\arenas\PreGeneratedDuelArena;
 use jkorn\bd\BasicDuelsManager;
@@ -16,11 +16,11 @@ use jkorn\bd\messages\BasicDuelsMessages;
 use jkorn\bd\player\BasicDuelPlayer;
 use jkorn\bd\scoreboards\BasicDuelsScoreboardManager;
 use jkorn\practice\arenas\PracticeArena;
+use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\games\duels\DuelPlayer;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\PracticeUtil;
-use jkorn\practice\scoreboard\ScoreboardData;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Player;
@@ -184,25 +184,24 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
      */
     public function die(): void
     {
+        $basicDuelsManager = PracticeCore::getBaseGameManager()->getGameManager(BasicDuelsManager::NAME);
+        if(!$basicDuelsManager instanceof BasicDuelsManager)
+        {
+            return;
+        }
+
         if($this->arena instanceof PostGeneratedDuelArena)
         {
             PracticeUtil::deleteLevel($this->arena->getLevel(), true);
         }
         elseif ($this->arena instanceof PreGeneratedDuelArena)
         {
-            // Opens the duel arena again for future use.
-            $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager(ArenaManager::TYPE);
-            if($arenaManager instanceof ArenaManager)
-            {
-                $arenaManager->open($this->arena);
-            }
+            /** @var ArenaManager $arenaManager */
+            $arenaManager = $basicDuelsManager->getArenaManager();
+            $arenaManager->open($this->arena);
         }
 
-        $genericDuelManager = PracticeCore::getBaseGameManager()->getGameManager(BasicDuelsManager::NAME);
-        if($genericDuelManager instanceof BasicDuelsManager)
-        {
-            $genericDuelManager->remove($this);
-        }
+        $basicDuelsManager->remove($this);
     }
 
     /**
@@ -550,7 +549,7 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
      * used so that the spectator form could show the game's basic
      * information.
      */
-    public function getSpectatorFormDisplay(Player $player): string
+    public function getSpectatorFormDisplayName(Player $player): string
     {
         // TODO: Get message from literal.
         $firstLine = $this->gameType->getDisplayName() . " Basic Duel\n";
@@ -559,14 +558,14 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
     }
 
     /**
-     * @return string
+     * @return ButtonTexture|null
      *
      * Gets the game's form texture, used so that the form
      * gets pretty printed.
      */
-    public function getSpectatorFormTexture(): string
+    public function getSpectatorFormButtonTexture(): ?ButtonTexture
     {
-        return $this->gameType->getTexture();
+        return $this->gameType->getFormButtonTexture();
     }
 
     /**

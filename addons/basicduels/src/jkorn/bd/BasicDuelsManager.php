@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace jkorn\bd;
 
 
-use jkorn\bd\arenas\ArenaManager;
 use jkorn\bd\arenas\IDuelArena;
+use jkorn\bd\arenas\ArenaManager;
 use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\duels\Basic1vs1;
 use jkorn\bd\duels\leaderboard\BasicDuelsLeaderboards;
@@ -18,7 +18,9 @@ use jkorn\bd\duels\IBasicDuel;
 use jkorn\bd\messages\BasicDuelsMessageManager;
 use jkorn\bd\queues\BasicQueuesManager;
 use jkorn\bd\scoreboards\BasicDuelsScoreboardManager;
+use jkorn\practice\arenas\PracticeArenaManager;
 use jkorn\practice\forms\display\FormDisplay;
+use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\games\duels\AbstractDuel;
 use jkorn\practice\games\misc\gametypes\IGame;
 use jkorn\practice\games\misc\gametypes\ISpectatorGame;
@@ -57,6 +59,9 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
     /** @var BasicDuelsLeaderboards */
     private $leaderboards;
 
+    /** @var ArenaManager */
+    private $arenaManager;
+
     /** @var BasicDuels */
     private $core;
 
@@ -69,6 +74,8 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
 
         $this->initGameTypes();
 
+        // TODO: Load the arena manager.
+        $this->arenaManager = new ArenaManager($core, $this);
         $this->queuesManager = new BasicQueuesManager($this);
         $this->leaderboards = new BasicDuelsLeaderboards($this);
     }
@@ -78,12 +85,12 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
      */
     private function initGameTypes(): void
     {
-        $this->registerGameType(new BasicDuelGameInfo(2,
-            "1vs1", "textures/ui/dressing_room_customization.png"));
-        $this->registerGameType(new BasicDuelGameInfo(4,
-            "2vs2", "textures/ui/FriendsDiversity.png"));
-        $this->registerGameType(new BasicDuelGameInfo(6,
-            "3vs3", "textures/ui/dressing_room_skins.png"));
+        $this->registerGameType(new BasicDuelGameInfo(2, "1vs1",
+            new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/dressing_room_customization.png")));
+        $this->registerGameType(new BasicDuelGameInfo(4, "2vs2",
+            new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/FriendsDiversity.png")));
+        $this->registerGameType(new BasicDuelGameInfo(6, "3vs3",
+            new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/dressing_room_skins.png")));
     }
 
     /**
@@ -197,19 +204,19 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
      *
      * Gets the title of the type of game.
      */
-    public function getTitle(): string
+    public function getDisplayName(): string
     {
         return "Basic Duels";
     }
 
     /**
-     * @return string
+     * @return ButtonTexture|null
      *
-     * Gets the texture of the game type, used for forms.
+     * Gets the form button texture.
      */
-    public function getTexture(): string
+    public function getFormButtonTexture(): ?ButtonTexture
     {
-        return "textures/ui/fire_resistance_effect.png";
+        return new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/fire_resistance_effect.png");
     }
 
     /**
@@ -217,8 +224,9 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
      */
     public function onRegistered(): void
     {
-        // Registers the arena manager generator.
-        PracticeCore::getBaseArenaManager()->registerArenaManager(new ArenaManager(), true);
+        // Loads the arena manager.
+        $this->arenaManager->load();
+
         // Registers the scoreboard manager.
         PracticeCore::getBaseScoreboardDisplayManager()->registerScoreboardManager(
             new BasicDuelsScoreboardManager($this->core), true);
@@ -246,11 +254,17 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
      */
     public function onUnregistered(): void
     {
-        PracticeCore::getBaseArenaManager()->unregisterArenaManager(ArenaManager::TYPE);
-
         BasicDuelsUtils::unregisterDisplayStats();
         BasicDuelsUtils::unregisterPlayerSettings();
         BasicDuelsUtils::unregisterPlayerStatistics();
+    }
+
+    /**
+     * Called when the game manager has been saved.
+     */
+    public function onSave(): void
+    {
+        $this->arenaManager->save();
     }
 
     /**
@@ -265,32 +279,30 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
      */
     protected function randomArena(int $duelID, int $numPlayers): IDuelArena
     {
-        $duelArenaManager = PracticeCore::getBaseArenaManager()->getArenaManager(ArenaManager::TYPE);
-        if($duelArenaManager instanceof ArenaManager)
+        $duelArena = $this->arenaManager->randomArena();
+        if($duelArena !== null)
         {
-            $duelArena = $duelArenaManager->randomArena();
+            // Closes the arena.
+            $this->arenaManager->close($duelArena);
+            return $duelArena;
         }
 
-        if(!isset($duelArena) || $duelArena === null)
-        {
-            $levelName = "game.duels.basic.{$duelID}";
+        $levelName = "game.duels.basic.{$duelID}";
 
-            /** @var BasicDuelsGeneratorInfo $randomGenerator */
-            $randomGenerator = PracticeGeneratorManager::randomGenerator(
-                function(PracticeGeneratorInfo $info) use($numPlayers)
-                {
-                    $type = $numPlayers === 2 ? BasicDuelsGeneratorInfo::TYPE_1VS1 : BasicDuelsGeneratorInfo::TYPE_TEAM;
-                    return $info instanceof BasicDuelsGeneratorInfo
-                        && ($info->getType() === BasicDuelsGeneratorInfo::TYPE_ANY
-                            || $info->getType() === $type);
-                }
-            );
-            $this->server->generateLevel($levelName, null, $randomGenerator->getClass());
-            $this->server->loadLevel($levelName);
-            $duelArena = new PostGeneratedDuelArena($levelName, $randomGenerator);
-        }
+        /** @var BasicDuelsGeneratorInfo $randomGenerator */
+        $randomGenerator = PracticeGeneratorManager::randomGenerator(
+            function(PracticeGeneratorInfo $info) use ($numPlayers)
+            {
+                $type = $numPlayers === 2 ? BasicDuelsGeneratorInfo::TYPE_1VS1 : BasicDuelsGeneratorInfo::TYPE_TEAM;
+                return $info instanceof BasicDuelsGeneratorInfo
+                    && ($info->getType() === BasicDuelsGeneratorInfo::TYPE_ANY
+                        || $info->getType() === $type);
+            }
+        );
 
-        return $duelArena;
+        $this->server->generateLevel($levelName, null, $randomGenerator->getClass());
+        $this->server->loadLevel($levelName);
+        return new PostGeneratedDuelArena($levelName, $randomGenerator);
     }
 
     /**
@@ -363,6 +375,16 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
     public function getAwaitingManager(): IAwaitingManager
     {
         return $this->queuesManager;
+    }
+
+    /**
+     * @return PracticeArenaManager
+     *
+     * Gets the game's arena manager.
+     */
+    public function getArenaManager(): PracticeArenaManager
+    {
+        return $this->arenaManager;
     }
 
     /**

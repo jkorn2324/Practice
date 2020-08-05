@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace jkorn\ffa\forms\internal;
 
 use jkorn\ffa\arenas\FFAArena;
-use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\types\CustomForm;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
-class EditFFAArena extends InternalForm implements FFAInternalForms
+class EditFFAArena extends FFAInternalForm
 {
 
     /**

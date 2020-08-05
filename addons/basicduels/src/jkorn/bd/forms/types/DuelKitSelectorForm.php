@@ -67,7 +67,6 @@ class DuelKitSelectorForm extends FormDisplay
      */
     public function display(Player $player, ...$args): void
     {
-        // TODO: Implement display() method.
         /** @var BasicDuelsManager|null $duelsManager */
         $duelsManager = PracticeCore::getBaseGameManager()->getGameManager(BasicDuelsManager::NAME);
         if($duelsManager === null)
@@ -131,22 +130,12 @@ class DuelKitSelectorForm extends FormDisplay
         $inKits = [];
         foreach($kits as $kit)
         {
-            $texture = $kit->getTexture();
             $formData = $this->formData["button.duel.button.template"];
-            if($texture !== "")
-            {
-                $form->addButton(
-                    $formData->getText($player, ["type" => $gameType, "kit" => $kit]),
-                    0,
-                    $texture
-                );
-            }
-            else
-            {
-                $form->addButton(
-                    $formData->getText($player, ["type" => $gameType, "kit" => $kit])
-                );
-            }
+            $form->addButton(
+                $formData->getText($player, ["type" => $gameType, "kit" => $kit]),
+                $kit->getFormButtonTexture()
+            );
+
             $inKits[] = $kit;
         }
 

@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace jkorn\practice\games;
 
 
+use jkorn\practice\arenas\PracticeArenaManager;
 use jkorn\practice\display\DisplayStatistic;
 use jkorn\practice\display\DisplayStatisticNames;
 use jkorn\practice\games\misc\gametypes\IGame;
+use jkorn\practice\games\misc\managers\awaiting\IAwaitingManager;
 use jkorn\practice\games\misc\managers\IAwaitingGameManager;
 use jkorn\practice\games\misc\managers\ISpectatingGameManager;
 use jkorn\practice\games\misc\managers\IGameManager;
@@ -28,7 +30,7 @@ use jkorn\practice\PracticeCore;
 class BaseGameManager implements DisplayStatisticNames
 {
     /** @var IGameManager[] */
-    private $gameTypes = [];
+    private $gameManagers = [];
     /** @var int */
     private $currentTicks = 0;
 
@@ -56,7 +58,7 @@ class BaseGameManager implements DisplayStatisticNames
             function(Player $player, Server $server, $data)
             {
                 $playersCount = 0;
-                $games = PracticeCore::getBaseGameManager()->getGameTypes();
+                $games = PracticeCore::getBaseGameManager()->getGameManagers();
                 foreach($games as $game)
                 {
                     $playersCount += $game->getPlayersPlaying();
@@ -85,7 +87,7 @@ class BaseGameManager implements DisplayStatisticNames
             {
                 if($data instanceof IGameManager)
                 {
-                    return $data->getTitle();
+                    return $data->getDisplayName();
                 }
                 return "Unknown";
             }
@@ -101,19 +103,18 @@ class BaseGameManager implements DisplayStatisticNames
     public function registerGameManager(IGameManager $manager, bool $override = false): void
     {
         $gameType = $manager->getType();
-
-        if(isset($this->gameTypes[$gameType]))
+        if(isset($this->gameManagers[$gameType]))
         {
             if(!$override)
             {
                 return;
             }
 
-            $oldGameManager = $this->gameTypes[$gameType];
+            $oldGameManager = $this->gameManagers[$gameType];
             $oldGameManager->onUnregistered();
         }
 
-        $this->gameTypes[$gameType] = $manager;
+        $this->gameManagers[$gameType] = $manager;
         $manager->onRegistered();
     }
 
@@ -125,9 +126,9 @@ class BaseGameManager implements DisplayStatisticNames
      */
     public function getGameManager(string $type): ?IGameManager
     {
-        if(isset($this->gameTypes[$type]))
+        if(isset($this->gameManagers[$type]))
         {
-            return $this->gameTypes[$type];
+            return $this->gameManagers[$type];
         }
 
         return null;
@@ -135,15 +136,33 @@ class BaseGameManager implements DisplayStatisticNames
 
     /**
      * @param Player $player
+     * @param callable|null $filter - Filters what game we do search for,
+     *              must return null or a game and contain a game manager parameter.
+     *              EX: function(IGameManager $manager) { return true; }
+     *
      * @return IGame|null
      *
-     * Gets the game from the player.
+     * Gets the game from the player, by default gets the game the player is
+     * playing in.
      */
-    public function getGame(Player $player): ?IGame
+    public function getGame(Player $player, ?callable $filter = null): ?IGame
     {
-        foreach($this->gameTypes as $gameType)
+        if($filter !== null)
         {
-            $game = $gameType->getFromPlayer($player);
+            foreach($this->gameManagers as $gameManager)
+            {
+                $game = $filter($gameManager);
+                if($game !== null && $game instanceof IGame)
+                {
+                    return $game;
+                }
+            }
+            return null;
+        }
+
+        foreach($this->gameManagers as $gameManager)
+        {
+            $game = $gameManager->getFromPlayer($player);
             if($game !== null)
             {
                 return $game;
@@ -155,14 +174,14 @@ class BaseGameManager implements DisplayStatisticNames
 
     /**
      * @param Player $player - The input player.
-     * @return IAwaitingGameManager|null - Returns the game manager if player is
+     * @return IAwaitingManager|null - Returns the game manager if player is
      *                   awaiting in a game.
      *
      * Gets the player's current awaiting game type.
      */
-    public function getAwaitingGameType(Player $player): ?IAwaitingGameManager
+    public function getAwaitingManager(Player $player): ?IAwaitingManager
     {
-        foreach($this->gameTypes as $gameType)
+        foreach($this->gameManagers as $gameType)
         {
             if(
                 $gameType instanceof IAwaitingGameManager
@@ -171,7 +190,7 @@ class BaseGameManager implements DisplayStatisticNames
                 $awaitingManager = $gameType->getAwaitingManager();
                 if($awaitingManager->isAwaiting($player))
                 {
-                    return $gameType;
+                    return $awaitingManager;
                 }
             }
         }
@@ -187,7 +206,7 @@ class BaseGameManager implements DisplayStatisticNames
      */
     public function getSpectatingGame(Player $player): ?ISpectatorGame
     {
-        foreach($this->gameTypes as $gameType)
+        foreach($this->gameManagers as $gameType)
         {
             if($gameType instanceof ISpectatingGameManager)
             {
@@ -207,7 +226,7 @@ class BaseGameManager implements DisplayStatisticNames
      */
     public function update(): void
     {
-        foreach($this->gameTypes as $game)
+        foreach($this->gameManagers as $game)
         {
             if($game instanceof IUpdatedGameManager)
             {
@@ -223,9 +242,30 @@ class BaseGameManager implements DisplayStatisticNames
      *
      * Gets the game types, etc...
      */
-    public function getGameTypes()
+    public function getGameManagers()
     {
-        return $this->gameTypes;
+        return $this->gameManagers;
+    }
+
+    /**
+     * Gets all of the arena managers.
+     *
+     * @return PracticeArenaManager[]
+     */
+    public function getArenaManagers()
+    {
+        $managers = [];
+
+        foreach($this->gameManagers as $gameManager)
+        {
+            $arenaManager = $gameManager->getArenaManager();
+
+            if($arenaManager !== null)
+            {
+                $managers[$gameManager->getType()] = $arenaManager;
+            }
+        }
+        return $managers;
     }
 
     /**
@@ -239,7 +279,7 @@ class BaseGameManager implements DisplayStatisticNames
     {
         $games = [];
 
-        foreach($this->gameTypes as $gameType)
+        foreach($this->gameManagers as $gameType)
         {
             if($gameType instanceof ISpectatingGameManager)
             {
@@ -251,9 +291,12 @@ class BaseGameManager implements DisplayStatisticNames
     }
 
     /**
-     * Saves the data from the manager, unused here.
+     * Saves the data from the managers.
      *
      * @param bool $async
      */
-    public function save(bool $async = false): void {}
+    public function save(bool $async = false): void
+    {
+
+    }
 }

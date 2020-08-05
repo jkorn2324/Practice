@@ -5,60 +5,66 @@ declare(strict_types=1);
 namespace jkorn\bd\arenas;
 
 
-use jkorn\practice\arenas\IArenaManager;
+use jkorn\bd\BasicDuels;
+use jkorn\bd\BasicDuelsManager;
+use jkorn\practice\arenas\PracticeArenaManager;
 use jkorn\practice\forms\IPracticeForm;
-use jkorn\practice\PracticeCore;
-use pocketmine\Server;
+use jkorn\practice\forms\types\properties\ButtonTexture;
 
-class ArenaManager implements IArenaManager
+class ArenaManager extends PracticeArenaManager
 {
 
-    const TYPE = "basic_duels";
-
-    /** @var PracticeCore */
-    private $core;
-    /** @var Server */
-    private $server;
+    /** @var string */
+    private $arenasFile;
 
     /** @var PreGeneratedDuelArena[] */
     private $arenas;
+
     /** @var array */
     private $openArenas;
-    /** @var bool */
-    private $loaded = false;
 
-    public function __construct()
+    public function __construct(BasicDuels $basicDuels, BasicDuelsManager $parent)
     {
-        $this->core = PracticeCore::getInstance();
-        $this->server = $this->core->getServer();
-
         $this->arenas = [];
         $this->openArenas = [];
+
+        parent::__construct($basicDuels->getDataFolder() . "arenas/", $parent, false);
+
+        $this->arenasFile = $this->getDirectory() . "duels.json";
     }
 
     /**
-     * Called when the arena manager is first registered.
+     * Used to load the arenas of the arena manager.
      */
-    public function onRegistered(): void
+    protected function onLoad(): void
     {
-        // TODO: Implement onRegistered() method.
+        if(!file_exists($this->arenasFile))
+        {
+            $file = fopen($this->arenasFile, "w");
+            fclose($file);
+        }
+        else
+        {
+            $contents = json_decode(file_get_contents($this->arenasFile), true);
+            foreach($contents as $arenaName => $data)
+            {
+                $arena = PreGeneratedDuelArena::decode($arenaName, $data);
+                if($arena !== null)
+                {
+                    $this->arenas[$arena->getName()] = $arena;
+                    $this->openArenas[$arena->getName()] = true;
+                }
+            }
+        }
     }
 
     /**
-     * Called when the arena manager is unregistered.
-     */
-    public function onUnregistered(): void
-    {
-        // TODO: Implement onUnregistered() method.
-    }
-
-    /**
-     * @param $arena
-     * @param bool $override - Determines whether to override the arena.
+     * @param $arena - The arena to add to the list.
+     * @param bool $override
      *
      * @return bool - Determines whether or not the arena has been successfully added.
      *
-     * Adds an arena to the manager.
+     * Adds an arena to the practice arena manager.
      */
     public function addArena($arena, bool $override = false): bool
     {
@@ -67,10 +73,10 @@ class ArenaManager implements IArenaManager
     }
 
     /**
-     * @param string $name
+     * @param string $name - The name of the arena.
      * @return mixed
      *
-     * Gets an arena from its name.
+     * Gets the arena from the arena list.
      */
     public function getArena(string $name)
     {
@@ -79,6 +85,34 @@ class ArenaManager implements IArenaManager
             return $this->arenas[strtolower($name)];
         }
         return null;
+    }
+
+    /**
+     * @param callable|null $filter - This filters the based on a callable,
+     *        the callable should return a boolean and should contain an arena parameter.
+     *
+     * @return array|PreGeneratedDuelArena[]
+     *
+     * Gets the arenas from the arena list.
+     */
+    public function getArenas(?callable $filter = null)
+    {
+        if($filter !== null)
+        {
+            return array_filter($this->arenas, $filter);
+        }
+
+        return $this->arenas;
+    }
+
+    /**
+     * @param $arena - The arena to delete from the list.
+     *
+     * Deletes the arena from the arena list.
+     */
+    public function deleteArena($arena): void
+    {
+        // TODO: Implement deleteArena() method.
     }
 
     /**
@@ -107,7 +141,7 @@ class ArenaManager implements IArenaManager
     /**
      * @return PreGeneratedDuelArena|null
      *
-     * Gets a random duel arena.
+     * Gets a random arena from the open arenas list.
      */
     public function randomArena(): ?PreGeneratedDuelArena
     {
@@ -125,151 +159,36 @@ class ArenaManager implements IArenaManager
     }
 
     /**
-     * @param $arena
+     * Used to save the arenas.
      *
-     * Deletes the arena from the list.
+     * @return bool - Return true if the arenas have successfully been saved, false otherwise.
      */
-    public function deleteArena($arena): void
-    {
-        // TODO: Implement deleteArena() method.
-    }
-
-    /**
-     * @return array|PreGeneratedDuelArena[]
-     *
-     * Gets an array or list of arenas.
-     */
-    public function getArenas()
-    {
-        return $this->arenas;
-    }
-
-    /**
-     * @return PreGeneratedDuelArena|null
-     *
-     * Gets a random open pre generated arena.
-     */
-    public function getRandomOpenArena(): ?PreGeneratedDuelArena
-    {
-        if(count($this->openArenas) <= 0)
-        {
-            return null;
-        }
-
-        $keys = array_keys($this->openArenas);
-        $randomKey = $keys[mt_rand(0, count($keys) - 1)];
-        if(isset($this->arenas[$randomKey]))
-        {
-            return $this->arenas[$randomKey];
-        }
-        return null;
-    }
-
-    /**
-     * @return string
-     *
-     * Gets the arena manager type.
-     */
-    public function getType(): string
-    {
-        return self::TYPE;
-    }
-
-    /**
-     * @param string $arenaFolder
-     * @param bool $async
-     *
-     * Loads the contents of the file and exports them as an arena.
-     */
-    public function load(string &$arenaFolder, bool $async): void
-    {
-        $filePath = $arenaFolder . $this->getType() . ".json";
-        if(!file_exists($filePath))
-        {
-            $file = fopen($filePath, "w");
-            fclose($file);
-        }
-        else
-        {
-            $contents = json_decode(file_get_contents($filePath), true);
-            foreach($contents as $arenaName => $data)
-            {
-                $arena = PreGeneratedDuelArena::decode($arenaName, $data);
-                if($arena !== null)
-                {
-                    $this->arenas[$arena->getName()] = $arena;
-                    $this->openArenas[$arena->getName()] = true;
-                }
-            }
-        }
-
-        $this->loaded = true;
-    }
-
-    /**
-     * @return bool
-     *
-     * Determines if the arena manager is loaded.
-     */
-    public function isLoaded(): bool
-    {
-        return $this->loaded;
-    }
-
-    /**
-     * @return array - The exported arena data.
-     *
-     * Exports the contents of the file.
-     */
-    public function export(): array
+    protected function onSave(): bool
     {
         $exported = [];
         foreach($this->arenas as $arena)
         {
             $exported[$arena->getName()] = $arena->export();
         }
-        return $exported;
+        file_put_contents($this->arenasFile, json_encode($exported));
+        return true;
     }
 
     /**
-     * @param $manager
-     * @return bool
+     * @return ButtonTexture|null
      *
-     * Determines if one manager is equivalent to another.
+     * Gets the form display texture.
      */
-    public function equals($manager): bool
+    public function getFormButtonTexture(): ?ButtonTexture
     {
-        return is_a($manager, __NAMESPACE__ . "\\" . self::class, true)
-            && get_class($manager) === self::class;
-    }
-
-    /**
-     * @return string
-     *
-     * Gets the display name of the arena manager,
-     * used for the main form display.
-     */
-    public function getFormDisplayName(): string
-    {
-        return "Basic Duels";
-    }
-
-    /**
-     * @return string
-     *
-     * Gets the form texture for the main arena manager,
-     * return "" for no texture.
-     */
-    public function getFormTexture(): string
-    {
-        // TODO: Get the texture for the arena manager.
-        return "";
+        // TODO: Implement getFormButtonTexture() method.
+        return null;
     }
 
     /**
      * @return IPracticeForm|null
      *
-     * Gets the arena editor selection menu.
+     * Gets the menu used to edit the arenas.
      */
     public function getArenaEditorMenu(): ?IPracticeForm
     {

@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace jkorn\practice\forms\internal\types\arenas;
 
 
-use jkorn\practice\arenas\IArenaManager;
+use jkorn\practice\arenas\PracticeArenaManager;
 use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\PracticeCore;
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 class ArenaMenu extends InternalForm
@@ -28,7 +27,7 @@ class ArenaMenu extends InternalForm
         {
             if($data !== null && isset($extraData["managers"]))
             {
-                /** @var IArenaManager[] $managers */
+                /** @var PracticeArenaManager[] $managers */
                 $managers = $extraData["managers"];
                 if(count($managers) <= 0)
                 {
@@ -50,8 +49,8 @@ class ArenaMenu extends InternalForm
         $form->setTitle(TextFormat::BOLD . "Arena Menu Selector");
         $form->setContent("Select the arena type you want to edit.");
 
-        $arenas = PracticeCore::getBaseArenaManager()->getArenaManagers();
-        if(count($arenas) <= 0)
+        $arenaManagers = PracticeCore::getBaseGameManager()->getArenaManagers();
+        if(count($arenaManagers) <= 0)
         {
             $form->addButton("None");
             $form->addExtraData("managers", []);
@@ -59,23 +58,14 @@ class ArenaMenu extends InternalForm
             return;
         }
 
-        $arenaManagers = [];
-        foreach($arenas as $arena)
+        $inManagers = [];
+        foreach($arenaManagers as $manager)
         {
-            $texture = $arena->getFormTexture();
-            if($texture !== "") {
-                $form->addButton(
-                    TextFormat::BOLD . $arena->getFormDisplayName() . " Arenas",
-                    0,
-                    $arena->getFormTexture()
-                );
-            } else {
-                $form->addButton(TextFormat::BOLD . $arena->getFormDisplayName() . " Arenas");
-            }
-            $arenaManagers[] = $arena;
+            $form->addButton($manager->getFormDisplayName(), $manager->getFormButtonTexture());
+            $inManagers[] = $manager;
         }
 
-        $form->addExtraData("managers", $arenaManagers);
+        $form->addExtraData("managers", $inManagers);
         $player->sendForm($form);
     }
 

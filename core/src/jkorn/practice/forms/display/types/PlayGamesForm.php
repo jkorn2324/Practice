@@ -70,7 +70,7 @@ class PlayGamesForm extends FormDisplay
             }
         });
 
-        $gameTypes = PracticeCore::getBaseGameManager()->getGameTypes();
+        $gameTypes = PracticeCore::getBaseGameManager()->getGameManagers();
 
         $form->setTitle($this->formData["title"]->getText($player));
         $form->setContent($this->formData["description"]->getText($player));
@@ -88,21 +88,11 @@ class PlayGamesForm extends FormDisplay
         $inputGameTypes = [];
         foreach($gameTypes as $gameType)
         {
-            $texture = $gameType->getTexture();
-            if($texture !== "")
-            {
-                $form->addButton(
-                    $this->formData["button.select.game.template"]->getText($player, $gameType),
-                    0,
-                    $texture
-                );
-            }
-            else
-            {
-                $form->addButton(
-                    $this->formData["button.select.game.template"]->getText($player, $gameType)
-                );
-            }
+            $form->addButton(
+                $this->formData["button.select.game.template"]->getText($player, $gameType),
+                $gameType->getFormButtonTexture()
+            );
+
             $inputGameTypes[] = $gameType;
         }
 

@@ -6,14 +6,14 @@ namespace jkorn\ffa\forms\internal;
 
 
 use jkorn\ffa\arenas\FFAArena;
-use jkorn\ffa\arenas\FFAArenaManager;
-use jkorn\practice\forms\internal\InternalForm;
+use jkorn\ffa\FFAGameManager;
+use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
-class DeleteFFAArena extends InternalForm implements FFAInternalForms
+class DeleteFFAArena extends FFAInternalForm
 {
 
 
@@ -42,14 +42,13 @@ class DeleteFFAArena extends InternalForm implements FFAInternalForms
                 /** @var FFAArena|null $arena */
                 $arena = $extraData["arena"];
 
-                $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager(FFAArenaManager::MANAGER_TYPE);
-
-                if(!$arenaManager instanceof FFAArenaManager)
+                $ffaManager = PracticeCore::getBaseGameManager()->getGameManager(FFAGameManager::GAME_TYPE);
+                if(!$ffaManager instanceof FFAGameManager)
                 {
                     return;
                 }
 
-                $arenaManager->deleteArena($arena);
+                $ffaManager->getArenaManager()->deleteArena($arena);
 
                 // TODO: SEND MESSAGE
             }
@@ -67,8 +66,10 @@ class DeleteFFAArena extends InternalForm implements FFAInternalForms
 
         $form->setContent(implode($content, "\n"));
 
-        $form->addButton(TextFormat::BOLD . "Yes", 0, "textures/ui/confirm.png");
-        $form->addButton(TextFormat::BOLD . "No", 0, "textures/ui/cancel.png");
+        $form->addButton(TextFormat::BOLD . "Yes",
+            new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/confirm.png"));
+        $form->addButton(TextFormat::BOLD . "No",
+            new ButtonTexture(ButtonTexture::TYPE_PATH, "textures/ui/cancel.png"));
 
         $form->addExtraData("arena", $arena);
 

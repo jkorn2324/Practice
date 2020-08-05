@@ -8,6 +8,7 @@ use jkorn\bd\BasicDuelsManager;
 use jkorn\bd\duels\types\BasicDuelGameInfo;
 use jkorn\bd\scoreboards\BasicDuelsScoreboardManager;
 use jkorn\practice\games\misc\managers\awaiting\IAwaitingManager;
+use jkorn\practice\games\misc\managers\IAwaitingGameManager;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\player\PracticePlayer;
 use jkorn\practice\PracticeCore;
@@ -235,5 +236,15 @@ class BasicQueuesManager implements IAwaitingManager
             return $this->queues[$player->getServerID()->toString()];
         }
         return null;
+    }
+
+    /**
+     * @return IAwaitingGameManager
+     *
+     * Gets the parent game manager.
+     */
+    public function getGameManager(): IAwaitingGameManager
+    {
+        return $this->parent;
     }
 }

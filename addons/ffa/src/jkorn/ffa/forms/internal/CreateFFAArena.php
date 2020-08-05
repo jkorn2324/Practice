@@ -6,8 +6,7 @@ namespace jkorn\ffa\forms\internal;
 
 
 use jkorn\ffa\arenas\FFAArena;
-use jkorn\ffa\arenas\FFAArenaManager;
-use jkorn\practice\forms\internal\InternalForm;
+use jkorn\ffa\FFAGameManager;
 use jkorn\practice\forms\types\CustomForm;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\level\SpawnArea;
@@ -15,7 +14,7 @@ use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
-class CreateFFAArena extends InternalForm implements FFAInternalForms
+class CreateFFAArena extends FFAInternalForm
 {
 
     /**
@@ -30,13 +29,13 @@ class CreateFFAArena extends InternalForm implements FFAInternalForms
         {
             if($data !== null && isset($extraData["kits"]))
             {
-                $arenaManager = PracticeCore::getBaseArenaManager()->getArenaManager(FFAArenaManager::MANAGER_TYPE);
-                if(!$arenaManager instanceof FFAArenaManager)
+                $ffaManager = PracticeCore::getBaseGameManager()->getGameManager(FFAGameManager::GAME_TYPE);
+                if(!$ffaManager instanceof FFAGameManager)
                 {
-                    // TODO: Send message.
                     return;
                 }
 
+                $arenaManager = $ffaManager->getArenaManager();
 
                 // Gets the name of the FFA Arena.
                 $name = strval($data[1]);

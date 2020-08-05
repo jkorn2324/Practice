@@ -6,8 +6,11 @@ namespace jkorn\practice\player;
 
 
 use jkorn\practice\games\misc\gametypes\IGame;
+use jkorn\practice\games\misc\managers\awaiting\IAwaitingManager;
 use jkorn\practice\games\misc\managers\IAwaitingGameManager;
 use jkorn\practice\games\misc\gametypes\ISpectatorGame;
+use jkorn\practice\games\misc\managers\IGameManager;
+use jkorn\practice\games\misc\managers\ISpectatingGameManager;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\messages\IPracticeMessages;
 use jkorn\practice\messages\managers\PracticeMessageManager;
@@ -309,10 +312,10 @@ class PracticePlayer extends Player implements IPracticeMessages
     public function onLeave(PlayerQuitEvent &$event): void
     {
         // Removes the player from the game queue.
-        $awaitingGame = $this->getAwaitingGameType();
+        $awaitingGame = $this->getAwaitingManager();
         if($awaitingGame !== null)
         {
-            $awaitingGame->getAwaitingManager()->removeAwaiting($this, false);
+            $awaitingGame->removeAwaiting($this, false);
         }
 
         // Gets the current game the player is playing in and
@@ -659,15 +662,26 @@ class PracticePlayer extends Player implements IPracticeMessages
     }
 
     /**
-     * @return IAwaitingGameManager|null - Returns the game manager if player
+     * @return IAwaitingManager|null - Returns the game manager if player
      *                   is awaiting a game, null otherwise.
      *
      *
      * Determines if this player is awaiting a game.
      */
-    public function getAwaitingGameType(): ?IAwaitingGameManager
+    public function getAwaitingManager(): ?IAwaitingManager
     {
-        return PracticeCore::getBaseGameManager()->getAwaitingGameType($this);
+        return PracticeCore::getBaseGameManager()->getAwaitingManager($this);
+    }
+
+    /**
+     * @return bool
+     *
+     * Determines if the player is awaiting for a game.
+     */
+    public function isAwaitingForGame(): bool
+    {
+        $awaiting = $this->getAwaitingManager();
+        return $awaiting !== null;
     }
 
     /**

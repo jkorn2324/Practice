@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace jkorn\ffa\forms\internal;
 
 
-interface FFAInternalForms
+interface FFAInternalFormIDs
 {
     // Internal Forms
     const FFA_ARENA_MENU = "ffa.arena.menu";

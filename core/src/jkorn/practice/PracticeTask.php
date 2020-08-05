@@ -46,7 +46,7 @@ class PracticeTask extends Task
      */
     private function updateGames(): void
     {
-        $games = PracticeCore::getBaseGameManager()->getGameTypes();
+        $games = PracticeCore::getBaseGameManager()->getGameManagers();
 
         foreach($games as $game)
         {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\games\misc\gametypes;
 
 
+use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\games\misc\gametypes\IGame;
 use pocketmine\Player;
 
@@ -60,15 +61,15 @@ interface ISpectatorGame extends IGame
      * used so that the spectator form could show the game's basic
      * information.
      */
-    public function getSpectatorFormDisplay(Player $player): string;
+    public function getSpectatorFormDisplayName(Player $player): string;
 
     /**
-     * @return string
+     * @return ButtonTexture|null
      *
      * Gets the game's form texture, used so that the form
      * gets pretty printed.
      */
-    public function getSpectatorFormTexture(): string;
+    public function getSpectatorFormButtonTexture(): ?ButtonTexture;
 
     /**
      * @return string

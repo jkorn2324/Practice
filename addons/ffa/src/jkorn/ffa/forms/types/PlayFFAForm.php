@@ -109,15 +109,10 @@ class PlayFFAForm extends FormDisplay
         $inputGames = [];
         foreach($games as $game)
         {
-            $texture = $game->getTexture();
-            if($texture !== "")
-            {
-                $form->addButton($this->formData["button.select.arena.template"]->getText($player, $game), 0, $texture);
-            }
-            else
-            {
-                $form->addButton($this->formData["button.select.arena.template"]->getText($player, $game));
-            }
+            $form->addButton(
+                $this->formData["button.select.arena.template"]->getText($player, $game),
+                $game->getFormButtonTexture()
+            );
             $inputGames[] = $game;
         }
 

@@ -95,15 +95,7 @@ class KitSelectorMenu extends InternalForm
         $inputKits = [];
         foreach($kits as $kit)
         {
-            $texture = $kit->getTexture();
-            if($texture !== "")
-            {
-                $form->addButton($kit->getName(), 0, $texture);
-            }
-            else
-            {
-                $form->addButton($kit->getName());
-            }
+            $form->addButton($kit->getName(), $kit->getFormButtonTexture());
             $inputKits[] = $kit;
         }
         $form->addExtraData("kits", $inputKits);

@@ -165,16 +165,12 @@ class BasicDuelsUtils implements BasicDuelsStatistics
                 } elseif ($data instanceof IBasicDuel) {
                     return $data->getGameType()->getDisplayName();
                 } elseif ($player instanceof PracticePlayer) {
-                    $awaiting = $player->getAwaitingGameType();
+
+                    $awaiting = $player->getAwaitingManager();
                     $game = $player->getCurrentGame();
 
-                    if
-                    (
-                        $awaiting instanceof BasicDuelsManager
-                        && ($queuesManager = $awaiting->getAwaitingManager()) !== null
-                        && $queuesManager instanceof BasicQueuesManager
-                    ) {
-                        $queue = $queuesManager->getAwaiting($player);
+                    if ($awaiting instanceof BasicQueuesManager) {
+                        $queue = $awaiting->getAwaiting($player);
                         if ($queue !== null) {
                             return $queue->getGameType()->getDisplayName();
                         }
@@ -196,16 +192,11 @@ class BasicDuelsUtils implements BasicDuelsStatistics
                 } elseif ($data instanceof AbstractDuel) {
                     return $data->getKit()->getName();
                 } elseif ($player instanceof PracticePlayer) {
-                    $awaiting = $player->getAwaitingGameType();
+                    $awaiting = $player->getAwaitingManager();
                     $game = $player->getCurrentGame();
 
-                    if
-                    (
-                        $awaiting instanceof BasicDuelsManager
-                        && ($queuesManager = $awaiting->getAwaitingManager()) !== null
-                        && $queuesManager instanceof BasicQueuesManager
-                    ) {
-                        $queue = $queuesManager->getAwaiting($player);
+                    if ($awaiting instanceof BasicQueuesManager) {
+                        $queue = $awaiting->getAwaiting($player);
                         if
                         (
                             $queue !== null

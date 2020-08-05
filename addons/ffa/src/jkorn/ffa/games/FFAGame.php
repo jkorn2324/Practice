@@ -6,6 +6,7 @@ namespace jkorn\ffa\games;
 
 
 use jkorn\ffa\arenas\FFAArena;
+use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\games\misc\gametypes\IGame;
 use jkorn\practice\player\PracticePlayer;
 use pocketmine\event\Event;
@@ -169,18 +170,17 @@ class FFAGame implements IGame
     }
 
     /**
-     * @return string
+     * @return ButtonTexture|null
      *
-     * Gets the game's texture.
+     * Gets the game's form button texture.
      */
-    public function getTexture(): string
+    public function getFormButtonTexture(): ?ButtonTexture
     {
         if($this->arena !== null)
         {
-            return $this->arena->getFormTexture();
+            return $this->arena->getFormButtonTexture();
         }
-
-        return "";
+        return null;
     }
 
     /**

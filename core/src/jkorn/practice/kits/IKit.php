@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\kits;
 
 
+use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\kits\data\KitEffectsData;
 use jkorn\practice\kits\data\KitCombatData;
 use pocketmine\Player;
@@ -50,9 +51,9 @@ interface IKit
     public function getName(): string;
 
     /**
-     * @return string
+     * @return ButtonTexture|null
      *
-     * Gets the texture of the kit.
+     * Gets the button texture for the kit.
      */
-    public function getTexture(): string;
+    public function getFormButtonTexture(): ?ButtonTexture;
 }

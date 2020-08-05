@@ -6,6 +6,7 @@ namespace jkorn\practice\forms\types;
 
 
 use jkorn\practice\forms\Form;
+use jkorn\practice\forms\types\properties\ButtonTexture;
 
 /**
  * SimpleForm Class, majority was taken from FormAPI with some modifications.
@@ -84,15 +85,14 @@ class SimpleForm extends Form
 
     /**
      * @param string $text
-     * @param int $imageType
-     * @param string $imagePath
+     * @param ButtonTexture|null $info - The button's texture information.
      * @param string $label
      */
-    public function addButton(string $text, int $imageType = -1, string $imagePath = "", ?string $label = null) : void {
+    public function addButton(string $text, ?ButtonTexture $info = null, ?string $label = null) : void {
         $content = ["text" => $text];
-        if($imageType !== -1) {
-            $content["image"]["type"] = $imageType === 0 ? "path" : "url";
-            $content["image"]["data"] = $imagePath;
+        if($info !== null)
+        {
+            $info->import($content);
         }
         $this->data["buttons"][] = $content;
         $this->labelMap[] = $label ?? count($this->labelMap);
