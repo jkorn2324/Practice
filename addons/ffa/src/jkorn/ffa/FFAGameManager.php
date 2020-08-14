@@ -61,11 +61,6 @@ class FFAGameManager implements IGameManager, FFADisplayStatistics
         // Loads the arena manager.
         $this->arenaManager->load();
 
-        // Registers the arena manager.
-        PracticeCore::getBaseScoreboardDisplayManager()->registerScoreboardManager(
-            new FFAScoreboardManager($this->core), true);
-        PracticeCore::getBaseFormDisplayManager()->registerFormDisplayManager(
-            new FFAFormManager($this->core), true);
         // TODO: Message manager.
         /* PracticeCore::getBaseMessageManager()->register(
             new FFAMessageManager($this->core), true); */
@@ -187,6 +182,12 @@ class FFAGameManager implements IGameManager, FFADisplayStatistics
                 return "Unknown";
             }
             , false));
+
+        // Registers the scoreboard manager.
+        PracticeCore::getBaseScoreboardDisplayManager()->registerScoreboardManager(
+            new FFAScoreboardManager($this->core), true);
+        PracticeCore::getBaseFormDisplayManager()->registerFormDisplayManager(
+            new FFAFormManager($this->core), true);
     }
 
     /**

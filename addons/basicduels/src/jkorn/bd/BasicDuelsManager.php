@@ -227,6 +227,11 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
         // Loads the arena manager.
         $this->arenaManager->load();
 
+        // Must be registered before the forms.
+        BasicDuelsUtils::registerDisplayStats();
+        BasicDuelsUtils::registerPlayerSettings();
+        BasicDuelsUtils::registerPlayerStatistics();
+
         // Registers the scoreboard manager.
         PracticeCore::getBaseScoreboardDisplayManager()->registerScoreboardManager(
             new BasicDuelsScoreboardManager($this->core), true);
@@ -240,11 +245,6 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
 
         // Initializes the generators.
         BasicDuelsUtils::initGenerators();
-
-        BasicDuelsUtils::registerDisplayStats();
-        BasicDuelsUtils::registerPlayerSettings();
-        BasicDuelsUtils::registerPlayerStatistics();
-
         // Clears the levels from the previous games.
         $this->removeLevels();
     }
