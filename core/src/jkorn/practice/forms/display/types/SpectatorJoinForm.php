@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\forms\display\types;
 
 
+use jkorn\practice\forms\display\ButtonDisplayText;
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\display\FormDisplayText;
 use jkorn\practice\forms\types\SimpleForm;
@@ -28,7 +29,7 @@ class SpectatorJoinForm extends FormDisplay
         $buttons = $data["buttons"];
         foreach($buttons as $buttonLocal => $data)
         {
-            $formData = FormDisplayText::decodeButton($data);
+            $formData = ButtonDisplayText::decode($data);
             if($formData !== null)
             {
                 $this->formData["button.{$buttonLocal}"] = $formData;
@@ -114,7 +115,7 @@ class SpectatorJoinForm extends FormDisplay
 
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
-
+            // TODO: Handle result
         });
 
         $form->setTitle($this->formData["title"]->getText($player));

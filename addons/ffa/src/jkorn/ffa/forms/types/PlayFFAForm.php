@@ -8,6 +8,7 @@ namespace jkorn\ffa\forms\types;
 use jkorn\ffa\FFAGameManager;
 use jkorn\ffa\games\FFAGame;
 use jkorn\ffa\statistics\FFADisplayStatistics;
+use jkorn\practice\forms\display\ButtonDisplayText;
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\display\FormDisplayText;
 use jkorn\practice\forms\types\SimpleForm;
@@ -37,7 +38,7 @@ class PlayFFAForm extends FormDisplay
         $buttons = $data["buttons"];
         foreach($buttons as $buttonLocal => $data)
         {
-            $formData = FormDisplayText::decodeButton($data);
+            $formData = ButtonDisplayText::decode($data);
             if($formData !== null)
             {
                 $this->formData["button.{$buttonLocal}"] = $formData;
@@ -92,7 +93,7 @@ class PlayFFAForm extends FormDisplay
         if(count($games) <= 0)
         {
             $form->addButton(
-                $this->formData["button.select.arena.none"]->getText($player)
+                $this->formData["button.select.arena.none"]->getText($player, null, false)
             );
             $form->setExtraData(["games" => []]);
             $player->sendForm($form);
@@ -102,9 +103,10 @@ class PlayFFAForm extends FormDisplay
         $inputGames = [];
         foreach($games as $game)
         {
+            $formTexture = $game->getFormButtonTexture();
             $form->addButton(
-                $this->formData["button.select.arena.template"]->getText($player, $game),
-                $game->getFormButtonTexture()
+                $this->formData["button.select.arena.template"]->getText($player, $game, $formTexture !== null),
+                $formTexture
             );
             $inputGames[] = $game;
         }

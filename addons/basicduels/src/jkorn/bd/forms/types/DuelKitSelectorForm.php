@@ -13,6 +13,7 @@ namespace jkorn\bd\forms\types;
 
 use jkorn\bd\BasicDuelsManager;
 use jkorn\bd\duels\types\BasicDuelGameInfo;
+use jkorn\practice\forms\display\ButtonDisplayText;
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\display\FormDisplayText;
 use jkorn\practice\forms\types\SimpleForm;
@@ -37,7 +38,7 @@ class DuelKitSelectorForm extends FormDisplay
 
         $buttons = $data["buttons"];
         foreach ($buttons as $buttonLocal => $text) {
-            $formDisplay = FormDisplayText::decodeButton($text);
+            $formDisplay = ButtonDisplayText::decode($text);
             if($formDisplay !== null)
             {
                 $this->formData["button.{$buttonLocal}"] = $formDisplay;
@@ -106,7 +107,7 @@ class DuelKitSelectorForm extends FormDisplay
         $kits = PracticeCore::getKitManager()->getAll();
         if(count($kits) <= 0)
         {
-            $button = $this->formData["button.duel.button.none"]->getText($player);
+            $button = $this->formData["button.duel.button.none"]->getText($player, null, false);
             $form->addButton($button);
             $form->setExtraData(["kits" => [], "type" => $gameType]);
             $player->sendForm($form);
@@ -117,8 +118,10 @@ class DuelKitSelectorForm extends FormDisplay
         foreach($kits as $kit)
         {
             $formData = $this->formData["button.duel.button.template"];
+            $formTexture = $kit->getFormButtonTexture();
+
             $form->addButton(
-                $formData->getText($player, ["type" => $gameType, "kit" => $kit]),
+                $formData->getText($player, ["type" => $gameType, "kit" => $kit], $formTexture !== null),
                 $kit->getFormButtonTexture()
             );
 

@@ -210,6 +210,83 @@ class PracticeUtil
     }
 
     /**
+     * @param $character - The color input.
+     * @param $formatted - Determines whether the color is formatted.
+     * @return bool
+     *
+     * Determines if the character is a Minecraft color.
+     */
+    public static function isColor($character, bool $formatted = true): bool
+    {
+        if(!is_string($character))
+        {
+            return false;
+        }
+
+        if(!$formatted)
+        {
+            return isset(self::COLOR_ARRAY[$character]);
+        }
+
+        $flipped = array_flip(self::COLOR_ARRAY);
+        return isset($flipped[$character]);
+    }
+
+    /**
+     * @param string $input
+     * @param bool $raw
+     * @return array
+     *
+     * The tokenize colors from the string (separate them), used by the button display
+     * text class to set the text.
+     */
+    public static function tokenizeColors(string $input, bool $raw = false): array
+    {
+        if($raw)
+        {
+            return TextFormat::tokenize($input);
+        }
+
+        $array = [];
+
+        $stringIterator = "";
+        for($index = 0; $index < strlen($input); $index++)
+        {
+            $character = $input[$index];
+            $stringIterator .= $character;
+
+            $filteredArray = array_filter(self::COLOR_ARRAY, function(string $key) use($stringIterator)
+            {
+               return strlen($key) >= strlen($stringIterator);
+            }, ARRAY_FILTER_USE_KEY);
+
+            if(count($filteredArray) <= 0)
+            {
+                continue;
+            }
+
+            foreach($filteredArray as $colorKey => $value)
+            {
+                if(($position = strpos($stringIterator, $colorKey)) !== false)
+                {
+                    $preString = substr($stringIterator, $position - strlen($colorKey), $position);
+                    if(strlen($preString) !== 0) {
+                        $array[] = $preString;
+                    }
+                    $array[] = $colorKey;
+                    $stringIterator = str_replace($preString, "", str_replace($colorKey, "", $stringIterator));
+                }
+            }
+        }
+        if(strlen($stringIterator) !== 0)
+        {
+            $array[] = $stringIterator;
+        }
+        return $array;
+    }
+
+
+    /**
      * @param string $message - The address to the message.
      *
      * Converts the message according to its colors.

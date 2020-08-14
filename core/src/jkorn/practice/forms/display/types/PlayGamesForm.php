@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\forms\display\types;
 
 
+use jkorn\practice\forms\display\ButtonDisplayText;
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\display\FormDisplayText;
 use jkorn\practice\forms\types\SimpleForm;
@@ -27,7 +28,7 @@ class PlayGamesForm extends FormDisplay
         $buttons = $data["buttons"];
         foreach($buttons as $buttonLocal => $data)
         {
-            $formData = FormDisplayText::decodeButton($data);
+            $formData = ButtonDisplayText::decode($data);
             if($formData !== null)
             {
                 $this->formData["button.{$buttonLocal}"] = $formData;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\forms\display\types;
 
 
+use jkorn\practice\forms\display\ButtonDisplayText;
 use jkorn\practice\forms\display\FormDisplayText;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
@@ -29,7 +30,7 @@ class MenuSettingsForm extends FormDisplay
         $buttons = $data["buttons"];
         foreach ($buttons as $buttonLocal => $text) {
 
-            $formData = FormDisplayText::decodeButton($text);
+            $formData = ButtonDisplayText::decode($text);
             if($formData !== null)
             {
                 $this->formData["button.{$buttonLocal}"] = $formData;
@@ -74,9 +75,9 @@ class MenuSettingsForm extends FormDisplay
 
         $form->setTitle($this->formData["title"]->getText($player));
         $form->setContent($this->formData["description"]->getText($player));
-        $form->addButton($this->formData["button.settings.basic"]->getText($player));
 
-        $form->addButton($this->formData["button.settings.builder"]->getText($player));
+        $form->addButton($this->formData["button.settings.basic"]->getText($player, null, false));
+        $form->addButton($this->formData["button.settings.builder"]->getText($player, null, false));
 
         $player->sendForm($form);
     }
