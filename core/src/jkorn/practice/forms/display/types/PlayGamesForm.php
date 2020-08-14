@@ -27,18 +27,11 @@ class PlayGamesForm extends FormDisplay
         $buttons = $data["buttons"];
         foreach($buttons as $buttonLocal => $data)
         {
-            $text = "";
-            if(isset($data["top.text"]))
+            $formData = FormDisplayText::decodeButton($data);
+            if($formData !== null)
             {
-                $text = $data["top.text"];
+                $this->formData["button.{$buttonLocal}"] = $formData;
             }
-
-            if(isset($data["bottom.text"]) && trim($data["bottom.text"]) !== "")
-            {
-                $text .= "\n" . $data["bottom.text"];
-            }
-
-            $this->formData["button.{$buttonLocal}"] = new FormDisplayText($text);
         }
     }
 

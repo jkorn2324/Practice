@@ -258,6 +258,26 @@ class DisplayStatistic implements DisplayStatisticNames
         return false;
     }
 
+    /**
+     * @param string $text - The input text.
+     * @return string - The output text without the statistics.
+     *
+     * Clears the statistics from the text.
+     */
+    public static function clearStatistics(string $text): string
+    {
+        foreach(self::$statistics as $localized => $statistic)
+        {
+            $statisticVariable = "{$localized}";
+
+            if(($position = strpos($text, $statisticVariable)) !== false)
+            {
+                $text = str_replace($statisticVariable, "", $text);
+            }
+        }
+        return $text;
+    }
+
 
     // ----------------------------- The display statistic instance -------------------
 

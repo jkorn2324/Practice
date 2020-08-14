@@ -29,25 +29,11 @@ class DuelTypeSelectorForm extends FormDisplay
 
         $buttons = $data["buttons"];
         foreach ($buttons as $buttonLocal => $text) {
-            $inputText = $text;
-            if (is_array($text)) {
-                $topLine = "";
-                $bottomLine = "";
-                if (isset($text["top.text"])) {
-                    $topLine = $text["top.text"];
-                }
-
-                if (isset($text["bottom.text"])) {
-                    $bottomLine = $text["bottom.text"];
-                }
-
-                if ($bottomLine !== "") {
-                    $inputText = implode("\n", [$topLine, $bottomLine]);
-                } else {
-                    $inputText = $topLine;
-                }
+            $formData = FormDisplayText::decodeButton($text);
+            if($formData !== null)
+            {
+                $this->formData["button.{$buttonLocal}"] = $formData;
             }
-            $this->formData["button.{$buttonLocal}"] = new FormDisplayText($inputText);
         }
     }
 

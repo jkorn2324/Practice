@@ -7,7 +7,9 @@ namespace jkorn\practice\forms\display\types;
 
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\display\FormDisplayText;
+use jkorn\practice\forms\display\manager\PracticeFormManager;
 use jkorn\practice\forms\types\SimpleForm;
+use jkorn\practice\games\misc\gametypes\ISpectatorGame;
 use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 
@@ -25,7 +27,16 @@ class SpectatorSelectionForm extends FormDisplay
     {
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
-            // TODO: Get output.
+            if($data !== null && isset($extraData["games"]))
+            {
+                /** @var ISpectatorGame[] $games */
+                $games = $extraData["games"];
+
+                if(isset($games[(int)$data]))
+                {
+                    $game = $games[(int)$data];
+                }
+            }
         });
 
         $form->setTitle($this->formData["title"]->getText($player));

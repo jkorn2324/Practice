@@ -54,3 +54,17 @@ form.spectator.game.selection:
   class: jkorn\practice\forms\display\types\SpectatorSelectionForm
   title: "Spectate Game"
   description: "Select the game that you want to spectate."
+
+# The form that contains the text display for the
+# form that determines whether spectators should join.
+form.spectator.game.join:
+  class: jkorn\practice\forms\display\types\SpectatorSelectionForm
+  title: "Spectate Game"
+  description: "Select \"Join\" if you want to spectate the game, otherwise select \"Cancel\"."
+  buttons:
+    selection.join:
+      top.text: "Yes"
+      bottom.text: ""
+    selection.cancel:
+      top.text: "Cancel"
+      bottom.text: ""
