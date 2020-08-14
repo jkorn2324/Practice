@@ -91,9 +91,9 @@ interface IGameManager
     public function getFormButtonTexture(): ?ButtonTexture;
 
     /**
-     * @return FormDisplay|null
+     * @param Player $player - The player that selected the game.
      *
-     * Gets the corresponding form used to put the player in the game.
+     * Called when the game is selected in the Play Games Form.
      */
-    public function getGameSelector(): ?FormDisplay;
+    public function onGameSelected(Player $player): void;
 }

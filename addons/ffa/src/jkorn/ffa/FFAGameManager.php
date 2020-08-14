@@ -344,18 +344,21 @@ class FFAGameManager implements IGameManager, FFADisplayStatistics
     }
 
     /**
-     * @return FormDisplay|null
+     * @param Player $player - The player that selected it.
      *
-     * Gets the corresponding form used to put the player in the game.
+     * Called when the game is selected in the Play Games Form.
      */
-    public function getGameSelector(): ?FormDisplay
+    public function onGameSelected(Player $player): void
     {
-        $manager = PracticeCore::getBaseFormDisplayManager()->getFormManager(FFAFormManager::LOCALIZED_NAME);
-        if($manager !== null)
+        $formManager = PracticeCore::getBaseFormDisplayManager()->getFormManager(FFAFormManager::LOCALIZED_NAME);
+        if($formManager !== null)
         {
-            return $manager->getForm(FFAFormManager::FFA_PLAY_FORM);
+            $form = $formManager->getForm(FFAFormManager::FFA_PLAY_FORM);
+            if($form !== null)
+            {
+                $form->display($player);
+            }
         }
-        return null;
     }
 
     /**

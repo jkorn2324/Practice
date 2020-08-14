@@ -6,6 +6,8 @@ namespace jkorn\practice\games\duels\types;
 
 
 use jkorn\practice\kits\IKit;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\Player;
 use jkorn\practice\games\duels\AbstractDuel;
@@ -241,6 +243,36 @@ abstract class Duel1vs1 extends AbstractDuel
         if ($player instanceof PracticePlayer)
         {
             $player->putInLobby(false);
+        }
+    }
+
+    /**
+     * @param EntityDamageEvent $event
+     *
+     * Handles when the entity gets damaged, usually is always called
+     * when a player in the duel gets damaged.
+     */
+    protected function handleEntityDamage(EntityDamageEvent &$event): void
+    {
+        $damaged = $event->getEntity();
+
+        // If the damaged player isn't playing or the player is a spectator.
+        if(!$this->isPlaying($damaged))
+        {
+            $event->setCancelled();
+            return;
+        }
+
+        // Gets the damager and checks if the player is a spectator or not.
+        if($event instanceof EntityDamageByEntityEvent)
+        {
+            $damager = $event->getDamager();
+
+            if(!$this->isPlaying($damager))
+            {
+                $event->setCancelled();
+                return;
+            }
         }
     }
 }

@@ -7,6 +7,8 @@ namespace jkorn\practice\games\duels;
 
 use jkorn\practice\games\misc\gametypes\IUpdatedGame;
 use jkorn\practice\kits\IKit;
+use pocketmine\event\block\BlockBreakEvent;
+use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\Event;
@@ -192,6 +194,18 @@ abstract class AbstractDuel implements IUpdatedGame
         {
             $this->handlePlayerRespawn($event);
         }
+        elseif ($event instanceof EntityDamageEvent)
+        {
+            $this->handleEntityDamage($event);
+        }
+        elseif ($event instanceof BlockPlaceEvent)
+        {
+            $this->handleBlockPlace($event);
+        }
+        elseif ($event instanceof BlockBreakEvent)
+        {
+            $this->handleBlockBreak($event);
+        }
     }
 
     /**
@@ -233,6 +247,28 @@ abstract class AbstractDuel implements IUpdatedGame
      * Handles when the player respawns.
      */
     abstract protected function handlePlayerRespawn(PlayerRespawnEvent &$event): void;
+
+    /**
+     * @param EntityDamageEvent $event
+     *
+     * Handles when the entity gets damaged, usually is always called
+     * when a player in the duel gets damaged.
+     */
+    abstract protected function handleEntityDamage(EntityDamageEvent &$event): void;
+
+    /**
+     * @param BlockPlaceEvent $event
+     *
+     * Handles when a block is placed within the game.
+     */
+    abstract protected function handleBlockPlace(BlockPlaceEvent &$event): void;
+
+    /**
+     * @param BlockBreakEvent $event
+     *
+     * Handles when a block has broken within the game.
+     */
+    abstract protected function handleBlockBreak(BlockBreakEvent &$event): void;
 
     /**
      * @return string

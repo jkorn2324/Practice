@@ -51,7 +51,7 @@ interface IGame
      * of event that this calls.
      * - PlayerDeathEvent
      * - PlayerRespawnEvent
-     * - EntityDamageEvent - TODO
+     * - EntityDamageEvent
      *   - EntityDamageByEntityEvent
      *   - EntityDamageByChildEntityEvent
      * - BlockPlaceEvent - TODO

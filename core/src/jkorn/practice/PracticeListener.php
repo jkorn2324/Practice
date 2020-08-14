@@ -6,6 +6,7 @@ namespace jkorn\practice;
 
 
 use jkorn\practice\games\misc\gametypes\IGame;
+use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\event\player\PlayerDeathEvent;
@@ -144,6 +145,38 @@ class PracticeListener implements Listener
         {
             // By default, send the player to the lobby.
             $player->putInLobby(false);
+        }
+    }
+
+    /**
+     * @param EntityDamageEvent $event
+     *
+     * Called when an entity receives damage.
+     */
+    public function onEntityDamage(EntityDamageEvent $event): void
+    {
+        $damagedEntity = $event->getEntity();
+
+        if($damagedEntity instanceof PracticePlayer)
+        {
+            if
+            (
+                ($game = $damagedEntity->getCurrentGame()) !== null
+                && $game instanceof IGame
+            )
+            {
+                $game->handleEvent($event);
+            }
+            // Covers everything else.
+            elseif
+            (
+                $damagedEntity->isSpectatingGame()
+                || $damagedEntity->isAwaitingForGame()
+                || $damagedEntity->isInLobby()
+            )
+            {
+                $event->setCancelled();
+            }
         }
     }
 }

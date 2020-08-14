@@ -6,6 +6,7 @@ namespace jkorn\practice\player\info\stats;
 
 
 use jkorn\practice\display\DisplayStatistic;
+use jkorn\practice\display\DisplayStatisticNames;
 use jkorn\practice\misc\ISavedHeader;
 use jkorn\practice\player\info\stats\properties\IntegerStatProperty;
 use jkorn\practice\player\PracticePlayer;
@@ -18,12 +19,8 @@ use pocketmine\Server;
  *
  * The statistics information for the player.
  */
-class StatsInfo implements ISavedHeader
+class StatsInfo implements ISavedHeader, DisplayStatisticNames
 {
-
-    const STAT_KILLS = "stat.player.kills";
-    const STAT_DEATHS = "stat.player.deaths";
-
     /** @var StatPropertyInfo[] */
     private static $statistics = [];
 
@@ -32,8 +29,8 @@ class StatsInfo implements ISavedHeader
      */
     public static function initDefaultStats(): void
     {
-        self::registerStatistic(new StatPropertyInfo(self::STAT_DEATHS, IntegerStatProperty::class, true));
-        self::registerStatistic(new StatPropertyInfo(self::STAT_KILLS, IntegerStatProperty::class, true));
+        self::registerStatistic(new StatPropertyInfo(self::STATISTIC_TOTAL_PLAYER_KILLS, IntegerStatProperty::class, true));
+        self::registerStatistic(new StatPropertyInfo(self::STATISTIC_TOTAL_PLAYER_DEATHS, IntegerStatProperty::class, true));
     }
 
     /**

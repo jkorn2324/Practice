@@ -33,12 +33,12 @@ interface ITeamGame extends IGame
     public function getTeamSize(): int;
 
     /**
-     * @param Player $player
+     * @param $player
      * @return mixed
      *
      * Gets the team from the player.
      */
-    public function getTeam(Player $player);
+    public function getTeam($player);
 
     /**
      * @param Player $player

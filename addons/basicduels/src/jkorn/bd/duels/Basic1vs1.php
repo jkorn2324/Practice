@@ -21,6 +21,10 @@ use jkorn\practice\games\duels\DuelPlayer;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\PracticeUtil;
+use pocketmine\event\block\BlockBreakEvent;
+use pocketmine\event\block\BlockPlaceEvent;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Player;
@@ -205,12 +209,12 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
     }
 
     /**
-     * @param Player $player
+     * @param $player
      * @return bool
      *
      * Determines if the player is a spectator.
      */
-    public function isSpectator(Player $player): bool
+    public function isSpectator($player): bool
     {
         if($player instanceof PracticePlayer)
         {
@@ -586,5 +590,25 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
         ];
 
         return implode("\n", $description);
+    }
+
+    /**
+     * @param BlockPlaceEvent $event
+     *
+     * Handles when a block is placed within the game.
+     */
+    protected function handleBlockPlace(BlockPlaceEvent &$event): void
+    {
+        // TODO: Implement handleBlockPlace() method.
+    }
+
+    /**
+     * @param BlockBreakEvent $event
+     *
+     * Handles when a block has broken within the game.
+     */
+    protected function handleBlockBreak(BlockBreakEvent &$event): void
+    {
+        // TODO: Implement handleBlockBreak() method.
     }
 }

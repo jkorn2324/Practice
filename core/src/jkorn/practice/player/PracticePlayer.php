@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\player;
 
 
+use jkorn\practice\display\DisplayStatisticNames;
 use jkorn\practice\games\misc\gametypes\IGame;
 use jkorn\practice\games\misc\managers\awaiting\IAwaitingManager;
 use jkorn\practice\games\misc\managers\IAwaitingGameManager;
@@ -734,6 +735,43 @@ class PracticePlayer extends Player implements IPracticeMessages
     }
 
     /**
+     * Called when the player has died.
+     */
+    protected function onDeath(): void
+    {
+        parent::onDeath();
+
+        // Adds a death to the total player deaths.
+        $statisticsInformation = $this->getStatsInfo();
+        $totalDeathsStatistic = $statisticsInformation->getStatistic(DisplayStatisticNames::STATISTIC_TOTAL_PLAYER_DEATHS);
+        if($totalDeathsStatistic !== null)
+        {
+            $totalDeathsStatistic->setValue($totalDeathsStatistic->getValue() + 1);
+        }
+
+        // Adds a kill to the player that killed the current player.
+        $lastDamageCause = $this->getLastDamageCause();
+        if($lastDamageCause instanceof EntityDamageByEntityEvent)
+        {
+            $damager = $lastDamageCause->getDamager();
+            if($damager instanceof PracticePlayer)
+            {
+                $cause = $lastDamageCause->getCause();
+                if($cause === EntityDamageEvent::CAUSE_VOID || $cause === EntityDamageEvent::CAUSE_SUICIDE)
+                {
+                    return;
+                }
+                $damagerStatistics = $damager->getStatsInfo();
+                $damagerKills = $damagerStatistics->getStatistic(DisplayStatisticNames::STATISTIC_TOTAL_PLAYER_KILLS);
+                if($damagerKills !== null)
+                {
+                    $damagerKills->setValue($damagerKills->getValue() + 1);
+                }
+            }
+        }
+    }
+
+    /**
      * @param EntityDamageEvent &$event - The input event.
      *
      * @return bool
@@ -786,13 +824,6 @@ class PracticePlayer extends Player implements IPracticeMessages
 
             // Updates the attack speed.
             $this->attackTime = $speed;
-
-
-            /* if($damager->isInFFA() && $damager->getFFAArena()->equals($this->ffaArena) && $event->getCause() !== EntityDamageEvent::CAUSE_SUICIDE)
-            {
-                $damager->getCombatInfo()->setInCombat(true);
-                $this->getCombatInfo()->setInCombat(true);
-            } */
         }
     }
 

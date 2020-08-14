@@ -89,10 +89,12 @@ class CombatInfo
         if($combat)
         {
             // TODO: Send player in combat message.
+            $this->player->sendMessage("You are now in combat.");
         }
         else
         {
             // TODO: Send player out of combat message.
+            $this->player->sendMessage("You are out of combat.");
         }
     }
 

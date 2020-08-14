@@ -24,13 +24,13 @@ interface DisplayStatisticNames
     const STATISTIC_PLAYER_PING = "stat.player.ping";
     const STATISTIC_PLAYER_NAME = "stat.player.name";
     const STATISTIC_PLAYER_OS = "stat.player.os";
-    const STATISTIC_PLAYER_KDR = "stat.player.kdr";
+    const STATISTIC_TOTAL_PLAYER_KDR = "stat.player.kdr.total";
     const STATISTIC_PLAYER_CPS = "stat.player.cps";
     const STATISTIC_PLAYER_EQUIPPED_KIT = "stat.player.equipped.kit";
 
     // These are registered via the StatsInfo class.
-    const STATISTIC_PLAYER_KILLS = "stat.player.kills";
-    const STATISTIC_PLAYER_DEATHS = "stat.player.deaths";
+    const STATISTIC_TOTAL_PLAYER_KILLS = "stat.player.kills.total";
+    const STATISTIC_TOTAL_PLAYER_DEATHS = "stat.player.deaths.total";
 
     // The Games Default Statistics
     const STATISTIC_GAMES_TYPE = "stat.games.type";

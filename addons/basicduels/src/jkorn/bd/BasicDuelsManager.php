@@ -398,19 +398,21 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
     }
 
     /**
-     * @return FormDisplay|null
+     * @param Player $player - The player that selected it.
      *
-     * Gets the corresponding form used to put the player in the game.
+     * Called when the game is selected in the Play Games Form.
      */
-    public function getGameSelector(): ?FormDisplay
+    public function onGameSelected(Player $player): void
     {
-        $manager = PracticeCore::getBaseFormDisplayManager()->getFormManager(BasicDuelsFormManager::NAME);
-        if($manager !== null)
+        $formManager = PracticeCore::getBaseFormDisplayManager()->getFormManager(BasicDuelsFormManager::NAME);
+        if($formManager !== null)
         {
-            return $manager->getForm(BasicDuelsFormManager::TYPE_SELECTOR_FORM);
+            $form = $formManager->getForm(BasicDuelsFormManager::TYPE_SELECTOR_FORM);
+            if($form !== null)
+            {
+                $form->display($player);
+            }
         }
-
-        return null;
     }
 
     /**

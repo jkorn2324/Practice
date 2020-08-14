@@ -6,9 +6,14 @@ namespace jkorn\ffa\games;
 
 
 use jkorn\ffa\arenas\FFAArena;
+use jkorn\ffa\statistics\FFADisplayStatistics;
 use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\games\misc\gametypes\IGame;
 use jkorn\practice\player\PracticePlayer;
+use pocketmine\event\block\BlockBreakEvent;
+use pocketmine\event\block\BlockPlaceEvent;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\Player;
@@ -114,12 +119,58 @@ class FFAGame implements IGame
      */
     public function removeFromGame(Player $player, int $reason): void
     {
-        // TODO: Determine if the player is in combat.
+        if(!$player instanceof PracticePlayer)
+        {
+            return;
+        }
 
+        // Removes the player from the game indefinitely.
         if($this->isPlaying($player))
         {
-            /** @var PracticePlayer $player */
             unset($this->players[$player->getServerID()->toString()]);
+        }
+
+        $addDeath = false;
+        if($reason === self::REASON_DIED) {
+            $addDeath = true;
+        } elseif ($reason === self::REASON_LEFT_SERVER) {
+            $addDeath = $player->getCombatInfo()->isInCombat();
+        }
+
+        if($addDeath)
+        {
+            $lastDamageCause = $player->getLastDamageCause();
+            if($lastDamageCause instanceof EntityDamageByEntityEvent)
+            {
+                $lastDamager = $lastDamageCause->getDamager();
+                if
+                (
+                    $lastDamager instanceof PracticePlayer
+                    && ($game = $lastDamager->getCurrentGame()) !== null
+                    && $game instanceof FFAGame && $game->equals($this)
+                    && ($combatInfo = $lastDamager->getCombatInfo())->isInCombat()
+                )
+                {
+                    // Updates the player's kills statistics.
+                    $killerStatistics = $lastDamager->getStatsInfo();
+                    $killsStat = $killerStatistics->getStatistic(FFADisplayStatistics::STATISTIC_FFA_PLAYER_KILLS);
+                    if($killsStat !== null)
+                    {
+                        $killsStat->setValue($killsStat->getValue() + 1);
+                    }
+
+                    $combatInfo->setInCombat(false);
+                }
+            }
+
+            $dPlayerStats = $player->getStatsInfo();
+            $deathsStat = $dPlayerStats->getStatistic(FFADisplayStatistics::STATISTIC_FFA_PLAYER_DEATHS);
+
+            if($deathsStat !== null)
+            {
+                $previousDeathCount = $deathsStat->getValue();
+                $deathsStat->setValue($previousDeathCount + 1);
+            }
         }
     }
 
@@ -211,15 +262,94 @@ class FFAGame implements IGame
         {
             $this->handleDeathEvent($event);
         }
+        elseif ($event instanceof EntityDamageByEntityEvent)
+        {
+            $this->handleEntityDamageEvent($event);
+        }
+        elseif ($event instanceof BlockPlaceEvent)
+        {
+            $this->handleBlockPlaceEvent($event);
+        }
+        elseif ($event instanceof BlockBreakEvent)
+        {
+            $this->handleBlockBreakEvent($event);
+        }
     }
 
     /**
      * @param PlayerDeathEvent $event
      *
-     * Handles when the player dies in an FFA Arena.
+     * Handles when the player dies in an FFA Arena, updates the kills & deaths statistics.
      */
     protected function handleDeathEvent(PlayerDeathEvent &$event): void
     {
-        // TODO: Update player deaths, update player kills.
+        $player = $event->getPlayer();
+        if($player instanceof PracticePlayer)
+        {
+            $lastDamageCause = $player->getLastDamageCause();
+            if($lastDamageCause === null)
+            {
+                $this->removeFromGame($player, self::REASON_UNFAIR_RESULT);
+                return;
+            }
+
+            $cause = $lastDamageCause->getCause();
+            if($cause === EntityDamageEvent::CAUSE_SUICIDE || $cause === EntityDamageEvent::CAUSE_VOID)
+            {
+                $this->removeFromGame($player, self::REASON_UNFAIR_RESULT);
+                return;
+            }
+
+            $this->removeFromGame($player, self::REASON_DIED);
+        }
+    }
+
+    /**
+     * @param EntityDamageEvent $event
+     *
+     * Handles when an entity is damaged in an FFA Arena. It is always
+     * going to be when a player gets damaged.
+     */
+    protected function handleEntityDamageEvent(EntityDamageEvent &$event): void
+    {
+        $damaged = $event->getEntity();
+
+        // Puts the players in combat.
+        if($damaged instanceof PracticePlayer && $event instanceof EntityDamageByEntityEvent)
+        {
+            $damager = $event->getDamager();
+            if
+            (
+                $damager instanceof PracticePlayer
+                && ($game = $damager->getCurrentGame()) !== null
+                && $game instanceof FFAGame && $game->equals($this)
+            )
+            {
+                $damager->getCombatInfo()->setInCombat(true);
+                $damaged->getCombatInfo()->setInCombat(true);
+            }
+        }
+    }
+
+    /**
+     * @param BlockPlaceEvent $event
+     *
+     * Handles when a block is placed.
+     */
+    protected function handleBlockPlaceEvent(BlockPlaceEvent &$event): void
+    {
+        // TODO: Handle this with build uhc.
+        $event->setCancelled();
+    }
+
+    /**
+     * @param BlockBreakEvent $event
+     *
+     * Handles when a block is broken.
+     */
+    protected function handleBlockBreakEvent(BlockBreakEvent &$event): void
+    {
+        // TODO: Handle this with build uhc.
+        $event->setCancelled();
     }
 }

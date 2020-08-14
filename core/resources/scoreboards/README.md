@@ -90,9 +90,9 @@ These are the statistics that work for any scoreboard, regardless of game-modes 
 - `{stat.online.players}` - Displays the current number of players on the server.
 - `{stat.max.players}` - Displays the maximum number of players that could join the server.
 
-- `{stat.player.kills}` - Lists the number of kills the player has ever on the server.
-- `{stat.player.deaths}` - Lists the number of deaths the player has ever on the server.
-- `{stat.player.kdr}` - Lists the KDR of the player on the server.
+- `{stat.player.kills.total}` - Lists the total number of kills the player has on the server.
+- `{stat.player.deaths.total}` - Lists the total number of deaths the player has on the server.
+- `{stat.player.kdr.total}` - Lists the player's total KDR on the server.
 - `{stat.player.cps}` - Lists the clicks-per-second of the player.
 - `{stat.player.ping}` - Displays the current player's ping.
 - `{stat.player.name}` - Displays the current player's name.

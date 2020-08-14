@@ -13,12 +13,12 @@ interface ISpectatorGame extends IGame
 {
 
     /**
-     * @param Player $player
+     * @param $player
      * @return bool
      *
      * Determines if the player is a spectator.
      */
-    public function isSpectator(Player $player): bool;
+    public function isSpectator($player): bool;
 
     /**
      * @param Player $player

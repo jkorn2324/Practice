@@ -85,15 +85,15 @@ class DisplayStatistic implements DisplayStatisticNames
 
         // Registers the player's kdr, the kills & deaths display statistics are already registered.
         self::register(new DisplayStatistic(
-            self::STATISTIC_PLAYER_KDR,
+            self::STATISTIC_TOTAL_PLAYER_KDR,
             function(Player $player, Server $server, $data)
             {
                 if($player instanceof PracticePlayer)
                 {
                     $statistics = $player->getStatsInfo();
 
-                    $kills = $statistics->getStatistic(StatsInfo::STAT_KILLS);
-                    $deaths = $statistics->getStatistic(StatsInfo::STAT_DEATHS);
+                    $kills = $statistics->getStatistic(self::STATISTIC_TOTAL_PLAYER_KILLS);
+                    $deaths = $statistics->getStatistic(self::STATISTIC_TOTAL_PLAYER_DEATHS);
 
                     if($kills !== null && $deaths !== null)
                     {

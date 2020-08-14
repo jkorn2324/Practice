@@ -64,6 +64,7 @@ class BasicDuelGameInfo implements IGameInfo
     {
         return $this->numPlayers;
     }
+
     /**
      * @param $object
      * @return bool

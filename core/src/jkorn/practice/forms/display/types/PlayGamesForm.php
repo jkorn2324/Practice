@@ -59,14 +59,10 @@ class PlayGamesForm extends FormDisplay
                 return;
             }
 
-            if($data !== null)
+            if($data !== null && isset($games[(int)$data]))
             {
                 $gameManager = $games[(int)$data];
-                $form = $gameManager->getGameSelector();
-                if($form !== null)
-                {
-                    $form->display($player);
-                }
+                $gameManager->onGameSelected($player);
             }
         });
 

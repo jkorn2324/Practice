@@ -11,6 +11,8 @@ use jkorn\practice\games\misc\gametypes\ITeamGame;
 use jkorn\practice\games\misc\teams\TeamColor;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\player\PracticePlayer;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\Player;
 
@@ -105,12 +107,12 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
     }
 
     /**
-     * @param Player $player
+     * @param $player
      * @return DuelTeam|null
      *
      * Gets the team from the player.
      */
-    public function getTeam(Player $player)
+    public function getTeam($player)
     {
         if($this->team1->isInTeam($player))
         {
@@ -286,6 +288,58 @@ abstract class TeamDuel extends AbstractDuel implements ITeamGame
                }
 
                 $player->putInLobby(false);
+            }
+        }
+    }
+
+    /**
+     * @param EntityDamageEvent $event
+     *
+     * Handles when the entity gets damaged, usually is always called
+     * when a player in the duel gets damaged.
+     */
+    protected function handleEntityDamage(EntityDamageEvent &$event): void
+    {
+        // Damaged is always a player.
+        $damaged = $event->getEntity();
+
+        // Cancel if the status is not in progress.
+        if($this->status < self::STATUS_IN_PROGRESS)
+        {
+            $event->setCancelled();
+            return;
+        }
+
+        if($event instanceof EntityDamageByEntityEvent)
+        {
+            $damager = $event->getDamager();
+
+            $damagerTeam = $this->getTeam($damager);
+            $damagedTeam = $this->getTeam($damaged);
+
+            // Makes sure that players who aren't in a team can't hit players playing.
+            if($damagedTeam === null || $damagerTeam === null)
+            {
+                $event->setCancelled();
+                return;
+            }
+
+            // Cancels if either players are eliminated.
+            if
+            (
+                $damagedTeam->isEliminated($damaged)
+                || $damagerTeam->isEliminated($damager)
+            )
+            {
+                $event->setCancelled();
+                return;
+            }
+
+            // if teammates are the same they can't hit one another.
+            if($damagerTeam->equals($damagedTeam))
+            {
+                $event->setCancelled();
+                return;
             }
         }
     }
