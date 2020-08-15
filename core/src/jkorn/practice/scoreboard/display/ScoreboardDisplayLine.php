@@ -9,6 +9,7 @@ use jkorn\practice\display\DisplayStatistic;
 use pocketmine\Player;
 use jkorn\practice\misc\IDisplayText;
 use jkorn\practice\PracticeUtil;
+use pocketmine\utils\TextFormat;
 
 class ScoreboardDisplayLine implements IDisplayText
 {
@@ -35,11 +36,43 @@ class ScoreboardDisplayLine implements IDisplayText
     public function getText(Player $player, $args = null): string
     {
         $output = $this->text;
-
         PracticeUtil::convertMessageColors($output);
         DisplayStatistic::convert($output, $player, $args);
-
         return $output;
+    }
+
+    /**
+     * @param string ...$lines - The lines of the scoreboard.
+     * @return string
+     *
+     * Gets the text for the line element. ONLY USED IF THE
+     * SCOREBOARD DISPLAY LINE IS IN FACT A LINE.
+     */
+    public function getTextForLine(string...$lines): string
+    {
+        if(!$this->isLine())
+        {
+            return $this->text;
+        }
+
+        $maxCharacters = 0;
+        foreach($lines as $line) {
+            $cleaned = trim(TextFormat::clean($line));
+            if(strlen($cleaned) >= $maxCharacters) {
+                $maxCharacters = strlen($cleaned);
+            }
+        }
+        return str_repeat("-", $maxCharacters);
+    }
+
+    /**
+     * @return bool
+     *
+     * Determines if the scoreboard display line is a line element.
+     */
+    public function isLine(): bool
+    {
+        return strpos($this->text, "{LINE}") !== false;
     }
 
     /**

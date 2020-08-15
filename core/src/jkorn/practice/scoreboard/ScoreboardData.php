@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace jkorn\practice\scoreboard;
 
 
+use jkorn\practice\games\misc\teams\TeamColor;
 use jkorn\practice\player\info\settings\SettingsInfo;
 use jkorn\practice\player\PracticePlayer;
 use pocketmine\Player;
 use jkorn\practice\PracticeCore;
 use jkorn\practice\scoreboard\display\ScoreboardDisplayLine;
+use pocketmine\utils\TextFormat;
 
 class ScoreboardData
 {
@@ -103,9 +105,30 @@ class ScoreboardData
 
         $lines = $displayInfo->getLines();
 
+        $linesToAdd = [];
+        $linesTextInput = [];
+
         foreach($lines as $index => $line)
         {
-            $this->scoreboard->addLine($index, $line->getText($this->player));
+            if(!$line->isLine()) {
+                $linesTextInput[] = $text = $line->getText($this->player);
+                $this->scoreboard->addLine($index, $text);
+            } else {
+                $linesToAdd[$index] = $line;
+            }
+        }
+
+        // Add the lines to the line text.
+        $previousColor = "";
+        foreach($linesToAdd as $index => $line) {
+
+            do {
+                // Gets a random color.
+                $color = TeamColor::random()->getTextColor();
+            } while ($previousColor !== $color);
+            $previousColor = $color;
+            $lineText = $previousColor . TextFormat::RESET . $line->getTextForLine(...$linesTextInput);
+            $this->scoreboard->addLine($index, $lineText);
         }
 
         $this->scoreboardType = $type;

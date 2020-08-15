@@ -52,7 +52,7 @@ class ScoreboardDisplayInformation
 
             $this->lines[$lineNumber = $scoreboardLine - 1] = $lineDisplay = new ScoreboardDisplayLine($text);
 
-            if($lineDisplay->containsStatistics())
+            if($lineDisplay->containsStatistics() && !$lineDisplay->isLine())
             {
                 $this->updatedLines[] = $lineNumber;
             }

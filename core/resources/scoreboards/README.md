@@ -68,6 +68,7 @@ More line effects:
 - `{BOLD}` - Makes the text bold.
 - `{ITALIC}` - Makes the text italicized.
 - `{UNDERLINE}` - Underlines the text.
+- `{LINE}` - Makes the given scoreboard line draw a line that fits.
 
 ## Displaying Statistics
 There are certain statistics that you can display on a given line by using a set of curly-braces and defining the type of statistic that you want to display.
