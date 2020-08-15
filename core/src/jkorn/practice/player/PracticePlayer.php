@@ -943,7 +943,6 @@ class PracticePlayer extends Player implements IPracticeMessages
         }
 
         $this->lookingAtForm = true;
-
         parent::sendForm($form);
     }
 
@@ -979,30 +978,5 @@ class PracticePlayer extends Player implements IPracticeMessages
         {
             $this->teleport($position);
         }
-    }
-
-    /**
-     * @param DataPacket $packet
-     * @param bool $needACK
-     * @param bool $immediate
-     * @return bool|int
-     *
-     * Called when the data packet is sent.
-     */
-    public function sendDataPacket(DataPacket $packet, bool $needACK = false, bool $immediate = false)
-    {
-        if($result = parent::sendDataPacket($packet, $needACK, $immediate))
-        {
-            if($packet instanceof ModalFormRequestPacket)
-            {
-                $form = $this->forms[$packet->formId];
-                if($form instanceof SimpleForm)
-                {
-                    // TODO: If it doesn't work, do a scheduled delayed task.
-                    $this->urlImageHandler->onSend();
-                }
-            }
-        }
-        return $result;
     }
 }

@@ -14,6 +14,8 @@ use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
+use pocketmine\event\server\DataPacketSendEvent;
+use pocketmine\network\mcpe\protocol\ModalFormRequestPacket;
 use pocketmine\Server;
 use jkorn\practice\items\PracticeItem;
 use jkorn\practice\player\info\ClientInfo;
@@ -177,6 +179,22 @@ class PracticeListener implements Listener
             {
                 $event->setCancelled();
             }
+        }
+    }
+
+    /**
+     * @param DataPacketSendEvent $event
+     * @priority MONITOR
+     * @ignoreCancelled true
+     *
+     * Called when a data packet is sent from server to client.
+     */
+    public function onDataPacketSend(DataPacketSendEvent $event): void
+    {
+        $packet = $event->getPacket(); $player = $event->getPlayer();
+        if($packet instanceof ModalFormRequestPacket && $player instanceof PracticePlayer)
+        {
+            $player->getFormURLImageHandler()->onSend();
         }
     }
 }

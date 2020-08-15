@@ -7,6 +7,10 @@ namespace jkorn\practice\player\misc;
 
 use Closure;
 use jkorn\practice\player\PracticePlayer;
+use jkorn\practice\PracticeCore;
+use pocketmine\Server;
+use pocketmine\scheduler\TaskScheduler;
+use pocketmine\scheduler\ClosureTask;
 use pocketmine\entity\Attribute;
 use pocketmine\network\mcpe\protocol\NetworkStackLatencyPacket;
 use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
@@ -25,6 +29,8 @@ class FormURLImageHandler
 
     /** @var PracticePlayer */
     private $player;
+    /** @var Server */
+    private $server;
 
     /** @var Closure[] */
     private $callbackResponses = [];
@@ -38,6 +44,7 @@ class FormURLImageHandler
     public function __construct(PracticePlayer $player)
     {
         $this->player = $player;
+        $this->server = $player->getServer();
     }
 
     /**
@@ -45,17 +52,36 @@ class FormURLImageHandler
      */
     public function onSend(): void
     {
-        if(!$this->player->isOnline())
-        {
-            return;
-        }
+        PracticeCore::getInstance()->getScheduler()->scheduleDelayedTask(
+            new ClosureTask(function(): void
+            {
+                $this->onSendDelay();
+            }), 1);
+    }
 
-        $timeStamp = mt_rand() * 1000;
-        $packet = new NetworkStackLatencyPacket();
-        $packet->timestamp = $timeStamp;
-        $packet->needResponse = true;
-        $this->player->sendDataPacket($packet);
-        $this->callbackResponses[$timeStamp] = true;
+    /**
+     * Called in onSend.
+     */
+    private function onSendDelay(): void
+    {
+        try {
+
+            if(!$this->player->isOnline())
+            {
+                return;
+            }
+
+            $timeStamp = mt_rand() * 1000;
+            $packet = new NetworkStackLatencyPacket();
+            $packet->timestamp = $timeStamp;
+            $packet->needResponse = true;
+            $this->player->sendDataPacket($packet);
+            $this->callbackResponses[$timeStamp] = true;
+
+        } catch (\Exception $e)
+        {
+            var_dump($e->getTraceAsString());
+        }
     }
 
     /**
@@ -75,6 +101,7 @@ class FormURLImageHandler
         }
 
         unset($this->callbackResponses[$timeStamp]);
+        var_dump("Received Packet - FORM URL");
         $this->requestFormUpdate();
         return true;
     }
@@ -107,6 +134,8 @@ class FormURLImageHandler
         }
         elseif ($this->doRequestUpdate)
         {
+            $this->numberUpdateTimes--;
+
             if($this->numberUpdateTimes < 0)
             {
                 $this->doRequestUpdate = false;
@@ -116,6 +145,7 @@ class FormURLImageHandler
 
         if($this->doRequestUpdate && $this->player->isOnline())
         {
+            var_dump("Update Attributes Packet - FORM URL");
             $packet = new UpdateAttributesPacket();
             $packet->entityRuntimeId = $this->player->getId();
             $entries[] = $this->player->getAttributeMap()->getAttribute(Attribute::EXPERIENCE_LEVEL);

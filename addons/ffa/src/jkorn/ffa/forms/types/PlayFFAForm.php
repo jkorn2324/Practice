@@ -92,9 +92,14 @@ class PlayFFAForm extends FormDisplay
 
         if(count($games) <= 0)
         {
-            $form->addButton(
+            /* $form->addButton(
                 $this->formData["button.select.arena.none"]->getText($player, null, false)
-            );
+            ); */
+
+            // TODO: see if this works
+            $form->addButton($this->formData["button.select.arena.none"]->getText($player),
+                1, "https://www.pngfind.com/pngs/m/256-2562232_github-icon-png-download-github-icon-blue-png.png");
+
             $form->setExtraData(["games" => []]);
             $player->sendForm($form);
             return;
