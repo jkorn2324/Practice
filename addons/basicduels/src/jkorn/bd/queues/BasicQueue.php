@@ -74,7 +74,7 @@ class BasicQueue extends AbstractQueue
     public function isMatching(AbstractQueue &$queue): bool
     {
         // Checks if the players are equivalent.
-        if($queue->player->equalsPlayer($this->player))
+        if($queue->player->equals($this->player))
         {
             return false;
         }

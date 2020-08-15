@@ -101,7 +101,7 @@ class ItemManager extends AbstractManager
             // TODO: Enderpearl cooldown.
             if(!$player instanceof PracticePlayer || !$item instanceof EnderPearl)
             {
-                return false;
+                return true;
             }
 
             $animate = $action === PlayerInteractEvent::LEFT_CLICK_AIR && $player->getClientInfo()->isPE();
@@ -115,7 +115,7 @@ class ItemManager extends AbstractManager
         {
             if(!$player instanceof PracticePlayer || !$item instanceof SplashPotion)
             {
-                return false;
+                return true;
             }
 
             $animate = $action === PlayerInteractEvent::LEFT_CLICK_AIR && $player->getClientInfo()->isPE();
@@ -128,7 +128,7 @@ class ItemManager extends AbstractManager
         {
             if(!$player instanceof PracticePlayer || !$item instanceof Snowball)
             {
-                return false;
+                return true;
             }
 
             $animate = $action === PlayerInteractEvent::LEFT_CLICK_AIR && $player->getClientInfo()->isPE();
@@ -142,12 +142,12 @@ class ItemManager extends AbstractManager
         {
             if(!$player instanceof PracticePlayer || !$player->isInGame())
             {
-                return false;
+                return true;
             }
 
             if(!$item instanceof Armor)
             {
-                return false;
+                return true;
             }
 
             $animate = $action === PlayerInteractEvent::LEFT_CLICK_AIR && $player->getClientInfo()->isPE();

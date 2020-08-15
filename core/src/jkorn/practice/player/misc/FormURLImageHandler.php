@@ -25,7 +25,7 @@ use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
 class FormURLImageHandler
 {
 
-    private const REQUEST_COUNT = 3;
+    private const REQUEST_COUNT = 5;
 
     /** @var PracticePlayer */
     private $player;

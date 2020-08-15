@@ -525,16 +525,16 @@ class PracticePlayer extends Player implements IPracticeMessages
     }
 
     /**
-     * @param $player
+     * @param Vector3 $v3
      * @return bool
      *
-     * Determines if the players are equivalent.
+     * Determines if the player is equivalent to another player.
      */
-    public function equalsPlayer($player): bool
+    public function equals(Vector3 $v3): bool
     {
-        if($player instanceof PracticePlayer)
+        if($v3 instanceof PracticePlayer)
         {
-            return $player->serverUUID->equals($this->serverUUID);
+            return $v3->serverUUID->equals($this->serverUUID);
         }
 
         return false;
@@ -595,7 +595,6 @@ class PracticePlayer extends Player implements IPracticeMessages
 
         $this->disguiseInfo = null;
     }
-
 
 
     /**
@@ -1062,7 +1061,7 @@ class PracticePlayer extends Player implements IPracticeMessages
     {
         if(!$this->spawned || !$this->isAlive() || $this->isSpectator() || $this->isFakeSpectating())
         {
-            return false;
+            return true;
         }
 
         $item->onClickAir($this, $this->getDirectionVector());

@@ -569,7 +569,7 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
         {
             if(
                 $inputPlayer instanceof PracticePlayer
-                && $inputPlayer->equalsPlayer($player)
+                && $inputPlayer->equals($player)
                 && $reason === self::REASON_LEFT_SERVER
             )
             {
