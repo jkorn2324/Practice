@@ -35,7 +35,7 @@ class TapItem
      * @param Item $item - The tap item.
      * @param int $action - The action the player used when handling the item.
      *
-     * @return bool - Determines whether or not the player successfully used the tap item.
+     * @return bool - Determines whether to cancel the interact event (always true).
      *
      * Called when the tap item is used.
      */
@@ -43,7 +43,7 @@ class TapItem
     {
         if(!$player->isOnline())
         {
-            return false;
+            return true;
         }
 
         if($player instanceof PracticePlayer) {
@@ -54,7 +54,7 @@ class TapItem
                 // Only return false if the player is a pe player and all these other checks are true.
                 // Prevents windows 10 players from getting the same checks.
                 if (!$value && $action !== PlayerInteractEvent::RIGHT_CLICK_AIR && $player->getClientInfo()->isPE()) {
-                    return false;
+                    return true;
                 }
             }
         }

@@ -114,7 +114,7 @@ class PracticeListener implements Listener
 
                 if($useItem)
                 {
-                    $event->setCancelled(!$tapItem->onItemUse($player, $item, $action));
+                    $event->setCancelled($tapItem->onItemUse($player, $item, $action));
                     return;
                 }
 
