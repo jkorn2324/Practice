@@ -95,8 +95,14 @@ abstract class AbstractFormDisplayManager
         }
 
         $this->loadFormDisplays($inputFile);
+        $this->initInternalForms();
         $this->loaded = true;
     }
+
+    /**
+     * Initializes the internal forms to the display manager.
+     */
+    abstract protected function initInternalForms(): void;
 
     /**
      * @param string $inputFile

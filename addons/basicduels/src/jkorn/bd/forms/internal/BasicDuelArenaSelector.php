@@ -2,19 +2,18 @@
 
 declare(strict_types=1);
 
-namespace jkorn\ffa\forms\internal;
+namespace jkorn\bd\forms\internal;
 
 
-use jkorn\ffa\arenas\FFAArena;
-use jkorn\ffa\arenas\FFAArenaManager;
-use jkorn\ffa\FFAGameManager;
+use jkorn\bd\arenas\ArenaManager;
+use jkorn\bd\arenas\PreGeneratedDuelArena;
+use jkorn\bd\BasicDuelsManager;
 use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\types\SimpleForm;
-use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
-class FFAArenaSelector extends FFAInternalForm
+class BasicDuelArenaSelector extends BasicDuelInternalForm
 {
 
     /**
@@ -26,19 +25,19 @@ class FFAArenaSelector extends FFAInternalForm
     protected function onDisplay(Player $player, ...$args): void
     {
         $ffaManager = $this->getGameManager();
-        if(!$ffaManager instanceof FFAGameManager)
+        if(!$ffaManager instanceof BasicDuelsManager)
         {
             return;
         }
 
-        /** @var FFAArenaManager $arenaManager */
+        /** @var ArenaManager $arenaManager */
         $arenaManager = $ffaManager->getArenaManager();
 
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
             if($data !== null && isset($extraData["arenas"], $extraData["formType"]))
             {
-                /** @var FFAArena[] $arenas */
+                /** @var PreGeneratedDuelArena[] $arenas */
                 $arenas = $extraData["arenas"];
                 $formType = strval($extraData["formType"]);
 
@@ -55,8 +54,8 @@ class FFAArenaSelector extends FFAInternalForm
             }
         });
 
-        $form->setTitle(TextFormat::BOLD . "Select FFA Arena");
-        $form->setContent("Select the FFA Arena you want to edit or delete.");
+        $form->setTitle(TextFormat::BOLD . "Select Basic Duel Arena");
+        $form->setContent("Select the Basic Duel Arena you want to edit or delete.");
 
         $arenas = $arenaManager->getArenas();
         if(count($arenas) <= 0)
@@ -102,6 +101,6 @@ class FFAArenaSelector extends FFAInternalForm
      */
     public function getLocalizedName(): string
     {
-        return self::FFA_ARENA_SELECTOR;
+        return self::BASIC_DUEL_ARENA_SELECTOR;
     }
 }

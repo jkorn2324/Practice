@@ -9,7 +9,6 @@ use jkorn\practice\forms\internal\types\arenas\ArenaMenu;
 use jkorn\practice\forms\internal\types\kits\CreateKitForm;
 use jkorn\practice\forms\internal\types\kits\DeleteKitForm;
 use jkorn\practice\forms\internal\types\kits\edit\EditKitIcon;
-use jkorn\practice\forms\internal\types\kits\edit\EditKitItems;
 use jkorn\practice\forms\internal\types\kits\edit\EditKitKnockback;
 use jkorn\practice\forms\internal\types\kits\edit\EditKitMenu;
 use jkorn\practice\forms\internal\types\kits\edit\effects\AddKitEffect;
@@ -42,7 +41,6 @@ abstract class InternalForm implements IPracticeForm, IInternalFormIDs
         self::registerForm(new CreateKitForm());
         self::registerForm(new DeleteKitForm());
         self::registerForm(new EditKitMenu());
-        self::registerForm(new EditKitItems());
         self::registerForm(new EditKitKnockback());
         self::registerForm(new EditKitEffectsMenu());
         self::registerForm(new KitEffectSelectorMenu());

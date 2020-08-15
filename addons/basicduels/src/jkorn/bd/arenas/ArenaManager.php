@@ -7,7 +7,9 @@ namespace jkorn\bd\arenas;
 
 use jkorn\bd\BasicDuels;
 use jkorn\bd\BasicDuelsManager;
+use jkorn\bd\forms\internal\BasicDuelInternalFormIDs;
 use jkorn\practice\arenas\PracticeArenaManager;
+use jkorn\practice\forms\internal\InternalForm;
 use jkorn\practice\forms\IPracticeForm;
 use jkorn\practice\forms\types\properties\ButtonTexture;
 
@@ -73,7 +75,18 @@ class ArenaManager extends PracticeArenaManager
      */
     public function addArena($arena, bool $override = false): bool
     {
-        // TODO: Implement addArena() method.
+        if(!$arena instanceof PreGeneratedDuelArena)
+        {
+            return false;
+        }
+
+        if(isset($this->arenas[$arena->getLocalizedName()]) && !$override)
+        {
+            return false;
+        }
+        // Adds the arena to the arenas list.
+        $this->arenas[$arena->getLocalizedName()] = $arena;
+        $this->openArenas[$arena->getLocalizedName()] = true;
         return true;
     }
 
@@ -150,17 +163,42 @@ class ArenaManager extends PracticeArenaManager
      */
     public function randomArena(): ?PreGeneratedDuelArena
     {
+        $previouslySelected = [];
+        return $this->randomArenaRecursive($previouslySelected);
+    }
+
+    /**
+     * @param array $previouslySelected - The previously selected arenas.
+     * @return PreGeneratedDuelArena|null
+     *
+     * Gets a random arena recursively based on arena visibility.
+     */
+    private function randomArenaRecursive(array &$previouslySelected): ?PreGeneratedDuelArena
+    {
         if(count($this->openArenas) <= 0)
         {
             return null;
         }
 
         $randomKey = array_keys($this->openArenas)[mt_rand(0, count($this->openArenas) - 1)];
-        if(isset($this->arenas[$randomKey]))
-        {
-            return $this->arenas[$randomKey];
+        if(!isset($this->arenas[$randomKey])) {
+            unset($this->openArenas[$randomKey]);
+            return null;
         }
-        return null;
+
+        $arena = $this->arenas[$randomKey];
+        if(!$arena->isVisible()) {
+            if(!isset($previouslySelected[$randomKey])) {
+                $previouslySelected[$randomKey] = true;
+                return $this->randomArenaRecursive($previouslySelected);
+            }
+            if(count($this->openArenas) > count($previouslySelected)) {
+                return $this->randomArenaRecursive($previouslySelected);
+            }
+            return null;
+        }
+
+        return $arena;
     }
 
     /**
@@ -197,7 +235,6 @@ class ArenaManager extends PracticeArenaManager
      */
     public function getArenaEditorMenu(): ?IPracticeForm
     {
-        // TODO: Implement getArenaEditorMenu() method.
-        return null;
+        return InternalForm::getForm(BasicDuelInternalFormIDs::BASIC_DUEL_ARENA_MENU);
     }
 }

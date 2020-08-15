@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\bd\arenas;
 
 
+use jkorn\bd\BasicDuelsManager;
 use jkorn\practice\arenas\PracticeArena;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\level\PositionArea;
@@ -13,6 +14,7 @@ use jkorn\practice\PracticeCore;
 use jkorn\practice\PracticeUtil;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
+use pocketmine\Server;
 
 class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
 {
@@ -25,6 +27,9 @@ class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
     /** @var array */
     private $arenaKits = [];
 
+    /** @var bool */
+    private $visible;
+
     /**
      * PreGeneratedDuelArena constructor.
      * @param string $name
@@ -33,16 +38,18 @@ class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
      * @param Vector3 $secondPosition
      * @param Level $level
      * @param PositionArea $area
+     * @param bool $visible
      *
      * The constructor of the arena.
      */
-    public function __construct(string $name, $kits, Vector3 $firstPosition, Vector3 $secondPosition, Level $level, PositionArea $area)
+    public function __construct(string $name, $kits, Vector3 $firstPosition, Vector3 $secondPosition, Level $level, PositionArea $area, bool $visible)
     {
         parent::__construct($name, $level);
 
         $this->arenaArea = $area;
         $this->p1Position = $firstPosition;
         $this->p2Position = $secondPosition;
+        $this->visible = $visible;
 
         // Initializes the kits and adds them to the valid kits list.
         if(is_array($kits))
@@ -56,6 +63,26 @@ class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
                 }
             }
         }
+    }
+
+    /**
+     * @return bool
+     *
+     * Determines if the arena is visible.
+     */
+    public function isVisible(): bool
+    {
+        return $this->visible && count($this->arenaKits) > 0;
+    }
+
+    /**
+     * @param bool $visible
+     *
+     * Sets the arena visibility.
+     */
+    public function setVisible(bool $visible): void
+    {
+        $this->visible = $visible;
     }
 
     /**
@@ -182,8 +209,9 @@ class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
             "area" => $this->arenaArea->export(),
             "kits" => array_values($this->arenaKits),
             "level" => $this->level->getName(),
-            "p1Position" => PracticeUtil::arrToVec3($this->p1Position),
-            "p2Position" => PracticeUtil::arrToVec3($this->p2Position)
+            "visible" => $this->visible,
+            "p1Position" => PracticeUtil::vec3ToArr($this->p1Position),
+            "p2Position" => PracticeUtil::vec3ToArr($this->p2Position)
         ];
     }
 
@@ -194,9 +222,42 @@ class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
      *
      * Decodes the arena from the provided data & arena.
      */
-    public static function decode(string $arenaName, array $data): ?PreGeneratedDuelArena
+    public static function decode(string $arenaName, $data): ?PreGeneratedDuelArena
     {
-        // TODO: Decode the information from the data.
+        $server = Server::getInstance();
+
+        if(is_array($data) && isset($data["area"], $data["kits"], $data["level"], $data["visible"], $data["p1Position"], $data["p2Position"]))
+        {
+            $loaded = true;
+            if(!$server->isLevelLoaded($data["level"]))
+            {
+                $loaded = $server->loadLevel($data["level"]);
+            }
+
+            // Checks if the level is loaded or not.
+            if(!$loaded)
+            {
+                return null;
+            }
+
+            $level = $server->getLevelByName($data["level"]);
+            $p1Position = PracticeUtil::arrToVec3($data["p1Position"]);
+            $p2Position = PracticeUtil::arrToVec3($data["p2Position"]);
+
+            if($level !== null && $p1Position !== null && $p2Position !== null)
+            {
+                return new PreGeneratedDuelArena(
+                    $arenaName,
+                    $data["kits"],
+                    $p1Position,
+                    $p2Position,
+                    $level,
+                    PositionArea::decode($data["area"]),
+                    (bool)$data["visible"]
+                );
+            }
+        }
+
         return null;
     }
 }

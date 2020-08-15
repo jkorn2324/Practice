@@ -35,21 +35,7 @@ class FFAFormManager extends AbstractFormDisplayManager
     {
         $this->core = $core;
 
-        $this->registerInternalForms();
-
         parent::__construct($core->getResourcesFolder() . "forms/", $core->getDataFolder() . "forms/");
-    }
-
-    /**
-     * Registers the internal forms.
-     */
-    private function registerInternalForms(): void
-    {
-        InternalForm::registerForm(new FFAArenaSelector(), true);
-        InternalForm::registerForm(new FFAArenaMenu(), true);
-        InternalForm::registerForm(new EditFFAArena(), true);
-        InternalForm::registerForm(new CreateFFAArena(), true);
-        InternalForm::registerForm(new DeleteFFAArena(), true);
     }
 
     /**
@@ -60,5 +46,17 @@ class FFAFormManager extends AbstractFormDisplayManager
     public function getLocalizedName(): string
     {
         return self::LOCALIZED_NAME;
+    }
+
+    /**
+     * Initializes the internal forms to the display manager.
+     */
+    protected function initInternalForms(): void
+    {
+        InternalForm::registerForm(new FFAArenaSelector(), true);
+        InternalForm::registerForm(new FFAArenaMenu(), true);
+        InternalForm::registerForm(new EditFFAArena(), true);
+        InternalForm::registerForm(new CreateFFAArena(), true);
+        InternalForm::registerForm(new DeleteFFAArena(), true);
     }
 }

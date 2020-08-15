@@ -114,16 +114,16 @@ class PositionArea implements ISaved, IArea
     }
 
     /**
-     * @param array $data - The area data.
+     * @param $data - The area data.
      * @return PositionArea
      *
      * Decodes the position area.
      */
-    public static function decode(array $data)
+    public static function decode($data)
     {
         $area = new PositionArea();
 
-        if(isset($data["vertex1"], $data["vertex2"]))
+        if(is_array($data) && isset($data["vertex1"], $data["vertex2"]))
         {
             $vertex1 = PracticeUtil::arrToVec3($data["vertex1"]);
             $vertex2 = PracticeUtil::arrToVec3($data["vertex2"]);

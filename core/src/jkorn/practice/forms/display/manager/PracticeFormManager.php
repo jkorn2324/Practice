@@ -103,4 +103,11 @@ class PracticeFormManager extends AbstractFormDisplayManager
     {
         return self::NAME;
     }
+
+    /**
+     * Initializes the internal forms to the display manager,
+     * no need to use here as the default internal forms are already
+     * registered.
+     */
+    protected function initInternalForms(): void {}
 }

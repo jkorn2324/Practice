@@ -6,8 +6,12 @@ namespace jkorn\bd\forms;
 
 
 use jkorn\bd\BasicDuels;
-use jkorn\practice\forms\display\FormDisplay;
+use jkorn\bd\forms\internal\BasicDuelArenaMenu;
+use jkorn\bd\forms\internal\BasicDuelArenaSelector;
+use jkorn\bd\forms\internal\edit\EditBasicDuelArenaMenu;
+use jkorn\bd\forms\internal\edit\EditBasicDuelArenaVisibility;
 use jkorn\practice\forms\display\manager\AbstractFormDisplayManager;
+use jkorn\practice\forms\internal\InternalForm;
 
 
 class BasicDuelsFormManager extends AbstractFormDisplayManager
@@ -37,5 +41,16 @@ class BasicDuelsFormManager extends AbstractFormDisplayManager
     public function getLocalizedName(): string
     {
         return self::NAME;
+    }
+
+    /**
+     * Initializes the internal forms to the display manager.
+     */
+    protected function initInternalForms(): void
+    {
+        InternalForm::registerForm(new BasicDuelArenaMenu(), true);
+        InternalForm::registerForm(new BasicDuelArenaSelector(), true);
+        InternalForm::registerForm(new EditBasicDuelArenaMenu(), true);
+        InternalForm::registerForm(new EditBasicDuelArenaVisibility(), true);
     }
 }
