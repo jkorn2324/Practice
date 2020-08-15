@@ -10,6 +10,7 @@ use jkorn\practice\misc\ISaved;
 class ButtonTexture implements ISaved
 {
 
+    const TYPE_NONE = -1;
     const TYPE_PATH = 0;
     const TYPE_URL = 1;
 
@@ -26,6 +27,21 @@ class ButtonTexture implements ISaved
     }
 
     /**
+     * @param string $path
+     *
+     * Sets the path of the button.
+     */
+    public function setPath(string $path): void
+    {
+        if($path === $this->path)
+        {
+            return;
+        }
+
+        $this->path = (string)$path;
+    }
+
+    /**
      * @return string
      *
      * Gets the texture path.
@@ -33,6 +49,21 @@ class ButtonTexture implements ISaved
     public function getPath(): string
     {
         return $this->path;
+    }
+
+    /**
+     * @param $imageType
+     *
+     * Sets the image type of the button texture.
+     */
+    public function setImageType($imageType): void
+    {
+        if($this->imageType === (int)$imageType)
+        {
+            return;
+        }
+
+        $this->imageType = (int)$imageType;
     }
 
     /**
@@ -50,7 +81,7 @@ class ButtonTexture implements ISaved
      *
      * Determines if the button texture information is valid.
      */
-    private function validate(): bool
+    public function validate(): bool
     {
         return ($this->imageType === 0 || $this->imageType === 1) && $this->imageType !== "";
     }

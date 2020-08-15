@@ -56,4 +56,11 @@ interface IKit
      * Gets the button texture for the kit.
      */
     public function getFormButtonTexture(): ?ButtonTexture;
+
+    /**
+     * @param ButtonTexture $texture
+     *
+     * Sets the form texture of the kit.
+     */
+    public function setFormButtonTexture(ButtonTexture $texture): void;
 }

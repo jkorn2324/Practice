@@ -197,6 +197,17 @@ class SavedKit implements ISaved, IKit
         return $this->buttonTexture;
     }
 
+
+    /**
+     * @param ButtonTexture $texture
+     *
+     * Sets the form texture of the kit.
+     */
+    public function setFormButtonTexture(ButtonTexture $texture): void
+    {
+        $this->buttonTexture = $texture;
+    }
+
     /**
      * @param string $name
      * @param $data

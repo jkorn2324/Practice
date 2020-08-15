@@ -8,6 +8,7 @@ namespace jkorn\practice\forms\internal;
 use jkorn\practice\forms\internal\types\arenas\ArenaMenu;
 use jkorn\practice\forms\internal\types\kits\CreateKitForm;
 use jkorn\practice\forms\internal\types\kits\DeleteKitForm;
+use jkorn\practice\forms\internal\types\kits\edit\EditKitIcon;
 use jkorn\practice\forms\internal\types\kits\edit\EditKitItems;
 use jkorn\practice\forms\internal\types\kits\edit\EditKitKnockback;
 use jkorn\practice\forms\internal\types\kits\edit\EditKitMenu;
@@ -48,6 +49,7 @@ abstract class InternalForm implements IPracticeForm, IInternalFormIDs
         self::registerForm(new RemoveKitEffect());
         self::registerForm(new AddKitEffect());
         self::registerForm(new EditKitEffect());
+        self::registerForm(new EditKitIcon());
         self::registerForm(new ArenaMenu());
 
         self::$initialized = true;
