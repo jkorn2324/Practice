@@ -6,15 +6,15 @@ namespace jkorn\practice\player;
 
 
 use jkorn\practice\display\DisplayStatisticNames;
+use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\games\misc\gametypes\IGame;
 use jkorn\practice\games\misc\managers\awaiting\IAwaitingManager;
-use jkorn\practice\games\misc\managers\IAwaitingGameManager;
 use jkorn\practice\games\misc\gametypes\ISpectatorGame;
-use jkorn\practice\games\misc\managers\IGameManager;
-use jkorn\practice\games\misc\managers\ISpectatingGameManager;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\messages\IPracticeMessages;
 use jkorn\practice\messages\managers\PracticeMessageManager;
+use jkorn\practice\player\misc\FormURLImageHandler;
+use jkorn\practice\player\misc\PracticePlayerSessionAdapter;
 use pocketmine\entity\Attribute;
 use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
@@ -26,6 +26,8 @@ use pocketmine\level\Position;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
+use pocketmine\network\mcpe\protocol\ModalFormRequestPacket;
+use pocketmine\network\mcpe\protocol\NetworkStackLatencyPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\SourceInterface;
 use pocketmine\Player;
@@ -76,6 +78,8 @@ class PracticePlayer extends Player implements IPracticeMessages
     protected $statsInfo;
     /** @var CombatInfo|null */
     protected $combatInfo = null;
+    /** @var FormURLImageHandler */
+    private $urlImageHandler;
 
     /** @var IKit|null */
     private $equippedKit = null;
@@ -88,6 +92,7 @@ class PracticePlayer extends Player implements IPracticeMessages
     /** @var bool */
     private $fakeSpectating = false;
 
+
     /**
      * PracticePlayer constructor.
      * @param SourceInterface $interface
@@ -99,6 +104,9 @@ class PracticePlayer extends Player implements IPracticeMessages
     public function __construct(SourceInterface $interface, string $ip, int $port)
     {
         parent::__construct($interface, $ip, $port);
+
+        // Change the session adapter so we can track when we get network stack latency.
+        $this->sessionAdapter = new PracticePlayerSessionAdapter($this->server, $this);
         $this->serverUUID = UUID::fromRandom();
 
         $this->initializeSettings();
@@ -113,6 +121,20 @@ class PracticePlayer extends Player implements IPracticeMessages
         $this->actionInfo = new ActionsInfo();
         $this->clicksInfo = new ClicksInfo();
         $this->statsInfo = new StatsInfo();
+        $this->urlImageHandler = new FormURLImageHandler($this);
+    }
+
+    /**
+     * @param NetworkStackLatencyPacket $packet
+     * @return bool
+     *
+     * Called when the player handles network stack latency.
+     */
+    public function handleNetworkStackLatency(NetworkStackLatencyPacket $packet): bool
+    {
+        $timeStamp = $packet->timestamp;
+        $this->urlImageHandler->onReceive($timeStamp);
+        return true;
     }
 
     /**
@@ -380,6 +402,8 @@ class PracticePlayer extends Player implements IPracticeMessages
                 $this->combatInfo->update();
             }
         }
+
+        $this->urlImageHandler->update();
     }
 
     /**
@@ -462,6 +486,14 @@ class PracticePlayer extends Player implements IPracticeMessages
         }
 
         return $this->combatInfo;
+    }
+
+    /**
+     * @return FormURLImageHandler
+     */
+    public function getFormURLImageHandler(): FormURLImageHandler
+    {
+        return $this->urlImageHandler;
     }
 
     /**
@@ -911,8 +943,10 @@ class PracticePlayer extends Player implements IPracticeMessages
         }
 
         $this->lookingAtForm = true;
+
         parent::sendForm($form);
     }
+
 
     /**
      * @param int $formId
@@ -945,5 +979,30 @@ class PracticePlayer extends Player implements IPracticeMessages
         {
             $this->teleport($position);
         }
+    }
+
+    /**
+     * @param DataPacket $packet
+     * @param bool $needACK
+     * @param bool $immediate
+     * @return bool|int
+     *
+     * Called when the data packet is sent.
+     */
+    public function sendDataPacket(DataPacket $packet, bool $needACK = false, bool $immediate = false)
+    {
+        if($result = parent::sendDataPacket($packet, $needACK, $immediate))
+        {
+            if($packet instanceof ModalFormRequestPacket)
+            {
+                $form = $this->forms[$packet->formId];
+                if($form instanceof SimpleForm)
+                {
+                    // TODO: If it doesn't work, do a scheduled delayed task.
+                    $this->urlImageHandler->onSend();
+                }
+            }
+        }
+        return $result;
     }
 }
