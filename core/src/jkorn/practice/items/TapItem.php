@@ -79,7 +79,7 @@ class TapItem
         }
         elseif ($item instanceof Item)
         {
-            if(!$this->includeMeta) {
+            if($this->includeMeta) {
                 return $item->getId() === $this->item->getId();
             }
 

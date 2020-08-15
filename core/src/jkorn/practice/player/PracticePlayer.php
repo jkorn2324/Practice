@@ -1030,11 +1030,11 @@ class PracticePlayer extends Player implements IPracticeMessages
         }
 
         if(!$this->isCreative()) {
-            if(!$item->isNull()) {
-                $item->pop();
-            } else {
+
+            if($item->isNull()) {
                 $item = Item::get(Item::AIR);
             }
+
             $this->getInventory()->setItemInHand($item);
         }
 
