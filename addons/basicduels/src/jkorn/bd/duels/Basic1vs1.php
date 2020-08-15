@@ -10,6 +10,7 @@ use jkorn\bd\arenas\ArenaManager;
 use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\arenas\PreGeneratedDuelArena;
 use jkorn\bd\BasicDuelsManager;
+use jkorn\bd\BasicDuelsUtils;
 use jkorn\bd\duels\types\BasicDuelGameInfo;
 use jkorn\bd\messages\BasicDuelsMessageManager;
 use jkorn\bd\messages\BasicDuelsMessages;
@@ -541,6 +542,38 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
     public function getSpectatorCount(): int
     {
         return count($this->spectators);
+    }
+
+    /**
+     * @return bool
+     *
+     * Determines if your duel is visible to spectators, based
+     * on the player's setting.
+     */
+    public function isVisibleToSpectators(): bool
+    {
+        $player1Settings = $this->player1->getPlayer()->getSettingsInfo();
+        $player2Settings = $this->player2->getPlayer()->getSettingsInfo();
+
+        $player1Visibility = $player1Settings->getProperty(BasicDuelsUtils::SETTING_SPECTATE_DUELS);
+        $player2Visibility = $player2Settings->getProperty(BasicDuelsUtils::SETTING_SPECTATE_DUELS);
+
+        if($player1Visibility === null && $player2Visibility === null)
+        {
+            return true;
+        }
+
+        if($player1Visibility !== null && $player2Visibility !== null)
+        {
+            return (bool)$player1Visibility->getValue() && (bool)$player2Visibility->getValue();
+        }
+
+        if($player1Visibility !== null)
+        {
+            return (bool)$player1Visibility->getValue();
+        }
+
+        return (bool)$player2Visibility->getValue();
     }
 
     /**

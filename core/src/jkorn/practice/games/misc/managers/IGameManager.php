@@ -9,6 +9,7 @@ use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\games\misc\leaderboards\IGameLeaderboard;
 use jkorn\practice\games\misc\gametypes\IGame;
+use jkorn\practice\scoreboard\display\manager\AbstractScoreboardDisplayManager;
 use pocketmine\Player;
 
 interface IGameManager

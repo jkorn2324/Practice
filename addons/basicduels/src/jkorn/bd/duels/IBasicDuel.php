@@ -45,4 +45,11 @@ interface IBasicDuel extends ISpectatorGame
      * Gets the results of the duel.
      */
     public function getResults(): array;
+
+    /**
+     * @return bool
+     *
+     * Determines if your duel is visible to spectators.
+     */
+    public function isVisibleToSpectators(): bool;
 }

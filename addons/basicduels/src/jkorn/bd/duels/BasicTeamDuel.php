@@ -603,6 +603,37 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
     }
 
     /**
+     * @return bool
+     *
+     * Determines if the duels is visible to spectators, based on
+     * a player's setting. In this case, its based on majority rules.
+     */
+    public function isVisibleToSpectators(): bool
+    {
+        if (!$this->team1 instanceof BasicDuelTeam)
+        {
+            if($this->team2 instanceof BasicDuelTeam)
+            {
+                return $this->team2->getSpectatorVisibilityPercentage() >= 0.5;
+            }
+            return true;
+        }
+
+        if(!$this->team2 instanceof BasicDuelTeam)
+        {
+            return $this->team1->getSpectatorVisibilityPercentage() >= 0.5;
+        }
+
+        $team1VisibilityPercentage = $this->team1->getSpectatorVisibilityPercentage();
+        $team2VisibilityPercentage = $this->team2->getSpectatorVisibilityPercentage();
+
+        $averagePercentage = ($team1VisibilityPercentage + $team2VisibilityPercentage) / 2.0;
+
+        // Majority Rules
+        return $averagePercentage >= 0.5;
+    }
+
+    /**
      * @param Player $player - The player used to get the message.
      *
      * @return string

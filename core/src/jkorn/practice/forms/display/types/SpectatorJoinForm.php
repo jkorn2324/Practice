@@ -8,9 +8,11 @@ namespace jkorn\practice\forms\display\types;
 use jkorn\practice\forms\display\ButtonDisplayText;
 use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\display\FormDisplayText;
+use jkorn\practice\forms\display\manager\PracticeFormManager;
 use jkorn\practice\forms\types\SimpleForm;
 use jkorn\practice\games\misc\gametypes\ISpectatorGame;
 use jkorn\practice\player\PracticePlayer;
+use jkorn\practice\PracticeCore;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
@@ -115,7 +117,24 @@ class SpectatorJoinForm extends FormDisplay
 
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
-            // TODO: Handle result
+            if($data !== null && isset($extraData["game"]))
+            {
+                /** @var ISpectatorGame $game */
+                $game = $extraData["game"];
+
+                if($data === 0)
+                {
+                    $game->addSpectator($player, true);
+                }
+                else
+                {
+                    $form = PracticeCore::getBaseFormDisplayManager()->getForm(PracticeFormManager::FORM_SPECTATOR_SELECTION);
+                    if($form !== null)
+                    {
+                        $form->display($player);
+                    }
+                }
+            }
         });
 
         $form->setTitle($this->formData["title"]->getText($player));
@@ -125,6 +144,8 @@ class SpectatorJoinForm extends FormDisplay
 
         $form->addButton($this->formData["button.selection.join"]->getText($player, $game), 0, "textures/ui/confirm.png");
         $form->addButton($this->formData["button.selection.cancel"]->getText($player, $game), 0, "textures/ui/cancel.png");
+
+        $form->addExtraData("game", $game);
 
         $player->sendForm($form);
     }

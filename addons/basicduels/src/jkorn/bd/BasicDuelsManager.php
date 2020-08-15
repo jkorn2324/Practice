@@ -19,7 +19,6 @@ use jkorn\bd\messages\BasicDuelsMessageManager;
 use jkorn\bd\queues\BasicQueuesManager;
 use jkorn\bd\scoreboards\BasicDuelsScoreboardManager;
 use jkorn\practice\arenas\PracticeArenaManager;
-use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\games\duels\AbstractDuel;
 use jkorn\practice\games\misc\gametypes\IGame;
@@ -74,7 +73,6 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
 
         $this->initGameTypes();
 
-        // TODO: Load the arena manager.
         $this->arenaManager = new ArenaManager($core, $this);
         $this->queuesManager = new BasicQueuesManager($this);
         $this->leaderboards = new BasicDuelsLeaderboards($this);
@@ -356,16 +354,15 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
     }
 
     /**
-     * @param $manager
-     * @return bool
+     * @return PracticeArenaManager
      *
-     * Determines if one manager is equivalent to another.
+     * Gets the game's arena manager.
      */
-    public function equals($manager): bool
+    public function getArenaManager(): PracticeArenaManager
     {
-        return is_a($manager, __NAMESPACE__ . "\\" . self::class)
-            && get_class($manager) === self::class;
+        return $this->arenaManager;
     }
+
 
     /**
      * @return IAwaitingManager
@@ -375,16 +372,6 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
     public function getAwaitingManager(): IAwaitingManager
     {
         return $this->queuesManager;
-    }
-
-    /**
-     * @return PracticeArenaManager
-     *
-     * Gets the game's arena manager.
-     */
-    public function getArenaManager(): PracticeArenaManager
-    {
-        return $this->arenaManager;
     }
 
     /**
@@ -458,11 +445,11 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
 
         foreach($this->duels as $duel)
         {
-            if($duel instanceof AbstractDuel)
+            if($duel instanceof AbstractDuel && $duel instanceof IBasicDuel)
             {
                 $status = $duel->getStatus();
 
-                if($status < AbstractDuel::STATUS_ENDING)
+                if($status < AbstractDuel::STATUS_ENDING && $duel->isVisibleToSpectators())
                 {
                     $games[] = $duel;
                 }
@@ -470,5 +457,18 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
         }
 
         return $games;
+    }
+
+
+    /**
+     * @param $manager
+     * @return bool
+     *
+     * Determines if one manager is equivalent to another.
+     */
+    public function equals($manager): bool
+    {
+        return is_a($manager, __NAMESPACE__ . "\\" . self::class)
+            && get_class($manager) === self::class;
     }
 }

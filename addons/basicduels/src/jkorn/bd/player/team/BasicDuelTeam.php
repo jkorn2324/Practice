@@ -6,6 +6,7 @@ namespace jkorn\bd\player\team;
 
 
 use jkorn\bd\arenas\IDuelArena;
+use jkorn\bd\BasicDuelsUtils;
 use jkorn\bd\scoreboards\BasicDuelsScoreboardManager;
 use jkorn\practice\games\duels\teams\DuelTeam;
 use jkorn\practice\games\misc\gametypes\IGame;
@@ -227,5 +228,37 @@ class BasicDuelTeam extends DuelTeam
         }
 
         return implode(TextFormat::GRAY . ", " . TextFormat::RESET, array_values($displayPlayers)) . TextFormat::RESET;
+    }
+
+    /**
+     * @return float
+     *
+     * Gets the spectator visibility percentage.
+     */
+    public function getSpectatorVisibilityPercentage(): float
+    {
+        if(count($this->players) <= 0)
+        {
+            return 1.0;
+        }
+
+        $total = 0.0; $count = 0;
+        foreach($this->players as $player)
+        {
+            $settingsInformation = $player->getPlayer()->getSettingsInfo();
+            $viewDuels = $settingsInformation->getProperty(BasicDuelsUtils::SETTING_SPECTATE_DUELS);
+            $additivePercentage = 1.0;
+            if($viewDuels !== null)
+            {
+                $additivePercentage = (bool)$viewDuels->getValue() ? 1.0 : 0.0;
+            }
+            $total = $additivePercentage;
+            $count++;
+        }
+
+        // Sets the count of the visibility to prevent divisible by zero.
+        if($count <= 0) $count = 1.0;
+
+        return $total / floatval($count);
     }
 }

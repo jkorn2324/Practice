@@ -36,6 +36,7 @@ class BasicDuelsUtils implements BasicDuelsStatistics
 {
     // The PE Only Setting
     const SETTING_PE_ONLY = "duels.basic.pe.only";
+    const SETTING_SPECTATE_DUELS = "duels.basic.players.spectate.duel";
 
     /**
      * Initializes the generators.
@@ -816,6 +817,15 @@ class BasicDuelsUtils implements BasicDuelsStatistics
                 "disabled" => "Disable PE-Only Basic Duels"
             ], false
         );
+
+        SettingsInfo::registerSetting(
+            self::SETTING_SPECTATE_DUELS,
+            BooleanSettingProperty::class,
+            [
+                "enabled" => "Allow Other Players to Spectate Your Duels",
+                "disabled" => "Don't Allow Other Players to Spectate Your Duels"
+            ], true
+        );
     }
 
 
@@ -825,6 +835,7 @@ class BasicDuelsUtils implements BasicDuelsStatistics
     public static function unregisterPlayerSettings(): void
     {
         SettingsInfo::unregisterSetting(self::SETTING_PE_ONLY);
+        SettingsInfo::unregisterSetting(self::SETTING_SPECTATE_DUELS);
     }
 
     /**

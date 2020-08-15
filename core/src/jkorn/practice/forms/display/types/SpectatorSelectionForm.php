@@ -16,7 +16,6 @@ use pocketmine\Player;
 class SpectatorSelectionForm extends FormDisplay
 {
 
-
     /**
      * @param Player $player
      * @param mixed ...$args
@@ -35,6 +34,11 @@ class SpectatorSelectionForm extends FormDisplay
                 if(isset($games[(int)$data]))
                 {
                     $game = $games[(int)$data];
+                    $form = PracticeCore::getBaseFormDisplayManager()->getForm(PracticeFormManager::FORM_SPECTATOR_JOIN);
+                    if($form !== null)
+                    {
+                        $form->display($player, $game);
+                    }
                 }
             }
         });
