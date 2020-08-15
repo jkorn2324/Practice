@@ -81,13 +81,14 @@ class ItemManager extends AbstractManager
     /**
      * @param Item $item
      * @param callable $callback
+     * @param bool $includeMeta - Determines whether or not to include metadata as tap items. Should return true for potions.
      *
      * Registers the tap item to the item manager.
      */
-    public function registerTapItem(Item $item, callable $callback): void
+    public function registerTapItem(Item $item, callable $callback, bool $includeMeta = true): void
     {
-        $tapItem = new TapItem($item, $callback);
-        $this->tapItems[$tapItem->getLocalizedName()] = $tapItem;
+        $tapItem = new TapItem($item, $callback, $includeMeta);
+        $this->tapItems[$tapItem->getItemID()] = $tapItem;
     }
 
     /**
@@ -218,10 +219,11 @@ class ItemManager extends AbstractManager
      */
     public function getTapItem(Item $item): ?TapItem
     {
-        $localized = "{$item->getId()}:{$item->getDamage()}";
-        if(isset($this->tapItems[$localized]))
-        {
-            return $this->tapItems[$localized];
+        if(isset($this->tapItems[$item->getId()])) {
+            $tapItem = $this->tapItems[$item->getId()];
+            if ($tapItem->equalsItem($item)) {
+                return $tapItem;
+            }
         }
 
         return null;

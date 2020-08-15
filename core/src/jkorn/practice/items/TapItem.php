@@ -20,14 +20,18 @@ class TapItem
     /** @var callable */
     private $callback;
 
-    /** @var string */
-    private $localizedName;
+    /** @var int */
+    private $itemID;
 
-    public function __construct(Item $item, callable $callback)
+    /** @var bool */
+    private $includeMeta;
+
+    public function __construct(Item $item, callable $callback, bool $includeMeta)
     {
         $this->item = $item;
         $this->callback = $callback;
-        $this->localizedName = "{$item->getId()}:{$item->getDamage()}";
+        $this->includeMeta = $includeMeta;
+        $this->itemID = $item->getId();
     }
 
     /**
@@ -75,19 +79,23 @@ class TapItem
         }
         elseif ($item instanceof Item)
         {
-            return $item->getId() === $this->item->getId();
+            if(!$this->includeMeta) {
+                return $item->getId() === $this->item->getId();
+            }
+
+            return $item->getId() === $this->item->getId() && $item->getDamage() === $this->item->getDamage();
         }
 
         return false;
     }
 
     /**
-     * @return string
+     * @return int
      *
-     * Gets the item's localized name.
+     * Gets the item's unique identifier.
      */
-    public function getLocalizedName(): string
+    public function getItemID(): int
     {
-        return $this->localizedName;
+        return $this->itemID;
     }
 }
