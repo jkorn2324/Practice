@@ -53,7 +53,7 @@ class FormURLImageHandler
     public function onSend(): void
     {
         PracticeCore::getInstance()->getScheduler()->scheduleDelayedTask(
-            new ClosureTask(function(): void
+            new ClosureTask(function(int $currentTick): void
             {
                 $this->onSendDelay();
             }), 1);
@@ -64,24 +64,17 @@ class FormURLImageHandler
      */
     private function onSendDelay(): void
     {
-        try {
-
-            if(!$this->player->isOnline())
-            {
-                return;
-            }
-
-            $timeStamp = mt_rand() * 1000;
-            $packet = new NetworkStackLatencyPacket();
-            $packet->timestamp = $timeStamp;
-            $packet->needResponse = true;
-            $this->player->sendDataPacket($packet);
-            $this->callbackResponses[$timeStamp] = true;
-
-        } catch (\Exception $e)
+        if(!$this->player->isOnline())
         {
-            var_dump($e->getTraceAsString());
+            return;
         }
+
+        $timeStamp = mt_rand() * 1000;
+        $packet = new NetworkStackLatencyPacket();
+        $packet->timestamp = $timeStamp;
+        $packet->needResponse = true;
+        $this->player->sendDataPacket($packet);
+        $this->callbackResponses[$timeStamp] = true;
     }
 
     /**
@@ -101,7 +94,6 @@ class FormURLImageHandler
         }
 
         unset($this->callbackResponses[$timeStamp]);
-        var_dump("Received Packet - FORM URL");
         $this->requestFormUpdate();
         return true;
     }
@@ -145,7 +137,6 @@ class FormURLImageHandler
 
         if($this->doRequestUpdate && $this->player->isOnline())
         {
-            var_dump("Update Attributes Packet - FORM URL");
             $packet = new UpdateAttributesPacket();
             $packet->entityRuntimeId = $this->player->getId();
             $entries[] = $this->player->getAttributeMap()->getAttribute(Attribute::EXPERIENCE_LEVEL);

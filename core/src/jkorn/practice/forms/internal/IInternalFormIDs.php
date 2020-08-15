@@ -27,6 +27,7 @@ interface IInternalFormIDs
     // Edits the kit information.
     const EDIT_KIT_ITEMS = "kit.edit.items";
     const EDIT_KIT_KNOCKBACK = "kit.edit.knockback";
+    const EDIT_KIT_ICON = "kit.edit.icon";
 
     const EDIT_KIT_EFFECTS_MENU = "kit.edit.effects.menu";
     const ADD_KIT_EFFECT = "kit.add.effect";

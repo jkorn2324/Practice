@@ -58,7 +58,7 @@ form.spectator.game.selection:
 # The form that contains the text display for the
 # form that determines whether spectators should join.
 form.spectator.game.join:
-  class: jkorn\practice\forms\display\types\SpectatorSelectionForm
+  class: jkorn\practice\forms\display\types\SpectatorJoinForm
   title: "Spectate Game"
   description: "Select \"Join\" if you want to spectate the game, otherwise select \"Cancel\"."
   buttons:
