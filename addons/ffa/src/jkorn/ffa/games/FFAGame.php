@@ -134,7 +134,15 @@ class FFAGame implements IGame
         if($reason === self::REASON_DIED) {
             $addDeath = true;
         } elseif ($reason === self::REASON_LEFT_SERVER) {
-            $addDeath = $player->getCombatInfo()->isInCombat();
+
+            if($player !== null)
+            {
+                $combatInfo = $player->getCombatInfo();
+                if($combatInfo !== null)
+                {
+                    $addDeath = $combatInfo->isInCombat();
+                }
+            }
         }
 
         if($addDeath)

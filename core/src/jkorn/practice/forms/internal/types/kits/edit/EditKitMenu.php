@@ -60,6 +60,7 @@ class EditKitMenu extends InternalForm
                         $form = InternalForm::getForm(self::EDIT_KIT_EFFECTS_MENU);
                         break;
                     case 3:
+                        $form = InternalForm::getForm(self::EDIT_KIT_ICON);
                         break;
                 }
 
@@ -78,6 +79,7 @@ class EditKitMenu extends InternalForm
         $form->addButton(TextFormat::BOLD . "Edit Items", 0, "textures/ui/inventory_icon.png");
         $form->addButton(TextFormat::BOLD . "Edit Knockback", 0, "textures/ui/strength_effect.png");
         $form->addButton(TextFormat::BOLD . "Edit Effects", 0, "textures/ui/absorption_effect.png");
+        $form->addButton(TextFormat::BOLD . "Edit Icon", 0, "textures/ui/color_picker.png");
 
         $form->addExtraData("kit", $kit);
 
