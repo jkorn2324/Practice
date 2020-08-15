@@ -62,7 +62,11 @@ class ScoreboardDisplayLine implements IDisplayText
                 $maxCharacters = strlen($cleaned);
             }
         }
-        return str_repeat("-", $maxCharacters);
+
+        $outputText = str_replace("{LINE}", str_repeat("-", $maxCharacters), $this->text);
+        PracticeUtil::convertMessageColors($outputText);
+
+        return $outputText;
     }
 
     /**

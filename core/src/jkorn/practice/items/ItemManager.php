@@ -136,11 +136,24 @@ class ItemManager extends AbstractManager
             return true;
         });
 
+        // Called when the player taps on a fishing rod.
+        $this->registerTapItem(Item::get(Item::FISHING_ROD), function(Player $player, Item $item, int $action): bool {
+
+            if(!$player instanceof PracticePlayer)
+            {
+                return true;
+            }
+
+            $animate = $action = PlayerInteractEvent::LEFT_CLICK_AIR && $player->getClientInfo()->isPE();
+            $player->useRod($item, $animate);
+            return true;
+        });
+
 
         // Callable function for all armor.
         $armorCallable = function(Player $player, Item $item, int $action): bool
         {
-            if(!$player instanceof PracticePlayer || !$player->isInGame())
+            if(!$player instanceof PracticePlayer)
             {
                 return true;
             }

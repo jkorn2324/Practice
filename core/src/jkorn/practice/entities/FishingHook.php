@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace jkorn\practice\entities;
 
 
+use jkorn\practice\player\PracticePlayer;
 use pocketmine\entity\Entity;
 use pocketmine\entity\projectile\Projectile;
 use pocketmine\event\entity\EntityCombustByEntityEvent;
@@ -101,11 +102,9 @@ class FishingHook extends Projectile
                 $this->kill();
                 $this->close();
 
-                /* if($player instanceof INetworkPlayer && $player->isFishing()) {
+                if($player instanceof PracticePlayer && $player->isFishing()) {
                     $player->stopFishing();
-                } */
-
-                // TODO: Force player to stop fishing.
+                }
             }
         }
 
@@ -139,7 +138,7 @@ class FishingHook extends Projectile
     {
         $e = $this->getOwningEntity();
 
-        if($e instanceof Player and $this->caught) {
+        if($e instanceof Player && $this->caught) {
             $this->broadcastEntityEvent(ActorEventPacket::FISH_HOOK_TEASE, 0, $this->getLevel()->getPlayers());
         }
 

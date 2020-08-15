@@ -125,7 +125,7 @@ class ScoreboardData
             do {
                 // Gets a random color.
                 $color = TeamColor::random()->getTextColor();
-            } while ($previousColor !== $color);
+            } while ($previousColor === $color);
             $previousColor = $color;
             $lineText = $previousColor . TextFormat::RESET . $line->getTextForLine(...$linesTextInput);
             $this->scoreboard->addLine($index, $lineText);

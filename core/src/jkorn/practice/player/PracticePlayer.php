@@ -1011,6 +1011,100 @@ class PracticePlayer extends Player implements IPracticeMessages
     }
 
     /**
+     * @param ProjectileItem $item - The projectile item that the player uses.
+     * @param bool $animate - Called to animate the player.
+     * @return bool
+     *
+     * Called to force a player to throw a projectile.
+     */
+    public function throwProjectile(ProjectileItem $item, bool $animate): bool
+    {
+        if(!$this->spawned || !$this->isAlive() || $this->isSpectator() || $this->isFakeSpectating())
+        {
+            return true;
+        }
+
+        $item->onClickAir($this, $this->getDirectionVector());
+        if($animate) {
+            $this->sendAnimation(AnimatePacket::ACTION_SWING_ARM);
+        }
+
+        if(!$this->isCreative()) {
+            $item->pop();
+            if($item->getCount() <= 0) {
+                $item = Item::get(Item::AIR);
+            }
+            $this->getInventory()->setItemInHand($item);
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     *
+     * Determines if the player is fishing or not.
+     */
+    public function isFishing(): bool
+    {
+        return $this->fishing !== null;
+    }
+
+    /**
+     * Forces the player to stop fishing.
+     *
+     * @param bool $click - Determines if the player has clicked.
+     * @param bool $killEntity - Determines whether to kill the fishing rod or not.
+     */
+    public function stopFishing(bool $click = true, bool $killEntity = true): void
+    {
+        if($this->fishing !== null)
+        {
+            if($click) {
+                $this->fishing->reelLine();
+            } elseif (!$this->fishing->isClosed() && $killEntity) {
+                $this->fishing->kill();
+                $this->fishing->close();
+            }
+        }
+        $this->fishing = null;
+    }
+
+    /**
+     * Called when the player is fishing.
+     */
+    private function startFishing(): void
+    {
+        if($this->isFishing()) {
+            return;
+        }
+
+        $tag = Entity::createBaseNBT($this->add(0.0, $this->getEyeHeight(), 0.0), $this->getDirectionVector(), (float)$this->yaw, (float)$this->pitch);
+        $rod = Entity::createEntity("FishingHook", $this->getLevelNonNull(), $tag, $this);
+
+        if($rod !== null && $rod instanceof FishingHook)
+        {
+            $x = -sin(deg2rad($this->yaw)) * cos(deg2rad($this->pitch));
+            $y = -sin(deg2rad($this->pitch));
+            $z = cos(deg2rad($this->yaw)) * cos(deg2rad($this->pitch));
+            $rod->setMotion(new Vector3($x, $y, $z));
+
+            $event = new ProjectileLaunchEvent($rod);
+            $event->call();
+
+            if($event->isCancelled())
+            {
+                $rod->flagForDespawn();
+                return;
+            }
+
+            $rod->spawnToAll();
+            $this->getLevel()->broadcastLevelSoundEvent($this, LevelSoundEventPacket::SOUND_THROW, 0, EntityIds::PLAYER);
+            $this->fishing = $rod;
+        }
+    }
+
+    /**
      * @param Item $item - The item to force a player.
      * @param bool $animate - Called to animate the player.
      * @return bool
@@ -1036,108 +1130,17 @@ class PracticePlayer extends Player implements IPracticeMessages
             if(!$this->isCreative())
             {
                 // TODO: Account for unbreaking enchantments.
-                $newItem = Item::get($item->getId(), $item->getDamage() + 1);
-                if($newItem->getDamage() < 65)
+                $item->setDamage($item->getDamage() + 1);
+                if($item->getDamage() > 65)
                 {
-                    $newItem = Item::get(Item::AIR);
+                    $item = Item::get(Item::AIR);
                 }
-                $this->getInventory()->setItemInHand($newItem);
+                $this->getInventory()->setItemInHand($item);
             }
             return true;
         }
 
         $this->startFishing();
         return true;
-    }
-
-    /**
-     * @param ProjectileItem $item - The projectile item that the player uses.
-     * @param bool $animate - Called to animate the player.
-     * @return bool
-     *
-     * Called to force a player to throw a projectile.
-     */
-    public function throwProjectile(ProjectileItem $item, bool $animate): bool
-    {
-        if(!$this->spawned || !$this->isAlive() || $this->isSpectator() || $this->isFakeSpectating())
-        {
-            return true;
-        }
-
-        $item->onClickAir($this, $this->getDirectionVector());
-        if($animate) {
-            $this->sendAnimation(AnimatePacket::ACTION_SWING_ARM);
-        }
-
-        if(!$this->isCreative()) {
-            if($item->getCount() > 0) {
-                $outputItem = $item->pop();
-            } else {
-                $outputItem = Item::get(Item::AIR);
-            }
-            $this->getInventory()->setItemInHand($outputItem);
-        }
-
-        return true;
-    }
-
-    /**
-     * @return bool
-     *
-     * Determines if the player is fishing or not.
-     */
-    public function isFishing(): bool
-    {
-        return $this->fishing !== null;
-    }
-
-    /**
-     * Forces the player to stop fishing.
-     *
-     * @param bool $click - Determines if the player has clicked.
-     * @param bool $killEntity - Determines whether to kill the fishing rod or not.
-     */
-    public function stopFishing(bool $click = true, bool $killEntity = true): void
-    {
-        if($this->fishing instanceof FishingHook)
-        {
-            if($click) {
-                $this->fishing->reelLine();
-            } elseif (!$this->fishing->isClosed() && $killEntity) {
-                $this->fishing->kill();
-                $this->fishing->close();
-            }
-        }
-        $this->fishing = null;
-    }
-
-    /**
-     * Called when the player is fishing.
-     */
-    private function startFishing(): void
-    {
-        $tag = Entity::createBaseNBT($this->add(0.0, $this->getEyeHeight(), 0.0), $this->getDirectionVector(), (float)$this->yaw, (float)$this->pitch);
-        $rod = Entity::createEntity("FishingHook", $this->getLevelNonNull(), $tag, $this);
-
-        if($rod instanceof FishingHook)
-        {
-            $x = -sin(deg2rad($this->yaw)) * cos(deg2rad($this->pitch));
-            $y = -sin(deg2rad($this->pitch));
-            $z = cos(deg2rad($this->yaw)) * cos(deg2rad($this->pitch));
-            $rod->setMotion(new Vector3($x, $y, $z));
-
-            $event = new ProjectileLaunchEvent($rod);
-            $event->call();
-
-            if($event->isCancelled())
-            {
-                $rod->flagForDespawn();
-                return;
-            }
-
-            $rod->spawnToAll();
-            $this->getLevel()->broadcastLevelSoundEvent($this, LevelSoundEventPacket::SOUND_THROW, 0, EntityIds::PLAYER);
-            $this->fishing = $rod;
-        }
     }
 }
