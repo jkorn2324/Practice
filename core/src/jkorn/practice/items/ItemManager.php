@@ -5,7 +5,16 @@ declare(strict_types=1);
 namespace jkorn\practice\items;
 
 
+use jkorn\practice\player\PracticePlayer;
+use jkorn\practice\PracticeUtil;
+use pocketmine\event\player\PlayerInteractEvent;
+use pocketmine\item\Armor;
+use pocketmine\item\EnderPearl;
 use pocketmine\item\Item;
+use pocketmine\item\Potion;
+use pocketmine\item\Snowball;
+use pocketmine\item\SplashPotion;
+use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 use jkorn\practice\forms\display\manager\PracticeFormManager;
@@ -22,6 +31,9 @@ class ItemManager extends AbstractManager
     /** @var array|PracticeItem[] */
     private $items;
 
+    /** @var array|TapItem[] */
+    private $tapItems;
+
     /** @var string */
     private $resourcesFolder, $itemFolder;
 
@@ -31,6 +43,7 @@ class ItemManager extends AbstractManager
         $this->itemFolder = $core->getDataFolder() . "items";
 
         $this->items = [];
+        $this->tapItems = [];
 
         parent::__construct(false);
     }
@@ -60,7 +73,145 @@ class ItemManager extends AbstractManager
             fclose($file);
         }
 
+        $this->initDefaultTapItems();
+
         $this->loadItems($inputFile);
+    }
+
+    /**
+     * @param Item $item
+     * @param callable $callback
+     *
+     * Registers the tap item to the item manager.
+     */
+    public function registerTapItem(Item $item, callable $callback): void
+    {
+        $tapItem = new TapItem($item, $callback);
+        $this->tapItems[$tapItem->getLocalizedName()] = $tapItem;
+    }
+
+    /**
+     * Initializes the default tap items.
+     */
+    private function initDefaultTapItems(): void
+    {
+        // Called when the player taps the enderpearl.
+        $this->registerTapItem(Item::get(Item::ENDER_PEARL), function(Player $player, Item $item, int $action): bool
+        {
+            // TODO: Enderpearl cooldown.
+            if(!$player instanceof PracticePlayer || !$item instanceof EnderPearl)
+            {
+                return false;
+            }
+
+            $animate = $action === PlayerInteractEvent::LEFT_CLICK_AIR && $player->getClientInfo()->isPE();
+            $player->throwProjectile($item, $animate);
+            return true;
+        });
+
+
+        // Called when the player taps the item with a potion.
+        $this->registerTapItem(Item::get(Item::SPLASH_POTION), function(Player $player, Item $item, int $action): bool
+        {
+            if(!$player instanceof PracticePlayer || !$item instanceof SplashPotion)
+            {
+                return false;
+            }
+
+            $animate = $action === PlayerInteractEvent::LEFT_CLICK_AIR && $player->getClientInfo()->isPE();
+            $player->throwProjectile($item, $animate);
+            return true;
+        });
+
+        // Called when the player taps the item with a snowball.
+        $this->registerTapItem(Item::get(Item::SNOWBALL), function(Player $player, Item $item, int $action): bool
+        {
+            if(!$player instanceof PracticePlayer || !$item instanceof Snowball)
+            {
+                return false;
+            }
+
+            $animate = $action === PlayerInteractEvent::LEFT_CLICK_AIR && $player->getClientInfo()->isPE();
+            $player->throwProjectile($item, $animate);
+            return true;
+        });
+
+
+        // Callable function for all armor.
+        $armorCallable = function(Player $player, Item $item, int $action): bool
+        {
+            if(!$player instanceof PracticePlayer || !$player->isInGame())
+            {
+                return false;
+            }
+
+            if(!$item instanceof Armor)
+            {
+                return false;
+            }
+
+            $animate = $action === PlayerInteractEvent::LEFT_CLICK_AIR && $player->getClientInfo()->isPE();
+            $slot = PracticeUtil::getArmorSlotFromItem($item);
+            if($slot !== -1 && ($armorInventory = $player->getArmorInventory())->getItem($slot)->isNull()) {
+                $armorInventory->setItem($slot, $item);
+                if(!$player->isCreative()) {
+                    $player->getInventory()->setItemInHand(Item::get(Item::AIR));
+                }
+
+                if($animate) {
+                    $player->sendAnimation(AnimatePacket::ACTION_SWING_ARM);
+                }
+            }
+
+            return true;
+        };
+
+        // Registers the diamond armor tap items.
+        $this->registerTapItem(Item::get(Item::DIAMOND_HELMET), $armorCallable);
+        $this->registerTapItem(Item::get(Item::DIAMOND_CHESTPLATE), $armorCallable);
+        $this->registerTapItem(Item::get(Item::DIAMOND_LEGGINGS), $armorCallable);
+        $this->registerTapItem(Item::get(Item::DIAMOND_BOOTS), $armorCallable);
+
+        // Registers the golden armor tap items.
+        $this->registerTapItem(Item::get(Item::GOLD_HELMET), $armorCallable);
+        $this->registerTapItem(Item::get(Item::GOLD_CHESTPLATE), $armorCallable);
+        $this->registerTapItem(Item::get(Item::GOLD_LEGGINGS), $armorCallable);
+        $this->registerTapItem(Item::get(Item::GOLD_BOOTS), $armorCallable);
+
+        // Registers the iron armor tap items.
+        $this->registerTapItem(Item::get(Item::IRON_HELMET), $armorCallable);
+        $this->registerTapItem(Item::get(Item::IRON_CHESTPLATE), $armorCallable);
+        $this->registerTapItem(Item::get(Item::IRON_LEGGINGS), $armorCallable);
+        $this->registerTapItem(Item::get(Item::IRON_BOOTS), $armorCallable);
+
+        // Registers the chain armor tap items.
+        $this->registerTapItem(Item::get(Item::CHAIN_HELMET), $armorCallable);
+        $this->registerTapItem(Item::get(Item::CHAIN_CHESTPLATE), $armorCallable);
+        $this->registerTapItem(Item::get(Item::CHAIN_LEGGINGS), $armorCallable);
+        $this->registerTapItem(Item::get(Item::CHAIN_BOOTS), $armorCallable);
+
+        // Registers the leather armor tap items.
+        $this->registerTapItem(Item::get(Item::LEATHER_HELMET), $armorCallable);
+        $this->registerTapItem(Item::get(Item::LEATHER_CHESTPLATE), $armorCallable);
+        $this->registerTapItem(Item::get(Item::LEATHER_LEGGINGS), $armorCallable);
+        $this->registerTapItem(Item::get(Item::LEATHER_BOOTS), $armorCallable);
+    }
+
+    /**
+     * @param Item $item
+     * @return TapItem|null
+     *
+     * Gets the tap item from the
+     */
+    public function getTapItem(Item $item): ?TapItem
+    {
+        $localized = "{$item->getId()}:{$item->getDamage()}";
+        if(isset($this->tapItems[$localized]))
+        {
+            return $this->tapItems[$localized];
+        }
+
+        return null;
     }
 
     /**

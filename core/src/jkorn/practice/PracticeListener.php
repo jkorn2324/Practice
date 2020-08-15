@@ -6,6 +6,7 @@ namespace jkorn\practice;
 
 
 use jkorn\practice\games\misc\gametypes\IGame;
+use jkorn\practice\items\TapItem;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerCreationEvent;
@@ -98,9 +99,26 @@ class PracticeListener implements Listener
             ) {
                 $event->setCancelled($actionItem->execute($player));
             }
-            else
+            // Called when the player used a tap item.
+            elseif (
+                ($tapItem = PracticeCore::getItemManager()->getTapItem($item)) !== null
+                && $tapItem instanceof TapItem
+            )
             {
-                // TODO: Tap items.
+                // Called to determine if the item is used.
+                $useItem = $action === PlayerInteractEvent::RIGHT_CLICK_AIR || $action === PlayerInteractEvent::RIGHT_CLICK_BLOCK;
+                if($useItem && !$player->getClientInfo()->isPE())
+                {
+                    $useItem = $action !== PlayerInteractEvent::RIGHT_CLICK_BLOCK;
+                }
+
+                if($useItem)
+                {
+                    $event->setCancelled(!$tapItem->onItemUse($player, $item, $action));
+                    return;
+                }
+
+                $event->setCancelled();
             }
         }
     }

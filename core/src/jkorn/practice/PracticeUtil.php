@@ -9,6 +9,7 @@ use jkorn\practice\commands\PracticeCommand;
 use jkorn\practice\level\gen\PracticeChunkLoader;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
+use pocketmine\item\Armor;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\enchantment\EnchantmentInstance;
 use pocketmine\item\Item;
@@ -614,5 +615,43 @@ class PracticeUtil
                 $viewer->batchDataPacket($packet);
             }
         }
+    }
+
+    /**
+     * @param Armor $armor - The armor input.
+     * @return int
+     *
+     * Gets the armor slot from the corresponding item.
+     */
+    public static function getArmorSlotFromItem(Armor $armor): int
+    {
+        switch($armor->getId())
+        {
+            case Item::CHAIN_HELMET:
+            case Item::DIAMOND_HELMET:
+            case Item::GOLD_HELMET:
+            case Item::IRON_HELMET:
+            case Item::LEATHER_HELMET:
+                return 0;
+            case Item::CHAIN_CHESTPLATE:
+            case Item::DIAMOND_CHESTPLATE:
+            case Item::GOLD_CHESTPLATE:
+            case Item::LEATHER_CHESTPLATE:
+            case Item::IRON_CHESTPLATE:
+                return 1;
+            case Item::CHAIN_LEGGINGS:
+            case Item::DIAMOND_LEGGINGS:
+            case Item::GOLD_LEGGINGS:
+            case Item::IRON_LEGGINGS:
+            case Item::LEATHER_LEGGINGS:
+                return 2;
+            case Item::CHAIN_BOOTS:
+            case Item::DIAMOND_BOOTS:
+            case Item::GOLD_BOOTS:
+            case Item::IRON_BOOTS:
+            case Item::LEATHER_BOOTS:
+                return 3;
+        }
+        return -1;
     }
 }
