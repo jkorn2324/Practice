@@ -34,7 +34,15 @@ class EditBasicDuelArenaVisibility extends BasicDuelInternalForm
 
         $form = new SimpleForm(function(Player $player, $data, $extraData)
         {
-            // TODO
+            if($data !== null && isset($extraData["arena"]))
+            {
+                /** @var PreGeneratedDuelArena $arena */
+                $arena = $extraData["arena"];
+                $visible = $data === 0 ? true : false;
+                $arena->setVisible($visible);
+
+                // TODO: Send message.
+            }
         });
 
         $form->setTitle(TextFormat::BOLD . "Edit Arena Visibility");
@@ -52,6 +60,8 @@ class EditBasicDuelArenaVisibility extends BasicDuelInternalForm
 
         $form->addButton(TextFormat::BOLD . "Open", 0, "textures/ui/confirm.png");
         $form->addButton(TextFormat::BOLD . "Close", 0, "textures/ui/cancel.png");
+
+        $form->addButton("arena", $arena);
 
         $player->sendForm($form);
     }
@@ -75,7 +85,6 @@ class EditBasicDuelArenaVisibility extends BasicDuelInternalForm
      */
     public function getLocalizedName(): string
     {
-        // TODO: Implement getLocalizedName() method.
         return self::EDIT_BASIC_DUEL_ARENA_VISIBILITY;
     }
 }

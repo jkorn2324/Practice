@@ -28,6 +28,7 @@ use jkorn\practice\games\misc\managers\awaiting\IAwaitingManager;
 use jkorn\practice\games\misc\leaderboards\IGameLeaderboard;
 use jkorn\practice\games\misc\managers\ISpectatingGameManager;
 use jkorn\practice\games\misc\managers\IUpdatedGameManager;
+use jkorn\practice\items\PracticeItemManager;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\level\gen\PracticeGeneratorInfo;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
@@ -363,6 +364,16 @@ class BasicDuelsManager implements IAwaitingGameManager, ISpectatingGameManager,
         return $this->arenaManager;
     }
 
+    /**
+     * @return PracticeItemManager|null
+     *
+     * Gets the basic duels item manager.
+     */
+    public function getItemManager(): ?PracticeItemManager
+    {
+        // TODO: Implement item manager so we can load queues.
+        return null;
+    }
 
     /**
      * @return IAwaitingManager

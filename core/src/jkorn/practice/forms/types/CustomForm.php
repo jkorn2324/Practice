@@ -19,7 +19,7 @@ class CustomForm extends Form
     /**
      * @param callable $callable
      */
-    public function __construct(?callable $callable)
+    public function __construct(?callable $callable = null)
     {
         parent::__construct($callable);
         $this->data["type"] = "custom_form";

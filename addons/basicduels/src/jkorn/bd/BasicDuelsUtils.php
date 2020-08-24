@@ -856,6 +856,14 @@ class BasicDuelsUtils implements BasicDuelsStatistics
             IntegerStatProperty::class,
             true
         ));
+
+        // The player's win streak.
+        StatsInfo::registerStatistic(new StatPropertyInfo(
+            self::STATISTIC_DUELS_PLAYER_WIN_STREAK,
+            IntegerStatProperty::class,
+            false,
+            0
+        ));
     }
 
     /**
@@ -865,5 +873,6 @@ class BasicDuelsUtils implements BasicDuelsStatistics
     {
         StatsInfo::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_WINS);
         StatsInfo::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_LOSSES);
+        StatsInfo::unregisterStatistic(self::STATISTIC_DUELS_PLAYER_WIN_STREAK);
     }
 }

@@ -86,6 +86,16 @@ class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
     }
 
     /**
+     * @param Vector3 $position - The new position.
+     *
+     * Sets the p1 Start position in the duel.
+     */
+    public function setP1StartPosition(Vector3 $position): void
+    {
+        $this->p1Position = $position;
+    }
+
+    /**
      * @return Vector3
      *
      * Gets the first player position.
@@ -96,6 +106,16 @@ class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
     }
 
     /**
+     * @param Vector3 $position - The new position.
+     *
+     * Sets the second player position.
+     */
+    public function setP2StartPosition(Vector3 $position): void
+    {
+        $this->p2Position = $position;
+    }
+
+    /**
      * @return Vector3
      *
      * Gets the second player position.
@@ -103,6 +123,16 @@ class PreGeneratedDuelArena extends PracticeArena implements IDuelArena, ISaved
     public function getP2StartPosition(): Vector3
     {
         return $this->p2Position;
+    }
+
+    /**
+     * @return PositionArea
+     *
+     * Gets the area that the arena covers.
+     */
+    public function getArea(): PositionArea
+    {
+        return $this->arenaArea;
     }
 
     /**

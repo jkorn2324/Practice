@@ -10,6 +10,7 @@ use jkorn\bd\arenas\ArenaManager;
 use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\arenas\PreGeneratedDuelArena;
 use jkorn\bd\BasicDuelsManager;
+use jkorn\bd\BasicDuelsStatistics;
 use jkorn\bd\duels\types\BasicDuelGameInfo;
 use jkorn\bd\messages\BasicDuelsMessageManager;
 use jkorn\bd\messages\BasicDuelsMessages;
@@ -169,6 +170,12 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
                 && $teamPlayer instanceof DuelTeamPlayer
             )
             {
+                // Updates the player.
+                if($teamPlayer instanceof BasicDuelTeamPlayer)
+                {
+                    $this->updateStats($teamPlayer);
+                }
+
                 // Checks if player is eliminated, puts the player in lobby.
                 if(!$teamPlayer->isEliminated())
                 {
@@ -208,6 +215,43 @@ class BasicTeamDuel extends TeamDuel implements IBasicDuel
 
         // Resets the spectators.
         $this->spectators = [];
+    }
+
+    /**
+     * @param BasicDuelTeamPlayer $player
+     *
+     * Updates the stats of the team player.
+     */
+    private function updateStats(BasicDuelTeamPlayer &$player): void
+    {
+        $gamePlayer = $player->getPlayer();
+        $winningTeam = $this->results["winner"]; $losingTeam = $this->results["loser"];
+        $winStreak = ($statsInfo = $gamePlayer->getStatsInfo())
+            ->getStatistic(BasicDuelsStatistics::STATISTIC_DUELS_PLAYER_WIN_STREAK);
+
+        if($winningTeam instanceof BasicDuelTeam && $winningTeam->isInTeam($player))
+        {
+            if($winStreak !== null)
+            {
+                $wsValue = $winStreak->getValue();
+                $winStreak->setValue(++$wsValue);
+            }
+            $updatedValue = $statsInfo->getStatistic(BasicDuelsStatistics::STATISTIC_DUELS_PLAYER_WINS);
+        }
+        elseif ($losingTeam instanceof BasicDuelTeam && $losingTeam->isInTeam($player))
+        {
+            if($winStreak !== null)
+            {
+                $winStreak->setValue(0);
+            }
+            $updatedValue = $statsInfo->getStatistic(BasicDuelsStatistics::STATISTIC_DUELS_PLAYER_LOSSES);
+        }
+
+        if(isset($updatedValue) && $updatedValue !== null)
+        {
+            $value = $updatedValue->getValue();
+            $updatedValue->setValue(++$value);
+        }
     }
 
     /**

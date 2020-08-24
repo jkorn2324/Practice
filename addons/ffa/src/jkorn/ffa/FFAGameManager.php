@@ -18,6 +18,7 @@ use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\games\misc\gametypes\IGame;
 use jkorn\practice\games\misc\leaderboards\IGameLeaderboard;
 use jkorn\practice\games\misc\managers\IGameManager;
+use jkorn\practice\items\PracticeItemManager;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\player\info\stats\properties\IntegerStatProperty;
 use jkorn\practice\player\info\stats\StatPropertyInfo;
@@ -381,5 +382,16 @@ class FFAGameManager implements IGameManager, FFADisplayStatistics
     public function getArenaManager(): PracticeArenaManager
     {
         return $this->arenaManager;
+    }
+
+    /**
+     * @return PracticeItemManager|null
+     *
+     * Gets the item manager of the game, none used here as
+     * everything could be handled from forms.
+     */
+    public function getItemManager(): ?PracticeItemManager
+    {
+        return null;
     }
 }

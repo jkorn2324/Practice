@@ -9,6 +9,7 @@ use jkorn\practice\forms\display\FormDisplay;
 use jkorn\practice\forms\types\properties\ButtonTexture;
 use jkorn\practice\games\misc\leaderboards\IGameLeaderboard;
 use jkorn\practice\games\misc\gametypes\IGame;
+use jkorn\practice\items\PracticeItemManager;
 use jkorn\practice\scoreboard\display\manager\AbstractScoreboardDisplayManager;
 use pocketmine\Player;
 
@@ -58,6 +59,13 @@ interface IGameManager
      * Gets the number of players playing.
      */
     public function getPlayersPlaying(): int;
+
+    /**
+     * @return PracticeItemManager|null
+     *
+     * Gets the item manager for the game manager.
+     */
+    public function getItemManager(): ?PracticeItemManager;
 
     /**
      * @return PracticeArenaManager|null

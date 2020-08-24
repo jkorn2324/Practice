@@ -10,6 +10,8 @@ use jkorn\practice\entities\FishingHook;
 use jkorn\practice\games\misc\gametypes\IGame;
 use jkorn\practice\games\misc\managers\awaiting\IAwaitingManager;
 use jkorn\practice\games\misc\gametypes\ISpectatorGame;
+use jkorn\practice\items\DefaultItemManager;
+use jkorn\practice\items\TapItemManager;
 use jkorn\practice\kits\IKit;
 use jkorn\practice\messages\IPracticeMessages;
 use jkorn\practice\messages\managers\PracticeMessageManager;
@@ -39,7 +41,6 @@ use pocketmine\network\SourceInterface;
 use pocketmine\Player;
 use pocketmine\utils\UUID;
 use jkorn\practice\data\PracticeDataManager;
-use jkorn\practice\items\ItemManager;
 use jkorn\practice\player\info\ActionsInfo;
 use jkorn\practice\player\info\ClicksInfo;
 use jkorn\practice\player\info\ClientInfo;
@@ -517,7 +518,7 @@ class PracticePlayer extends Player implements IPracticeMessages
         $clientInfo = $this->getClientInfo();
         if($clientInfo !== null && $clientInfo->isPE() && !$clickedBlock) {
             $item = $this->getInventory()->getItemInHand();
-            $tapItem = PracticeCore::getItemManager()->getTapItem($item);
+            $tapItem = TapItemManager::getTapItem($item);
             if($tapItem !== null) {
                 $tapItem->onItemUse($this, $item, PlayerInteractEvent::LEFT_CLICK_AIR);
             }
@@ -944,7 +945,7 @@ class PracticePlayer extends Player implements IPracticeMessages
 
         // Removes all of the effects.
         $this->removeAllEffects();
-        PracticeCore::getItemManager()->sendItemsFromType(ItemManager::TYPE_LOBBY, $this);
+        PracticeCore::getDefaultItemManager()->sendItemsFromType(DefaultItemManager::TYPE_LOBBY, $this);
     }
 
     /**

@@ -12,6 +12,8 @@ use jkorn\practice\display\DisplayStatistic;
 use jkorn\practice\forms\display\BaseFormDisplayManager;
 use jkorn\practice\games\BaseGameManager;
 use jkorn\practice\games\player\GamePlayer;
+use jkorn\practice\items\DefaultItemManager;
+use jkorn\practice\items\TapItemManager;
 use jkorn\practice\level\gen\PracticeGeneratorManager;
 use jkorn\practice\messages\BaseMessageManager;
 use jkorn\practice\player\info\stats\StatsInfo;
@@ -22,7 +24,6 @@ use jkorn\practice\data\PracticeDataManager;
 use jkorn\practice\data\providers\JSONDataProvider;
 use jkorn\practice\entities\FishingHook;
 use jkorn\practice\entities\SplashPotion;
-use jkorn\practice\items\ItemManager;
 use jkorn\practice\kits\KitManager;
 use jkorn\practice\player\info\settings\SettingsInfo;
 
@@ -39,8 +40,8 @@ class PracticeCore extends PluginBase
     private static $baseFormDisplayManager;
     /** @var BaseMessageManager */
     private static $baseMessageManager;
-    /** @var ItemManager */
-    private static $itemManager;
+    /** @var DefaultItemManager */
+    private static $defaultManager;
     /** @var BaseGameManager */
     private static $baseGameManager;
 
@@ -69,6 +70,9 @@ class PracticeCore extends PluginBase
         // Initializes the default statistics.
         StatsInfo::initDefaultStats();
 
+        // Initializes the default tap items.
+        TapItemManager::initializeDefaults();
+
         // Initializes the scoreboard statistics.
         self::$baseScoreboardDisplayManager = new BaseScoreboardDisplayManager($this);
         self::$baseFormDisplayManager = new BaseFormDisplayManager($this);
@@ -76,7 +80,7 @@ class PracticeCore extends PluginBase
         self::$baseMessageManager = new BaseMessageManager($this);
         self::$kitManager = new KitManager($this);
         self::$baseGameManager = new BaseGameManager($this);
-        self::$itemManager = new ItemManager($this);
+        self::$defaultManager = new DefaultItemManager($this);
 
     }
 
@@ -167,13 +171,13 @@ class PracticeCore extends PluginBase
     }
 
     /**
-     * @return ItemManager
+     * @return DefaultItemManager
      *
-     * Gets the item manager.
+     * Gets the default item manager.
      */
-    public static function getItemManager(): ItemManager
+    public static function getDefaultItemManager(): DefaultItemManager
     {
-        return self::$itemManager;
+        return self::$defaultManager;
     }
 
     /**

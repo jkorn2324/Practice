@@ -10,6 +10,7 @@ use jkorn\bd\arenas\ArenaManager;
 use jkorn\bd\arenas\PostGeneratedDuelArena;
 use jkorn\bd\arenas\PreGeneratedDuelArena;
 use jkorn\bd\BasicDuelsManager;
+use jkorn\bd\BasicDuelsStatistics;
 use jkorn\bd\BasicDuelsUtils;
 use jkorn\bd\duels\types\BasicDuelGameInfo;
 use jkorn\bd\messages\BasicDuelsMessageManager;
@@ -154,6 +155,11 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
 
             // TODO: Prefix
             $player->sendMessage($this->getResultMessage($player));
+
+            if($this->player1 instanceof BasicDuelPlayer)
+            {
+                $this->updateStats($this->player1);
+            }
         }
 
         // Updates the second player.
@@ -167,6 +173,11 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
 
             // TODO: Prefix
             $player->sendMessage($this->getResultMessage($player));
+
+            if($this->player2 instanceof BasicDuelPlayer)
+            {
+                $this->updateStats($this->player2);
+            }
         }
 
         // Broadcasts everything to the spectators & resets them.
@@ -182,6 +193,46 @@ class Basic1vs1 extends Duel1vs1 implements IBasicDuel
 
         // Resets the spectators.
         $this->spectators = [];
+    }
+
+    /**
+     * @param BasicDuelPlayer $player
+     *
+     * Updates the duels statistics of the given input player.
+     */
+    private function updateStats(BasicDuelPlayer &$player)
+    {
+        $gamePlayer = $player->getPlayer();
+        $winner = $this->results["winner"]; $loser = $this->results["loser"];
+        $winStreak = ($statsInfo = $gamePlayer->getStatsInfo())
+            ->getStatistic(BasicDuelsStatistics::STATISTIC_DUELS_PLAYER_WIN_STREAK);
+
+        if($player->equals($winner)) {
+
+            // Updates the win streak of the player.
+            if($winStreak != null)
+            {
+                $wsValue = $winStreak->getValue();
+                $winStreak->setValue(++$wsValue);
+            }
+
+            $updatedValue = $statsInfo->getStatistic(BasicDuelsStatistics::STATISTIC_DUELS_PLAYER_WINS);
+        }
+        elseif ($player->equals($loser))
+        {
+            // Sets the win streak to 0.
+            if($winStreak != null)
+            {
+                $winStreak->setValue(0);
+            }
+            $updatedValue = $statsInfo->getStatistic(BasicDuelsStatistics::STATISTIC_DUELS_PLAYER_LOSSES);
+        }
+
+        if(isset($updatedValue) && $updatedValue !== null)
+        {
+            $value = $updatedValue->getValue();
+            $updatedValue->setValue(++$value);
+        }
     }
 
     /**

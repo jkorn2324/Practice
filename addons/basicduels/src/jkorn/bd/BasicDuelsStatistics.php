@@ -17,6 +17,8 @@ interface BasicDuelsStatistics
     // Stats that are registered in the statsInfo class.
     const STATISTIC_DUELS_PLAYER_WINS = "duels.basic.stat.wins";
     const STATISTIC_DUELS_PLAYER_LOSSES = "duels.basic.stat.losses";
+    // Gets the player's current win streak.
+    const STATISTIC_DUELS_PLAYER_WIN_STREAK = "duels.basic.stat.win.streak";
 
     const STATISTIC_DUELS_PLAYER_WL_RATIO = "duels.basic.stat.wl.ratio";
 
